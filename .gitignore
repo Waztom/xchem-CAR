@@ -6,6 +6,7 @@ __pycache__/
 /static/*
 /media/*
 .idea/
+/Test_DB_files/*
 
 # Django / React / Webpack stuff
 /migrations/*
