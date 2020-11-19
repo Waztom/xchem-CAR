@@ -1,0 +1,56 @@
+secrets.py
+
+__pycache__/
+/.vscode/
+
+/static/*
+/media/*
+.idea/
+
+# Django / React / Webpack stuff
+/migrations/*
+venv/*
+db.sqlite3
+*.pyc
+webpack-stats.json
+assets/bundles
+local_settings.py
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Webpack
+/frontend/bundles/*
+/frontend/webpack_bundles/*
+/webpack-stats.json
+/jquery-webpack-stats.json
+
+# Logs
+logs
+.npm
+*.log
+npm-debug.log*
+
+# Output of 'npm pack'
+*.tgz
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+pytestdebug.log
+
+### react ###
+.DS_*
+**/*.backup.*
+**/*.back.*
+node_modules
