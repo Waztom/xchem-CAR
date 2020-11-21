@@ -1,6 +1,31 @@
-from reactions.models import Project, Target, Method, Reaction, Reactant
+from reactions.models import (
+    Project, 
+    Target, 
+    Method, 
+    Reaction, 
+    Reactant,
+    AddAction,
+    MakeSolutionAction,
+    StirAction,
+    WashAction,
+    DrySolutionAction,
+    ConcentrateAction,
+    AnalyseAction)
+
 from rest_framework import viewsets, permissions, filters
-from reactions.serializers import ProjectSerializer, TargetSerializer, MethodSerializer, ReactionSerializer, ReactantSerializer
+from reactions.serializers import (
+    ProjectSerializer, 
+    TargetSerializer, 
+    MethodSerializer, 
+    ReactionSerializer, 
+    ReactantSerializer,
+    AddActionSerializer,
+    MakeSolutionActionSerializer,
+    StirActionSerializer,
+    WashActionSerializer,
+    DrySolutionActionSerializer,
+    ConcentrateActionSerializer,
+    AnalyseActionSerializer)
 
 # Viewsets allow us to create CRUD like usability without explicitly setting
 # these up! 
@@ -45,7 +70,6 @@ class ReactionViewSet(viewsets.ModelViewSet):
     search_fields = ['method_id__id']
 
 
-
 class ReactantViewSet(viewsets.ModelViewSet):
     queryset = Reactant.objects.all()
     permission_classes = [
@@ -57,4 +81,72 @@ class ReactantViewSet(viewsets.ModelViewSet):
     search_fields = ['reaction_id__id']
 
 
+class AddActionViewSet(viewsets.ModelViewSet):
+    queryset = AddAction.objects.all()
+    permission_classes = [
+        # Allows all users to access this model - will change when users addded
+        permissions.AllowAny
+    ]
+    serializer_class = AddActionSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['reaction_id__id']
 
+class MakeSolutionActionViewSet(viewsets.ModelViewSet):
+    queryset = MakeSolutionAction.objects.all()
+    permission_classes = [
+        # Allows all users to access this model - will change when users addded
+        permissions.AllowAny
+    ]
+    serializer_class = MakeSolutionActionSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['reaction_id__id']
+
+class StirActionViewSet(viewsets.ModelViewSet):
+    queryset = StirAction.objects.all()
+    permission_classes = [
+        # Allows all users to access this model - will change when users addded
+        permissions.AllowAny
+    ]
+    serializer_class = StirActionSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['reaction_id__id']
+
+class WashActionViewSet(viewsets.ModelViewSet):
+    queryset = WashAction.objects.all()
+    permission_classes = [
+        # Allows all users to access this model - will change when users addded
+        permissions.AllowAny
+    ]
+    serializer_class = WashActionSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['reaction_id__id']
+
+class DrySolutionActionViewSet(viewsets.ModelViewSet):
+    queryset = DrySolutionAction.objects.all()
+    permission_classes = [
+        # Allows all users to access this model - will change when users addded
+        permissions.AllowAny
+    ]
+    serializer_class = DrySolutionActionSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['reaction_id__id']
+
+class ConcentrateActionViewSet(viewsets.ModelViewSet):
+    queryset = ConcentrateAction.objects.all()
+    permission_classes = [
+        # Allows all users to access this model - will change when users addded
+        permissions.AllowAny
+    ]
+    serializer_class = ConcentrateActionSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['reaction_id__id']
+
+class AnalyseActionViewSet(viewsets.ModelViewSet):
+    queryset = AnalyseAction.objects.all()
+    permission_classes = [
+        # Allows all users to access this model - will change when users addded
+        permissions.AllowAny
+    ]
+    serializer_class = AnalyseActionSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['reaction_id__id']

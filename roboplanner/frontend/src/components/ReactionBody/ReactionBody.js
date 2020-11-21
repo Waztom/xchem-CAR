@@ -31,8 +31,6 @@ const SetMoleqInput = ({ moleq }) => {
     // Add code to update API as well
   };
 
-  console.log(Moleq);
-
   return (
     <InputGroup
       size="sm"
@@ -48,6 +46,7 @@ const SetMoleqInput = ({ moleq }) => {
         aria-describedby="inputGroup-sizing-sm"
         placeholder={Moleq.moleq}
       />
+      {console.log(Moleq)}
     </InputGroup>
   );
 };
@@ -82,6 +81,7 @@ const SetAddOrderInput = ({ addorder }) => {
         aria-describedby="inputGroup-sizing-sm"
         placeholder={AddOrder.addorder}
       />
+      {console.log(AddOrder)}
     </InputGroup>
   );
 };
@@ -116,6 +116,7 @@ const SetConcentrationInput = ({ concentration }) => {
         aria-describedby="inputGroup-sizing-sm"
         placeholder={Concentration.concentration}
       />
+      {console.log(Concentration)}
     </InputGroup>
   );
 };
@@ -142,6 +143,7 @@ const SetSolventInput = ({ solvent }) => {
           <option>DCM</option>
         </Form.Control>
       </Form.Group>
+      {console.log(Solvent)}
     </Form>
   );
 };
