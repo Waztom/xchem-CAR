@@ -1,8 +1,11 @@
 from django.db import models
 
 class Project(models.Model):
+     # The date it was made
+    init_date = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255, db_index=True, unique=True)
-
+    submittername = models.CharField(max_length=255)
+    submitteremail = models.CharField(max_length=255)
 
 class Target(models.Model):
     project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
