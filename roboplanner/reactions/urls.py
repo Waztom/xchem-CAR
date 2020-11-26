@@ -1,3 +1,4 @@
+from django.conf.urls import url, include
 from rest_framework import routers
 from reactions.api import (
     ProjectViewSet, 
@@ -12,6 +13,7 @@ from reactions.api import (
     DrySolutionActionViewSet,
     ConcentrateActionViewSet,
     AnalyseActionViewSet)
+from .views import UploadProject, ValidateTaskView
 
 router = routers.DefaultRouter()
 router.register('api/projects', ProjectViewSet, 'projects')
@@ -27,4 +29,13 @@ router.register('api/drysolution', DrySolutionActionViewSet, 'drysolutionactions
 router.register('api/concentrateactions', ConcentrateActionViewSet, 'concentrateactions')
 router.register('api/analyseactions', AnalyseActionViewSet, 'analyseactions')
 
-urlpatterns = router.urls
+urlpatterns = [
+    url('upload/', UploadProject.as_view(), name='uploadproject'),
+    url(r"^validate_task/(?P<validate_task_id>.+)/$", ValidateTaskView.as_view(), name='validate_task'),
+]
+
+urlpatterns += router.urls
+# urlpatterns = router.urls
+
+
+
