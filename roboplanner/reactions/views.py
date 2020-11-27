@@ -45,7 +45,6 @@ class UploadProject(View):
                 #### Got up to here - need to look at validate task and implement first
                 # Start celery task # Code getting stuck in celery task!!!!
                 task_validate = validateFileUpload.delay(tmp_file)
-                #######
                 context = {}
                 context['validate_task_id'] = task_validate.id
                 context['validate_task_status'] = task_validate.status
@@ -128,8 +127,8 @@ class ValidateTaskView(View):
         if task.status == "SUCCESS":
             results = task.get()
             # NB get tuple from validate task
-            validate_dict = results[1]
-            validated = results[2]
+            validate_dict = results[0]
+            validated = results[1]
             if validated:
                 response_data['html'] = 'Your data was validated. \n It can now be uploaded using the upload option.'
                 response_data['validated'] = 'Validated'
@@ -138,7 +137,7 @@ class ValidateTaskView(View):
 
             if not validated:
                 # set pandas options to display all column data
-                pd.set_option('display.max_colwidth', -1)
+                pd.set_option('display.max_colwidth', None)
 
                 table = pd.DataFrame.from_dict(validate_dict)
                 html_table = table.to_html()

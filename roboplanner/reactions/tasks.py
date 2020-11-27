@@ -1,9 +1,4 @@
-import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "roboplanner.settings")
-import django
-django.setup()
-from django.conf import settings
-
+from celery import shared_task
 
 from rdkit import Chem
 from rxn4chemistry import RXN4ChemistryWrapper
@@ -15,7 +10,6 @@ from .validate import (
     checkColumnName,
     checkNumberColumns,
     checkSMILES)
-from celery import shared_task
 
 # Setup IBM RxN API
 # api_key=os.environ['IBM_API_KEY'] 
@@ -45,6 +39,7 @@ def validateFileUpload(csv_fp):
     """
     
     validated = True
+    smiles_list = []
     
     validate_dict = {'target_name': [],
                      'field': [],

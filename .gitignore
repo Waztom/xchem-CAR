@@ -8,6 +8,9 @@ __pycache__/
 .idea/
 /Test_DB_files/*
 *.csv
+# Ignore db files including Redis (rdb)
+*.db
+*.rdb
 
 # Django / React / Webpack stuff
 /migrations/*
