@@ -1,4 +1,5 @@
 from celery import shared_task
+from django.core.files.storage import default_storage
 
 from rdkit import Chem
 from rxn4chemistry import RXN4ChemistryWrapper
@@ -16,9 +17,12 @@ from .validate import (
 # rxn4chemistry_wrapper = RXN4ChemistryWrapper(api_key=api_key)
 # rxn4chemistry_wrapper.create_project('Test actions')
 
+def delete_tmp_file(filepath):
+    default_storage.delete(filepath)
+
 # Celery validate task
 @shared_task
-def validateFileUpload(csv_fp):
+def validateFileUpload(csv_fp, validate_only=True):
     """ Celery task to process validate the uploaded files for retrosynthesis planning.
     
     Parameters
@@ -64,5 +68,10 @@ def validateFileUpload(csv_fp):
 
     if len(validate_dict['target_name']) !=0:
         validated = False
-        
+    
+    # Delete tempory file if only validate selected
+    if validate_only:
+        default_storage.delete(csv_fp)
+        csv_fp = None
+      
     return (validate_dict, validated, csv_fp, smiles_list)

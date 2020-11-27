@@ -5,9 +5,9 @@ from celery import Celery
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'roboplanner.settings')
 
+# Can use Redis - just need to install it
 # app = Celery('roboplanner', backend='redis://localhost:6379/0', broker='pyamqp://') 
 app = Celery('roboplanner', backend='db+sqlite:///results.db', broker='pyamqp://') 
-
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.

@@ -57,7 +57,7 @@ class UploadProject(View):
                 # Start chained celery tasks. NB first function passes tuple
                 # to second function - see tasks.py
                 task_upload = (
-                    validateFileUpload.s(tmp_file) | process_csv.s()).apply_async()
+                    validateFileUpload.s(tmp_file, validate_only=False) | process_csv.s()).apply_async()
 
                 context = {}
                 context['upload_task_id'] = task_upload.id

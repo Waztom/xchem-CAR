@@ -12,6 +12,8 @@ __pycache__/
 *.db
 *.rdb
 
+boilerplatenotes.txt
+    
 # Django / React / Webpack stuff
 /migrations/*
 venv/*
