@@ -11,7 +11,9 @@ from django.conf import settings
 from celery.result import AsyncResult
 
 from .forms import UploadForm
-from .tasks import validateFileUpload
+from .tasks import (
+    validateFileUpload,
+    uploadIBMReaction)
 import pandas as pd
 
 
@@ -30,11 +32,14 @@ class UploadProject(View):
         # check_services - from Fragalysis to check Celery stuff. May need it
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
+            # Create dictionary of project info
+            project_info = {}
+
             # Get info from form submitted
             csvfile = request.FILES['csv_file']
-            projectname = request.POST['project_name']
-            submittername =  request.POST['submitter_name']
-            submitteremail =  request.POST['submitter_email']
+            project_info['submittername'] =  request.POST['submitter_name']
+            project_info['submitterorganisation'] =  request.POST['submitter_organisation']
+            project_info['submitteremail'] =  request.POST['submitter_email']
             choice = request.POST['submit_choice']
                         
             # Save csv to temp storage
@@ -57,7 +62,7 @@ class UploadProject(View):
                 # Start chained celery tasks. NB first function passes tuple
                 # to second function - see tasks.py
                 task_upload = (
-                    validateFileUpload.s(tmp_file, validate_only=False) | process_csv.s()).apply_async()
+                    validateFileUpload.s(tmp_file, project_info=project_info, validate_only=False) | uploadIBMReaction.s()).apply_async()
 
                 context = {}
                 context['upload_task_id'] = task_upload.id
@@ -151,4 +156,102 @@ class ValidateTaskView(View):
         return JsonResponse(response_data)
 
 
-# Create your views here.
+class UploadTaskView(View):
+    """ View to handle dynamic loading of upload results from `reactions.tasks.UploadIBMReaction` - the upload of files
+    for a computed set by a user at viewer/upload_cset or a target set by a user at viewer/upload_tset
+    Methods
+    -------
+    allowed requests:
+        - GET: takes a task id, checks it's status and returns the status, and result if the task is complete
+    url:
+        upload_task/<uploads_task_id>
+    template:
+        viewer/upload-cset.html or viewer/upload-tset.html
+    """
+    def get(self, request, upload_task_id):
+        """ Get method for `UploadTaskView`. Takes an upload task id, checks it's status and returns the status,
+        and result if the task is complete
+        Parameters
+        ----------
+        request: request
+            Context sent by `UploadCSet` or `UploadTSet`
+        upload_task_id: str
+            task id provided by `UploadCSet` or `UploadTSet`
+        Returns
+        -------
+        response_data: JSON
+            response data (dict) in JSON format:
+                - if status = 'RUNNING':
+                    - upload_task_status (str): task.status
+                    - upload_task_id (str): task.id
+                - if status = 'FAILURE':
+                    - upload_task_status (str): task.status
+                    - upload_task_id (str): task.id
+                    - upload_traceback (str): task.traceback
+                - if status = 'SUCCESS':
+                    - upload_task_status (str): task.status
+                    - upload_task_id (str): task.id
+                    - if results are a list (data was processed - validated or uploaded):
+                        if this was a validation process
+                        - validated (str): 'Not validated'
+                        - html (str): html table of validation errors
+                        if results are a validation/upload process:
+                        - validated (str): 'Validated'
+                        - results (dict): results
+                        For compound sets ('cset')
+                        - results['cset_download_url'] (str): download url for computed set sdf file
+                        - results['pset_download_url'] (str): download url for computed set pdb files (zip)
+                        For target sets ('tset')
+                        - results['tset_download_url'] (str): download url for processed zip file
+                    - if results are not string or list:
+                        - processed (str): 'None'
+                        - html (str): message to tell the user their data was not processed
+        """
+        task = AsyncResult(upload_task_id)
+        response_data = {'upload_task_status': task.status,
+                         'upload_task_id': task.id}
+
+        if task.status == 'FAILURE':
+            result = task.traceback
+            response_data['upload_traceback'] = str(result)
+
+            return JsonResponse(response_data)
+
+        if task.status == 'SUCCESS':
+
+            results = task.get()
+            # NB get tuple from validate task
+            validate_dict = results[0]
+            validated = results[1]
+            
+            if validated:                    
+                # Upload/Update output tasks send back a tuple
+                # First element defines the source of the upload task (cset, tset)
+                response_data['validated'] = 'Validated'
+                return JsonResponse(response_data) 
+
+            if not validated:
+
+                # set pandas options to display all column data
+                pd.set_option('display.max_colwidth', -1)
+
+                table = pd.DataFrame.from_dict(validate_dict)
+                html_table = table.to_html()
+                html_table += '''<p> Your data was <b>not</b> validated. The table above shows errors</p>'''
+
+                response_data['validated'] = 'Not validated'
+                response_data['html'] = html_table
+
+                return JsonResponse(response_data)    
+                    
+            else:
+                # Error output
+                html_table = '''<p> Your data was <b>not</b> processed.</p>'''
+                response_data['processed'] = 'None'
+                response_data['html'] = html_table
+                return JsonResponse(response_data)
+
+        return JsonResponse(response_data)
+
+
+

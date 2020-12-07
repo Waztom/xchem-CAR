@@ -4,7 +4,7 @@ __pycache__/
 /.vscode/
 
 /static/*
-/media/*
+roboplanner/media/*
 .idea/
 /Test_DB_files/*
 *.csv
@@ -15,7 +15,7 @@ __pycache__/
 boilerplatenotes.txt
     
 # Django / React / Webpack stuff
-/migrations/*
+roboplanner/reactions/migrations/*
 venv/*
 db.sqlite3
 *.pyc

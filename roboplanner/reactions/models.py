@@ -1,17 +1,33 @@
 from django.db import models
+from django.utils.text import slugify
+import random
+import string
+
+def rand_slug():
+    return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
 
 class Project(models.Model):
      # The date it was made
     init_date = models.DateTimeField(auto_now_add=True)
-    name = models.CharField(max_length=255, db_index=True, unique=True)
+    name = models.SlugField(max_length=100, db_index=True, unique=True)
+    submitterorganisation = models.CharField(max_length=100)
     submittername = models.CharField(max_length=255)
     submitteremail = models.CharField(max_length=255)
+    
+    def save(self, *args, **kwargs):
+        if not self.name:
+            # Newly created object, so set slug
+            self.name = slugify(self.submittername[0:3] + ' ' + self.submitterorganisation[0:3] + ' ' + rand_slug())
+        
+        super(Project, self).save(*args, **kwargs)
+
 
 class Target(models.Model):
     project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
     smiles = models.CharField(max_length=255, db_index=True, null=True)
     image = models.FileField(upload_to='targetimages/', max_length=255)
     name = models.CharField(max_length=255, db_index=True, unique=True)
+    expectedammount = models.IntegerField(null=True)
 
 
 class Method(models.Model):

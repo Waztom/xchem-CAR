@@ -103,7 +103,7 @@
          </script>
       {% endif %}
 
-      <!-- {% if upload_task_id %}
+      {% if upload_task_id %}
           <script>
           var content = document.getElementById('content');
           content.innerHTML = "";
@@ -129,42 +129,11 @@
 
                       }
                       if (validatedStatus === 'Validated') {
-                          clearTimer('Your files were uploaded! The download links are:');
-
-                          var url_a = response.data.results.cset_download_url;
-                          var content = document.getElementById('links');
-                          var a = document.createElement("a");
-                          var link = document.createTextNode("    Compound Set    ");
-                          a.appendChild(link);
-                          a.title = 'compound set';
-                          a.href = url_a;
-                          content.appendChild(a);
-
-                          var br = document.createElement('br');
-                          content.appendChild(br);
-
-                          var url_b = response.data.results.pset_download_url;
-                          var b = document.createElement("a");
-                          var link_b = document.createTextNode("    Protein Set    ");
-                          b.appendChild(link_b);
-                          b.title = 'protein set';
-                          b.href = url_b;
-                          content.appendChild(b);
-
+                          clearTimer('Your files were uploaded!');
                       }
-                      var moleculesProcessed = response.data.processed
-
-                      if (moleculesProcessed === 'None') {
-
-                          var content = document.getElementById('links');
-                          content.innerHTML = response.data.html;
-
-                          clearTimer('');
-
-                      }
+                      
                   }
-                    else if (taskStatus === 'FAILURE') {
-
+                  else if (taskStatus === 'FAILURE') {
                         clearTimer('An error occurred - see traceback below');
                         var content = document.getElementById('links');
                         content.innerHTML = response.data.upload_traceback;
@@ -188,6 +157,6 @@
             progressTitle.innerHTML = message;
           }
          </script>
-      {% endif %} -->
+      {% endif %}
 
 {% endblock %}

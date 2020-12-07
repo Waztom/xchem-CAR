@@ -13,7 +13,7 @@ from reactions.api import (
     DrySolutionActionViewSet,
     ConcentrateActionViewSet,
     AnalyseActionViewSet)
-from .views import UploadProject, ValidateTaskView
+from .views import UploadProject, ValidateTaskView, UploadTaskView
 
 router = routers.DefaultRouter()
 router.register('api/projects', ProjectViewSet, 'projects')
@@ -32,6 +32,7 @@ router.register('api/analyseactions', AnalyseActionViewSet, 'analyseactions')
 urlpatterns = [
     url('upload/', UploadProject.as_view(), name='uploadproject'),
     url(r"^validate_task/(?P<validate_task_id>.+)/$", ValidateTaskView.as_view(), name='validate_task'),
+    url(r"^upload_task/(?P<upload_task_id>.+)/$", UploadTaskView.as_view(), name='upload_task')
 ]
 
 urlpatterns += router.urls
