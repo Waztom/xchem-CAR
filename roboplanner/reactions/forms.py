@@ -11,4 +11,3 @@ class UploadForm(forms.Form):
     submitter_email = forms.EmailField(label='Your email')
     csv_file = forms.FileField(label='CSV file')
     submit_choice = forms.CharField(widget=forms.RadioSelect(choices=CHOICES))
-

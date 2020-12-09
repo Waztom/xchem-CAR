@@ -2,7 +2,8 @@ from reactions.models import (
     Project, 
     Target, 
     Method, 
-    Reaction, 
+    Reaction,
+    Product, 
     Reactant,
     AddAction,
     MakeSolutionAction,
@@ -18,6 +19,7 @@ from reactions.serializers import (
     TargetSerializer, 
     MethodSerializer, 
     ReactionSerializer, 
+    ProductSerializer,
     ReactantSerializer,
     AddActionSerializer,
     MakeSolutionActionSerializer,
@@ -68,6 +70,17 @@ class ReactionViewSet(viewsets.ModelViewSet):
     serializer_class = ReactionSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['method_id__id']
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    permission_classes = [
+        # Allows all users to access this model - will change when users addded
+        permissions.AllowAny
+    ]
+    serializer_class = ProductSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['reaction_id__id']
 
 
 class ReactantViewSet(viewsets.ModelViewSet):

@@ -48,14 +48,19 @@ class Method(models.Model):
 
 class Reaction(models.Model):
     method_id = models.ForeignKey(Method, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50) 
-    productsmiles =  models.CharField(max_length=255, db_index=True, null=True)
-    productimage = models.FileField(upload_to='productimages/', max_length=255)
-    productname = models.CharField(max_length=100, unique=True)
+    reactionclass = models.CharField(max_length=255)
+    
+
+class Product(models.Model):
+    reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, unique=True)
+    smiles =  models.CharField(max_length=255, db_index=True, null=True)
+    image = models.FileField(upload_to='productimages/', max_length=255)
 
 
 class Reactant(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, unique=True)
     smiles =  models.CharField(max_length=255, db_index=True, null=True)
     image= models.FileField(upload_to='reactantimages/', max_length=255)
     
@@ -148,44 +153,3 @@ class AnalyseAction(models.Model):
         choices=QCMethod.choices,
         default=QCMethod.LCMS,
         max_length=10)
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-#  moleq= models.IntegerField(null=True)
-#     addorder=models.IntegerField(null=True)
-#     concentration=models.IntegerField(null=True)
-
-#     class Workup(models.TextChoices):
-#         NA = 'None'    
-#         HCl = 'HCl'
-#         DCM = 'DCM' 
-
-#     workup = models.CharField(
-#         choices=Workup.choices,
-#         default=Workup.NA,
-#         max_length=10
-#     )
-
-# temperature = models.IntegerField(null=True)
-
-#     class Solvent(models.TextChoices):
-#         NA = 'None'
-#         DMA = 'DMA'
-#         DCM = 'DCM' 
-
-#     solvent = models.CharField(
-#         choices=Solvent.choices,
-#         default=Solvent.NA,
-#         max_length=10
-#     )

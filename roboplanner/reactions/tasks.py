@@ -13,7 +13,17 @@ from .validate import (
 
 from .createmodels import (
     createProjectModel,
-    createTargetModel
+    createTargetModel,
+    createMethodModel,
+    createReactionModel,
+    createProductModel,
+    createReactantModel
+)
+
+from.IBMapicalls import (
+    createIBMProject,
+    getIBMRetroSyn,
+    collectIBMReactionInfo    
 )
 
 def delete_tmp_file(filepath):
@@ -62,10 +72,12 @@ def validateFileUpload(csv_fp, project_info=None, validate_only=True):
     else:
         # Check SMILES 
         indexes = [i for i,smi in enumerate(uploaded_csv_df['Targets'])]
-        smiles_list = [smi for smi in uploaded_csv_df['Targets']]
-        ammounts_list = [amount for amount in uploaded_csv_df['Ammount_required (mg)']]
+        smiles_list = [smi.strip() for smi in uploaded_csv_df['Targets']]
+        uploaded_csv_df['Targets'] = smiles_list   
+        print(uploaded_csv_df['Targets'])
+        amounts_list = [amount for amount in uploaded_csv_df['Ammount_required (mg)']]
         
-        for index, smi, ammount in zip(indexes, smiles_list, ammounts_list): 
+        for index, smi, ammount in zip(indexes, smiles_list, amounts_list): 
             validate_dict = checkSMILES(smi, index, validate_dict)
             validate_dict = checkIsNumber(ammount, index, validate_dict)
 
@@ -76,8 +88,11 @@ def validateFileUpload(csv_fp, project_info=None, validate_only=True):
     if validate_only:
         default_storage.delete(csv_fp)
         csv_fp = None
+
+    # Convert dataframe to dictionary to make it JSON serializable
+    uploaded_dict = uploaded_csv_df.to_dict('list') 
       
-    return (validate_dict, validated, csv_fp, project_info, smiles_list)
+    return (validate_dict, validated, csv_fp, project_info, uploaded_dict)
 
     # Functions to request info from IBM API
     
@@ -86,7 +101,7 @@ def uploadIBMReaction(validate_output):
     # Validate output is a list - this is one way to get
     # Celery chaining to work where second function uses list output
     # from first function (validate) called
-    validate_dict, validated, csv_fp, project_info, smiles_list = validate_output
+    validate_dict, validated, csv_fp, project_info, uploaded_dict = validate_output
     
     if not validated:
         # Delete tempory file if only validate selected
@@ -95,26 +110,70 @@ def uploadIBMReaction(validate_output):
     
     if validated:
         # Create project model and return project id
-        project_id  = createProjectModel(project_info)
+        project_id, project_name  = createProjectModel(project_info)
         
-        slug_no = 1
-        for smiles in smiles_list:
+        # Create an IBM project
+        IBM_project_id, rxn4chemistry_wrapper  = createIBMProject(project_name)
+
+        target_no = 1
+        for smiles, amount in zip(uploaded_dict['Targets'], uploaded_dict['Ammount_required (mg)']):
 
             # Number of steps/name of reactants from IBM API???????
             # Create a Target model and return target id
-            createTargetModel(project_id = project_id, smiles=smiles, slug_no=slug_no)
-                # Create a Method model
-
-                    # Create a Reaction model
-
-                        # Create Reactant models
-
-                            # Create Action models
-            slug_no += 1
-        
-        # Delete tempory file if only validate selected
-        default_storage.delete(csv_fp)
-    
-    return validate_dict, validated
- 
+            target_id = createTargetModel(project_id = project_id, smiles=smiles, target_no=target_no)
             
+            # Create IBM 
+            # Run IBM API cal to get retrosyn info
+            max_steps = 3
+            results = getIBMRetroSyn(rxn4chemistry_wrapper=rxn4chemistry_wrapper, smiles=smiles, max_steps=max_steps)
+
+            # Set maximum number of methods/pathways to collect
+            no_pathways_found = len(results['retrosynthetic_paths'])
+
+            if no_pathways_found < 3:
+                max_pathways = no_pathways_found
+            if no_pathways_found > 3:
+                max_pathways = 3
+            
+            pathway_no = 1
+            
+            while pathway_no < max_pathways:
+                for pathway in results['retrosynthetic_paths']:
+                    # Get pathways with confidence above threshold
+                    if pathway['confidence'] > 0.90:
+                        # Create a Method model
+                        method_id = createMethodModel(target_id=target_id, smiles=smiles, max_steps=max_steps, amount=amount)
+                        
+                        # Get reaction info about pathway
+                        reaction_info = collectIBMReactionInfo(pathway=pathway)
+                        
+                        product_no = 1
+                        for product_smiles, reaction_class, reactants, actions in zip(reaction_info['product_smiles'],reaction_info['rclass'],reaction_info['reactants'],reaction_info['actions']):
+                            # Create a Reaction model
+                            reaction_id = createReactionModel(method_id=method_id,reaction_class=reaction_class)
+
+                            # Create a Product model
+                            createProductModel(reaction_id=reaction_id, project_name=project_name, target_no=target_no, pathway_no=pathway_no, product_no=product_no, product_smiles=product_smiles)
+                            
+                            # Creat Reactant models
+                            reactant_no = 1
+                            for reactant_smiles in reactants:
+                                createReactantModel(reaction_id=reaction_id, project_name=project_name, target_no=target_no, pathway_no=pathway_no, product_no=product_no, reactant_no=reactant_no, reactant_smiles=reactant_smiles)
+                                reactant_no += 1
+
+                            product_no += 1
+
+                            # Create robotic actions for each reaction
+                            for action in actions:
+                                # Need to find out waht the action is and call the approp createAction model
+                                
+                               
+
+                pathway_no += 1     
+
+            target_no += 1
+        
+    # Delete tempory file
+    default_storage.delete(csv_fp)
+    
+    return validate_dict, validated  
