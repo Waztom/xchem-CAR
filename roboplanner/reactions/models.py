@@ -71,8 +71,8 @@ class AddAction(models.Model):
     class Unit(models.TextChoices):
         mmol = 'mmol'
         ml = 'ml'
-        mg = 'mg'
 
+    actionno = models.IntegerField() 
     material = models.CharField(max_length=255)
     quantity = models.IntegerField(null=True)
     unit = models.CharField(
@@ -86,59 +86,62 @@ class AddAction(models.Model):
 class MakeSolutionAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     class Unit(models.TextChoices):
-        molar = 'mol/L'
-        mass = 'g/L'
+        mmol = 'mmol'
+        ml = 'ml'
 
+    actionno = models.IntegerField() 
     solute = models.CharField(max_length=100)
-    soluteammount = models.IntegerField()
-    solvent = models.CharField(max_length=100)
-    
-    unit = models.CharField(
+    solutequantity = models.IntegerField()
+    soluteunit = models.CharField(
         choices=Unit.choices,
-        default=Unit.molar,
+        default=Unit.mmol,
+        max_length=10
+        )
+
+    solvent = models.CharField(max_length=100)
+    solventquantity = models.IntegerField()
+    solventunit = models.CharField(
+        choices=Unit.choices,
+        default=Unit.ml,
         max_length=10
     )
-
-    concentration = models.IntegerField()
-
 
 class StirAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     class Unit(models.TextChoices):
-        seconds = 's'
-        minutes = 'min'
-        hours = 'h'
+        seconds = 'seconds'
     
-    duration = models.IntegerField()
-    
+    actionno = models.IntegerField() 
+    duration = models.IntegerField()    
     unit = models.CharField(
         choices=Unit.choices,
-        default=Unit.minutes,
+        default=Unit.seconds,
         max_length=10
     )
 
 class WashAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     class Unit(models.TextChoices):
-        mmol = 'mmol'
         ml = 'ml'
-        mg = 'mg'
     
+    actionno = models.IntegerField() 
     material = models.CharField(max_length=100)
     norepetitions = models.IntegerField() 
     unit = models.CharField(
         choices=Unit.choices,
         default=Unit.ml,
         max_length=10
-    )
+        )
 
 class DrySolutionAction(models.Model):
-    reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)   
+    reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
+    actionno = models.IntegerField() 
     dryingagent = models.CharField(max_length=100)
 
 
 class ConcentrateAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
+    actionno = models.IntegerField() 
     concentrate=models.BooleanField(default=False)
 
 
@@ -149,6 +152,7 @@ class AnalyseAction(models.Model):
         NMR = 'NMR'
         XChem = 'XChem'
 
+    actionno = models.IntegerField() 
     method = models.CharField(
         choices=QCMethod.choices,
         default=QCMethod.LCMS,

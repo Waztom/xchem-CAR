@@ -40,7 +40,7 @@ def collectIBMReactionInfo(rxn4chemistry_wrapper, pathway):
     reaction_info['reactants'] = []
     reaction_info['actions'] = []
 
-    time.sleep(30)
+    time.sleep(60)
     pathway_synthesis_response = rxn4chemistry_wrapper.create_synthesis_from_sequence(sequence_id=pathway['sequenceId'])
     pathway_synthesis_id = pathway_synthesis_response['synthesis_id']
     synthesis_tree, reactions, actions = rxn4chemistry_wrapper.get_synthesis_plan(synthesis_id=pathway_synthesis_id)

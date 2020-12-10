@@ -17,7 +17,8 @@ from .createmodels import (
     createMethodModel,
     createReactionModel,
     createProductModel,
-    createReactantModel
+    createReactantModel,
+    createActionModel
 )
 
 from.IBMapicalls import (
@@ -145,10 +146,13 @@ def uploadIBMReaction(validate_output):
                         method_id = createMethodModel(target_id=target_id, smiles=smiles, max_steps=max_steps, amount=amount)
                         
                         # Get reaction info about pathway
-                        reaction_info = collectIBMReactionInfo(pathway=pathway)
+                        reaction_info = collectIBMReactionInfo(rxn4chemistry_wrapper=rxn4chemistry_wrapper, pathway=pathway)
                         
                         product_no = 1
                         for product_smiles, reaction_class, reactants, actions in zip(reaction_info['product_smiles'],reaction_info['rclass'],reaction_info['reactants'],reaction_info['actions']):
+                            # Product_smiles and reaction class is a list of individual elements
+                            # Reactants and actions is a list of lists    
+                            
                             # Create a Reaction model
                             reaction_id = createReactionModel(method_id=method_id,reaction_class=reaction_class)
 
@@ -161,15 +165,15 @@ def uploadIBMReaction(validate_output):
                                 createReactantModel(reaction_id=reaction_id, project_name=project_name, target_no=target_no, pathway_no=pathway_no, product_no=product_no, reactant_no=reactant_no, reactant_smiles=reactant_smiles)
                                 reactant_no += 1
 
-                            product_no += 1
-
                             # Create robotic actions for each reaction
+                            action_no = 1
                             for action in actions:
-                                # Need to find out waht the action is and call the approp createAction model
-                                
-                               
+                                createActionModel(reaction_id=reaction_id, action_no=action_no, action=action)
+                                action_no += 1
+                            
+                            product_no += 1                          
 
-                pathway_no += 1     
+                    pathway_no += 1     
 
             target_no += 1
         
