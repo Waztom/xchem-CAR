@@ -64,8 +64,7 @@ class Reactant(models.Model):
     smiles =  models.CharField(max_length=255, db_index=True, null=True)
     image= models.FileField(upload_to='reactantimages/', max_length=255)
     
-# Models to capture actions and sequence
-
+# Models to capture IBM actions
 class AddAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     class Unit(models.TextChoices):

@@ -159,13 +159,13 @@ def uploadIBMReaction(validate_output):
                             # Create a Product model
                             createProductModel(reaction_id=reaction_id, project_name=project_name, target_no=target_no, pathway_no=pathway_no, product_no=product_no, product_smiles=product_smiles)
                             
-                            # Creat Reactant models
+                            # Create Reactant models
                             reactant_no = 1
                             for reactant_smiles in reactants:
                                 createReactantModel(reaction_id=reaction_id, project_name=project_name, target_no=target_no, pathway_no=pathway_no, product_no=product_no, reactant_no=reactant_no, reactant_smiles=reactant_smiles)
                                 reactant_no += 1
 
-                            # Create robotic actions for each reaction
+                            # Create robotic actions for each reaction - link robo actions to known working methods????????
                             action_no = 1
                             for action in actions:
                                 createActionModel(reaction_id=reaction_id, action_no=action_no, action=action)
