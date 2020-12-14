@@ -1,6 +1,7 @@
 from rdkit import Chem
 from rdkit.Chem import Draw
 from rdkit.Chem import AllChem
+from rdkit.Chem import Descriptors
 
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -154,8 +155,6 @@ def createActionModel(reaction_id, action_no, action):
     # Create a dictionary of key (action name from IBM API) and
     # funtion name to create the appropriate model
     actionMethods = {
-        "add"           : createAddActionModel,
-        "make-solution" : createMakeSolutionActionModel,
         "stir"          : createStirActionModel,
         "wash"          : createWashActionModel,
         "dry-solution"  : createDrySolutionActionModel,
@@ -194,60 +193,52 @@ def convertNameToSmiles(chemical_name):
         return False
       
 
-def createAddActionModel(reaction_id, action_no, action):    
-    # Get info from action JSON
-    # Check if smiles and convert chem name to smiles if not
-    material = action['content']['material']['value']
-    material_smiles_check = checkSMILES(material)
+def createAddActionModel(reaction_id, reactant_no, reactant_smiles):
+    # Check if reactant_smiles is a common solvent
+    # Get smiles from csv file!!!!!
+    common_solvents = {
+        "CC#N"      : "Acetonitrile",
+        "c1ccccc1"  : "Benzene",
 
-    if material_smiles_check: 
-        quantity = action['content']['material']['quantity']['value']
-        unit = action['content']['material']['quantity']['unit']
-        dropwise_bool = action['content']['dropwise']['value'] 
+        "O"         : "Water",
+        "CCOC(C)=O" : "Ethyl acetate",
+        "ClCCl"     : "Dichloromethane",
+        "CC(C)=O"   : "Acetone",
+        "Cc1ccccc1" : "Toluene",
+        "C1CCOC1"   : "Tetrahydrofuran",
         
-        add = AddAction()
-        reaction_obj = Reaction.objects.get(id=reaction_id)
-        add.reaction_id = reaction_obj
-        add.actionno = action_no
-        add.material = material_smiles_check
-        add.quantity = quantity
-        add.unit = unit
-        add.dropwise = dropwise_bool   
-        add.save()
+        "CO"        : "Methanol",
+        "CCO"       : "Ethanol",
+        "CCCO"      : "Propanol",
+        "CCCCO"     : "Butanol",
+        "CC(C)O"    : "Isopropylalcohol"
 
-def createMakeSolutionActionModel(reaction_id, action_no, action):    
-    # Get info from action JSON
-    materials = action['content']['materials']['value']
-    materials_smiles_check = [checkSMILES(material['value']) for material in materials]
 
-    if all(materials_smiles_check):
-        solute_smiles = materials_smiles_check[0]
-        solvent_smiles = materials_smiles_check[1]
 
-        quantities = [material['quantity']['value'] for material in materials]
-        solute_quantity = quantities[0]
-        solvent_quantity = quantities[1]
+    }
 
-        units = [material['quantity']['unit'] for material in materials]
-        solute_unit = units[0]
-        solvent_unit = units[1]
-        
-        makesoln = MakeSolutionAction()
-        reaction_obj = Reaction.objects.get(id=reaction_id)
-        makesoln.reaction_id = reaction_obj
-        makesoln.actionno = action_no
-        makesoln.solute = solute_smiles
-        makesoln.solutequantity = solute_quantity
-        makesoln.soluteunit = solute_unit
-        makesoln.solvent = solvent_smiles
-        makesoln.solventequantity = solvent_quantity
-        makesoln.solventunit = solvent_unit 
-        makesoln.save()
+    # Get MW
+    mol = Chem.MolFromSmiles(reactant_smiles)
+    molecular_weight = Descriptors.ExactMolWt(mol)         
+    
+    add = AddAction()
+    reaction_obj = Reaction.objects.get(id=reaction_id)
+    add.reaction_id = reaction_obj
+    add.actionno = reactant_no
+    add.material = reactant_smiles
+    add.molecularweight = molecular_weight
+    add.save()
+
 
 def createStirActionModel(reaction_id, action_no, action):
     # Get info from action JSON
     duration = action['content']['duration']['value']
     unit = action['content']['duration']['unit']
+    try: 
+        temperature = action['content']['temperature']['value']
+    except Exception as e:
+        temperature = 25
+        # Add error log or something
 
     stir = StirAction()
     reaction_obj = Reaction.objects.get(id=reaction_id)
@@ -255,6 +246,7 @@ def createStirActionModel(reaction_id, action_no, action):
     stir.actionno = action_no
     stir.duration = duration
     stir.unit = unit
+    stir.temperature = temperature
     stir.save()
 
 
@@ -300,6 +292,45 @@ def createConcentrateActionModel(reaction_id, action_no, action):
     concentrate.actionno = action_no
     concentrate.concentrate = True
     concentrate.save()
+
+
+
+
+# Check if need these models?
+def createMakeSolutionActionModel(reaction_id, action_no, action):    
+    # Get info from action JSON
+    materials = action['content']['materials']['value']
+    materials_smiles_check = [checkSMILES(material['value']) for material in materials]
+
+    if all(materials_smiles_check):
+        solute_smiles = materials_smiles_check[0]
+        solvent_smiles = materials_smiles_check[1]
+
+        quantities = [material['quantity']['value'] for material in materials]
+        solute_quantity = quantities[0]
+        solvent_quantity = quantities[1]
+
+        units = [material['quantity']['unit'] for material in materials]
+        solute_unit = units[0]
+        solvent_unit = units[1]
+        
+        makesoln = MakeSolutionAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        makesoln.reaction_id = reaction_obj
+        makesoln.actionno = action_no
+        makesoln.solute = solute_smiles
+        makesoln.solutequantity = solute_quantity
+        makesoln.soluteunit = solute_unit
+        makesoln.solvent = solvent_smiles
+        makesoln.solventequantity = solvent_quantity
+        makesoln.solventunit = solvent_unit 
+        makesoln.save()
+
+
+    
+
+
+
 
 
     

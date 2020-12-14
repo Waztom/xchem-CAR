@@ -64,24 +64,16 @@ class Reactant(models.Model):
     smiles =  models.CharField(max_length=255, db_index=True, null=True)
     image= models.FileField(upload_to='reactantimages/', max_length=255)
     
-# Models to capture IBM actions
+
 class AddAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
-    class Unit(models.TextChoices):
-        mmol = 'mmol'
-        ml = 'ml'
-
     actionno = models.IntegerField() 
     material = models.CharField(max_length=255)
-    quantity = models.IntegerField(null=True)
-    unit = models.CharField(
-        choices=Unit.choices,
-        default=Unit.mmol,
-        max_length=10
-    )
+    molequivalents = models.IntegerField(default=1, null=True)
+    molecularweight = models.IntegerField()
     dropwise = models.BooleanField(default=False)
 
-
+# Models to capture IBM actions
 class MakeSolutionAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     class Unit(models.TextChoices):
@@ -117,6 +109,7 @@ class StirAction(models.Model):
         default=Unit.seconds,
         max_length=10
     )
+    temperature = models.IntegerField()
 
 class WashAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
