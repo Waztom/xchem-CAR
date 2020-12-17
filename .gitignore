@@ -25,6 +25,7 @@ local_settings.py
 
 # Jupyter Notebook
 .ipynb_checkpoints
+/Notebooks/In-data/
 
 # Webpack
 /frontend/bundles/*

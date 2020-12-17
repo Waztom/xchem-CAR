@@ -2,16 +2,15 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 from rdkit.Chem import AllChem
 from rdkit.Chem import Descriptors
-
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
 from .models import (
-    Project, 
-    Target, 
-    Method, 
+    Project,
+    Target,
+    Method,
     Reaction,
-    Product, 
+    Product,
     Reactant,
     AddAction,
     MakeSolutionAction,
@@ -19,21 +18,73 @@ from .models import (
     WashAction,
     DrySolutionAction,
     ConcentrateAction,
-    AnalyseAction)
+    AnalyseAction,
+)
 
 from urllib.request import urlopen
 from urllib.parse import quote
 
 # Certificate to NIH Cactus stopped working (10/12/2020)
 # use this for devlopment purposes only by setting use
-# of unverified certs - defo not for prod. This is not a 
+# of unverified certs - defo not for prod. This is not a
 # cert issue on my machine, did update certs and have
 # pointed Conda to fresh certs. Same thing when using on Binder
 # at 'https://github.com/xchem/strucbio_practical' and
 # 'https://stackoverflow.com/questions/33699577/conda-update-failed-ssl-error-ssl-certificate-verify-failed-certificate-ver'
 
 import ssl
+
 ssl._create_default_https_context = ssl._create_unverified_context
+
+# Check if reactant_smiles is a common solvent
+# Get smiles from csv file!!!!!
+common_solvents = {
+    "CC(O)=O": "acetic acid",
+    "CC(C)=O": "acetone",
+    "CC#N": "acetonitrile",
+    "c1ccccc1": "benzene",
+    "CCCCO": "1-butanol",
+    "CCC(C)O": "2-butanol",
+    "CCC(C)=O": "2-butanone",
+    "CC(C)(C)O": "t-butyl alcohol",
+    "ClC(Cl)(Cl)Cl": "carbon tetrachloride",
+    "Clc1ccccc1": "chlorobenzene",
+    "ClC(Cl)Cl": "chloroform",
+    "C1CCCCC1": "cyclohexane",
+    "ClCCCl": "1,2-dichloroethane",
+    "OCCOCCO": "diethylene glycol",
+    "CCOCC": "diethyl ether",
+    "COC": "dimethyl ether",
+    "COCCOC": "1,2-dimethoxy-ethane",
+    "CN(C)C=O": "dimethyl-formamide ",
+    "C[S](C)=O": "dimethyl sulfoxide",
+    "C1COCCO1": "1,4-dioxane",
+    "CCO": "ethanol",
+    "CCOC(C)=O": "ethyl acetate",
+    "OCCO": "ethylene glycol",
+    "OCC(O)CO": "glycerin",
+    "CCCCCCC": "heptane",
+    "CN(C)[P](=O)(N(C)C)N(C)C": "hexamethylphosphoramide",
+    "CN(C)P(N(C)C)N(C)C": "hexamethylphosphoroustriamide",
+    "CCCCCC": "hexane",
+    "CO": "methanol",
+    "COC(C)(C)C": "methyl t-butyl ether",
+    "ClCCl": "methylene chloride",
+    "CN1CCCC1=O": "N-methyl-2-pyrrolidinone",
+    "C[N+]([O-])=O": "nitromethane",
+    "CCCCC": "pentane",
+    "CCCC(C)C": "isohexane",
+    "CCCO": "1-propanol",
+    "CC(C)O": "2-propanol",
+    "c1ccncc1": "pyridine",
+    "C1CCOC1": "tetrahydrofuran",
+    "Cc1ccccc1": "toluene",
+    "CCN(CC)CC": "triethyl amine",
+    "O": "water",
+    "Cc1ccccc1C": "o-xylene",
+    "Cc1cccc(C)c1": "m-xylene",
+    "Cc1ccc(C)cc1": "p-xylene",
+}
 
 
 def createSVGString(smiles):
@@ -49,11 +100,11 @@ def createSVGString(smiles):
 
     # Initiate drawer and set size/font size
     drawer = Draw.rdMolDraw2D.MolDraw2DSVG(900, 200)
-    drawer.SetFontSize(12)       
+    drawer.SetFontSize(12)
     drawer.DrawMolecule(mol)
     drawer.FinishDrawing()
     svg_string = drawer.GetDrawingText()
-    
+
     return svg_string
 
 
@@ -61,21 +112,21 @@ def createProjectModel(project_info):
     # Function that creates a project object
     # if the csv file uploaded is validated and
     # the user wants to upload the data
-    
+
     # project_info is a dictionary of info passed into the validate/upload
-    # Celery tasks 
+    # Celery tasks
 
     # Create Project object
     project = Project()
-    project.submittername = project_info['submittername']
-    project.submitterorganisation =  project_info['submitterorganisation'] 
-    project.submitteremail = project_info['submitteremail']
+    project.submittername = project_info["submittername"]
+    project.submitterorganisation = project_info["submitterorganisation"]
+    project.submitteremail = project_info["submitteremail"]
     project.save()
 
     return project.id, project.name
 
 
-def createTargetModel(project_id, smiles, target_no):
+def createTargetModel(project_id, smiles, target_no, expected_amount):
     """
     Function that creates a Target object
     if the csv file uploaded is validated and
@@ -91,22 +142,24 @@ def createTargetModel(project_id, smiles, target_no):
     project_name = project_obj.name
     target.project_id = project_obj
     target.smiles = smiles
-    target.name = '{}-{}'.format(project_name, target_no)
+    target.name = "{}-{}".format(project_name, target_no)
     # Create and Write svg to file
     target_svg_string = createSVGString(smiles)
-    target_svg_fn = default_storage.save('targetimages/' + target.name, ContentFile(target_svg_string)) 
-    target.image = target_svg_fn     
+    target_svg_fn = default_storage.save("targetimages/" + target.name + ".svg", ContentFile(target_svg_string))
+    target.image = target_svg_fn
+    target.expectedamount = expected_amount
     target.save()
 
     return target.id
 
-def createMethodModel(target_id, smiles, max_steps, amount):
+
+def createMethodModel(target_id, smiles, max_steps, expected_amount):
     method = Method()
     target_obj = Target.objects.get(id=target_id)
     method.target_id = target_obj
     method.nosteps = max_steps
-    method.targetmass = amount
-    method.unit = 'mg'
+    method.targetmass = expected_amount
+    method.unit = "mg"
     method.save()
 
     return method.id
@@ -126,28 +179,35 @@ def createReactionModel(method_id, reaction_class):
     return reaction.id
 
 
-def createProductModel(reaction_id, project_name, target_no, pathway_no, product_no, product_smiles):    
+def createProductModel(reaction_id, project_name, target_no, pathway_no, product_no, product_smiles):
     product = Product()
-    product.name = '{}-{}-{}-{}'.format(project_name, target_no, pathway_no, product_no)
+    product.name = "{}-{}-{}-{}".format(project_name, target_no, pathway_no, product_no)
     reaction_obj = Reaction.objects.get(id=reaction_id)
     product.reaction_id = reaction_obj
     product.smiles = product_smiles
     product_svg_string = createSVGString(product_smiles)
-    product_svg_fn = default_storage.save('productimages/' + product.name, ContentFile(product_svg_string))
+    product_svg_fn = default_storage.save("productimages/" + product.name + ".svg", ContentFile(product_svg_string))
     product.image = product_svg_fn
     product.save()
 
 
-def createReactantModel(reaction_id, project_name, target_no, pathway_no, product_no, reactant_no, reactant_smiles):    
-    reactant = Reactant()
-    reactant.name = '{}-{}-{}-{}-{}'.format(project_name, target_no, pathway_no, product_no, reactant_no)
-    reaction_obj = Reaction.objects.get(id=reaction_id)
-    reactant.reaction_id = reaction_obj
-    reactant.smiles = reactant_smiles
-    reactant_svg_string = createSVGString(reactant_smiles)
-    reactant_svg_fn = default_storage.save('reactantimages/' + reactant.name, ContentFile(reactant_svg_string))
-    reactant.image = reactant_svg_fn
-    reactant.save()
+def createReactantModel(reaction_id, project_name, target_no, pathway_no, product_no, reactant_no, reactant_smiles):
+    if reactant_smiles not in common_solvents:
+        reactant = Reactant()
+        reactant.name = "{}-{}-{}-{}-{}".format(project_name, target_no, pathway_no, product_no, reactant_no)
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        reactant.reaction_id = reaction_obj
+        reactant.smiles = reactant_smiles
+        reactant_svg_string = createSVGString(reactant_smiles)
+        reactant_svg_fn = default_storage.save(
+            "reactantimages/" + reactant.name + ".svg", ContentFile(reactant_svg_string)
+        )
+        reactant.image = reactant_svg_fn
+        reactant.save()
+        return True
+    else:
+        return False
+
 
 def createActionModel(reaction_id, action_no, action):
     # action is a JSON
@@ -155,18 +215,16 @@ def createActionModel(reaction_id, action_no, action):
     # Create a dictionary of key (action name from IBM API) and
     # funtion name to create the appropriate model
     actionMethods = {
-        "stir"          : createStirActionModel,
-        "wash"          : createWashActionModel,
-        "dry-solution"  : createDrySolutionActionModel,
-        "concentrate"   : createConcentrateActionModel
+        "stir": createStirActionModel,
+        "wash": createWashActionModel,
+        "dry-solution": createDrySolutionActionModel,
+        "concentrate": createConcentrateActionModel,
     }
 
-    action_name = action['name']
+    action_name = action["name"]
 
     if action_name in actionMethods:
         actionMethods[action_name](reaction_id, action_no, action)
-    # else:
-    #     raise Exception("Method {} not implemented".format(action_name))
 
 
 def checkSMILES(smiles):
@@ -185,42 +243,19 @@ def checkSMILES(smiles):
 def convertNameToSmiles(chemical_name):
     try:
         name_converted = quote(chemical_name)
-        url= 'https://cactus.nci.nih.gov/chemical/structure/' + name_converted + '/smiles'
-        ans = urlopen(url).read().decode('utf8')
-        smiles = ans.split(' ')[0]
+        url = "https://cactus.nci.nih.gov/chemical/structure/" + name_converted + "/smiles"
+        ans = urlopen(url).read().decode("utf8")
+        smiles = ans.split(" ")[0]
         return smiles
     except:
         return False
-      
+
 
 def createAddActionModel(reaction_id, reactant_no, reactant_smiles):
-    # Check if reactant_smiles is a common solvent
-    # Get smiles from csv file!!!!!
-    common_solvents = {
-        "CC#N"      : "Acetonitrile",
-        "c1ccccc1"  : "Benzene",
-
-        "O"         : "Water",
-        "CCOC(C)=O" : "Ethyl acetate",
-        "ClCCl"     : "Dichloromethane",
-        "CC(C)=O"   : "Acetone",
-        "Cc1ccccc1" : "Toluene",
-        "C1CCOC1"   : "Tetrahydrofuran",
-        
-        "CO"        : "Methanol",
-        "CCO"       : "Ethanol",
-        "CCCO"      : "Propanol",
-        "CCCCO"     : "Butanol",
-        "CC(C)O"    : "Isopropylalcohol"
-
-
-
-    }
-
     # Get MW
     mol = Chem.MolFromSmiles(reactant_smiles)
-    molecular_weight = Descriptors.ExactMolWt(mol)         
-    
+    molecular_weight = Descriptors.ExactMolWt(mol)
+
     add = AddAction()
     reaction_obj = Reaction.objects.get(id=reaction_id)
     add.reaction_id = reaction_obj
@@ -232,10 +267,10 @@ def createAddActionModel(reaction_id, reactant_no, reactant_smiles):
 
 def createStirActionModel(reaction_id, action_no, action):
     # Get info from action JSON
-    duration = action['content']['duration']['value']
-    unit = action['content']['duration']['unit']
-    try: 
-        temperature = action['content']['temperature']['value']
+    duration = action["content"]["duration"]["value"]
+    unit = action["content"]["duration"]["unit"]
+    try:
+        temperature = action["content"]["temperature"]["value"]
     except Exception as e:
         temperature = 25
         # Add error log or something
@@ -252,16 +287,15 @@ def createStirActionModel(reaction_id, action_no, action):
 
 def createWashActionModel(reaction_id, action_no, action):
     # Get info from action JSON
-    material = action['content']['material']['value']
-    no_repetitions = action['content']['repetitions']['value']
-    amount = action['content']['material']['quantity']['value']
-    unit = action['content']['material']['quantity']['unit']
+    material = action["content"]["material"]["value"]
+    no_repetitions = action["content"]["repetitions"]["value"]
+    amount = action["content"]["material"]["quantity"]["value"]
+    unit = action["content"]["material"]["quantity"]["unit"]
 
     # Update as we find more
     common_wash_materials = {
-        "brine" : ['[Na+].[Cl-]', 'O'],
-        "water" : ['O'],
-
+        "brine": ["[Na+].[Cl-]", "O"],
+        "water": ["O"],
     }
 
     wash = WashAction()
@@ -276,7 +310,7 @@ def createWashActionModel(reaction_id, action_no, action):
 
 def createDrySolutionActionModel(reaction_id, action_no, action):
     # Get info from action JSON
-    material = action['content']['material']['value']
+    material = action["content"]["material"]["value"]
     dry = DrySolutionAction()
     reaction_obj = Reaction.objects.get(id=reaction_id)
     dry.reaction_id = reaction_obj
@@ -294,26 +328,24 @@ def createConcentrateActionModel(reaction_id, action_no, action):
     concentrate.save()
 
 
-
-
 # Check if need these models?
-def createMakeSolutionActionModel(reaction_id, action_no, action):    
+def createMakeSolutionActionModel(reaction_id, action_no, action):
     # Get info from action JSON
-    materials = action['content']['materials']['value']
-    materials_smiles_check = [checkSMILES(material['value']) for material in materials]
+    materials = action["content"]["materials"]["value"]
+    materials_smiles_check = [checkSMILES(material["value"]) for material in materials]
 
     if all(materials_smiles_check):
         solute_smiles = materials_smiles_check[0]
         solvent_smiles = materials_smiles_check[1]
 
-        quantities = [material['quantity']['value'] for material in materials]
+        quantities = [material["quantity"]["value"] for material in materials]
         solute_quantity = quantities[0]
         solvent_quantity = quantities[1]
 
-        units = [material['quantity']['unit'] for material in materials]
+        units = [material["quantity"]["unit"] for material in materials]
         solute_unit = units[0]
         solvent_unit = units[1]
-        
+
         makesoln = MakeSolutionAction()
         reaction_obj = Reaction.objects.get(id=reaction_id)
         makesoln.reaction_id = reaction_obj
@@ -323,14 +355,6 @@ def createMakeSolutionActionModel(reaction_id, action_no, action):
         makesoln.soluteunit = solute_unit
         makesoln.solvent = solvent_smiles
         makesoln.solventequantity = solvent_quantity
-        makesoln.solventunit = solvent_unit 
+        makesoln.solventunit = solvent_unit
         makesoln.save()
 
-
-    
-
-
-
-
-
-    
