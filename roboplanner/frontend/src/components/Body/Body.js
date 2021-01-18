@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 import Card from "react-bootstrap/Card";
-import Container from "react-bootstrap/Container";
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
 import ListGroup from "react-bootstrap/ListGroup";
 
 import ReactionBody from "../ReactionBody/ReactionBody";
@@ -21,36 +18,36 @@ const TargetCard = ({ name, image }) => {
   );
 };
 
-const Body = () => {
+const Body = ({ ProjectID }) => {
   // Use hooks instead of classes
   const [isLoading, setLoading] = useState(true);
   const [Targets, setTargets] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
-      const request = await axios.get("api/targets/");
+      const request = await axios.get(`api/targets?search=${ProjectID}`);
       setTargets(request.data);
       setLoading(false);
     }
-    fetchData();
+    if (ProjectID !== undefined || ProjectID !== 0) {
+      fetchData();
+    }
   }, []);
 
-  if (isLoading) {
-    return <div className="App">Loading...</div>;
+  if (ProjectID !== undefined || ProjectID !== 0) {
+    if (isLoading) {
+      return <div className="App">Loading...</div>;
+    }
   }
 
   return Targets.map((target) => (
-    <ListGroup horizontal>
-      <ListGroup.Item>
-        <TargetCard
-          key={target.uniqueId}
-          name={target.name}
-          image={target.image}
-        />
+    <ListGroup horizontal key={target.name}>
+      <ListGroup.Item key={target.name}>
+        <TargetCard key={target.name} name={target.name} image={target.image} />
       </ListGroup.Item>
-      <ListGroup.Item>
+      {/* <ListGroup.Item>
         <ReactionBody targetid={target.id} />
-      </ListGroup.Item>
+      </ListGroup.Item> */}
     </ListGroup>
 
     // <React.Fragment>

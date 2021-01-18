@@ -230,6 +230,7 @@ def uploadIBMReaction(validate_output):
             target_no += 1
 
     # Delete tempory file
+
     default_storage.delete(csv_fp)
 
     return validate_dict, validated

@@ -1,9 +1,9 @@
 from reactions.models import (
-    Project, 
-    Target, 
-    Method, 
+    Project,
+    Target,
+    Method,
     Reaction,
-    Product, 
+    Product,
     Reactant,
     AddAction,
     MakeSolutionAction,
@@ -11,14 +11,15 @@ from reactions.models import (
     WashAction,
     DrySolutionAction,
     ConcentrateAction,
-    AnalyseAction)
+    AnalyseAction,
+)
 
 from rest_framework import viewsets, permissions, filters
 from reactions.serializers import (
-    ProjectSerializer, 
-    TargetSerializer, 
-    MethodSerializer, 
-    ReactionSerializer, 
+    ProjectSerializer,
+    TargetSerializer,
+    MethodSerializer,
+    ReactionSerializer,
     ProductSerializer,
     ReactantSerializer,
     AddActionSerializer,
@@ -27,10 +28,12 @@ from reactions.serializers import (
     WashActionSerializer,
     DrySolutionActionSerializer,
     ConcentrateActionSerializer,
-    AnalyseActionSerializer)
+    AnalyseActionSerializer,
+)
 
 # Viewsets allow us to create CRUD like usability without explicitly setting
-# these up! 
+# these up!
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
@@ -48,6 +51,8 @@ class TargetViewSet(viewsets.ModelViewSet):
         permissions.AllowAny
     ]
     serializer_class = TargetSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["project_id__id"]
 
 
 class MethodViewSet(viewsets.ModelViewSet):
@@ -58,7 +63,7 @@ class MethodViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = MethodSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['target_id__id']
+    search_fields = ["target_id__id"]
 
 
 class ReactionViewSet(viewsets.ModelViewSet):
@@ -69,7 +74,7 @@ class ReactionViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = ReactionSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['method_id__id']
+    search_fields = ["method_id__id"]
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -80,7 +85,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = ProductSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['reaction_id__id']
+    search_fields = ["reaction_id__id"]
 
 
 class ReactantViewSet(viewsets.ModelViewSet):
@@ -91,7 +96,7 @@ class ReactantViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = ReactantSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['reaction_id__id']
+    search_fields = ["reaction_id__id"]
 
 
 class AddActionViewSet(viewsets.ModelViewSet):
@@ -102,7 +107,8 @@ class AddActionViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = AddActionSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['reaction_id__id']
+    search_fields = ["reaction_id__id"]
+
 
 class MakeSolutionActionViewSet(viewsets.ModelViewSet):
     queryset = MakeSolutionAction.objects.all()
@@ -112,7 +118,8 @@ class MakeSolutionActionViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = MakeSolutionActionSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['reaction_id__id']
+    search_fields = ["reaction_id__id"]
+
 
 class StirActionViewSet(viewsets.ModelViewSet):
     queryset = StirAction.objects.all()
@@ -122,7 +129,8 @@ class StirActionViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = StirActionSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['reaction_id__id']
+    search_fields = ["reaction_id__id"]
+
 
 class WashActionViewSet(viewsets.ModelViewSet):
     queryset = WashAction.objects.all()
@@ -132,7 +140,8 @@ class WashActionViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = WashActionSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['reaction_id__id']
+    search_fields = ["reaction_id__id"]
+
 
 class DrySolutionActionViewSet(viewsets.ModelViewSet):
     queryset = DrySolutionAction.objects.all()
@@ -142,7 +151,8 @@ class DrySolutionActionViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = DrySolutionActionSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['reaction_id__id']
+    search_fields = ["reaction_id__id"]
+
 
 class ConcentrateActionViewSet(viewsets.ModelViewSet):
     queryset = ConcentrateAction.objects.all()
@@ -152,7 +162,8 @@ class ConcentrateActionViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = ConcentrateActionSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['reaction_id__id']
+    search_fields = ["reaction_id__id"]
+
 
 class AnalyseActionViewSet(viewsets.ModelViewSet):
     queryset = AnalyseAction.objects.all()
@@ -162,4 +173,5 @@ class AnalyseActionViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = AnalyseActionSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['reaction_id__id']
+    search_fields = ["reaction_id__id"]
+
