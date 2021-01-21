@@ -3,16 +3,17 @@ import axios from "axios";
 
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
+import Button from "react-bootstrap/Button";
 
 import MethodBody from "../MethodBody/MethodBody";
 
 // Start with main body and then add components
 const TargetCard = ({ name, image }) => {
   return (
-    <Card border="light" style={{ width: "18rem" }}>
-      <Card.Img variant="top" src={image} />
+    <Card text="dark" border="light" style={{ width: "18rem" }}>
+      <Card.Header>{name}</Card.Header>
       <Card.Body>
-        <Card.Title>{name}</Card.Title>
+        <Card.Img variant="bottom" src={image} />
       </Card.Body>
     </Card>
   );
@@ -40,13 +41,34 @@ const Body = ({ ProjectID }) => {
     }
   }
 
+  async function deleteData(targetid) {
+    try {
+      const response = await axios.delete(`api/targets/${targetid}`);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function handleDelete(id) {
+    deleteData(id);
+    const newList = Targets.filter((item) => item.id !== id);
+    setTargets(newList);
+  }
+
   return Targets.map((target) => (
-    <ListGroup variant="flush" horizontal key={target.name}>
-      <ListGroup.Item key={target.name}>
-        <TargetCard key={target.name} name={target.name} image={target.image} />
+    <ListGroup key={target.id} horizontal>
+      <ListGroup.Item key={target.id}>
+        <TargetCard name={target.name} image={target.image} />
+        <Button key={target.id} onClick={() => handleDelete(target.id)}>
+          Delete Target
+        </Button>
       </ListGroup.Item>
       <ListGroup.Item>
-        <MethodBody key={target.name} targetid={target.id} />
+        <MethodBody
+          key={target.id}
+          targetid={target.id}
+          onChange={handleDelete}
+        />
       </ListGroup.Item>
     </ListGroup>
   ));

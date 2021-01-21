@@ -8,13 +8,17 @@ import Body from "./Body/Body";
 const App = () => {
   const [ProjectID, setProjectID] = useState(0);
 
-  function handleChange(projectid) {
+  function changeProject(projectid) {
     setProjectID(projectid);
+  }
+
+  function deleteProject() {
+    setProjectID(0);
   }
 
   return (
     <React.Fragment>
-      <Header onChange={handleChange} />
+      <Header changeProject={changeProject} deleteProject={deleteProject} />
       <Body ProjectID={ProjectID} key={ProjectID} />
     </React.Fragment>
   );

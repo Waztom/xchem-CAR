@@ -308,6 +308,10 @@ const ReactionCard = ({ reactionid, temperature, workup, name }) => {
 };
 
 // Up to here with new web app
+// const ActionsCard = (() => {
+// useSt
+// }
+
 const ProductImage = ({ reactionid }) => {
   // Use hooks instead of classes
   const [isLoading, setLoading] = useState(true);
@@ -441,22 +445,25 @@ const MethodCard = ({ method }) => {
             methodid={method.id}
           ></ReactionAccordian>
         </Card.Body>
-        <Button variant="primary">Delete method</Button>
       </Card>
     </CardDeck>
   );
 };
 
-const MethodBody = ({ targetid }) => {
+const MethodBody = ({ targetid, onChange }) => {
   // Use hooks instead of classes
   const [isLoading, setLoading] = useState(true);
   const [Methods, setMethods] = useState([]);
+  const [NoMethods, setNoMethods] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
       try {
         const request = await axios.get(`api/methods?search=${targetid}`);
         setMethods(request.data);
+        const nomethods = Object.keys(request.data).length;
+        console.log(nomethods);
+        setNoMethods(nomethods);
         setLoading(false);
       } catch (err) {}
     }
@@ -467,11 +474,32 @@ const MethodBody = ({ targetid }) => {
     return <div className="App">Loading...</div>;
   }
 
+  async function deleteData(methodid) {
+    try {
+      const response = await axios.delete(`api/methods/${methodid}`);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function handleDelete(id) {
+    deleteData(id);
+    const newList = Methods.filter((item) => item.id !== id);
+    setMethods(newList);
+  }
+
+  // if (NoMethods === 0) {
+  //   onChange(targetid);
+  // }
+
   return (
     <ListGroup horizontal>
       {Methods.map((method) => (
         <ListGroup.Item key={method.id}>
           <MethodCard method={method} key={method.id} />
+          <Button key={method.id} onClick={() => handleDelete(method.id)}>
+            Delete Method
+          </Button>
         </ListGroup.Item>
       ))}
     </ListGroup>
