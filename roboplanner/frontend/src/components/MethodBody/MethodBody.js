@@ -9,6 +9,10 @@ import Row from "react-bootstrap/Row";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
 import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
+import Accordion from "react-bootstrap/Accordion";
+import Image from "react-bootstrap/Image";
+import CardDeck from "react-bootstrap/CardDeck";
 
 //Start with most nested children components
 // Process cards - these cards describe the overall
@@ -290,13 +294,7 @@ const ReactionCard = ({ reactionid, temperature, workup, name }) => {
       </ListGroup.Item>
       {Reactants.map((reactant) => (
         <ListGroup.Item>
-          <ReactantCard
-            image={reactant.image}
-            moleq={reactant.moleq}
-            addorder={reactant.addorder}
-            solvent={reactant.solvent}
-            concentration={reactant.concentration}
-          />
+          <ReactantCard image={reactant.image} />
         </ListGroup.Item>
       ))}
       <ListGroup.Item>
@@ -309,16 +307,21 @@ const ReactionCard = ({ reactionid, temperature, workup, name }) => {
   );
 };
 
-const MethodCard = ({ methodid }) => {
+// Up to here with new web app
+const ProductImage = ({ reactionid }) => {
   // Use hooks instead of classes
   const [isLoading, setLoading] = useState(true);
-  const [Reactions, setReactions] = useState([]);
+  const [Product, setProduct] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
-      const request = await axios.get(`api/reactions?search=${methodid}`);
-      setReactions(request.data);
-      setLoading(false);
+      try {
+        const request = await axios.get(`api/products?search=${reactionid}`);
+        setProduct(request.data);
+        setLoading(false);
+      } catch (err) {
+        console.log(err);
+      }
     }
     fetchData();
   }, []);
@@ -327,21 +330,124 @@ const MethodCard = ({ methodid }) => {
     return <div className="App">Loading...</div>;
   }
 
-  return Reactions.map((reaction) => (
-    <ListGroup style={{ border: "success" }}>
-      <ListGroup.Item>
-        <ReactionCard
-          reactionid={reaction.id}
-          temperature={reaction.temperature}
-          workup={reaction.workup}
-          name={reaction.name}
-        />
-      </ListGroup.Item>
-    </ListGroup>
-  ));
+  return Product.map((product) => <Image src={product.image} fluid />);
 };
 
-const ReactionBody = ({ targetid }) => {
+const ReactionAccordian = ({ methodid }) => {
+  // Use hooks instead of classes
+  const [isLoading, setLoading] = useState(true);
+  const [Reactions, setReactions] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const request = await axios.get(`api/reactions?search=${methodid}`);
+        setReactions(request.data);
+        setLoading(false);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return <div className="App">Loading...</div>;
+  }
+
+  return (
+    <Accordion>
+      {Reactions.map((reaction) => (
+        <Card key={reaction.id}>
+          <Card.Header>
+            <Accordion.Toggle as={Button} variant="link" eventKey={reaction.id}>
+              <ProductImage
+                key={reaction.id}
+                reactionid={reaction.id}
+              ></ProductImage>
+              {reaction.reactionclass}
+            </Accordion.Toggle>
+          </Card.Header>
+          <Accordion.Collapse eventKey={reaction.id}>
+            <Card.Body>Hello! I'm the body</Card.Body>
+          </Accordion.Collapse>
+        </Card>
+      ))}
+    </Accordion>
+  );
+};
+
+const SetTargetMassInput = ({ targetmass, unit }) => {
+  const [TargetMass, setTargetMass] = useState({ targetmass });
+  const [Unit, setUnit] = useState({ unit });
+
+  const handleTargetMassChange = (e) => {
+    const inputTargetMass = e.target.value;
+
+    if (!isNaN(inputTargetMass)) {
+      setTargetMass(e.target.value);
+    } else {
+      alert("Please input an integer value");
+    }
+
+    // Add code to update API as well
+  };
+
+  const handleUnitChange = (e) => {
+    setUnit(e.target.value);
+    // Add code to update API as well
+  };
+
+  return (
+    <InputGroup
+      size="sm"
+      className="mb-3"
+      value={TargetMass.targetmass}
+      onChange={() => handleTargetMassChange}
+    >
+      <InputGroup.Prepend>
+        <InputGroup.Text id="inputGroup-sizing-sm">Target Mass</InputGroup.Text>
+      </InputGroup.Prepend>
+      <FormControl
+        aria-label="Small"
+        aria-describedby="inputGroup-sizing-sm"
+        placeholder={TargetMass.targetmass}
+      />
+      <Form.Control
+        as="select"
+        onChange={() => handleUnitChange}
+        size="sm"
+        type="text"
+      >
+        <option>mg</option>
+        <option>g</option>
+      </Form.Control>
+    </InputGroup>
+  );
+};
+
+const MethodCard = ({ method }) => {
+  return (
+    <CardDeck>
+      <Card border="light" style={{ width: "18rem" }} key={method.id}>
+        <SetTargetMassInput
+          targetmass={method.targetmass}
+          unit={method.unit}
+        ></SetTargetMassInput>
+        <Card.Body>
+          <Card.Title>Synthetic actions</Card.Title>
+          <ReactionAccordian
+            key={method.id}
+            methodid={method.id}
+          ></ReactionAccordian>
+        </Card.Body>
+        <Button variant="primary">Delete method</Button>
+      </Card>
+    </CardDeck>
+  );
+};
+
+const MethodBody = ({ targetid }) => {
   // Use hooks instead of classes
   const [isLoading, setLoading] = useState(true);
   const [Methods, setMethods] = useState([]);
@@ -352,7 +458,6 @@ const ReactionBody = ({ targetid }) => {
         const request = await axios.get(`api/methods?search=${targetid}`);
         setMethods(request.data);
         setLoading(false);
-        console.log(request.data);
       } catch (err) {}
     }
     fetchData();
@@ -365,31 +470,12 @@ const ReactionBody = ({ targetid }) => {
   return (
     <ListGroup horizontal>
       {Methods.map((method) => (
-        <ListGroup.Item>
-          <MethodCard methodid={method.id} />
+        <ListGroup.Item key={method.id}>
+          <MethodCard method={method} key={method.id} />
         </ListGroup.Item>
       ))}
     </ListGroup>
   );
 };
 
-export default ReactionBody;
-
-// useEffect(() => {
-//     async function fetchData() {
-//       try {
-//         const [request1, request2, request3] = await Promise.all([
-//           axios.get(`api/reactants?search=${reactionid}`),
-//           axios.get(`api/?temperatures?search=${reactionid}`),
-//           axios.get(`api/?workups?search=${reactionid}`),
-//         ]);
-//         setReactants(request1.data);
-//         setTemperature(request2.data);
-//         setWorkUp(request3.data);
-//         setLoading(false);
-//       } catch (err) {
-//         console.log(err);
-//       }
-//     }
-//     fetchData();
-//   }, []);
+export default MethodBody;

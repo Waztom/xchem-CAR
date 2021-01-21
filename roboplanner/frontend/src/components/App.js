@@ -6,22 +6,7 @@ import Header from "./Layout/Header";
 import Body from "./Body/Body";
 
 const App = () => {
-  const [isLoading, setLoading] = useState(true);
-  const [Projects, setProjects] = useState([]);
   const [ProjectID, setProjectID] = useState(0);
-
-  useEffect(() => {
-    async function fetchData() {
-      const request = await axios.get("api/projects/");
-      setProjects(request.data);
-      setLoading(false);
-    }
-    fetchData();
-  }, []);
-
-  if (isLoading) {
-    return <div className="App">Loading...</div>;
-  }
 
   function handleChange(projectid) {
     setProjectID(projectid);
@@ -29,7 +14,7 @@ const App = () => {
 
   return (
     <React.Fragment>
-      <Header Projects={Projects} onChange={handleChange} key={Projects.id} />
+      <Header onChange={handleChange} />
       <Body ProjectID={ProjectID} key={ProjectID} />
     </React.Fragment>
   );
