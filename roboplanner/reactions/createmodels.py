@@ -126,7 +126,7 @@ def createProjectModel(project_info):
     return project.id, project.name
 
 
-def createTargetModel(project_id, smiles, target_no, expected_amount):
+def createTargetModel(project_id, smiles, target_no, target_mass):
     """
     Function that creates a Target object
     if the csv file uploaded is validated and
@@ -145,21 +145,22 @@ def createTargetModel(project_id, smiles, target_no, expected_amount):
     target.name = "{}-{}".format(project_name, target_no)
     # Create and Write svg to file
     target_svg_string = createSVGString(smiles)
-    target_svg_fn = default_storage.save("targetimages/" + target.name + ".svg", ContentFile(target_svg_string))
+    target_svg_fn = default_storage.save(
+        "targetimages/" + target.name + ".svg", ContentFile(target_svg_string)
+    )
     target.image = target_svg_fn
-    target.expectedamount = expected_amount
+    target.targetmass = target_mass
+    target.unit = "mg"
     target.save()
 
     return target.id
 
 
-def createMethodModel(target_id, smiles, max_steps, expected_amount):
+def createMethodModel(target_id, smiles, max_steps):
     method = Method()
     target_obj = Target.objects.get(id=target_id)
     method.target_id = target_obj
     method.nosteps = max_steps
-    method.targetmass = expected_amount
-    method.unit = "mg"
     method.save()
 
     return method.id
@@ -179,22 +180,36 @@ def createReactionModel(method_id, reaction_class):
     return reaction.id
 
 
-def createProductModel(reaction_id, project_name, target_no, pathway_no, product_no, product_smiles):
+def createProductModel(
+    reaction_id, project_name, target_no, pathway_no, product_no, product_smiles
+):
     product = Product()
     product.name = "{}-{}-{}-{}".format(project_name, target_no, pathway_no, product_no)
     reaction_obj = Reaction.objects.get(id=reaction_id)
     product.reaction_id = reaction_obj
     product.smiles = product_smiles
     product_svg_string = createSVGString(product_smiles)
-    product_svg_fn = default_storage.save("productimages/" + product.name + ".svg", ContentFile(product_svg_string))
+    product_svg_fn = default_storage.save(
+        "productimages/" + product.name + ".svg", ContentFile(product_svg_string)
+    )
     product.image = product_svg_fn
     product.save()
 
 
-def createReactantModel(reaction_id, project_name, target_no, pathway_no, product_no, reactant_no, reactant_smiles):
+def createReactantModel(
+    reaction_id,
+    project_name,
+    target_no,
+    pathway_no,
+    product_no,
+    reactant_no,
+    reactant_smiles,
+):
     if reactant_smiles not in common_solvents:
         reactant = Reactant()
-        reactant.name = "{}-{}-{}-{}-{}".format(project_name, target_no, pathway_no, product_no, reactant_no)
+        reactant.name = "{}-{}-{}-{}-{}".format(
+            project_name, target_no, pathway_no, product_no, reactant_no
+        )
         reaction_obj = Reaction.objects.get(id=reaction_id)
         reactant.reaction_id = reaction_obj
         reactant.smiles = reactant_smiles
@@ -243,7 +258,9 @@ def checkSMILES(smiles):
 def convertNameToSmiles(chemical_name):
     try:
         name_converted = quote(chemical_name)
-        url = "https://cactus.nci.nih.gov/chemical/structure/" + name_converted + "/smiles"
+        url = (
+            "https://cactus.nci.nih.gov/chemical/structure/" + name_converted + "/smiles"
+        )
         ans = urlopen(url).read().decode("utf8")
         smiles = ans.split(" ")[0]
         return smiles

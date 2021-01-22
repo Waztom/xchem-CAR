@@ -117,7 +117,7 @@ def uploadIBMReaction(validate_output):
         IBM_project_id, rxn4chemistry_wrapper = createIBMProject(project_name)
 
         target_no = 1
-        for smiles, expected_amount in zip(
+        for smiles, target_mass in zip(
             uploaded_dict["Targets"], uploaded_dict["Ammount_required (mg)"]
         ):
 
@@ -127,7 +127,7 @@ def uploadIBMReaction(validate_output):
                 project_id=project_id,
                 smiles=smiles,
                 target_no=target_no,
-                expected_amount=expected_amount,
+                target_mass=target_mass,
             )
 
             # Create IBM
@@ -154,10 +154,7 @@ def uploadIBMReaction(validate_output):
                 if pathway_no <= max_pathways and pathway["confidence"] > 0.90:
                     # Create a Method model
                     method_id = createMethodModel(
-                        target_id=target_id,
-                        smiles=smiles,
-                        max_steps=max_steps,
-                        expected_amount=expected_amount,
+                        target_id=target_id, smiles=smiles, max_steps=max_steps,
                     )
 
                     # Get reaction info about pathway

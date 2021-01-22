@@ -4,23 +4,107 @@ import axios from "axios";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 import Button from "react-bootstrap/Button";
+import InputGroup from "react-bootstrap/InputGroup";
+import FormControl from "react-bootstrap/FormControl";
+import Form from "react-bootstrap/Form";
 
 import MethodBody from "../MethodBody/MethodBody";
 
 // Start with main body and then add components
-const TargetCard = ({ name, image }) => {
+const SetTargetMassInput = ({ targetmass, unit, targetid }) => {
+  const [TargetMass, setTargetMass] = useState({ targetmass });
+  const [Unit, setUnit] = useState({ unit });
+
+  async function patchTargetMass(value) {
+    try {
+      const response = await axios.patch(`api/targets/${targetid}/`, {
+        targetmass: value,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function patchTargetUnit(value) {
+    try {
+      const response = await axios.patch(`api/targets/${targetid}/`, {
+        unit: value,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleTargetMassChange = (e) => {
+    const inputTargetMass = e.target.value;
+
+    if (!isNaN(inputTargetMass)) {
+      setTargetMass(e.target.value);
+      patchTargetMass(Number(e.target.value));
+    } else {
+      alert("Please input an integer value");
+    }
+  };
+
+  const handleUnitChange = (e) => {
+    setUnit(e.target.value);
+    patchTargetUnit(e.target.value);
+  };
+
+  return (
+    <InputGroup size="sm" className="mb-3">
+      <InputGroup.Prepend>
+        <InputGroup.Text id="inputGroup-sizing-sm">Target Mass</InputGroup.Text>
+      </InputGroup.Prepend>
+      <FormControl
+        aria-label="Small"
+        aria-describedby="inputGroup-sizing-sm"
+        placeholder={TargetMass.targetmass}
+        onChange={(event) => handleTargetMassChange(event)}
+      />
+      <Form.Control
+        as="select"
+        onChange={(event) => handleUnitChange(event)}
+        size="sm"
+        type="text"
+      >
+        <option>{Unit.unit}</option>
+        {Unit.unit === "mg" ? (
+          <option>g</option>
+        ) : Unit.unit === "g" ? (
+          <option>mg</option>
+        ) : (
+          <option>{Unit.unit}</option>
+        )}
+      </Form.Control>
+    </InputGroup>
+  );
+};
+
+const TargetCard = ({ target, handleDelete }) => {
+  function pressDelete(id) {
+    handleDelete(id);
+  }
+
   return (
     <Card text="dark" border="light" style={{ width: "18rem" }}>
-      <Card.Header>{name}</Card.Header>
+      <Card.Header>{target.name}</Card.Header>
+      <SetTargetMassInput
+        targetmass={target.targetmass}
+        unit={target.unit}
+        targetid={target.id}
+      ></SetTargetMassInput>
       <Card.Body>
-        <Card.Img variant="bottom" src={image} />
+        <Card.Img src={target.image} />
       </Card.Body>
+      <Button key={target.id} onClick={() => pressDelete(target.id)}>
+        Delete Target
+      </Button>
     </Card>
   );
 };
 
 const Body = ({ ProjectID }) => {
-  // Use hooks instead of classes
   const [isLoading, setLoading] = useState(true);
   const [Targets, setTargets] = useState([]);
 
@@ -58,16 +142,13 @@ const Body = ({ ProjectID }) => {
   return Targets.map((target) => (
     <ListGroup key={target.id} horizontal>
       <ListGroup.Item key={target.id}>
-        <TargetCard name={target.name} image={target.image} />
-        <Button key={target.id} onClick={() => handleDelete(target.id)}>
-          Delete Target
-        </Button>
+        <TargetCard target={target} handleDelete={handleDelete} />
       </ListGroup.Item>
       <ListGroup.Item>
         <MethodBody
           key={target.id}
           targetid={target.id}
-          onChange={handleDelete}
+          deleteTarget={handleDelete}
         />
       </ListGroup.Item>
     </ListGroup>

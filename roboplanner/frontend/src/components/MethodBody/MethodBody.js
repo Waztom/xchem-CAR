@@ -381,65 +381,12 @@ const ReactionAccordian = ({ methodid }) => {
   );
 };
 
-const SetTargetMassInput = ({ targetmass, unit }) => {
-  const [TargetMass, setTargetMass] = useState({ targetmass });
-  const [Unit, setUnit] = useState({ unit });
-
-  const handleTargetMassChange = (e) => {
-    const inputTargetMass = e.target.value;
-
-    if (!isNaN(inputTargetMass)) {
-      setTargetMass(e.target.value);
-    } else {
-      alert("Please input an integer value");
-    }
-
-    // Add code to update API as well
-  };
-
-  const handleUnitChange = (e) => {
-    setUnit(e.target.value);
-    // Add code to update API as well
-  };
-
-  return (
-    <InputGroup
-      size="sm"
-      className="mb-3"
-      value={TargetMass.targetmass}
-      onChange={() => handleTargetMassChange}
-    >
-      <InputGroup.Prepend>
-        <InputGroup.Text id="inputGroup-sizing-sm">Target Mass</InputGroup.Text>
-      </InputGroup.Prepend>
-      <FormControl
-        aria-label="Small"
-        aria-describedby="inputGroup-sizing-sm"
-        placeholder={TargetMass.targetmass}
-      />
-      <Form.Control
-        as="select"
-        onChange={() => handleUnitChange}
-        size="sm"
-        type="text"
-      >
-        <option>mg</option>
-        <option>g</option>
-      </Form.Control>
-    </InputGroup>
-  );
-};
-
 const MethodCard = ({ method }) => {
   return (
     <CardDeck>
       <Card border="light" style={{ width: "18rem" }} key={method.id}>
-        <SetTargetMassInput
-          targetmass={method.targetmass}
-          unit={method.unit}
-        ></SetTargetMassInput>
         <Card.Body>
-          <Card.Title>Synthetic actions</Card.Title>
+          <Card.Title>Synthetic steps</Card.Title>
           <ReactionAccordian
             key={method.id}
             methodid={method.id}
@@ -450,7 +397,7 @@ const MethodCard = ({ method }) => {
   );
 };
 
-const MethodBody = ({ targetid, onChange }) => {
+const MethodBody = ({ targetid, deleteTarget }) => {
   // Use hooks instead of classes
   const [isLoading, setLoading] = useState(true);
   const [Methods, setMethods] = useState([]);
@@ -462,7 +409,6 @@ const MethodBody = ({ targetid, onChange }) => {
         const request = await axios.get(`api/methods?search=${targetid}`);
         setMethods(request.data);
         const nomethods = Object.keys(request.data).length;
-        console.log(nomethods);
         setNoMethods(nomethods);
         setLoading(false);
       } catch (err) {}
@@ -486,24 +432,34 @@ const MethodBody = ({ targetid, onChange }) => {
     deleteData(id);
     const newList = Methods.filter((item) => item.id !== id);
     setMethods(newList);
+    const nomethods = Object.keys(Methods).length;
+    if (nomethods == 1) {
+      deleteTarget(targetid);
+    }
   }
 
-  // if (NoMethods === 0) {
-  //   onChange(targetid);
-  // }
-
-  return (
-    <ListGroup horizontal>
-      {Methods.map((method) => (
-        <ListGroup.Item key={method.id}>
-          <MethodCard method={method} key={method.id} />
-          <Button key={method.id} onClick={() => handleDelete(method.id)}>
-            Delete Method
-          </Button>
-        </ListGroup.Item>
-      ))}
-    </ListGroup>
-  );
+  if (NoMethods == 0) {
+    return (
+      <Card bg="warning">
+        <Card.Body>
+          Backend still busy processing else no methods were found!
+        </Card.Body>
+      </Card>
+    );
+  } else {
+    return (
+      <ListGroup horizontal>
+        {Methods.map((method) => (
+          <ListGroup.Item key={method.id}>
+            <MethodCard method={method} key={method.id} />
+            <Button key={method.id} onClick={() => handleDelete(method.id)}>
+              Delete Method
+            </Button>
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+    );
+  }
 };
 
 export default MethodBody;

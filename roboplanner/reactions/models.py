@@ -19,29 +19,34 @@ class Project(models.Model):
     def save(self, *args, **kwargs):
         if not self.name:
             # Newly created object, so set slug
-            self.name = slugify(self.submittername[0:3] + " " + self.submitterorganisation[0:3] + " " + rand_slug())
+            self.name = slugify(
+                self.submittername[0:3]
+                + " "
+                + self.submitterorganisation[0:3]
+                + " "
+                + rand_slug()
+            )
 
         super(Project, self).save(*args, **kwargs)
 
 
 class Target(models.Model):
-    project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
-    smiles = models.CharField(max_length=255, db_index=True, null=True)
-    image = models.FileField(upload_to="targetimages/", max_length=255)
-    name = models.CharField(max_length=255, db_index=True, unique=True)
-    expectedamount = models.IntegerField(null=True)
-
-
-class Method(models.Model):
     class Unit(models.TextChoices):
         mmol = "mmol"
         g = "g"
         mg = "mg"
 
-    target_id = models.ForeignKey(Target, on_delete=models.CASCADE)
-    nosteps = models.IntegerField(null=True)
+    project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
+    smiles = models.CharField(max_length=255, db_index=True, null=True)
+    image = models.FileField(upload_to="targetimages/", max_length=255)
+    name = models.CharField(max_length=255, db_index=True, unique=True)
     targetmass = models.IntegerField()
     unit = models.CharField(choices=Unit.choices, default=Unit.mg, max_length=10)
+
+
+class Method(models.Model):
+    target_id = models.ForeignKey(Target, on_delete=models.CASCADE)
+    nosteps = models.IntegerField(null=True)
 
 
 class Reaction(models.Model):
@@ -135,5 +140,7 @@ class AnalyseAction(models.Model):
         XChem = "XChem"
 
     actionno = models.IntegerField()
-    method = models.CharField(choices=QCMethod.choices, default=QCMethod.LCMS, max_length=10)
+    method = models.CharField(
+        choices=QCMethod.choices, default=QCMethod.LCMS, max_length=10
+    )
 
