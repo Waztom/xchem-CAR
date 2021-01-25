@@ -107,7 +107,7 @@ class AddActionViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = AddActionSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ["=reaction_id__id"]
+    search_fields = ["=reaction_id__id", "=material"]
 
 
 class MakeSolutionActionViewSet(viewsets.ModelViewSet):

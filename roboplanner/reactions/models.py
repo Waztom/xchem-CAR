@@ -72,8 +72,8 @@ class AddAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actionno = models.IntegerField()
     material = models.CharField(max_length=255)
-    molequivalents = models.IntegerField(default=1, null=True)
-    molecularweight = models.IntegerField()
+    molequivalents = models.FloatField(default=1, null=True)
+    molecularweight = models.FloatField()
     dropwise = models.BooleanField(default=False)
 
 

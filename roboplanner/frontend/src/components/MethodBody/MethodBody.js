@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
@@ -13,6 +14,7 @@ import Button from "react-bootstrap/Button";
 import Accordion from "react-bootstrap/Accordion";
 import Image from "react-bootstrap/Image";
 import CardDeck from "react-bootstrap/CardDeck";
+import { List } from "react-bootstrap-icons";
 
 //Start with most nested children components
 // Process cards - these cards describe the overall
@@ -311,6 +313,193 @@ const ReactionCard = ({ reactionid, temperature, workup, name }) => {
 // const ActionsCard = (() => {
 // useSt
 // }
+const SetDropwise = ({ dropwise, addactionid }) => {
+  const [Dropwise, setDropwise] = useState({ dropwise });
+  console.log(Dropwise.dropwise === false);
+
+  async function patchDropwise(value) {
+    try {
+      const response = await axios.patch(`api/addactions/${addactionid}/`, {
+        dropwise: value,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleDropwiseChange = (e) => {
+    setDropwise(e.target.value);
+    patchDropwise(e.target.value);
+  };
+
+  return (
+    <InputGroup size="sm" className="mb-3">
+      <InputGroup.Prepend>
+        <InputGroup.Text id="inputGroup-sizing-sm">
+          Add dropwise
+        </InputGroup.Text>
+      </InputGroup.Prepend>
+      <Form.Control
+        as="select"
+        onChange={(event) => handleDropwiseChange(event)}
+        size="sm"
+        type="text"
+      >
+        <option>"True"</option>
+        {Dropwise.dropwise === true ? (
+          <option>"False"</option>
+        ) : Dropwise.dropwise === false ? (
+          <option>"True"</option>
+        ) : (
+          <option>"False"</option>
+        )}
+      </Form.Control>
+    </InputGroup>
+  );
+};
+
+const SetMolEquivalent = ({ molequivalent, addactionid }) => {
+  const [TargetMol, setTargetMol] = useState({ molequivalent });
+
+  async function patchMolEquivalent(value) {
+    try {
+      const response = await axios.patch(`api/addactions/${addactionid}/`, {
+        molequivalents: value,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleMolEquivalentChange = (e) => {
+    const inputMolEquivalent = e.target.value;
+
+    if (!isNaN(inputMolEquivalent)) {
+      setTargetMol(e.target.value);
+      patchMolEquivalent(Number(e.target.value));
+    } else {
+      alert("Please input an integer value");
+    }
+  };
+
+  return (
+    <InputGroup size="sm" className="mb-3">
+      <InputGroup.Prepend>
+        <InputGroup.Text id="inputGroup-sizing-sm">Mol eq.</InputGroup.Text>
+      </InputGroup.Prepend>
+      <FormControl
+        aria-label="Small"
+        aria-describedby="inputGroup-sizing-sm"
+        placeholder={TargetMol.molequivalent}
+        onChange={(event) => handleMolEquivalentChange(event)}
+      />
+    </InputGroup>
+  );
+};
+
+const AddActionList = ({ reactionid }) => {
+  const [isLoading, setLoading] = useState(true);
+  const [AddActions, setAddActions] = useState([]);
+  const [Reactants, setReactants] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const requestadd = await axios.get(
+          `api/addactions?search=${reactionid}`
+        );
+        setAddActions(requestadd.data);
+        const requestreact = await axios.get(
+          `api/reactants?search=${reactionid}`
+        );
+        setReactants(requestreact.data);
+        setLoading(false);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return <div className="App">Loading...</div>;
+  }
+
+  async function patchAddNo(addactionid, value) {
+    try {
+      const response = await axios.patch(`api/addactions/${addactionid}/`, {
+        actionno: value,
+      });
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function handleOnDragEnd(result) {
+    const additems = Array.from(AddActions);
+    const [reorderedadditem] = additems.splice(result.source.index, 1);
+    additems.splice(result.destination.index, 0, reorderedadditem);
+
+    const reactitems = Array.from(Reactants);
+    const [reorderedreactitems] = reactitems.splice(result.source.index, 1);
+    reactitems.splice(result.destination.index, 0, reorderedreactitems);
+
+    setAddActions(additems);
+    setReactants(reactitems);
+
+    const addactionid = parseInt(result.draggableId);
+    const newactionno = result.destination.index + 1;
+
+    patchAddNo(addactionid, newactionno);
+  }
+
+  return (
+    <DragDropContext onDragEnd={handleOnDragEnd}>
+      <Droppable droppableId="characters">
+        {(provided) => (
+          <ListGroup
+            className="characters"
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+          >
+            {AddActions.map((addaction, index) => {
+              const addactionid = addaction.id.toString();
+              return (
+                <Draggable
+                  key={addaction.id}
+                  draggableId={addactionid}
+                  index={index}
+                >
+                  {(provided) => (
+                    <ListGroup.Item
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    >
+                      Step {index + 1} Add
+                      <SetMolEquivalent
+                        molequivalent={addaction.molequivalents}
+                        addactionid={addaction.id}
+                      ></SetMolEquivalent>
+                      <Image src={Reactants[index].image} fluid />
+                    </ListGroup.Item>
+                  )}
+                </Draggable>
+              );
+            })}
+            {provided.placeholder}
+          </ListGroup>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+};
+
+// const ActionList = ({ reactionid }) => {
+//   return;
+//   <AddActionList reactionid={reactionid}></AddActionList>;
+// };
 
 const ProductImage = ({ reactionid }) => {
   // Use hooks instead of classes
@@ -373,7 +562,8 @@ const ReactionAccordian = ({ methodid }) => {
             </Accordion.Toggle>
           </Card.Header>
           <Accordion.Collapse eventKey={reaction.id}>
-            <Card.Body>Hello! I'm the body</Card.Body>
+            <AddActionList reactionid={reaction.id}></AddActionList>
+            {/* <ActionList reactionid={reaction.id}></ActionList> */}
           </Accordion.Collapse>
         </Card>
       ))}

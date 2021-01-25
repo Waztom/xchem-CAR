@@ -152,6 +152,10 @@ def uploadIBMReaction(validate_output):
             for pathway in results["retrosynthetic_paths"]:
                 print(pathway_no)
                 if pathway_no <= max_pathways and pathway["confidence"] > 0.90:
+                    # Need to add check if reaction class and reactants already exist -
+                    # in other words looking for diversity and not dulpication
+                    # of reactions!!
+
                     # Create a Method model
                     method_id = createMethodModel(
                         target_id=target_id, smiles=smiles, max_steps=max_steps,
@@ -189,6 +193,9 @@ def uploadIBMReaction(validate_output):
 
                         # Create Reactant and addition action models
                         reactant_no = 1
+                        # IBM API sometimes yields duplicate reactants
+                        reactants = list(dict.fromkeys(reactants))
+
                         for reactant_smiles in reactants:
                             reactant_model = createReactantModel(
                                 reaction_id=reaction_id,
