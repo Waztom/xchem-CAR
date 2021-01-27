@@ -6,7 +6,6 @@ from reactions.api import (
     MethodViewSet,
     ReactionViewSet,
     ProductViewSet,
-    ReactantViewSet,
     AddActionViewSet,
     MakeSolutionActionViewSet,
     StirActionViewSet,
@@ -23,7 +22,6 @@ router.register("api/targets", TargetViewSet, "targets")
 router.register("api/methods", MethodViewSet, "methods")
 router.register("api/reactions", ReactionViewSet, "reactions")
 router.register("api/products", ProductViewSet, "products")
-router.register("api/reactants", ReactantViewSet, "reactants")
 router.register("api/addactions", AddActionViewSet, "addactions")
 router.register(
     "api/makesolutionactions", MakeSolutionActionViewSet, "makesolutionactions"

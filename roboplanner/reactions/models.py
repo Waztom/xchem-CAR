@@ -61,20 +61,15 @@ class Product(models.Model):
     image = models.FileField(upload_to="productimages/", max_length=255)
 
 
-class Reactant(models.Model):
-    reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, unique=True)
-    smiles = models.CharField(max_length=255, db_index=True, null=True)
-    image = models.FileField(upload_to="reactantimages/", max_length=255)
-
-
 class AddAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, unique=True)
     actionno = models.IntegerField()
-    material = models.CharField(max_length=255)
+    smiles = models.CharField(max_length=255)
     molequivalents = models.FloatField(default=1, null=True)
     molecularweight = models.FloatField()
     dropwise = models.BooleanField(default=False)
+    image = models.FileField(upload_to="addactionimages/", max_length=255)
 
 
 # Models to capture IBM actions

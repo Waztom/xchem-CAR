@@ -11,7 +11,6 @@ from .models import (
     Method,
     Reaction,
     Product,
-    Reactant,
     AddAction,
     MakeSolutionAction,
     StirAction,
@@ -196,34 +195,6 @@ def createProductModel(
     product.save()
 
 
-def createReactantModel(
-    reaction_id,
-    project_name,
-    target_no,
-    pathway_no,
-    product_no,
-    reactant_no,
-    reactant_smiles,
-):
-    if reactant_smiles not in common_solvents:
-        reactant = Reactant()
-        reactant.name = "{}-{}-{}-{}-{}".format(
-            project_name, target_no, pathway_no, product_no, reactant_no
-        )
-        reaction_obj = Reaction.objects.get(id=reaction_id)
-        reactant.reaction_id = reaction_obj
-        reactant.smiles = reactant_smiles
-        reactant_svg_string = createSVGString(reactant_smiles)
-        reactant_svg_fn = default_storage.save(
-            "reactantimages/" + reactant.name + ".svg", ContentFile(reactant_svg_string)
-        )
-        reactant.image = reactant_svg_fn
-        reactant.save()
-        return True
-    else:
-        return False
-
-
 def createActionModel(reaction_id, action_no, action):
     # action is a JSON
 
@@ -268,18 +239,36 @@ def convertNameToSmiles(chemical_name):
         return False
 
 
-def createAddActionModel(reaction_id, reactant_no, reactant_smiles):
-    # Get MW
-    mol = Chem.MolFromSmiles(reactant_smiles)
-    molecular_weight = Descriptors.ExactMolWt(mol)
+def createAddActionModel(
+    reaction_id,
+    project_name,
+    target_no,
+    pathway_no,
+    product_no,
+    action_no,
+    reactant_smiles,
+):
 
-    add = AddAction()
-    reaction_obj = Reaction.objects.get(id=reaction_id)
-    add.reaction_id = reaction_obj
-    add.actionno = reactant_no
-    add.material = reactant_smiles
-    add.molecularweight = molecular_weight
-    add.save()
+    if reactant_smiles not in common_solvents:
+        # Get MW
+        mol = Chem.MolFromSmiles(reactant_smiles)
+        molecular_weight = Descriptors.ExactMolWt(mol)
+
+        add = AddAction()
+        add.name = "{}-{}-{}-{}-{}".format(
+            project_name, target_no, pathway_no, product_no, action_no
+        )
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        add.reaction_id = reaction_obj
+        add.actionno = action_no
+        add.smiles = reactant_smiles
+        add_svg_string = createSVGString(reactant_smiles)
+        add_svg_fn = default_storage.save(
+            "addactionimages/" + add.name + ".svg", ContentFile(add_svg_string)
+        )
+        add.image = add_svg_fn
+        add.molecularweight = molecular_weight
+        add.save()
 
 
 def createStirActionModel(reaction_id, action_no, action):

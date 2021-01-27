@@ -4,7 +4,6 @@ from reactions.models import (
     Method,
     Reaction,
     Product,
-    Reactant,
     AddAction,
     MakeSolutionAction,
     StirAction,
@@ -21,7 +20,6 @@ from reactions.serializers import (
     MethodSerializer,
     ReactionSerializer,
     ProductSerializer,
-    ReactantSerializer,
     AddActionSerializer,
     MakeSolutionActionSerializer,
     StirActionSerializer,
@@ -88,17 +86,6 @@ class ProductViewSet(viewsets.ModelViewSet):
     search_fields = ["=reaction_id__id"]
 
 
-class ReactantViewSet(viewsets.ModelViewSet):
-    queryset = Reactant.objects.all()
-    permission_classes = [
-        # Allows all users to access this model - will change when users addded
-        permissions.AllowAny
-    ]
-    serializer_class = ReactantSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ["=reaction_id__id"]
-
-
 class AddActionViewSet(viewsets.ModelViewSet):
     queryset = AddAction.objects.all()
     permission_classes = [
@@ -107,7 +94,7 @@ class AddActionViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = AddActionSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ["=reaction_id__id", "=material"]
+    search_fields = ["=reaction_id__id"]
 
 
 class MakeSolutionActionViewSet(viewsets.ModelViewSet):

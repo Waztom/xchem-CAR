@@ -5,7 +5,6 @@ from reactions.models import (
     Method,
     Reaction,
     Product,
-    Reactant,
     AddAction,
     MakeSolutionAction,
     StirAction,
@@ -43,12 +42,6 @@ class ReactionSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = "__all__"
-
-
-class ReactantSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Reactant
         fields = "__all__"
 
 

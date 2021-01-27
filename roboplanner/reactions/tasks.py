@@ -19,7 +19,6 @@ from .createmodels import (
     createReactionModel,
     createProductModel,
     createAddActionModel,
-    createReactantModel,
     createActionModel,
 )
 
@@ -192,30 +191,22 @@ def uploadIBMReaction(validate_output):
                         )
 
                         # Create Reactant and addition action models
-                        reactant_no = 1
+                        action_no = 1
                         # IBM API sometimes yields duplicate reactants
                         reactants = list(dict.fromkeys(reactants))
 
                         for reactant_smiles in reactants:
-                            reactant_model = createReactantModel(
+                            createAddActionModel(
                                 reaction_id=reaction_id,
                                 project_name=project_name,
                                 target_no=target_no,
                                 pathway_no=pathway_no,
                                 product_no=product_no,
-                                reactant_no=reactant_no,
+                                action_no=action_no,
                                 reactant_smiles=reactant_smiles,
                             )
-                            if reactant_model:
-                                createAddActionModel(
-                                    reaction_id=reaction_id,
-                                    reactant_no=reactant_no,
-                                    reactant_smiles=reactant_smiles,
-                                )
-                                reactant_no += 1
+                            action_no += 1
 
-                        # Create robotic actions for each reaction - link robo actions to known working methods????????
-                        action_no = reactant_no
                         for action in actions:
                             createActionModel(
                                 reaction_id=reaction_id,

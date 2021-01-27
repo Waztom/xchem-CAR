@@ -400,7 +400,10 @@ const SetMolEquivalent = ({ molequivalent, addactionid }) => {
 const AddActionList = ({ reactionid }) => {
   const [isLoading, setLoading] = useState(true);
   const [AddActions, setAddActions] = useState([]);
-  const [Reactants, setReactants] = useState([]);
+
+  function compareActionno(a, b) {
+    return a.actionno - b.actionno;
+  }
 
   useEffect(() => {
     async function fetchData() {
@@ -408,11 +411,9 @@ const AddActionList = ({ reactionid }) => {
         const requestadd = await axios.get(
           `api/addactions?search=${reactionid}`
         );
-        setAddActions(requestadd.data);
-        const requestreact = await axios.get(
-          `api/reactants?search=${reactionid}`
-        );
-        setReactants(requestreact.data);
+        const sorted = requestadd.data.sort(compareActionno);
+        setAddActions(sorted);
+        console.log(sorted);
         setLoading(false);
       } catch (err) {
         console.log(err);
@@ -430,7 +431,6 @@ const AddActionList = ({ reactionid }) => {
       const response = await axios.patch(`api/addactions/${addactionid}/`, {
         actionno: value,
       });
-      console.log(response);
     } catch (error) {
       console.log(error);
     }
@@ -441,17 +441,12 @@ const AddActionList = ({ reactionid }) => {
     const [reorderedadditem] = additems.splice(result.source.index, 1);
     additems.splice(result.destination.index, 0, reorderedadditem);
 
-    const reactitems = Array.from(Reactants);
-    const [reorderedreactitems] = reactitems.splice(result.source.index, 1);
-    reactitems.splice(result.destination.index, 0, reorderedreactitems);
-
     setAddActions(additems);
-    setReactants(reactitems);
 
-    const addactionid = parseInt(result.draggableId);
-    const newactionno = result.destination.index + 1;
-
-    patchAddNo(addactionid, newactionno);
+    additems.map((additem, index) => {
+      const newactionno = index + 1;
+      patchAddNo(additem.id, newactionno);
+    });
   }
 
   return (
@@ -482,7 +477,7 @@ const AddActionList = ({ reactionid }) => {
                         molequivalent={addaction.molequivalents}
                         addactionid={addaction.id}
                       ></SetMolEquivalent>
-                      <Image src={Reactants[index].image} fluid />
+                      <Image src={addaction.image} fluid />
                     </ListGroup.Item>
                   )}
                 </Draggable>
