@@ -284,6 +284,7 @@ def createStirActionModel(reaction_id, action_no, action):
     stir = StirAction()
     reaction_obj = Reaction.objects.get(id=reaction_id)
     stir.reaction_id = reaction_obj
+    stir.actiontype = action["name"]
     stir.actionno = action_no
     stir.duration = duration
     stir.unit = unit
@@ -307,6 +308,7 @@ def createWashActionModel(reaction_id, action_no, action):
     wash = WashAction()
     reaction_obj = Reaction.objects.get(id=reaction_id)
     wash.reaction_id = reaction_obj
+    wash.actiontype = action["name"]
     wash.actionno = action_no
     wash.material = material
     wash.norepetitions = no_repetitions
@@ -320,6 +322,7 @@ def createDrySolutionActionModel(reaction_id, action_no, action):
     dry = DrySolutionAction()
     reaction_obj = Reaction.objects.get(id=reaction_id)
     dry.reaction_id = reaction_obj
+    dry.actiontype = action["name"]
     dry.actionno = action_no
     dry.dryingagent = material
     dry.save()
@@ -329,6 +332,7 @@ def createConcentrateActionModel(reaction_id, action_no, action):
     concentrate = ConcentrateAction()
     reaction_obj = Reaction.objects.get(id=reaction_id)
     concentrate.reaction_id = reaction_obj
+    concentrate.actiontype = action["name"]
     concentrate.actionno = action_no
     concentrate.concentrate = True
     concentrate.save()

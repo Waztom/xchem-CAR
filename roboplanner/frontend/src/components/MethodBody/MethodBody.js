@@ -358,6 +358,143 @@ const SetDropwise = ({ dropwise, addactionid }) => {
   );
 };
 
+/////////////////////// Checkm if need anything from above ///////////////////////
+const StirAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+
+const WashAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+
+const DrySolutionAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+
+const ConcentrateAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+
+const AddRestActionsList = ({ reactionid }) => {
+  const [isLoading, setLoading] = useState(true);
+  const [RestActions, setRestActions] = useState([]);
+
+  function compareActionno(a, b) {
+    return a.actionno - b.actionno;
+  }
+
+  useEffect(() => {
+    async function fetchData() {
+      const URLs = [
+        `api/makesolutionactions?search=${reactionid}`,
+        `api/stiractions?search=${reactionid}`,
+        `api/washactions?search=${reactionid}`,
+        `api/drysolutionactions?search=${reactionid}`,
+        `api/concentrateactions?search=${reactionid}`,
+        `api/analyseactions?search=${reactionid}`,
+      ];
+      const requests = URLs.map((URL) => axios.get(URL).catch((err) => null));
+
+      try {
+        const [
+          stirresponse,
+          washresponse,
+          dryresponse,
+          concresponse,
+        ] = await axios.all(requests);
+        const restactions = stirresponse.data.concat(
+          washresponse.data,
+          dryresponse.data,
+          concresponse.data
+        );
+        const sorted = restactions.sort(compareActionno);
+        setRestActions(sorted);
+        setLoading(false);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return <div className="App">Loading...</div>;
+  }
+
+  async function patchActionNo(actiontype, actionid, value) {
+    try {
+      const response = await axios.patch(
+        `api/${actiontype}actions/${actionid}/`,
+        {
+          actionno: value,
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function handleOnDragEnd(result) {
+    const items = Array.from(RestActions);
+    const [reordereditem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reordereditem);
+
+    setRestActions(items);
+
+    items.map((item, index) => {
+      var actiontype = item.actiontype;
+      if (actiontype === "dry-solution") {
+        actiontype = actiontype.replace(/-/g, "");
+      }
+      const newactionno = index + 1;
+      patchActionNo(actiontype, item.id, newactionno);
+    });
+  }
+
+  function getComponent(action) {
+    const components = {
+      stir: <StirAction action={action}></StirAction>,
+      wash: <WashAction action={action}></WashAction>,
+      "dry-solution": <DrySolutionAction action={action}></DrySolutionAction>,
+      concentrate: <ConcentrateAction action={action}></ConcentrateAction>,
+    };
+
+    return components[action.actiontype];
+  }
+
+  return (
+    <DragDropContext onDragEnd={handleOnDragEnd}>
+      <Droppable droppableId="characters">
+        {(provided) => (
+          <ListGroup
+            className="characters"
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+          >
+            {RestActions.map((action, index) => {
+              const actionid = action.actiontype + "-" + index.toString();
+              return (
+                <Draggable key={actionid} draggableId={actionid} index={index}>
+                  {(provided) => (
+                    <ListGroup.Item
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    >
+                      {getComponent(action)}
+                    </ListGroup.Item>
+                  )}
+                </Draggable>
+              );
+            })}
+            {provided.placeholder}
+          </ListGroup>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+};
+
 const SetMolEquivalent = ({ molequivalent, addactionid }) => {
   const [TargetMol, setTargetMol] = useState({ molequivalent });
 
@@ -413,7 +550,6 @@ const AddActionList = ({ reactionid }) => {
         );
         const sorted = requestadd.data.sort(compareActionno);
         setAddActions(sorted);
-        console.log(sorted);
         setLoading(false);
       } catch (err) {
         console.log(err);
@@ -557,8 +693,16 @@ const ReactionAccordian = ({ methodid }) => {
             </Accordion.Toggle>
           </Card.Header>
           <Accordion.Collapse eventKey={reaction.id}>
-            <AddActionList reactionid={reaction.id}></AddActionList>
-            {/* <ActionList reactionid={reaction.id}></ActionList> */}
+            <ListGroup horizontal>
+              <ListGroup.Item key={reaction.id}>
+                <AddActionList reactionid={reaction.id}></AddActionList>
+              </ListGroup.Item>
+              <ListGroup.Item key={reaction.id + 1}>
+                <AddRestActionsList
+                  reactionid={reaction.id}
+                ></AddRestActionsList>
+              </ListGroup.Item>
+            </ListGroup>
           </Accordion.Collapse>
         </Card>
       ))}
@@ -569,7 +713,7 @@ const ReactionAccordian = ({ methodid }) => {
 const MethodCard = ({ method }) => {
   return (
     <CardDeck>
-      <Card border="light" style={{ width: "18rem" }} key={method.id}>
+      <Card border="light" style={{ width: "30rem" }} key={method.id}>
         <Card.Body>
           <Card.Title>Synthetic steps</Card.Title>
           <ReactionAccordian
