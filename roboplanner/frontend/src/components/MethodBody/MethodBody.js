@@ -364,7 +364,11 @@ const StirAction = ({ action }) => {
 };
 
 const WashAction = ({ action }) => {
-  return <Button>{action.actiontype}</Button>;
+  return (
+    <Button>
+      {action.actiontype}-{action.material}
+    </Button>
+  );
 };
 
 const DrySolutionAction = ({ action }) => {
