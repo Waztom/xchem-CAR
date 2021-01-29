@@ -1,0 +1,162 @@
+{% load static %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Project upload</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+</head>
+{% block content %}
+    <body>
+      <section class="hero is-primary has-background-grey">
+        <div class="hero-body">
+{#          <div class="container">#}
+            <h1 class="title is-size-1 has-text-centered">Project Upload</h1>
+            <p class="subtitle has-text-centered" id="progress-title"></p>
+        </div>
+        </section>
+      <section class="hero is-light has-background-white">
+        <div class="hero-body">
+            <div class="columns is-centered">
+              <div class="column is-8" id="content">
+                  <p>
+                      Here, you can upload CAR project targets for follow up compounds to be reviewed and synthesised
+                  </p>
+                  <br>
+                  <p>The current specification version is <b>ver_1.0</b></p>
+                  <br>
+                  <form method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      {{ form.as_ul }}
+                    <button type="submit">Submit</button>
+                </form>
+                  {% autoescape off %}
+                      {% if download_url %}
+                        {{ download_url }}
+                      {% endif %}
+                      {% if table %}
+              <div style="width:800px; margin:0 auto;">
+                {{ table }}
+              </div>
+                      {% endif %}
+                  {% endautoescape %}
+              </div>
+            </div>
+          </div>
+      </section>
+        <p class="has-text-centered" id="links"></p>
+        <p class="has-text-centered" id="validate-id"></p>
+        <p class="has-text-centered" id="upload-id"></p>
+    </body>
+
+    {% if validate_task_id %}
+          <script>
+          var content = document.getElementById('content');
+          content.innerHTML = "";
+          var taskUrl = "{% url 'validate_task' validate_task_id=validate_task_id %}";
+          var validid = document.getElementById('validate-id');
+          validid.innerHTML = taskUrl;
+          console.log(taskUrl)
+          var dots = 1;
+          var progressTitle = document.getElementById('progress-title');
+          updateProgressTitleVal();
+          var timerVal = setInterval(function() {
+            updateProgressTitleVal();
+            axios.get(taskUrl)
+              .then(function(response){
+                var taskStatus = response.data.validate_task_status
+                if (taskStatus === 'SUCCESS') {
+
+                  var content = document.getElementById('links');
+                  content.innerHTML = response.data.html;
+
+                  clearTimerVal('');
+                }
+
+                else if (taskStatus === 'FAILURE') {
+
+                    clearTimerVal('An error occurred - see traceback below');
+                    var content = document.getElementById('links');
+                    content.innerHTML = response.data.validate_traceback;
+
+                }
+              })
+          }, 800);
+
+          function updateProgressTitleVal() {
+            dots++;
+            if (dots > 3) {
+              dots = 1;
+            }
+            progressTitle.innerHTML = 'validating files';
+            for (var i = 0; i < dots; i++) {
+              progressTitle.innerHTML += '.';
+            }
+          }
+          function clearTimerVal(message) {
+            clearInterval(timerVal);
+            progressTitle.innerHTML = message;
+          }
+         </script>
+      {% endif %}
+
+      {% if upload_task_id %}
+          <script>
+          var content = document.getElementById('content');
+          content.innerHTML = "";
+          var taskUrl = "{% url 'upload_task' upload_task_id=upload_task_id %}";
+          var validid = document.getElementById('upload-id');
+          validid.innerHTML = taskUrl;
+          var dots = 1;
+          var progressTitle = document.getElementById('progress-title');
+          updateProgressTitle();
+          var timer = setInterval(function() {
+            updateProgressTitle();
+            axios.get(taskUrl)
+              .then(function(response) {
+                  var taskStatus = response.data.upload_task_status
+                  if (taskStatus === 'SUCCESS') {
+                      var validatedStatus = response.data.validated
+                      if (validatedStatus === 'Not validated') {
+
+                          var content = document.getElementById('links');
+                          content.innerHTML = response.data.html;
+
+                          clearTimer('');
+
+                      }
+                      if (validatedStatus === 'Validated') {
+                          clearTimer('Your files were uploaded!');
+                      }
+                      
+                  }
+                  else if (taskStatus === 'FAILURE') {
+                        clearTimer('An error occurred - see traceback below');
+                        var content = document.getElementById('links');
+                        content.innerHTML = response.data.upload_traceback;
+
+                }
+              })
+          }, 800);
+
+          function updateProgressTitle() {
+            dots++;
+            if (dots > 3) {
+              dots = 1;
+            }
+            progressTitle.innerHTML = 'processing uploaded files';
+            for (var i = 0; i < dots; i++) {
+              progressTitle.innerHTML += '.';
+            }
+          }
+          function clearTimer(message) {
+            clearInterval(timer);
+            progressTitle.innerHTML = message;
+          }
+         </script>
+      {% endif %}
+
+{% endblock %}

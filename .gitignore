@@ -4,12 +4,18 @@ __pycache__/
 /.vscode/
 
 /static/*
-/media/*
+roboplanner/media/*
 .idea/
 /Test_DB_files/*
+*.csv
+# Ignore db files including Redis (rdb)
+*.db
+*.rdb
 
+boilerplatenotes.txt
+    
 # Django / React / Webpack stuff
-/migrations/*
+roboplanner/reactions/migrations/*
 venv/*
 db.sqlite3
 *.pyc
@@ -19,6 +25,7 @@ local_settings.py
 
 # Jupyter Notebook
 .ipynb_checkpoints
+/Notebooks/In-data/
 
 # Webpack
 /frontend/bundles/*

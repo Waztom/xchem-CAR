@@ -2,75 +2,156 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 import Card from "react-bootstrap/Card";
-import Container from "react-bootstrap/Container";
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
 import ListGroup from "react-bootstrap/ListGroup";
+import Button from "react-bootstrap/Button";
+import InputGroup from "react-bootstrap/InputGroup";
+import FormControl from "react-bootstrap/FormControl";
+import Form from "react-bootstrap/Form";
 
-import ReactionBody from "../ReactionBody/ReactionBody";
+import MethodBody from "../MethodBody/MethodBody";
 
 // Start with main body and then add components
-const TargetCard = ({ name, image }) => {
+const SetTargetMassInput = ({ targetmass, unit, targetid }) => {
+  const [TargetMass, setTargetMass] = useState({ targetmass });
+  const [Unit, setUnit] = useState({ unit });
+
+  async function patchTargetMass(value) {
+    try {
+      const response = await axios.patch(`api/targets/${targetid}/`, {
+        targetmass: value,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function patchTargetUnit(value) {
+    try {
+      const response = await axios.patch(`api/targets/${targetid}/`, {
+        unit: value,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleTargetMassChange = (e) => {
+    const inputTargetMass = e.target.value;
+
+    if (!isNaN(inputTargetMass)) {
+      setTargetMass(e.target.value);
+      patchTargetMass(Number(e.target.value));
+    } else {
+      alert("Please input an integer value");
+    }
+  };
+
+  const handleUnitChange = (e) => {
+    setUnit(e.target.value);
+    patchTargetUnit(e.target.value);
+  };
+
   return (
-    <Card style={{ width: "18rem" }}>
-      <Card.Img variant="top" src={image} />
+    <InputGroup size="sm" className="mb-3">
+      <InputGroup.Prepend>
+        <InputGroup.Text id="inputGroup-sizing-sm">Target Mass</InputGroup.Text>
+      </InputGroup.Prepend>
+      <FormControl
+        aria-label="Small"
+        aria-describedby="inputGroup-sizing-sm"
+        placeholder={TargetMass.targetmass}
+        onChange={(event) => handleTargetMassChange(event)}
+      />
+      <Form.Control
+        as="select"
+        onChange={(event) => handleUnitChange(event)}
+        size="sm"
+        type="text"
+      >
+        <option>{Unit.unit}</option>
+        {Unit.unit === "mg" ? (
+          <option>g</option>
+        ) : Unit.unit === "g" ? (
+          <option>mg</option>
+        ) : (
+          <option>{Unit.unit}</option>
+        )}
+      </Form.Control>
+    </InputGroup>
+  );
+};
+
+const TargetCard = ({ target, handleDelete }) => {
+  function pressDelete(id) {
+    handleDelete(id);
+  }
+
+  return (
+    <Card text="dark" border="light" style={{ width: "18rem" }}>
+      <Card.Header>{target.name}</Card.Header>
+      <SetTargetMassInput
+        targetmass={target.targetmass}
+        unit={target.unit}
+        targetid={target.id}
+      ></SetTargetMassInput>
       <Card.Body>
-        <Card.Title>{name}</Card.Title>
+        <Card.Img src={target.image} />
       </Card.Body>
+      <Button key={target.id} onClick={() => pressDelete(target.id)}>
+        Delete Target
+      </Button>
     </Card>
   );
 };
 
-const Body = () => {
-  // Use hooks instead of classes
+const Body = ({ ProjectID }) => {
   const [isLoading, setLoading] = useState(true);
   const [Targets, setTargets] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
-      const request = await axios.get("api/targets/");
+      const request = await axios.get(`api/targets?search=${ProjectID}`);
       setTargets(request.data);
       setLoading(false);
     }
-    fetchData();
+    if (ProjectID !== 0) {
+      fetchData();
+    }
   }, []);
 
-  if (isLoading) {
-    return <div className="App">Loading...</div>;
+  if (ProjectID !== 0) {
+    if (isLoading) {
+      return <div className="App">Loading...</div>;
+    }
+  }
+
+  async function deleteData(targetid) {
+    try {
+      const response = await axios.delete(`api/targets/${targetid}`);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function handleDelete(id) {
+    deleteData(id);
+    const newList = Targets.filter((item) => item.id !== id);
+    setTargets(newList);
   }
 
   return Targets.map((target) => (
-    <ListGroup horizontal>
+    <ListGroup key={target.id} horizontal>
+      <ListGroup.Item key={target.id}>
+        <TargetCard target={target} handleDelete={handleDelete} />
+      </ListGroup.Item>
       <ListGroup.Item>
-        <TargetCard
-          key={target.uniqueId}
-          name={target.name}
-          image={target.image}
+        <MethodBody
+          key={target.id}
+          targetid={target.id}
+          deleteTarget={handleDelete}
         />
       </ListGroup.Item>
-      <ListGroup.Item>
-        <ReactionBody targetid={target.id} />
-      </ListGroup.Item>
     </ListGroup>
-
-    // <React.Fragment>
-    //   <Card>
-    //     <Container fluid>
-    //       <Row>
-    //         <Col sm={3}>
-    //           <TargetCard
-    //             key={target.uniqueId}
-    //             name={target.name}
-    //             image={target.image}
-    //           />
-    //         </Col>
-    //         <Col sm={8}>
-    //           <ReactionBody targetid={target.id} />
-    //         </Col>
-    //       </Row>
-    //     </Container>
-    //   </Card>
-    // </React.Fragment>
   ));
 };
 
