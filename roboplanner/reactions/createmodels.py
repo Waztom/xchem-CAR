@@ -38,7 +38,6 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # Check if reactant_smiles is a common solvent
 # Get smiles from csv file!!!!!
 common_solvents = {
-    "CC(O)=O": "acetic acid",
     "CC(C)=O": "acetone",
     "CC#N": "acetonitrile",
     "c1ccccc1": "benzene",
@@ -75,10 +74,8 @@ common_solvents = {
     "CCCC(C)C": "isohexane",
     "CCCO": "1-propanol",
     "CC(C)O": "2-propanol",
-    "c1ccncc1": "pyridine",
     "C1CCOC1": "tetrahydrofuran",
     "Cc1ccccc1": "toluene",
-    "CCN(CC)CC": "triethyl amine",
     "O": "water",
     "Cc1ccccc1C": "o-xylene",
     "Cc1cccc(C)c1": "m-xylene",
