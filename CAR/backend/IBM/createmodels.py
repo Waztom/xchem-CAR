@@ -9,19 +9,30 @@ import sys
 
 sys.path.append("..")
 
+# Import standard models
+from ..models import Project, Target, Method, Reaction, Product, AnalyseAction
+
+# Import IBM models
 from ..models import (
-    Project,
-    Target,
-    Method,
-    Reaction,
-    Product,
-    AddAction,
-    MakeSolutionAction,
-    StirAction,
-    WashAction,
-    DrySolutionAction,
-    ConcentrateAction,
-    AnalyseAction,
+    IBMAddAction,
+    IBMCollectLayerAction,
+    IBMConcentrateAction,
+    IBMDegasAction,
+    IBMDrySolidAction,
+    IBMDrySolutionAction,
+    IBMExtractAction,
+    IBMFilterAction,
+    IBMMakeSolutionAction,
+    IBMPartitionAction,
+    IBMpHAction,
+    IBMPhaseSeparationAction,
+    IBMQuenchAction,
+    IBMRefluxAction,
+    IBMSetTemperatureAction,
+    IBMStirAction,
+    IBMStoreAction,
+    IBMWaitAction,
+    IBMWashAction,
 )
 
 from urllib.request import urlopen
@@ -228,9 +239,7 @@ def checkSMILES(smiles):
 def convertNameToSmiles(chemical_name):
     try:
         name_converted = quote(chemical_name)
-        url = (
-            "https://cactus.nci.nih.gov/chemical/structure/" + name_converted + "/smiles"
-        )
+        url = "https://cactus.nci.nih.gov/chemical/structure/" + name_converted + "/smiles"
         ans = urlopen(url).read().decode("utf8")
         smiles = ans.split(" ")[0]
         return smiles
@@ -239,13 +248,7 @@ def convertNameToSmiles(chemical_name):
 
 
 def createAddActionModel(
-    reaction_id,
-    project_name,
-    target_no,
-    pathway_no,
-    product_no,
-    action_no,
-    reactant_smiles,
+    reaction_id, project_name, target_no, pathway_no, product_no, action_no, reactant_smiles,
 ):
 
     if reactant_smiles not in common_solvents:
