@@ -193,8 +193,6 @@ def createProductModel(
 
 
 def createActionModel(reaction_id, action_no, action):
-    # action is a JSON
-
     # Create a dictionary of key (action name from IBM API) and
     # funtion name to create the appropriate model
     actionMethods = {
