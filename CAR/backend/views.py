@@ -22,7 +22,7 @@ def save_tmp_file(myfile):
 class UploadProject(View):
     def get(self, request):
         form = UploadForm()
-        return render(request, "reactions/upload.html", {"form": form})
+        return render(request, "backend/upload.html", {"form": form})
 
     def post(self, request):
         # check_services - from Fragalysis to check Celery stuff. May need it
@@ -51,7 +51,7 @@ class UploadProject(View):
                 context["validate_task_status"] = task_validate.status
 
                 # Update client side with task id and status
-                return render(request, "reactions/upload.html", context)
+                return render(request, "backend/upload.html", context)
 
             # if it's an upload, run the compound set task
             if str(choice) == "1":
@@ -69,20 +69,20 @@ class UploadProject(View):
                 context["upload_task_status"] = task_upload.status
 
                 # Update client side with task id and status
-                return render(request, "reactions/upload.html", context)
+                return render(request, "backend/upload.html", context)
 
         else:
             form = UploadForm()
 
         context["form"] = form
-        return render(request, "reactions/upload.html", context)
+        return render(request, "backend/upload.html", context)
 
 
 # Add upload and validate views here!!!!
 # Task functions common between Compound Sets and Target Set pages.
 class ValidateTaskView(View):
-    """ View to handle dynamic loading of validation results from `reactions.tasks.validateFileUpload` - the validation of files
-    uploaded to reactions/upload 
+    """ View to handle dynamic loading of validation results from `backend.tasks.validateFileUpload` - the validation of files
+    uploaded to backend/upload 
     Methods
     -------
     allowed requests:
@@ -159,7 +159,7 @@ class ValidateTaskView(View):
 
 
 class UploadTaskView(View):
-    """ View to handle dynamic loading of upload results from `reactions.tasks.UploadIBMReaction` - the upload of files
+    """ View to handle dynamic loading of upload results from `backend.tasks.UploadIBMReaction` - the upload of files
     for a computed set by a user at viewer/upload_cset or a target set by a user at viewer/upload_tset
     Methods
     -------

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from reactions.models import (
+from backend.models import (
     Project,
     Target,
     Method,

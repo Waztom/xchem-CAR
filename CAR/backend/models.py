@@ -73,6 +73,31 @@ class AddAction(models.Model):
 
 
 # Models to capture IBM actions
+class IBMAddAction(models.Model):
+    class Unit(models.TextChoices):
+        mmol = "mmol"
+        ml = "ml"
+
+    class Atmosphere(models.TextChoices):
+        nitrogen = "Nitrogen"
+        air = "Air"
+
+    reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
+    actiontype = models.CharField(max_length=100)
+    actionno = models.IntegerField()
+    smiles = models.CharField(max_length=255)
+    quantity = models.IntegerField()
+    quantityunit = models.CharField(
+        choices=Unit.choices, default=Unit.mmol, max_length=10
+    )
+
+    dropwise = models.BooleanField(default=False)
+    atmosphere = models.CharField(
+        choices=Atmosphere.choices, default=Atmosphere.air, max_length=10
+    )
+    temperature = models.IntegerField()
+
+
 class MakeSolutionAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
 

@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 from rest_framework import routers
-from reactions.api import (
+from backend.api import (
     ProjectViewSet,
     TargetViewSet,
     MethodViewSet,

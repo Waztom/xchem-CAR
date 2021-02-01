@@ -12,7 +12,7 @@ from .validate import (
     checkIsNumber,
 )
 
-from .createmodels import (
+from .IBM.createmodels import (
     createProjectModel,
     createTargetModel,
     createMethodModel,
@@ -23,9 +23,9 @@ from .createmodels import (
 )
 
 
-from .IBMapicalls import createIBMProject, getIBMRetroSyn, collectIBMReactionInfo
+from .IBM.apicalls import createIBMProject, getIBMRetroSyn, collectIBMReactionInfo
 
-from .filtermethod import filtermethod
+from .IBM.filtermethod import filtermethod
 
 
 def delete_tmp_file(filepath):

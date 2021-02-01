@@ -5,7 +5,11 @@ from rdkit.Chem import Descriptors
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-from .models import (
+import sys
+
+sys.path.append("..")
+
+from ..models import (
     Project,
     Target,
     Method,

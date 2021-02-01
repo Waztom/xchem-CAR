@@ -1,4 +1,4 @@
-from reactions.models import (
+from backend.models import (
     Project,
     Target,
     Method,
@@ -14,7 +14,7 @@ from reactions.models import (
 )
 
 from rest_framework import viewsets, permissions, filters
-from reactions.serializers import (
+from backend.serializers import (
     ProjectSerializer,
     TargetSerializer,
     MethodSerializer,
