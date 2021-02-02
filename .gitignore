@@ -13,6 +13,9 @@ CAR/media/*
 *.rdb
 
 boilerplatenotes.txt
+
+# Ignore log file
+CAR/logs/*
     
 # Django / React / Webpack stuff
 CAR/backend/migrations/*

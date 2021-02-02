@@ -18,7 +18,6 @@ from .IBM.createmodels import (
     createMethodModel,
     createReactionModel,
     createProductModel,
-    createAddActionModel,
     createActionModel,
 )
 
@@ -136,9 +135,7 @@ def uploadIBMReaction(validate_output):
                 # Run IBM API cal to get retrosyn info
                 max_steps = 3
                 results = getIBMRetroSyn(
-                    rxn4chemistry_wrapper=rxn4chemistry_wrapper,
-                    smiles=smiles,
-                    max_steps=max_steps,
+                    rxn4chemistry_wrapper=rxn4chemistry_wrapper, smiles=smiles, max_steps=max_steps,
                 )
 
                 # Set maximum number of methods/pathways to collect
@@ -201,28 +198,11 @@ def uploadIBMReaction(validate_output):
                                     product_smiles=product_smiles,
                                 )
 
-                                # Create Reactant and addition action models
+                                # Create action models
                                 action_no = 1
-                                # IBM API sometimes yields duplicate reactants
-                                reactants = list(dict.fromkeys(reactants))
-
-                                for reactant_smiles in reactants:
-                                    createAddActionModel(
-                                        reaction_id=reaction_id,
-                                        project_name=project_name,
-                                        target_no=target_no,
-                                        pathway_no=pathway_no,
-                                        product_no=product_no,
-                                        action_no=action_no,
-                                        reactant_smiles=reactant_smiles,
-                                    )
-                                    action_no += 1
-
                                 for action in actions:
                                     createActionModel(
-                                        reaction_id=reaction_id,
-                                        action_no=action_no,
-                                        action=action,
+                                        reaction_id=reaction_id, action_no=action_no, action=action,
                                     )
                                     action_no += 1
 

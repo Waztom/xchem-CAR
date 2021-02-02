@@ -5,6 +5,8 @@ from rdkit.Chem import Descriptors
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
+import pubchempy as pcp
+
 import sys
 
 sys.path.append("..")
@@ -35,20 +37,11 @@ from ..models import (
     IBMWashAction,
 )
 
-from urllib.request import urlopen
-from urllib.parse import quote
+# import the logging library
+import logging
 
-# Certificate to NIH Cactus stopped working (10/12/2020)
-# use this for devlopment purposes only by setting use
-# of unverified certs - defo not for prod. This is not a
-# cert issue on my machine, did update certs and have
-# pointed Conda to fresh certs. Same thing when using on Binder
-# at 'https://github.com/xchem/strucbio_practical' and
-# 'https://stackoverflow.com/questions/33699577/conda-update-failed-ssl-error-ssl-certificate-verify-failed-certificate-ver'
-
-import ssl
-
-ssl._create_default_https_context = ssl._create_unverified_context
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 # Check if reactant_smiles is a common solvent
 # Get smiles from csv file!!!!!
@@ -117,6 +110,27 @@ def createSVGString(smiles):
     svg_string = drawer.GetDrawingText()
 
     return svg_string
+
+
+def convertNameToSmiles(chemical_name):
+    try:
+        smiles = pcp.get_compounds("Pd/C", "name")[0].isomeric_smiles
+        return smiles
+    except:
+        return False
+
+
+def checkSMILES(smiles):
+    # Sometimes IBM yields chemical name and not smiles
+    # check if this is the case using rdkit mol and if not
+    # use NIH Cactus Resolver tool to convert name to smiles
+    mol = Chem.MolFromSmiles(smiles)
+
+    if mol:
+        return smiles
+    if not mol:
+        converted_smiles = convertNameToSmiles(smiles)
+        return converted_smiles
 
 
 def createProjectModel(project_info):
@@ -207,166 +221,86 @@ def createProductModel(
     product.save()
 
 
+def createAnalyseActionModel(reaction_id, action_no):
+    analyse = AnalyseAction()
+    reaction_obj = Reaction.objects.get(id=reaction_id)
+    analyse.reaction_id = reaction_obj
+    analyse.actiontype = "analyse"
+    analyse.actiontype = action_no
+    analyse.save()
+
+
 def createActionModel(reaction_id, action_no, action):
     # Create a dictionary of key (action name from IBM API) and
     # funtion name to create the appropriate model
     actionMethods = {
-        "stir": createStirActionModel,
-        "wash": createWashActionModel,
-        "dry-solution": createDrySolutionActionModel,
-        "concentrate": createConcentrateActionModel,
+        "add": createIBMAddAction,
+        "collect-layer": createIBMCollectLayerAction,
+        "concentrate": createIBMConcentrateAction,
+        "degas": createIBMDegasAction,
+        "dry-solid": createIBMDrySolidAction,
+        "dry-solution": createIBMDrySolutionAction,
+        "extract": createIBMExtractAction,
+        "filter": createIBMFilterAction,
+        "make-solution": createIBMMakeSolutionAction,
+        "partition": createIBMPartitionAction,
+        "ph": createIBMpHAction,
+        "phase-separation": createIBMPhaseSeparationAction,
+        "quench": createIBMQuenchAction,
+        "reflux": createIBMRefluxAction,
+        "set-temperature": createIBMSetTemperatureAction,
+        "stir": createIBMStirAction,
+        "store": createIBMStoreAction,
+        "wait": createIBMWaitAction,
+        "wash": createIBMWashAction,
     }
 
-    action_name = action["name"]
+    action_type = action["name"]
 
-    if action_name in actionMethods:
-        actionMethods[action_name](reaction_id, action_no, action)
-
-
-def checkSMILES(smiles):
-    # Sometimes IBM yields chemical name and not smiles
-    # check if this is the case using rdkit mol and if not
-    # use NIH Cactus Resolver tool to convert name to smiles
-    mol = Chem.MolFromSmiles(smiles)
-
-    if mol:
-        return smiles
-    if not mol:
-        converted_smiles = convertNameToSmiles(smiles)
-        return converted_smiles
+    if action_type == "add":
+        actionMethods[action_name](action_type, reaction_id, action_no, action)
+    else:
+        logger.info(action_type)
 
 
-def convertNameToSmiles(chemical_name):
-    try:
-        name_converted = quote(chemical_name)
-        url = "https://cactus.nci.nih.gov/chemical/structure/" + name_converted + "/smiles"
-        ans = urlopen(url).read().decode("utf8")
-        smiles = ans.split(" ")[0]
-        return smiles
-    except:
-        return False
+def createIBMAddAction(action_type, reaction_id, action_no, action):
+    material = action["content"]["material"]["value"]
+    materialquantity = action["content"]["material"]["quantity"]["value"]
+    materialquantityunit = action["content"]["material"]["quantity"]["unit"]
+    dropwise = action["content"]["dropwise"]["value"]
+    atmosphere = action["content"]["atmosphere"]["value"]
 
-
-def createAddActionModel(
-    reaction_id, project_name, target_no, pathway_no, product_no, action_no, reactant_smiles,
-):
-
-    if reactant_smiles not in common_solvents:
+    add = IBMAddAction()
+    reaction_obj = Reaction.objects.get(id=reaction_id)
+    add.reaction_id = reaction_obj
+    add.actiontype = action_type
+    add.actionno = action_no
+    add.material = material
+    # Check if smiles
+    smiles = checkSMILES(material)
+    if smiles:
         # Get MW
-        mol = Chem.MolFromSmiles(reactant_smiles)
+        mol = Chem.MolFromSmiles(smiles)
         molecular_weight = Descriptors.ExactMolWt(mol)
 
-        add = AddAction()
-        add.name = "{}-{}-{}-{}-{}".format(
-            project_name, target_no, pathway_no, product_no, action_no
-        )
-        reaction_obj = Reaction.objects.get(id=reaction_id)
-        add.reaction_id = reaction_obj
-        add.actionno = action_no
-        add.smiles = reactant_smiles
-        add_svg_string = createSVGString(reactant_smiles)
-        add_svg_fn = default_storage.save(
-            "addactionimages/" + add.name + ".svg", ContentFile(add_svg_string)
-        )
-        add.image = add_svg_fn
+        add.materialsmiles = smiles
         add.molecularweight = molecular_weight
-        add.save()
+        add_svg_string = createSVGString(smiles)
+        add_svg_fn = default_storage.save(
+            "addactionimages/" + reaction_id + "_" + action_no + "_" + material + ".svg",
+            ContentFile(add_svg_string),
+        )
+        add.materialimage = add_svg_fn
+    # Check if solvent then use ml as quantity
 
+    add.materialquantity = materialquantity
+    add.materialquantityunit = materialquantityunit
+    add.dropwise = dropwise
 
-def createStirActionModel(reaction_id, action_no, action):
-    # Get info from action JSON
-    duration = action["content"]["duration"]["value"]
-    unit = action["content"]["duration"]["unit"]
-    try:
-        temperature = action["content"]["temperature"]["value"]
-    except Exception as e:
-        temperature = 25
-        # Add error log or something
+    if atmosphere:
+        add.atmosphere = atmosphere
+    else:
+        add.atmosphere = "air"
 
-    stir = StirAction()
-    reaction_obj = Reaction.objects.get(id=reaction_id)
-    stir.reaction_id = reaction_obj
-    stir.actiontype = action["name"]
-    stir.actionno = action_no
-    stir.duration = duration
-    stir.unit = unit
-    stir.temperature = temperature
-    stir.save()
-
-
-def createWashActionModel(reaction_id, action_no, action):
-    # Get info from action JSON
-    material = action["content"]["material"]["value"]
-    no_repetitions = action["content"]["repetitions"]["value"]
-    amount = action["content"]["material"]["quantity"]["value"]
-    unit = action["content"]["material"]["quantity"]["unit"]
-
-    # Update as we find more
-    common_wash_materials = {
-        "brine": ["[Na+].[Cl-]", "O"],
-        "water": ["O"],
-    }
-
-    wash = WashAction()
-    reaction_obj = Reaction.objects.get(id=reaction_id)
-    wash.reaction_id = reaction_obj
-    wash.actiontype = action["name"]
-    wash.actionno = action_no
-    wash.material = material
-    wash.norepetitions = no_repetitions
-    wash.unit = unit
-    wash.save()
-
-
-def createDrySolutionActionModel(reaction_id, action_no, action):
-    # Get info from action JSON
-    material = action["content"]["material"]["value"]
-    dry = DrySolutionAction()
-    reaction_obj = Reaction.objects.get(id=reaction_id)
-    dry.reaction_id = reaction_obj
-    dry.actiontype = action["name"]
-    dry.actionno = action_no
-    dry.dryingagent = material
-    dry.save()
-
-
-def createConcentrateActionModel(reaction_id, action_no, action):
-    concentrate = ConcentrateAction()
-    reaction_obj = Reaction.objects.get(id=reaction_id)
-    concentrate.reaction_id = reaction_obj
-    concentrate.actiontype = action["name"]
-    concentrate.actionno = action_no
-    concentrate.concentrate = True
-    concentrate.save()
-
-
-# Check if need these models?
-def createMakeSolutionActionModel(reaction_id, action_no, action):
-    # Get info from action JSON
-    materials = action["content"]["materials"]["value"]
-    materials_smiles_check = [checkSMILES(material["value"]) for material in materials]
-
-    if all(materials_smiles_check):
-        solute_smiles = materials_smiles_check[0]
-        solvent_smiles = materials_smiles_check[1]
-
-        quantities = [material["quantity"]["value"] for material in materials]
-        solute_quantity = quantities[0]
-        solvent_quantity = quantities[1]
-
-        units = [material["quantity"]["unit"] for material in materials]
-        solute_unit = units[0]
-        solvent_unit = units[1]
-
-        makesoln = MakeSolutionAction()
-        reaction_obj = Reaction.objects.get(id=reaction_id)
-        makesoln.reaction_id = reaction_obj
-        makesoln.actionno = action_no
-        makesoln.solute = solute_smiles
-        makesoln.solutequantity = solute_quantity
-        makesoln.soluteunit = solute_unit
-        makesoln.solvent = solvent_smiles
-        makesoln.solventequantity = solvent_quantity
-        makesoln.solventunit = solvent_unit
-        makesoln.save()
+    add.save()
 
