@@ -114,10 +114,14 @@ def createSVGString(smiles):
 
 def convertNameToSmiles(chemical_name):
     try:
-        smiles = pcp.get_compounds("Pd/C", "name")[0].isomeric_smiles
+        smiles = pcp.get_compounds(chemical_name, "name")[0].isomeric_smiles
         return smiles
     except:
-        return False
+        try:
+            smiles = pcp.get_compounds(chemical_name, "formula")[0].isomeric_smiles
+            return smiles
+        except:
+            return False
 
 
 def checkSMILES(smiles):
@@ -125,7 +129,6 @@ def checkSMILES(smiles):
     # check if this is the case using rdkit mol and if not
     # use NIH Cactus Resolver tool to convert name to smiles
     mol = Chem.MolFromSmiles(smiles)
-
     if mol:
         return smiles
     if not mol:
@@ -257,50 +260,506 @@ def createActionModel(reaction_id, action_no, action):
 
     action_type = action["name"]
 
-    if action_type == "add":
-        actionMethods[action_name](action_type, reaction_id, action_no, action)
+    if action_type in actionMethods:
+        actionMethods[action_type](action_type, reaction_id, action_no, action)
     else:
         logger.info(action_type)
+        print(action)
 
 
 def createIBMAddAction(action_type, reaction_id, action_no, action):
-    material = action["content"]["material"]["value"]
-    materialquantity = action["content"]["material"]["quantity"]["value"]
-    materialquantityunit = action["content"]["material"]["quantity"]["unit"]
-    dropwise = action["content"]["dropwise"]["value"]
-    atmosphere = action["content"]["atmosphere"]["value"]
+    try:
+        material = action["content"]["material"]["value"]
+        if material == "SLN":
+            pass
+        else:
+            materialquantity = action["content"]["material"]["quantity"]["value"]
+            materialquantityunit = action["content"]["material"]["quantity"]["unit"]
+            dropwise = action["content"]["dropwise"]["value"]
+            atmosphere = action["content"]["atmosphere"]
 
-    add = IBMAddAction()
-    reaction_obj = Reaction.objects.get(id=reaction_id)
-    add.reaction_id = reaction_obj
-    add.actiontype = action_type
-    add.actionno = action_no
-    add.material = material
-    # Check if smiles
-    smiles = checkSMILES(material)
-    if smiles:
-        # Get MW
-        mol = Chem.MolFromSmiles(smiles)
-        molecular_weight = Descriptors.ExactMolWt(mol)
+            add = IBMAddAction()
+            reaction_obj = Reaction.objects.get(id=reaction_id)
+            add.reaction_id = reaction_obj
+            add.actiontype = action_type
+            add.actionno = action_no
+            add.material = material
+            # Check if smiles
+            smiles = checkSMILES(material)
+            if smiles:
+                # Get MW
+                mol = Chem.MolFromSmiles(smiles)
+                molecular_weight = Descriptors.ExactMolWt(mol)
 
-        add.materialsmiles = smiles
-        add.molecularweight = molecular_weight
-        add_svg_string = createSVGString(smiles)
-        add_svg_fn = default_storage.save(
-            "addactionimages/" + reaction_id + "_" + action_no + "_" + material + ".svg",
-            ContentFile(add_svg_string),
+                add.materialsmiles = smiles
+                add.molecularweight = molecular_weight
+                add_svg_string = createSVGString(smiles)
+                add_svg_fn = default_storage.save(
+                    "addactionimages/{}-{}-{}.svg".format(reaction_id, action_no, material),
+                    ContentFile(add_svg_string),
+                )
+                add.materialimage = add_svg_fn
+                # Check if solvent then use ml as quantity unit
+                if smiles in common_solvents:
+                    add.materialquantity = materialquantity
+                    add.materialquantityunit = "ml"
+                else:
+                    # If material not a solvent assign quantity unit moleq
+                    # Caveat here is if material is a catalyst!
+                    add.materialquantity = 1
+                    add.materialquantityunit = "moleq"
+            if atmosphere:
+                add.atmosphere = atmosphere["value"]
+            else:
+                add.atmosphere = "air"
+
+            add.save()
+
+    except Exception as error:
+        print(error)
+        print(action)
+
+
+def createIBMCollectLayerAction(action_type, reaction_id, action_no, action):
+    try:
+        layer = action["content"]["layer"]["value"]
+
+        collect = IBMCollectLayerAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        collect.reaction_id = reaction_obj
+        collect.actiontype = action_type
+        collect.actionno = action_no
+        collect.layer = layer
+        collect.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMConcentrateAction(action_type, reaction_id, action_no, action):
+    try:
+        concentrate = IBMConcentrateAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        concentrate.reaction_id = reaction_obj
+        concentrate.actiontype = action_type
+        concentrate.actionno = action_no
+        concentrate.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMDegasAction(action_type, reaction_id, action_no, action):
+    try:
+        gas = action["content"]["gas"]["value"]
+        duration = action["content"]["duration"]["value"]
+        unit = action["content"]["duration"]["unit"]
+
+        degas = IBMDegasAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        degas.reaction_id = reaction_obj
+        degas.actiontype = action_type
+        degas.actionno = action_no
+        degas.gas = gas
+        degas.duration = duration
+        degas.durationunit = unit
+        degas.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMDrySolidAction(action_type, reaction_id, action_no, action):
+    try:
+        temperature = action["content"]["gas"]["value"]
+        duration = action["content"]["duration"]["value"]
+        unit = action["content"]["duration"]["unit"]
+        atmosphere = action["content"]["atmosphere"]
+
+        drysolid = IBMDrySolidAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        drysolid.reaction_id = reaction_obj
+        drysolid.actiontype = action_type
+        drysolid.actionno = action_no
+        drysolid.temperature = temperature
+        drysolid.duration = duration
+        drysolid.durationunit = unit
+        if atmosphere:
+            drysolid.atmosphere = atmosphere["value"]
+        drysolid.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMDrySolutionAction(action_type, reaction_id, action_no, action):
+    try:
+        dryingagent = action["content"]["material"]["value"]
+
+        drysolution = IBMDrySolutionAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        drysolution.reaction_id = reaction_obj
+        drysolution.actiontype = action_type
+        drysolution.actionno = action_no
+        drysolution.dryingagent = dryingagent
+        drysolution.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMExtractAction(action_type, reaction_id, action_no, action):
+    try:
+        solvent = action["content"]["solvent"]["value"]
+        quantity = action["content"]["solvent"]["quantity"]["value"]
+        unit = action["content"]["solvent"]["quantity"]["unit"]
+        repetitions = action["content"]["repetitions"]["value"]
+
+        extract = IBMExtractAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        extract.reaction_id = reaction_obj
+        extract.actiontype = action_type
+        extract.actionno = action_no
+        extract.solvent = solvent
+        extract.solventquantity = quantity
+        extract.solventquantityunit = unit
+        extract.numberofrepetitions = repetitions
+        extract.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMFilterAction(action_type, reaction_id, action_no, action):
+    try:
+        phasetokeep = action["content"]["phase_to_keep"]["value"]
+        rinsingsolvent = action["content"]["rinsing_solvent"]["value"]
+        rinsingsolventquantity = action["content"]["rinsing_solvent"]["quantity"]["value"]
+        rinsingsolventquantityunit = action["content"]["rinsing_solvent"]["quantity"]["unit"]
+        extractionsolventforprecipitate = action["content"]["extraction_solvent"]["value"]
+        extractionsolventforprecipitatequantity = action["content"]["extraction_solvent"][
+            "quantity"
+        ]["value"]
+        extractionsolventforprecipitatequantityunit = action["content"]["extraction_solvent"][
+            "quantity"
+        ]["unit"]
+
+        filteraction = IBMFilterAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        filteraction.reaction_id = reaction_obj
+        filteraction.actiontype = action_type
+        filteraction.actionno = action_no
+        filteraction.phasetokeep = phasetokeep
+        filteraction.rinsingsolvent = rinsingsolvent
+        filteraction.rinsingsolventquantity = rinsingsolventquantity
+        filteraction.rinsingsolventquantityunit = rinsingsolventquantityunit
+        filteraction.extractionsolventforprecipitate = extractionsolventforprecipitate
+        filteraction.extractionsolventforprecipitatequantity = (
+            extractionsolventforprecipitatequantity
         )
-        add.materialimage = add_svg_fn
-    # Check if solvent then use ml as quantity
+        filteraction.extractionsolventforprecipitatequantityunit = (
+            extractionsolventforprecipitatequantityunit
+        )
+        filteraction.save()
 
-    add.materialquantity = materialquantity
-    add.materialquantityunit = materialquantityunit
-    add.dropwise = dropwise
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
 
-    if atmosphere:
-        add.atmosphere = atmosphere
-    else:
-        add.atmosphere = "air"
 
-    add.save()
+def createIBMMakeSolutionAction(action_type, reaction_id, action_no, action):
+    try:
+        materials = action["content"]["materials"]["value"]
+        solute = materials[0]["value"]
+        solutesmiles = checkSMILES(solute)
+        solvent = materials[1]["value"]
+        solventsmiles = checkSMILES(solvent)
+        solutequantity = materials[0]["qauntity"]["value"]
+        solutequantityunit = materials[0]["qauntity"]["unit"]
+        solventquantity = materials[1]["qauntity"]["value"]
+        solventquantityunit = materials[1]["qauntity"]["unit"]
 
+        soln = IBMMakeSolutionAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        soln.reaction_id = reaction_obj
+        soln.actiontype = action_type
+        soln.actionno = action_no
+        soln.solute = solute
+        if solutesmiles:
+            soln.solutesmiles = solutesmiles
+            soln_svg_string = createSVGString(solutesmiles)
+            soln_svg_fn = default_storage.save(
+                "IBMmakesolnimages/{}-{}-{}.svg".format(reaction_id, action_no, solute),
+                ContentFile(soln_svg_string),
+            )
+            soln.soluteimage = soln_svg_fn
+        soln.solvent = solvent
+        if solventsmiles:
+            soln.solventsmiles = solventsmiles
+            soln_svg_string = createSVGString(solventsmiles)
+            soln_svg_fn = default_storage.save(
+                "IBMmakesolnimages/{}-{}-{}.svg".format(reaction_id, action_no, solute),
+                ContentFile(soln_svg_string),
+            )
+            soln.solventimage = soln_svg_fn
+
+        soln.solutequantity = solutequantity
+        soln.solutequantityunit = solutequantityunit
+        soln.solventquantity = solventquantity
+        soln.solventquantityunit = solventquantityunit
+        soln.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+# Up to here
+def createIBMPartitionAction(action_type, reaction_id, action_no, action):
+    try:
+        firstpartitionsolvent = action["content"]["material_1"]["value"]
+        secondpartitionsolvent = action["content"]["material_2"]["value"]
+        firstpartitionsolventquantity = action["content"]["material_1"]["quantity"]["value"]
+        secondpartitionsolventquantity = action["content"]["material_2"]["quantity"]["value"]
+        firstpartitionsolventquantityunit = action["content"]["material_1"]["qauntity"]["unit"]
+        secondpartitionsolventquantityunit = action["content"]["material_2"]["qauntity"]["unit"]
+
+        parition = IBMPartitionAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        parition.reaction_id = reaction_obj
+        parition.actiontype = action_type
+        parition.actionno = action_no
+        parition.firstpartitionsolvent = firstpartitionsolvent
+        parition.firstpartitionsolventquantity = firstpartitionsolventquantity
+        parition.firstpartitionsolventquantityunit = firstpartitionsolventquantityunit
+        parition.secondpartitionsolvent = secondpartitionsolvent
+        parition.secondpartitionsolventquantity = secondpartitionsolventquantity
+        parition.secondpartitionsolventquantityunit = secondpartitionsolventquantityunit
+        parition.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMpHAction(action_type, reaction_id, action_no, action):
+    try:
+        material = action["content"]["material"]["value"]
+        materialquantity = action["content"]["material"]["quantity"]["value"]
+        materialquantityunit = action["content"]["material"]["quantity"]["unit"]
+        dropwise = action["content"]["dropwise"]["value"]
+        temperature = action["content"]["temperature"]["value"]
+
+        pH = IBMpHAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        pH.reaction_id = reaction_obj
+        pH.actiontype = action_type
+        pH.actionno = action_no
+        pH.material = material
+        pH.materialquantity = materialquantity
+        pH.materialquantityunit = materialquantityunit
+        pH.dropwise = dropwise
+        pH.temperature = temperature
+        pH.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMPhaseSeparationAction(action_type, reaction_id, action_no, action):
+    try:
+        phase = IBMPhaseSeparationAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        phase.reaction_id = reaction_obj
+        phase.actiontype = action_type
+        phase.actionno = action_no
+        phase.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMQuenchAction(action_type, reaction_id, action_no, action):
+    try:
+        material = action["content"]["material"]["value"]
+        materialquantity = action["content"]["material"]["quantity"]["value"]
+        materialquantityunit = action["content"]["material"]["quantity"]["unit"]
+        dropwise = action["content"]["dropwise"]["value"]
+        temperature = action["content"]["temperature"]
+
+        quench = IBMQuenchAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        quench.reaction_id = reaction_obj
+        quench.actiontype = action_type
+        quench.actionno = action_no
+        quench.material = material
+        quench.materialquantity = materialquantity
+        quench.materialquantityunit = materialquantityunit
+        if temperature:
+            quench.temperature = temperature["value"]
+        quench.dropwise = dropwise
+        quench.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMRefluxAction(action_type, reaction_id, action_no, action):
+    try:
+        duration = action["content"]["duration"]["value"]
+        durationunit = action["content"]["duration"]["unit"]
+        stirringspeed = action["content"]["stirring_speed"]["value"]
+        deanstarkapparatus = action["content"]["dean_stark"]["value"]
+        atmosphere = action["content"]["atmosphere"]
+
+        reflux = IBMRefluxAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        reflux.reaction_id = reaction_obj
+        reflux.actiontype = action_type
+        reflux.actionno = action_no
+        reflux.duration = duration
+        reflux.durationunit = durationunit
+        reflux.stirringspeed = stirringspeed
+        reflux.deanstarkapparatus = deanstarkapparatus
+        if atmosphere:
+            reflux.atmosphere = atmosphere["value"]
+        reflux.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMSetTemperatureAction(action_type, reaction_id, action_no, action):
+    try:
+        temperature = action["content"]["temperature"]["value"]
+
+        temp = IBMSetTemperatureAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        temp.reaction_id = reaction_obj
+        temp.actiontype = action_type
+        temp.actionno = action_no
+        temp.temperature = temperature
+        temp.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMStirAction(action_type, reaction_id, action_no, action):
+    try:
+        duration = action["content"]["duration"]["value"]
+        durationunit = action["content"]["duration"]["unit"]
+        temperature = action["content"]["temperature"]
+        stirringspeed = action["content"]["stirring_speed"]["value"]
+        atmosphere = action["content"]["atmosphere"]
+
+        stir = IBMStirAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        stir.reaction_id = reaction_obj
+        stir.actiontype = action_type
+        stir.actionno = action_no
+        stir.duration = duration
+        stir.durationunit = durationunit
+        if temperature:
+            stir.temperature = temperature["value"]
+        else:
+            stir.temperature = 25
+        stir.stirringspeed = stirringspeed
+        if atmosphere:
+            stir.atmosphere = atmosphere["value"]
+        else:
+            stir.atmosphere = "air"
+        stir.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMStoreAction(action_type, reaction_id, action_no, action):
+    try:
+        material = action["content"]["sample_name"]["value"]
+
+        store = IBMStoreAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        store.reaction_id = reaction_obj
+        store.actiontype = action_type
+        store.actionno = action_no
+        store.material = material
+        store.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMWaitAction(action_type, reaction_id, action_no, action):
+    try:
+        duration = action["content"]["duration"]["value"]
+        durationunit = action["content"]["duration"]["unit"]
+        temperature = action["content"]["temperature"]["value"]
+
+        wait = IBMWaitAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        wait.reaction_id = reaction_obj
+        wait.actiontype = action_type
+        wait.actionno = action_no
+        wait.duration = duration
+        wait.durationunit = durationunit
+        wait.temperature = temperature
+        wait.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
+
+
+def createIBMWashAction(action_type, reaction_id, action_no, action):
+    try:
+        material = action["content"]["material"]["value"]
+        materialquantity = action["content"]["material"]["quantity"]["value"]
+        materialquantityunit = action["content"]["material"]["quantity"]["unit"]
+        numberofrepetitions = action["content"]["repetitions"]["value"]
+
+        wash = IBMWashAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        wash.reaction_id = reaction_obj
+        wash.actiontype = action_type
+        wash.actionno = action_no
+        wash.material = material
+        wash.materialquantity = materialquantity
+        wash.materialquantityunit = materialquantityunit
+        wash.save()
+
+    except Exception as error:
+        print(action_type)
+        print(error)
+        print(action)
