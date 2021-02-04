@@ -46,33 +46,33 @@ router.register("api/products", ProductViewSet, "products")
 router.register("api/analyseactions", ProductViewSet, "analyseactions")
 
 # Register IBM action routes
-router.register("api/IBMAddActions", IBMAddActionViewSet, "IBMAddActions")
+router.register("api/IBMaddactions", IBMAddActionViewSet, "IBMaddactions")
 router.register(
-    "api/IBMCollectLayerActions", IBMCollectLayerActionViewSet, "IBMCollectLayerActions"
+    "api/IBMcollect-layeractions", IBMCollectLayerActionViewSet, "IBMcollect-layeractions"
 )
-router.register("api/IBMConcentrateActions", IBMConcentrateActionViewSet, "IBMConcentrateActions")
-router.register("api/IBMDegasActions", IBMDegasActionViewSet, "IBMDegasActions")
-router.register("api/IBMDrySolidActions", IBMDrySolidActionViewSet, "IBMDrySolidActions")
-router.register("api/IBMDrySolutionActions", IBMDrySolutionActionViewSet, "IBMDrySolutionActions")
-router.register("api/IBMExtractActions", IBMExtractActionViewSet, "IBMExtractActions")
-router.register("api/IBMFilterActions", IBMFilterActionViewSet, "IBMFilterActions")
+router.register("api/IBMconcentrateactions", IBMConcentrateActionViewSet, "IBMconcentrateactions")
+router.register("api/IBMdegasactions", IBMDegasActionViewSet, "IBMdegasactions")
+router.register("api/IBMdry-solidactions", IBMDrySolidActionViewSet, "IBMdry-solidactions")
+router.register("api/IBMdry-solutionactions", IBMDrySolutionActionViewSet, "IBMdry-solutionactions")
+router.register("api/IBMextractactions", IBMExtractActionViewSet, "IBMextractactions")
+router.register("api/IBMfilteractions", IBMFilterActionViewSet, "IBMfilteractions")
 router.register(
-    "api/IBMMakeSolutionActions", IBMMakeSolutionActionViewSet, "IBMMakeSolutionActions"
+    "api/IBMmake-solutionactions", IBMMakeSolutionActionViewSet, "IBMmake-solutionactions"
 )
-router.register("api/IBMPartitionActions", IBMPartitionActionViewSet, "IBMPartitionActions")
-router.register("api/IBMpHActions", IBMpHActionViewSet, "IBMpHActions")
+router.register("api/IBMpartitionactions", IBMPartitionActionViewSet, "IBMpartitionactions")
+router.register("api/IBMphactions", IBMpHActionViewSet, "IBMphactions")
 router.register(
-    "api/IBMPhaseSeparationActions", IBMPhaseSeparationActionViewSet, "IBMPhaseSeparationActions",
+    "api/IBMphase-separationactions", IBMPhaseSeparationActionViewSet, "IBMphase-separationactions",
 )
-router.register("api/IBMQuenchActions", IBMQuenchActionViewSet, "IBMQuenchActions")
-router.register("api/IBMRefluxActions", IBMRefluxActionViewSet, "IBMRefluxActions")
+router.register("api/IBMquenchactions", IBMQuenchActionViewSet, "IBMquenchactions")
+router.register("api/IBMrefluxactions", IBMRefluxActionViewSet, "IBMrefluxactions")
 router.register(
-    "api/IBMSetTemperatureActions", IBMSetTemperatureActionViewSet, "IBMSetTemperatureActions",
+    "api/IBMset-temperatureactions", IBMSetTemperatureActionViewSet, "IBMset-temperatureactions",
 )
-router.register("api/IBMStirActions", IBMStirActionViewSet, "IBMStirActions")
-router.register("api/IBMStoreActions", IBMStoreActionViewSet, "IBMStoreActions")
-router.register("api/IBMWaitActions", IBMWaitActionViewSet, "IBMWaitActions")
-router.register("api/IBMWashActions", IBMWashActionViewSet, "IBMWashActions")
+router.register("api/IBMstiractions", IBMStirActionViewSet, "IBMstiractions")
+router.register("api/IBMstoreactions", IBMStoreActionViewSet, "IBMstoreactions")
+router.register("api/IBMwaitactions", IBMWaitActionViewSet, "IBMwaitactions")
+router.register("api/IBMwashactions", IBMWashActionViewSet, "IBMwashactions")
 
 
 urlpatterns = [
