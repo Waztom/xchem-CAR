@@ -8,6 +8,7 @@ import Button from "react-bootstrap/Button";
 import Accordion from "react-bootstrap/Accordion";
 import Image from "react-bootstrap/Image";
 import CardDeck from "react-bootstrap/CardDeck";
+import Spinner from "react-bootstrap/Spinner";
 
 const IBMAddAction = ({ action }) => {
   return <Button>{action.actiontype}</Button>;
@@ -154,7 +155,11 @@ const ActionsList = ({ reactionid }) => {
   }, []);
 
   if (isLoading) {
-    return <div className="App">Loading...</div>;
+    return (
+      <Spinner animation="border" role="status">
+        <span className="sr-only">Loading...</span>
+      </Spinner>
+    );
   }
 
   async function patchActionNo(actiontype, actionid, value) {
@@ -274,7 +279,11 @@ const ProductImage = ({ reactionid }) => {
   }, []);
 
   if (isLoading) {
-    return <div className="App">Loading...</div>;
+    return (
+      <Spinner animation="border" role="status">
+        <span className="sr-only">Loading...</span>
+      </Spinner>
+    );
   }
 
   return Product.map((product) => <Image src={product.image} fluid />);
@@ -299,7 +308,11 @@ const ReactionAccordian = ({ methodid }) => {
   }, []);
 
   if (isLoading) {
-    return <div className="App">Loading...</div>;
+    return (
+      <Spinner animation="border" role="status">
+        <span className="sr-only">Loading...</span>
+      </Spinner>
+    );
   }
 
   return (
@@ -360,7 +373,11 @@ const MethodBody = ({ targetid, deleteTarget }) => {
   }, []);
 
   if (isLoading) {
-    return <div className="App">Loading...</div>;
+    return (
+      <Spinner animation="border" role="status">
+        <span className="sr-only">Loading...</span>
+      </Spinner>
+    );
   }
 
   async function deleteData(methodid) {

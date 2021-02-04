@@ -7,6 +7,7 @@ import Button from "react-bootstrap/Button";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
 import Form from "react-bootstrap/Form";
+import Spinner from "react-bootstrap/Spinner";
 
 import MethodBody from "../MethodBody/MethodBody";
 
@@ -121,7 +122,11 @@ const Body = ({ ProjectID }) => {
 
   if (ProjectID !== 0) {
     if (isLoading) {
-      return <div className="App">Loading...</div>;
+      return (
+        <Spinner animation="border" role="status">
+          <span className="sr-only">Loading...</span>
+        </Spinner>
+      );
     }
   }
 
