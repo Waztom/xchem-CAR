@@ -4,384 +4,73 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
-import Container from "react-bootstrap/Container";
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
-import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Accordion from "react-bootstrap/Accordion";
 import Image from "react-bootstrap/Image";
 import CardDeck from "react-bootstrap/CardDeck";
-import { List } from "react-bootstrap-icons";
+import Spinner from "react-bootstrap/Spinner";
 
-//Start with most nested children components
-// Process cards - these cards describe the overall
-// process: order of reactant/reagent addition, work-up,
-// QC etc. Will define these actions and breakpoints as
-// we go
-
-const SetMoleqInput = ({ moleq }) => {
-  const [Moleq, setMoleq] = useState({ moleq });
-
-  const handleMoleqChange = (e) => {
-    const inputMoleq = e.target.value;
-
-    if (!isNaN(inputMoleq)) {
-      setMoleq(e.target.value);
-    } else {
-      alert("Please input an integer value");
-    }
-
-    // Add code to update API as well
-  };
-
-  return (
-    <InputGroup
-      size="sm"
-      className="mb-3"
-      value={Moleq.moleq}
-      onChange={handleMoleqChange}
-    >
-      <InputGroup.Prepend>
-        <InputGroup.Text id="inputGroup-sizing-sm">Mol eq.</InputGroup.Text>
-      </InputGroup.Prepend>
-      <FormControl
-        aria-label="Small"
-        aria-describedby="inputGroup-sizing-sm"
-        placeholder={Moleq.moleq}
-      />
-      {console.log(Moleq)}
-    </InputGroup>
-  );
+const IBMAddAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
 };
-
-const SetAddOrderInput = ({ addorder }) => {
-  const [AddOrder, setAddOrder] = useState({ addorder });
-
-  const handleAddOrderChange = (e) => {
-    const inputOrder = e.target.value;
-
-    if (!isNaN(inputOrder)) {
-      setAddOrder(e.target.value);
-    } else {
-      alert("Please input an integer value");
-    }
-
-    // Add code to update API as well
-  };
-
-  return (
-    <InputGroup
-      size="sm"
-      className="mb-3"
-      value={AddOrder.addorder}
-      onChange={handleAddOrderChange}
-    >
-      <InputGroup.Prepend>
-        <InputGroup.Text id="inputGroup-sizing-sm">Add order</InputGroup.Text>
-      </InputGroup.Prepend>
-      <FormControl
-        aria-label="Small"
-        aria-describedby="inputGroup-sizing-sm"
-        placeholder={AddOrder.addorder}
-      />
-      {console.log(AddOrder)}
-    </InputGroup>
-  );
+const IBMCollectLayerAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
 };
-
-const SetConcentrationInput = ({ concentration }) => {
-  const [Concentration, setConcentration] = useState({ concentration });
-
-  const handleConcentrationChange = (e) => {
-    const inputConcentration = e.target.value;
-
-    if (!isNaN(inputConcentration)) {
-      setConcentration(e.target.value);
-    } else {
-      alert("Please input an integer value");
-    }
-
-    // Add code to update API as well
-  };
-
-  return (
-    <InputGroup
-      size="sm"
-      className="mb-3"
-      value={Concentration.concentration}
-      onChange={handleConcentrationChange}
-    >
-      <InputGroup.Prepend>
-        <InputGroup.Text id="inputGroup-sizing-sm">Conc (M)</InputGroup.Text>
-      </InputGroup.Prepend>
-      <FormControl
-        aria-label="Small"
-        aria-describedby="inputGroup-sizing-sm"
-        placeholder={Concentration.concentration}
-      />
-      {console.log(Concentration)}
-    </InputGroup>
-  );
+const IBMConcentrateAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
 };
-
-const SetSolventInput = ({ solvent }) => {
-  const [Solvent, setSolvent] = useState({ solvent });
-
-  const handleSolventChange = (e) => {
-    setSolvent(e.target.value);
-    // Add code to update API as well
-  };
-
-  return (
-    <Form>
-      <Form.Group controlId="exampleForm.ControlSelect1">
-        <Form.Control
-          as="select"
-          onChange={handleSolventChange}
-          size="sm"
-          type="text"
-        >
-          <option>{Solvent.solvent}</option>
-          <option>DMA</option>
-          <option>DCM</option>
-        </Form.Control>
-      </Form.Group>
-      {console.log(Solvent)}
-    </Form>
-  );
+const IBMDegasAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
 };
-
-// Reactant/Reactant cards
-const ReactantCard = ({ image, moleq, addorder, solvent, concentration }) => {
-  // Set state
-
-  // Render to return
-  return (
-    <Card style={{ width: "12rem" }}>
-      {/* Reactant image here */}
-      <Card.Img variant="top" src={image} alt="Reactant Image" />
-      <Card.Body></Card.Body>
-      <Container>
-        <Row>
-          <Col>
-            <SetMoleqInput moleq={moleq} />
-          </Col>
-          <Col>
-            <SetAddOrderInput addorder={addorder} />
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <SetSolventInput solvent={solvent} />
-          </Col>
-          <Col>
-            <SetConcentrationInput concentration={concentration} />
-          </Col>
-        </Row>
-      </Container>
-    </Card>
-  );
+const IBMDrySolidAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
 };
-
-const ReactionNameCard = ({ name }) => {
-  const [isLoading, setLoading] = useState(true);
-  const [ReactionName, setReactionName] = useState({ name });
-
-  // Must inlcude hook to handle change plus come up with
-  // better way of listing names => check with Anthony
-
-  return (
-    <Card style={{ width: "8rem" }}>
-      <Card.Body>{ReactionName.name}</Card.Body>
-    </Card>
-  );
+const IBMDrySolutionAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
 };
-
-// Render reactant cards!
-
-// Work up card
-const WorkUpCard = ({ workup }) => {
-  // Set state
-  const [WorkUpType, setWorkUpType] = useState(workup);
-
-  const handleWorkUpChange = (e) => {
-    setWorkUpType(e.target.value);
-    // Add code to update API as well
-  };
-
-  // Render to return
-  return (
-    <Card style={{ width: "8rem" }}>
-      <Card.Img variant="top" src="" alt="Work up image" />
-      <Card.Body>
-        <Form>
-          <Form.Group controlId="exampleForm.ControlSelect1">
-            <Form.Control
-              as="select"
-              onChange={handleWorkUpChange}
-              size="sm"
-              type="text"
-            >
-              <option>{WorkUpType.workup}</option>
-              <option>DMA</option>
-              <option>DCM</option>
-            </Form.Control>
-          </Form.Group>
-        </Form>
-      </Card.Body>
-    </Card>
-  );
+const IBMExtractAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
 };
-
-const TemperatureCard = ({ temperature }) => {
-  // Set state
-  const [Temperature, setTemperature] = useState({ temperature });
-
-  const handleTemperatureChange = (e) => {
-    setTemperature(e.target.value);
-    // Add code to update API as well
-  };
-
-  // Render to return
-  return (
-    <Card style={{ width: "8rem" }}>
-      <Card.Body>
-        <InputGroup
-          className="mb-3"
-          value={Temperature.temperature}
-          onChange={handleTemperatureChange}
-          size="sm"
-          type="text"
-        >
-          <FormControl
-            aria-describedby="basic-addon1"
-            placeholder={Temperature.temperature}
-            size="sm"
-          />
-        </InputGroup>
-      </Card.Body>
-    </Card>
-  );
+const IBMFilterAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
 };
-
-const ReactionCard = ({ reactionid, temperature, workup, name }) => {
-  // Use hooks instead of classes
-  const [isLoading, setLoading] = useState(true);
-  const [Reactants, setReactants] = useState([]);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const request = await axios.get(`api/reactants?search=${reactionid}`);
-        setReactants(request.data);
-        setLoading(false);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    fetchData();
-  }, []);
-
-  if (isLoading) {
-    return <div className="App">Loading...</div>;
-  }
-
-  return (
-    <ListGroup horizontal>
-      <ListGroup.Item>
-        <ReactionNameCard name={name} />
-      </ListGroup.Item>
-      {Reactants.map((reactant) => (
-        <ListGroup.Item>
-          <ReactantCard image={reactant.image} />
-        </ListGroup.Item>
-      ))}
-      <ListGroup.Item>
-        <TemperatureCard temperature={temperature} />
-      </ListGroup.Item>
-      <ListGroup.Item>
-        <WorkUpCard workup={workup} />
-      </ListGroup.Item>
-    </ListGroup>
-  );
+const IBMMakeSolutionAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
 };
-
-// Up to here with new web app
-// const ActionsCard = (() => {
-// useSt
-// }
-const SetDropwise = ({ dropwise, addactionid }) => {
-  const [Dropwise, setDropwise] = useState({ dropwise });
-  console.log(Dropwise.dropwise === false);
-
-  async function patchDropwise(value) {
-    try {
-      const response = await axios.patch(`api/addactions/${addactionid}/`, {
-        dropwise: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  const handleDropwiseChange = (e) => {
-    setDropwise(e.target.value);
-    patchDropwise(e.target.value);
-  };
-
-  return (
-    <InputGroup size="sm" className="mb-3">
-      <InputGroup.Prepend>
-        <InputGroup.Text id="inputGroup-sizing-sm">
-          Add dropwise
-        </InputGroup.Text>
-      </InputGroup.Prepend>
-      <Form.Control
-        as="select"
-        onChange={(event) => handleDropwiseChange(event)}
-        size="sm"
-        type="text"
-      >
-        <option>"True"</option>
-        {Dropwise.dropwise === true ? (
-          <option>"False"</option>
-        ) : Dropwise.dropwise === false ? (
-          <option>"True"</option>
-        ) : (
-          <option>"False"</option>
-        )}
-      </Form.Control>
-    </InputGroup>
-  );
+const IBMPartitionAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
 };
-
-/////////////////////// Checkm if need anything from above ///////////////////////
-const StirAction = ({ action }) => {
+const IBMpHAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+const IBMPhaseSeparationAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+const IBMQuenchAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+const IBMRefluxAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+const IBMSetTemperatureAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+const IBMStirAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+const IBMStoreAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+const IBMWaitAction = ({ action }) => {
+  return <Button>{action.actiontype}</Button>;
+};
+const IBMWashAction = ({ action }) => {
   return <Button>{action.actiontype}</Button>;
 };
 
-const WashAction = ({ action }) => {
-  return (
-    <Button>
-      {action.actiontype}-{action.material}
-    </Button>
-  );
-};
-
-const DrySolutionAction = ({ action }) => {
-  return <Button>{action.actiontype}</Button>;
-};
-
-const ConcentrateAction = ({ action }) => {
-  return <Button>{action.actiontype}</Button>;
-};
-
-const AddRestActionsList = ({ reactionid }) => {
+const ActionsList = ({ reactionid }) => {
   const [isLoading, setLoading] = useState(true);
-  const [RestActions, setRestActions] = useState([]);
+  const [Actions, setActions] = useState([]);
 
   function compareActionno(a, b) {
     return a.actionno - b.actionno;
@@ -390,29 +79,73 @@ const AddRestActionsList = ({ reactionid }) => {
   useEffect(() => {
     async function fetchData() {
       const URLs = [
-        `api/makesolutionactions?search=${reactionid}`,
-        `api/stiractions?search=${reactionid}`,
-        `api/washactions?search=${reactionid}`,
-        `api/drysolutionactions?search=${reactionid}`,
-        `api/concentrateactions?search=${reactionid}`,
-        `api/analyseactions?search=${reactionid}`,
+        `api/IBMaddactions?search=${reactionid}`,
+        `api/IBMcollect-layeractions?search=${reactionid}`,
+        `api/IBMconcentrateactions?search=${reactionid}`,
+        `api/IBMdegasactions?search=${reactionid}`,
+        `api/IBMdry-solidactions?search=${reactionid}`,
+        `api/IBMdry-solutionactions?search=${reactionid}`,
+        `api/IBMextractactions?search=${reactionid}`,
+        `api/IBMfilteractions?search=${reactionid}`,
+        `api/IBMmake-solutionactions?search=${reactionid}`,
+        `api/IBMpartitionactions?search=${reactionid}`,
+        `api/IBMphactions?search=${reactionid}`,
+        `api/IBMphase-separationactions?search=${reactionid}`,
+        `api/IBMquenchactions?search=${reactionid}`,
+        `api/IBMrefluxactions?search=${reactionid}`,
+        `api/IBMset-temperatureactions?search=${reactionid}`,
+        `api/IBMstiractions?search=${reactionid}`,
+        `api/IBMstoreactions?search=${reactionid}`,
+        `api/IBMwaitactions?search=${reactionid}`,
+        `api/IBMwashactions?search=${reactionid}`,
       ];
       const requests = URLs.map((URL) => axios.get(URL).catch((err) => null));
 
       try {
         const [
-          stirresponse,
-          washresponse,
-          dryresponse,
-          concresponse,
+          addresp,
+          collectresp,
+          concresp,
+          degasresp,
+          drysolidresp,
+          drysolnresp,
+          extractresp,
+          filterresp,
+          makesolnresp,
+          partitionresp,
+          phresp,
+          phasesepresp,
+          quenchresp,
+          refluxresp,
+          settempresp,
+          stirresp,
+          storeresp,
+          waitresp,
+          washresp,
         ] = await axios.all(requests);
-        const restactions = stirresponse.data.concat(
-          washresponse.data,
-          dryresponse.data,
-          concresponse.data
+        const actions = addresp.data.concat(
+          collectresp.data,
+          concresp.data,
+          degasresp.data,
+          drysolidresp.data,
+          drysolnresp.data,
+          extractresp.data,
+          filterresp.data,
+          makesolnresp.data,
+          partitionresp.data,
+          phresp.data,
+          phasesepresp.data,
+          quenchresp.data,
+          refluxresp.data,
+          settempresp.data,
+          stirresp.data,
+          storeresp.data,
+          waitresp.data,
+          washresp.data
         );
-        const sorted = restactions.sort(compareActionno);
-        setRestActions(sorted);
+        const sorted = actions.sort(compareActionno);
+        console.log(sorted);
+        setActions(sorted);
         setLoading(false);
       } catch (err) {
         console.log(err);
@@ -422,13 +155,17 @@ const AddRestActionsList = ({ reactionid }) => {
   }, []);
 
   if (isLoading) {
-    return <div className="App">Loading...</div>;
+    return (
+      <Spinner animation="border" role="status">
+        <span className="sr-only">Loading...</span>
+      </Spinner>
+    );
   }
 
   async function patchActionNo(actiontype, actionid, value) {
     try {
       const response = await axios.patch(
-        `api/${actiontype}actions/${actionid}/`,
+        `api/IBM${actiontype}actions/${actionid}/`,
         {
           actionno: value,
         }
@@ -439,17 +176,14 @@ const AddRestActionsList = ({ reactionid }) => {
   }
 
   function handleOnDragEnd(result) {
-    const items = Array.from(RestActions);
+    const items = Array.from(Actions);
     const [reordereditem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reordereditem);
 
-    setRestActions(items);
+    setActions(items);
 
     items.map((item, index) => {
       var actiontype = item.actiontype;
-      if (actiontype === "dry-solution") {
-        actiontype = actiontype.replace(/-/g, "");
-      }
       const newactionno = index + 1;
       patchActionNo(actiontype, item.id, newactionno);
     });
@@ -457,10 +191,37 @@ const AddRestActionsList = ({ reactionid }) => {
 
   function getComponent(action) {
     const components = {
-      stir: <StirAction action={action}></StirAction>,
-      wash: <WashAction action={action}></WashAction>,
-      "dry-solution": <DrySolutionAction action={action}></DrySolutionAction>,
-      concentrate: <ConcentrateAction action={action}></ConcentrateAction>,
+      add: <IBMAddAction action={action}></IBMAddAction>,
+      "collect-layer": (
+        <IBMCollectLayerAction action={action}></IBMCollectLayerAction>
+      ),
+      concentrate: (
+        <IBMConcentrateAction action={action}></IBMConcentrateAction>
+      ),
+      degas: <IBMDegasAction action={action}></IBMDegasAction>,
+      "dry-solid": <IBMDrySolidAction action={action}></IBMDrySolidAction>,
+      "dry-solution": (
+        <IBMDrySolutionAction action={action}></IBMDrySolutionAction>
+      ),
+      extract: <IBMExtractAction action={action}></IBMExtractAction>,
+      filter: <IBMFilterAction action={action}></IBMFilterAction>,
+      "make-solution": (
+        <IBMMakeSolutionAction action={action}></IBMMakeSolutionAction>
+      ),
+      partition: <IBMPartitionAction action={action}></IBMPartitionAction>,
+      ph: <IBMpHAction action={action}></IBMpHAction>,
+      "phase-separation": (
+        <IBMPhaseSeparationAction action={action}></IBMPhaseSeparationAction>
+      ),
+      quench: <IBMQuenchAction action={action}></IBMQuenchAction>,
+      reflux: <IBMRefluxAction action={action}></IBMRefluxAction>,
+      "set-temperature": (
+        <IBMSetTemperatureAction action={action}></IBMSetTemperatureAction>
+      ),
+      stir: <IBMStirAction action={action}></IBMStirAction>,
+      store: <IBMStoreAction action={action}></IBMStoreAction>,
+      wait: <IBMWaitAction action={action}></IBMWaitAction>,
+      wash: <IBMWashAction action={action}></IBMWashAction>,
     };
 
     return components[action.actiontype];
@@ -475,7 +236,7 @@ const AddRestActionsList = ({ reactionid }) => {
             {...provided.droppableProps}
             ref={provided.innerRef}
           >
-            {RestActions.map((action, index) => {
+            {Actions.map((action, index) => {
               const actionid = action.actiontype + "-" + index.toString();
               return (
                 <Draggable key={actionid} draggableId={actionid} index={index}>
@@ -499,143 +260,6 @@ const AddRestActionsList = ({ reactionid }) => {
   );
 };
 
-const SetMolEquivalent = ({ molequivalent, addactionid }) => {
-  const [TargetMol, setTargetMol] = useState({ molequivalent });
-
-  async function patchMolEquivalent(value) {
-    try {
-      const response = await axios.patch(`api/addactions/${addactionid}/`, {
-        molequivalents: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  const handleMolEquivalentChange = (e) => {
-    const inputMolEquivalent = e.target.value;
-
-    if (!isNaN(inputMolEquivalent)) {
-      setTargetMol(e.target.value);
-      patchMolEquivalent(Number(e.target.value));
-    } else {
-      alert("Please input an integer value");
-    }
-  };
-
-  return (
-    <InputGroup size="sm" className="mb-3">
-      <InputGroup.Prepend>
-        <InputGroup.Text id="inputGroup-sizing-sm">Mol eq.</InputGroup.Text>
-      </InputGroup.Prepend>
-      <FormControl
-        aria-label="Small"
-        aria-describedby="inputGroup-sizing-sm"
-        placeholder={TargetMol.molequivalent}
-        onChange={(event) => handleMolEquivalentChange(event)}
-      />
-    </InputGroup>
-  );
-};
-
-const AddActionList = ({ reactionid }) => {
-  const [isLoading, setLoading] = useState(true);
-  const [AddActions, setAddActions] = useState([]);
-
-  function compareActionno(a, b) {
-    return a.actionno - b.actionno;
-  }
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const requestadd = await axios.get(
-          `api/addactions?search=${reactionid}`
-        );
-        const sorted = requestadd.data.sort(compareActionno);
-        setAddActions(sorted);
-        setLoading(false);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    fetchData();
-  }, []);
-
-  if (isLoading) {
-    return <div className="App">Loading...</div>;
-  }
-
-  async function patchAddNo(addactionid, value) {
-    try {
-      const response = await axios.patch(`api/addactions/${addactionid}/`, {
-        actionno: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  function handleOnDragEnd(result) {
-    const additems = Array.from(AddActions);
-    const [reorderedadditem] = additems.splice(result.source.index, 1);
-    additems.splice(result.destination.index, 0, reorderedadditem);
-
-    setAddActions(additems);
-
-    additems.map((additem, index) => {
-      const newactionno = index + 1;
-      patchAddNo(additem.id, newactionno);
-    });
-  }
-
-  return (
-    <DragDropContext onDragEnd={handleOnDragEnd}>
-      <Droppable droppableId="characters">
-        {(provided) => (
-          <ListGroup
-            className="characters"
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-          >
-            {AddActions.map((addaction, index) => {
-              const addactionid = addaction.id.toString();
-              return (
-                <Draggable
-                  key={addaction.id}
-                  draggableId={addactionid}
-                  index={index}
-                >
-                  {(provided) => (
-                    <ListGroup.Item
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      Step {index + 1} Add
-                      <SetMolEquivalent
-                        molequivalent={addaction.molequivalents}
-                        addactionid={addaction.id}
-                      ></SetMolEquivalent>
-                      <Image src={addaction.image} fluid />
-                    </ListGroup.Item>
-                  )}
-                </Draggable>
-              );
-            })}
-            {provided.placeholder}
-          </ListGroup>
-        )}
-      </Droppable>
-    </DragDropContext>
-  );
-};
-
-// const ActionList = ({ reactionid }) => {
-//   return;
-//   <AddActionList reactionid={reactionid}></AddActionList>;
-// };
-
 const ProductImage = ({ reactionid }) => {
   // Use hooks instead of classes
   const [isLoading, setLoading] = useState(true);
@@ -655,7 +279,11 @@ const ProductImage = ({ reactionid }) => {
   }, []);
 
   if (isLoading) {
-    return <div className="App">Loading...</div>;
+    return (
+      <Spinner animation="border" role="status">
+        <span className="sr-only">Loading...</span>
+      </Spinner>
+    );
   }
 
   return Product.map((product) => <Image src={product.image} fluid />);
@@ -680,7 +308,11 @@ const ReactionAccordian = ({ methodid }) => {
   }, []);
 
   if (isLoading) {
-    return <div className="App">Loading...</div>;
+    return (
+      <Spinner animation="border" role="status">
+        <span className="sr-only">Loading...</span>
+      </Spinner>
+    );
   }
 
   return (
@@ -697,16 +329,7 @@ const ReactionAccordian = ({ methodid }) => {
             </Accordion.Toggle>
           </Card.Header>
           <Accordion.Collapse eventKey={reaction.id}>
-            <ListGroup horizontal>
-              <ListGroup.Item key={reaction.id}>
-                <AddActionList reactionid={reaction.id}></AddActionList>
-              </ListGroup.Item>
-              <ListGroup.Item key={reaction.id + 1}>
-                <AddRestActionsList
-                  reactionid={reaction.id}
-                ></AddRestActionsList>
-              </ListGroup.Item>
-            </ListGroup>
+            <ActionsList reactionid={reaction.id}></ActionsList>
           </Accordion.Collapse>
         </Card>
       ))}
@@ -750,7 +373,11 @@ const MethodBody = ({ targetid, deleteTarget }) => {
   }, []);
 
   if (isLoading) {
-    return <div className="App">Loading...</div>;
+    return (
+      <Spinner animation="border" role="status">
+        <span className="sr-only">Loading...</span>
+      </Spinner>
+    );
   }
 
   async function deleteData(methodid) {

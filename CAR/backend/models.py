@@ -74,20 +74,26 @@ class IBMAddAction(models.Model):
     class Unit(models.TextChoices):
         mmol = "mmol"
         ml = "ml"
+        moleq = "moleq"
 
     class Atmosphere(models.TextChoices):
-        nitrogen = "Nitrogen"
-        air = "Air"
+        nitrogen = "nitrogen"
+        air = "air"
 
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
     material = models.CharField(max_length=255)
+    materialsmiles = models.CharField(max_length=255, null=True)
     materialquantity = models.IntegerField()
     materialquantityunit = models.CharField(choices=Unit.choices, default=Unit.mmol, max_length=10,)
 
     dropwise = models.BooleanField(default=False)
     atmosphere = models.CharField(choices=Atmosphere.choices, default=Atmosphere.air, max_length=10)
+
+    # These are extras for helping robotic execution/calcs
+    molecularweight = models.FloatField(null=True)
+    materialimage = models.FileField(upload_to="addactionimages/", max_length=255, null=True)
 
 
 class IBMCollectLayerAction(models.Model):
@@ -197,9 +203,16 @@ class IBMMakeSolutionAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
-    chemicals = models.CharField(max_length=100)
-    chemicalquantity = models.IntegerField()
-    chemicalquantityunit = models.CharField(choices=Unit.choices, default=Unit.ml, max_length=10)
+    solute = models.CharField(max_length=255)
+    solutesmiles = models.CharField(max_length=255, null=True)
+    soluteimage = models.FileField(upload_to="IBMmakesolnimages/", max_length=255, null=True)
+    solvent = models.CharField(max_length=255)
+    solventsmiles = models.CharField(max_length=255, null=True)
+    solventimage = models.FileField(upload_to="IBMmakesolnimages/", max_length=255, null=True)
+    solutequantity = models.IntegerField()
+    solutequantityunit = models.CharField(choices=Unit.choices, default=Unit.ml, max_length=10)
+    solventquantity = models.IntegerField()
+    solventquantityunit = models.CharField(choices=Unit.choices, default=Unit.ml, max_length=10)
 
 
 class IBMPartitionAction(models.Model):
@@ -210,8 +223,8 @@ class IBMPartitionAction(models.Model):
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
 
-    firstpartitionsolvent = models.CharField(max_length=100)
-    secondpartitionsolvent = models.CharField(max_length=100)
+    firstpartitionsolvent = models.CharField(max_length=255)
+    secondpartitionsolvent = models.CharField(max_length=255)
     firstpartitionsolventquantity = models.IntegerField()
     secondpartitionsolventquantity = models.IntegerField()
     firstpartitionsolventquantityunit = models.CharField(
@@ -229,7 +242,6 @@ class IBMpHAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
-
     material = models.CharField(max_length=100)
     materialquantity = models.IntegerField(null=True)
     materialquantityunit = models.CharField(choices=Unit.choices, default=Unit.ml, max_length=10)
@@ -253,7 +265,7 @@ class IBMQuenchAction(models.Model):
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
 
-    material = models.CharField(max_length=100)
+    material = models.CharField(max_length=255)
     materialquantity = models.IntegerField(null=True)
     materialquantityunit = models.CharField(choices=Unit.choices, default=Unit.ml, max_length=10)
     dropwise = models.BooleanField(default=False)
@@ -278,11 +290,9 @@ class IBMRefluxAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
-
     duration = models.CharField(max_length=100, null=True)
     durationunit = models.CharField(choices=Unit.choices, default=Unit.seconds, max_length=10)
     stirringspeed = models.CharField(choices=Speed.choices, default=Speed.normal, max_length=10)
-
     deanstarkapparatus = models.BooleanField(default=False)
     atmosphere = models.CharField(choices=Atmosphere.choices, default=Atmosphere.air, max_length=10)
 
@@ -323,7 +333,7 @@ class IBMStoreAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
-    temperature = models.IntegerField()
+    material = models.CharField(max_length=255)
 
 
 class IBMWaitAction(models.Model):
@@ -347,7 +357,7 @@ class IBMWashAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
-    material = models.CharField(max_length=100)
+    material = models.CharField(max_length=255)
     materialquantity = models.IntegerField(null=True)
     materialquantityunit = models.CharField(choices=Unit.choices, default=Unit.ml, max_length=10)
     numberofrepetitions = models.IntegerField(null=True)

@@ -28,9 +28,7 @@ def filtermethod(reaction_info):
     reactants = list(dict.fromkeys(reactants))
 
     # Try encode to bytes to convert strings to numbers
-    rxn_classes_integers = [
-        convert(convertbytes(rxn_class)) for rxn_class in reaction_classes
-    ]
+    rxn_classes_integers = [convert(convertbytes(rxn_class)) for rxn_class in reaction_classes]
     reactant_integers = [convert(convertbytes(reactant)) for reactant in reactants]
 
     method_integer = sum(reactant_integers) + sum(rxn_classes_integers)

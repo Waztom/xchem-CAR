@@ -2,6 +2,26 @@ from rxn4chemistry import RXN4ChemistryWrapper
 import os
 import time
 from rdkit.Chem import AllChem
+import requests
+import json
+
+
+def convertIBMNameToSmiles(chemical_name):
+    try:
+        api_key = os.environ["IBM_API_KEY"]
+        data = [chemical_name]
+        headers = {
+            "Authorization": api_key,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        url = "https://rxn.res.ibm.com/rxn/api/api/v1/actions/convert-material-to-smiles"
+        r = requests.post(url=url, data=json.dumps(data), headers=headers, cookies={})
+        response_dict = r.json()
+        smiles = response_dict["payload"][chemical_name]
+        return smiles
+    except:
+        return False
 
 
 def createIBMProject(project_name):
@@ -26,10 +46,14 @@ def getIBMRetroSyn(rxn4chemistry_wrapper, smiles, max_steps):
     while results["results"] is None:
         try:
             time.sleep(30)
-            response = rxn4chemistry_wrapper.predict_automatic_retrosynthesis(product=smiles, max_steps=max_steps)
+            response = rxn4chemistry_wrapper.predict_automatic_retrosynthesis(
+                product=smiles, max_steps=max_steps
+            )
             while results["status"] != "SUCCESS":
                 time.sleep(130)
-                results = rxn4chemistry_wrapper.get_predict_automatic_retrosynthesis_results(response["prediction_id"])
+                results = rxn4chemistry_wrapper.get_predict_automatic_retrosynthesis_results(
+                    response["prediction_id"]
+                )
                 results["results"] = results
         except Exception as e:
             print(e)
@@ -44,10 +68,14 @@ def collectIBMReactionInfo(rxn4chemistry_wrapper, pathway):
     reaction_info["actions"] = []
 
     time.sleep(60)
-    pathway_synthesis_response = rxn4chemistry_wrapper.create_synthesis_from_sequence(sequence_id=pathway["sequenceId"])
+    pathway_synthesis_response = rxn4chemistry_wrapper.create_synthesis_from_sequence(
+        sequence_id=pathway["sequenceId"]
+    )
     pathway_synthesis_id = pathway_synthesis_response["synthesis_id"]
     time.sleep(60)
-    synthesis_tree, reactions, actions = rxn4chemistry_wrapper.get_synthesis_plan(synthesis_id=pathway_synthesis_id)
+    synthesis_tree, reactions, actions = rxn4chemistry_wrapper.get_synthesis_plan(
+        synthesis_id=pathway_synthesis_id
+    )
 
     for node in reactions:
         # NB gives list of actions for each reaction
