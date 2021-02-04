@@ -43,6 +43,8 @@ import logging
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+from .apicalls import convertIBMNameToSmiles
+
 # Check if reactant_smiles is a common solvent
 # Get smiles from csv file!!!!!
 common_solvents = {
@@ -113,6 +115,8 @@ def createSVGString(smiles):
 
 
 def convertNameToSmiles(chemical_name):
+    # First try pubchem and then IBM
+    # NB do this not to make too many IBM API calls
     try:
         smiles = pcp.get_compounds(chemical_name, "name")[0].isomeric_smiles
         return smiles
@@ -121,7 +125,12 @@ def convertNameToSmiles(chemical_name):
             smiles = pcp.get_compounds(chemical_name, "formula")[0].isomeric_smiles
             return smiles
         except:
-            return False
+            try:
+                smiles = convertIBMNameToSmiles(chemical_name)
+                return smiles
+            except:
+                print("PubChemPy/IBM could not convert {}".format(chemical_name))
+                return False
 
 
 def checkSMILES(smiles):
@@ -270,22 +279,26 @@ def createActionModel(reaction_id, action_no, action):
 def createIBMAddAction(action_type, reaction_id, action_no, action):
     try:
         material = action["content"]["material"]["value"]
-        if material == "SLN":
-            pass
-        else:
-            materialquantity = action["content"]["material"]["quantity"]["value"]
-            materialquantityunit = action["content"]["material"]["quantity"]["unit"]
-            dropwise = action["content"]["dropwise"]["value"]
-            atmosphere = action["content"]["atmosphere"]
+        materialquantity = action["content"]["material"]["quantity"]["value"]
+        materialquantityunit = action["content"]["material"]["quantity"]["unit"]
+        dropwise = action["content"]["dropwise"]["value"]
+        atmosphere = action["content"]["atmosphere"]
 
-            add = IBMAddAction()
-            reaction_obj = Reaction.objects.get(id=reaction_id)
-            add.reaction_id = reaction_obj
-            add.actiontype = action_type
-            add.actionno = action_no
-            add.material = material
+        add = IBMAddAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        add.reaction_id = reaction_obj
+        add.actiontype = action_type
+        add.actionno = action_no
+        add.material = material
+        if material == "SLN":
+            add.materialquantity = materialquantity
+            add.materialquantityunit = materialquantityunit
+        if material != "SLN":
             # Check if smiles
             smiles = checkSMILES(material)
+            if not smiles:
+                add.materialquantity = materialquantity
+                add.materialquantityunit = materialquantityunit
             if smiles:
                 # Get MW
                 mol = Chem.MolFromSmiles(smiles)
@@ -299,21 +312,14 @@ def createIBMAddAction(action_type, reaction_id, action_no, action):
                     ContentFile(add_svg_string),
                 )
                 add.materialimage = add_svg_fn
-                # Check if solvent then use ml as quantity unit
-                if smiles in common_solvents:
-                    add.materialquantity = materialquantity
-                    add.materialquantityunit = "ml"
-                else:
-                    # If material not a solvent assign quantity unit moleq
-                    # Caveat here is if material is a catalyst!
-                    add.materialquantity = 1
-                    add.materialquantityunit = "moleq"
-            if atmosphere:
-                add.atmosphere = atmosphere["value"]
-            else:
-                add.atmosphere = "air"
+                add.materialquantity = materialquantity
+                add.materialquantityunit = materialquantityunit
+        if atmosphere:
+            add.atmosphere = atmosphere["value"]
+        else:
+            add.atmosphere = "air"
 
-            add.save()
+        add.save()
 
     except Exception as error:
         print(error)
@@ -487,10 +493,10 @@ def createIBMMakeSolutionAction(action_type, reaction_id, action_no, action):
         solutesmiles = checkSMILES(solute)
         solvent = materials[1]["value"]
         solventsmiles = checkSMILES(solvent)
-        solutequantity = materials[0]["qauntity"]["value"]
-        solutequantityunit = materials[0]["qauntity"]["unit"]
-        solventquantity = materials[1]["qauntity"]["value"]
-        solventquantityunit = materials[1]["qauntity"]["unit"]
+        solutequantity = materials[0]["quantity"]["value"]
+        solutequantityunit = materials[0]["quantity"]["unit"]
+        solventquantity = materials[1]["quantity"]["value"]
+        solventquantityunit = materials[1]["quantity"]["unit"]
 
         soln = IBMMakeSolutionAction()
         reaction_obj = Reaction.objects.get(id=reaction_id)

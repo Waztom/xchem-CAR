@@ -136,7 +136,7 @@ def uploadIBMReaction(validate_output):
 
             # Set maximum number of attempts. Sometimes variation in routes is
             # very similar and wastes times
-            max_attempts = 5
+            max_attempts = 3
             attempts_dict = {}
 
             # Set maximum number of methods/pathways to collect
