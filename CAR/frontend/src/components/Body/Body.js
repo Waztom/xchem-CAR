@@ -68,15 +68,11 @@ const SetTargetMassInput = ({ targetmass, unit, targetid }) => {
         onChange={(event) => handleUnitChange(event)}
         size="sm"
         type="text"
+        value={Unit.unit}
       >
-        <option>{Unit.unit}</option>
-        {Unit.unit === "mg" ? (
-          <option>g</option>
-        ) : Unit.unit === "g" ? (
-          <option>mg</option>
-        ) : (
-          <option>{Unit.unit}</option>
-        )}
+        <option>mg</option>
+        <option>g</option>
+        <option>mmol</option>
       </Form.Control>
     </InputGroup>
   );

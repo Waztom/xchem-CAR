@@ -271,6 +271,7 @@ def createActionModel(reaction_id, action_no, action):
 
     if action_type in actionMethods:
         actionMethods[action_type](action_type, reaction_id, action_no, action)
+        return True
     else:
         logger.info(action_type)
         print(action)
@@ -454,11 +455,11 @@ def createIBMFilterAction(action_type, reaction_id, action_no, action):
         rinsingsolvent = action["content"]["rinsing_solvent"]["value"]
         rinsingsolventquantity = action["content"]["rinsing_solvent"]["quantity"]["value"]
         rinsingsolventquantityunit = action["content"]["rinsing_solvent"]["quantity"]["unit"]
-        extractionsolventforprecipitate = action["content"]["extraction_solvent"]["value"]
-        extractionsolventforprecipitatequantity = action["content"]["extraction_solvent"][
+        extractionforprecipitatesolvent = action["content"]["extraction_solvent"]["value"]
+        extractionforprecipitatesolventquantity = action["content"]["extraction_solvent"][
             "quantity"
         ]["value"]
-        extractionsolventforprecipitatequantityunit = action["content"]["extraction_solvent"][
+        extractionforprecipitatesolventquantityunit = action["content"]["extraction_solvent"][
             "quantity"
         ]["unit"]
 
@@ -471,12 +472,12 @@ def createIBMFilterAction(action_type, reaction_id, action_no, action):
         filteraction.rinsingsolvent = rinsingsolvent
         filteraction.rinsingsolventquantity = rinsingsolventquantity
         filteraction.rinsingsolventquantityunit = rinsingsolventquantityunit
-        filteraction.extractionsolventforprecipitate = extractionsolventforprecipitate
-        filteraction.extractionsolventforprecipitatequantity = (
-            extractionsolventforprecipitatequantity
+        filteraction.extractionforprecipitatesolvent = extractionforprecipitatesolvent
+        filteraction.extractionforprecipitatesolventquantity = (
+            extractionforprecipitatesolventquantity
         )
-        filteraction.extractionsolventforprecipitatequantityunit = (
-            extractionsolventforprecipitatequantityunit
+        filteraction.extractionforprecipitatesolventquantityunit = (
+            extractionforprecipitatesolventquantityunit
         )
         filteraction.save()
 
@@ -718,6 +719,15 @@ def createIBMStoreAction(action_type, reaction_id, action_no, action):
         store.actiontype = action_type
         store.actionno = action_no
         store.material = material
+        smiles = checkSMILES(material)
+        if smiles:
+            store.materialsmiles = smiles
+            store_svg_string = createSVGString(smiles)
+            store_svg_fn = default_storage.save(
+                "storeimages/{}-{}-{}.svg".format(reaction_id, action_no, material),
+                ContentFile(store_svg_string),
+            )
+            store.materialimage = store_svg_fn
         store.save()
 
     except Exception as error:

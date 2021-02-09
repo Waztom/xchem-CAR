@@ -213,10 +213,11 @@ def uploadIBMReaction(validate_output):
                             # Create action models
                             action_no = 1
                             for action in actions:
-                                createActionModel(
+                                created_model = createActionModel(
                                     reaction_id=reaction_id, action_no=action_no, action=action,
                                 )
-                                action_no += 1
+                                if created_model:
+                                    action_no += 1
 
                             product_no += 1
 
