@@ -106,7 +106,11 @@ def createSVGString(smiles):
 
     # Initiate drawer and set size/font size
     drawer = Draw.rdMolDraw2D.MolDraw2DSVG(900, 200)
-    drawer.SetFontSize(12)
+    drawer.SetFontSize(16)
+    drawer.SetLineWidth(6)
+    # Test
+    # drawer.drawOptions().bondLineWidth = 5
+    # drawer.drawOptions().padding = 1
     drawer.DrawMolecule(mol)
     drawer.FinishDrawing()
     svg_string = drawer.GetDrawingText()

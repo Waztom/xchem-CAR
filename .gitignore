@@ -12,6 +12,8 @@ CAR/media/*
 *.db
 *.rdb
 
+# Ignore compiled main.js
+CAR/frontend/static/frontend/main.js
 boilerplatenotes.txt
 
 # Ignore log file

@@ -60,12 +60,50 @@ def getIBMRetroSyn(rxn4chemistry_wrapper, smiles, max_steps):
     return results["results"]
 
 
+def collect_actions(tree):
+    actions = []
+
+    if "children" in tree and len(tree["children"]):
+        actions.append(tree["actions"])
+
+    for node in tree["children"]:
+        actions.extend(collect_actions(node))
+
+    return actions
+
+
+def collect_rclass(tree):
+    rclass = []
+    if "children" in tree and len(tree["children"]):
+        rclass.append(tree["rclass"])
+
+    for node in tree["children"]:
+        rclass.extend(collect_rclass(node))
+    return rclass
+
+
+def collect_products(tree):
+    products = []
+    if "children" in tree and len(tree["children"]):
+        products.append(tree["smiles"])
+
+    for node in tree["children"]:
+        products.extend(collect_products(node))
+    return products
+
+
+def collect_reactants(tree):
+    reactants = []
+    if "children" in tree and len(tree["children"]):
+        reactants.append([node["smiles"] for node in tree["children"]])
+
+    for node in tree["children"]:
+        reactants.extend(collect_reactants(node))
+    return reactants
+
+
 def collectIBMReactionInfo(rxn4chemistry_wrapper, pathway):
     reaction_info = {}
-    reaction_info["rclass"] = []
-    reaction_info["product_smiles"] = []
-    reaction_info["reactants"] = []
-    reaction_info["actions"] = []
 
     time.sleep(60)
     pathway_synthesis_response = rxn4chemistry_wrapper.create_synthesis_from_sequence(
@@ -77,20 +115,10 @@ def collectIBMReactionInfo(rxn4chemistry_wrapper, pathway):
         synthesis_id=pathway_synthesis_id
     )
 
-    for node in reactions:
-        # NB gives list of actions for each reaction
-        if len(node["actions"]) > 0:
-            reaction_info["actions"].append(node["actions"])
-
-    if "children" in pathway and len(pathway["children"]):
-        reaction_info["rclass"].append(pathway["rclass"])
-        reaction_info["product_smiles"].append(pathway["smiles"])
-        reaction_info["reactants"].append([node["smiles"] for node in pathway["children"]])
-
-    for node in pathway["children"]:
-        if "children" in node and len(node["children"]):
-            reaction_info["rclass"].append(node["rclass"])
-            reaction_info["product_smiles"].append(node["smiles"])
-            reaction_info["reactants"].append([node["smiles"] for node in node["children"]])
+    reaction_info["actions"] = collect_actions(synthesis_tree)
+    # Can we join these into one loop?
+    reaction_info["rclass"] = collect_rclass(pathway)
+    reaction_info["product_smiles"] = collect_products(pathway)
+    reaction_info["reactants"] = collect_reactants(pathway)
 
     return reaction_info

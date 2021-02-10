@@ -186,10 +186,9 @@ def uploadIBMReaction(validate_output):
                         )
 
                         product_no = 1
-                        for product_smiles, reaction_class, reactants, actions in zip(
+                        for product_smiles, reaction_class, actions in zip(
                             reaction_info["product_smiles"],
                             reaction_info["rclass"],
-                            reaction_info["reactants"],
                             reaction_info["actions"],
                         ):
                             # Product_smiles and reaction class is a list of individual elements

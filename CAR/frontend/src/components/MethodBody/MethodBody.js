@@ -21,8 +21,19 @@ String.prototype.capitalize = function () {
 };
 
 const SetSolvent = ({ action, updateAction, name }) => {
-  const solvname = name + "solvent";
+  const checkName = (name) => {
+    return name === "rinsing"
+      ? "rinsingsolvent"
+      : name === "extractionforprecipitate"
+      ? "extractionforprecipitatesolvent"
+      : name === "firstpartition"
+      ? "firstpartitionsolvent"
+      : name === "secondpartition"
+      ? "secondpartitionsolvent"
+      : "solvent";
+  };
 
+  const solvname = checkName(name);
   const solvent = action[solvname];
   const actiontype = action.actiontype;
   const id = action.id;
@@ -40,6 +51,9 @@ const SetSolvent = ({ action, updateAction, name }) => {
   }
 
   const handleSolventChange = (e) => {
+    console.log(action);
+    console.log(solvname);
+
     const newsolvent = e.target.value;
     setSolvent(newsolvent);
     patchSolvent(newsolvent);
@@ -241,7 +255,7 @@ const SetTemperature = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Temperature, SetTemperature] = useState({ temperature });
+  const [Temperature, setTemperature] = useState({ temperature });
 
   async function patchTemperature(value) {
     try {
@@ -257,7 +271,7 @@ const SetTemperature = ({ action, updateAction }) => {
     const inputQuantity = e.target.value;
 
     if (!isNaN(inputQuantity)) {
-      SetTemperature(inputQuantity);
+      setTemperature(inputQuantity);
       patchTemperature(Number(inputQuantity));
       updateAction(id, "temperature", inputQuantity);
     } else {
@@ -285,7 +299,7 @@ const SetNumberRepetitions = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [NumberRepetitions, SetNumberRepetitions] = useState({
+  const [NumberRepetitions, setNumberRepetitions] = useState({
     numberrepetitions,
   });
 
@@ -303,7 +317,7 @@ const SetNumberRepetitions = ({ action, updateAction }) => {
     const inputQuantity = e.target.value;
 
     if (!isNaN(inputQuantity)) {
-      SetNumberRepetitions(inputQuantity);
+      setNumberRepetitions(inputQuantity);
       patchNumberRepetitions(Number(inputQuantity));
       updateAction(id, "numberofrepetitions", inputQuantity);
     } else {
@@ -455,7 +469,7 @@ const SetLayer = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Layer, SetLayer] = useState({ layer });
+  const [Layer, setLayer] = useState({ layer });
 
   async function patchLayer(value) {
     try {
@@ -469,7 +483,7 @@ const SetLayer = ({ action, updateAction }) => {
 
   const handleLayerChange = (e) => {
     const newlayer = e.target.value.toLowerCase();
-    SetLayer(e.target.value);
+    setLayer(e.target.value);
     patchLayer(newlayer);
     updateAction(id, "layer", newlayer);
   };
@@ -498,7 +512,7 @@ const SetAtmosphere = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Atmosphere, SetAtmosphere] = useState({ atmosphere });
+  const [Atmosphere, setAtmosphere] = useState({ atmosphere });
 
   async function patchAtmosphere(value) {
     try {
@@ -512,7 +526,7 @@ const SetAtmosphere = ({ action, updateAction }) => {
 
   const handleAtmosphereChange = (e) => {
     const newatmosphere = e.target.value.toLowerCase();
-    SetAtmosphere(e.target.value);
+    setAtmosphere(e.target.value);
     patchAtmosphere(newatmosphere);
     updateAction(id, "atmosphere", newatmosphere);
   };
@@ -541,7 +555,7 @@ const SetDropwise = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [DropWise, SetDropwise] = useState({ dropwise });
+  const [DropWise, setDropwise] = useState({ dropwise });
 
   async function patchDropWise(value) {
     try {
@@ -555,7 +569,7 @@ const SetDropwise = ({ action, updateAction }) => {
 
   const handleDropWiseChange = (e) => {
     const newdropwise = e.target.value;
-    SetDropwise(newdropwise);
+    setDropwise(newdropwise);
     patchDropWise(newdropwise);
     updateAction(id, "dropwise", newdropwise);
   };
@@ -584,7 +598,7 @@ const SetDeanStark = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [DeanStark, SetDeanStark] = useState({ deanstark });
+  const [DeanStark, setDeanStark] = useState({ deanstark });
 
   async function patchDeanStark(value) {
     try {
@@ -598,7 +612,7 @@ const SetDeanStark = ({ action, updateAction }) => {
 
   const handleDeanStarkChange = (e) => {
     const newdeanstark = e.target.value;
-    SetDeanStark(newdeanstark);
+    setDeanStark(newdeanstark);
     patchDeanStark(newdeanstark);
     updateAction(id, "deanstarkapparatus", newdeanstark);
   };
@@ -617,6 +631,51 @@ const SetDeanStark = ({ action, updateAction }) => {
       >
         <option>True</option>
         <option>False</option>
+      </Form.Control>
+    </InputGroup>
+  );
+};
+
+const SetPhaseTokeep = ({ action, updateAction }) => {
+  const phasetokeep = action.phasetokeep.capitalize();
+  const actiontype = action.actiontype;
+  const id = action.id;
+
+  const [PhaseToKeep, setPhaseToKeep] = useState({ phasetokeep });
+
+  async function patchPhaseToKeep(value) {
+    try {
+      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
+        phasetokeep: value,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handlePhaseToKeepChange = (e) => {
+    const newphasetokeep = e.target.value.toLowerCase();
+    setPhaseToKeep(newphasetokeep);
+    patchPhaseToKeep(newphasetokeep);
+    updateAction(id, "phasetokeep", newphasetokeep);
+  };
+
+  return (
+    <InputGroup size="sm" className="mb-3" key={id.toString()}>
+      <InputGroup.Prepend>
+        <InputGroup.Text id="inputGroup-sizing-sm">
+          Phase to keep
+        </InputGroup.Text>
+      </InputGroup.Prepend>
+      <Form.Control
+        as="select"
+        onChange={(event) => handlePhaseToKeepChange(event)}
+        size="sm"
+        type="text"
+        value={PhaseToKeep.phasetokeep}
+      >
+        <option>Filtrate</option>
+        <option>Precipitate</option>
       </Form.Control>
     </InputGroup>
   );
@@ -711,8 +770,8 @@ const IBMAddAction = ({ action, actionno, updateAction }) => {
       <Row>
         <Col>
           <Image
-            width={150}
-            height={150}
+            width={350}
+            height={350}
             src={action.materialimage}
             alt={action.material}
             fluid
@@ -842,7 +901,11 @@ const IBMExtractAction = ({ action, actionno, updateAction }) => {
       </h5>
       <Row>
         <Col>
-          <SetSolvent action={action} updateAction={updateAction}></SetSolvent>
+          <SetSolvent
+            action={action}
+            updateAction={updateAction}
+            name={""}
+          ></SetSolvent>
           <SetQuantityInput
             action={action}
             updateAction={updateAction}
@@ -868,6 +931,10 @@ const IBMFilterAction = ({ action, actionno, updateAction }) => {
       </h5>
       <Row>
         <Col>
+          <SetPhaseTokeep
+            action={action}
+            updateAction={updateAction}
+          ></SetPhaseTokeep>
           <SetSolvent
             action={action}
             updateAction={updateAction}
@@ -905,8 +972,8 @@ const IBMMakeSolutionAction = ({ action, actionno, updateAction }) => {
       <Row>
         <Col>
           <Image
-            width={150}
-            height={150}
+            width={350}
+            height={350}
             src={action.soluteimage}
             alt={action.solute}
             fluid
@@ -917,8 +984,8 @@ const IBMMakeSolutionAction = ({ action, actionno, updateAction }) => {
             name={"solute"}
           ></SetQuantityInput>
           <Image
-            width={150}
-            height={150}
+            width={350}
+            height={350}
             src={action.solventimage}
             alt={action.solvent}
             fluid
@@ -1145,8 +1212,8 @@ const IBMStoreAction = ({ action, actionno }) => {
       <Row>
         <Col>
           <Image
-            width={150}
-            height={150}
+            width={350}
+            height={350}
             src={action.materialimage}
             alt={action.material}
             fluid
@@ -1471,10 +1538,11 @@ const ActionsList = ({ reactionid }) => {
 
   function updateAction(actionid, changekey, changevalue) {
     // let newArr = [...Actions];
+    console.log(changekey);
     var foundIndex = Actions.findIndex((x) => x.id == actionid);
     Actions[foundIndex][changekey] = changevalue;
     // setActions(newArr);
-    console.log(Actions[foundIndex]);
+    // console.log(Actions[foundIndex]);
   }
 
   return (
