@@ -1617,6 +1617,7 @@ const ReactionAccordian = ({ methodid }) => {
   // Use hooks instead of classes
   const [isLoading, setLoading] = useState(true);
   const [Reactions, setReactions] = useState([]);
+  const [isLoadingActions, setLoadActions] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -1639,12 +1640,21 @@ const ReactionAccordian = ({ methodid }) => {
     );
   }
 
+  function loadActions() {
+    setLoadActions(true);
+  }
+
   return (
     <Accordion>
       {Reactions.map((reaction) => (
         <Card key={reaction.id}>
           <Card.Header>
-            <Accordion.Toggle as={Button} variant="link" eventKey={reaction.id}>
+            <Accordion.Toggle
+              as={Button}
+              variant="link"
+              eventKey={reaction.id}
+              onClick={(event) => loadActions()}
+            >
               <ProductImage
                 key={reaction.id}
                 reactionid={reaction.id}
@@ -1652,12 +1662,14 @@ const ReactionAccordian = ({ methodid }) => {
               {reaction.reactionclass}
             </Accordion.Toggle>
           </Card.Header>
-          <Accordion.Collapse eventKey={reaction.id}>
-            <ActionsList
-              key={reaction.id}
-              reactionid={reaction.id}
-            ></ActionsList>
-          </Accordion.Collapse>
+          {isLoadingActions && (
+            <Accordion.Collapse eventKey={reaction.id}>
+              <ActionsList
+                key={reaction.id}
+                reactionid={reaction.id}
+              ></ActionsList>
+            </Accordion.Collapse>
+          )}
         </Card>
       ))}
     </Accordion>
