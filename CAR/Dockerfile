@@ -1,6 +1,5 @@
 FROM continuumio/miniconda3
 
-RUN mkdir /code
 WORKDIR /code
 
 # Try get npm on system?
@@ -23,9 +22,3 @@ RUN npm install --quiet --legacy-peer-deps
 
 # Copy over all the files
 COPY . . 
-
-
-
-
-
-

@@ -3,6 +3,7 @@ version: "3.9"
 services:
   app:
     build: .
+    restart: always
     ports:
       - 8000:8000
     volumes:
@@ -18,39 +19,50 @@ services:
       - db
       - redis
       - frontend
+      - rabbit
 
   db:
-    image: postgres:10
-    restart: always
+    image: postgres:10-alpine
+    restart: on-failure
     env_file:
       - ./.env
     volumes:
       - pgdata:/var/lib/postgresql/data/
 
   redis:
-    image: redis:latest
+    image: redis:alpine
 
   celery:
     restart: always
     build: .
     command: >
-      sh -c "cd /code && conda run -n CARdeploy celery -A CAR worker -l info"
+      sh -c "cd /code && 
+             conda run -n CARdeploy celery -A CAR worker -l info"
     volumes:
       - .:/code
     env_file:
       - ./.env
     depends_on:
-      - db
       - redis
-      - app
+      - rabbit
 
   frontend:
-    restart: always
+    restart: on-failure
     build: .
-    command: sh -c "cd /code && npm run dev"
+    command: >
+      sh -c "cd /code && 
+             npm run dev"
     volumes:
       - .:/code
       - node_modules:/code/node_modules
+
+  rabbit:
+    image: rabbitmq:alpine
+    env_file:
+      - ./.env
+    ports:
+      - 5672:5672
+      - 15672:15672
 
 volumes:
   pgdata:
