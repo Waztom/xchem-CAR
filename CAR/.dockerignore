@@ -1,8 +1,8 @@
 .git
 .cache
 .vscode
-*.log
-/media/*
+./logs/*
+./media/*
 *.pot
 *.pyc
 __pycache__/
