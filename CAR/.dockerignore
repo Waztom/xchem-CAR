@@ -1,0 +1,9 @@
+.git
+.cache
+.vscode
+*.log
+/media/*
+*.pot
+*.pyc
+__pycache__/
+**/static/*
