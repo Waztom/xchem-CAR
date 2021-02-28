@@ -1,9 +1,12 @@
 .git
 .cache
 .vscode
-*.log
-/media/*
+*/logs/*
+*/media/*
 *.pot
 *.pyc
 __pycache__/
 **/static/*
+docker-compose-*
+Dockerfile
+boilerplatenotes.txt
