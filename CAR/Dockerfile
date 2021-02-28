@@ -1,26 +1,19 @@
-FROM frolvlad/alpine-miniconda3
+FROM debian:bullseye-slim
 
-WORKDIR /code
+# Copy Python and Node reqs
+COPY package.json /app/package.json
+COPY requirements.txt /app/requirements.txt
 
-# Install conda environment from yaml
-COPY environment.yml environment.yml
-RUN conda env create -f environment.yml && \
-    conda clean -afy && \ 
-    find /opt/conda/ -follow -type f -name '*.a' -delete &&\ 
-    find /opt/conda/ -follow -type f -name '*.pyc' -delete &&\
-    find /opt/conda/ -follow -type f -name '*.js.map' -delete
-        
-# Get packages for rdkit
-RUN apk update && \
-    apk --no-cache add bash ca-certificates wget libxrender libxext nodejs npm && \
-    update-ca-certificates && \
-    npm i npm@latest -g 
+WORKDIR /app
 
-# Install the node stuff from package.json
-# NB also issue with react-beatiful-dnd and dependency with old
-# ver of react therfor used '--legacy-peer-deps' tag
-COPY package.json .
-RUN npm install --quiet --legacy-peer-deps 
+# Update and install
+RUN \
+ apt-get update && \
+ apt-get upgrade -y && \
+ apt-get install --no-install-recommends -y python3-rdkit python3-pip python3-pandas python3-psycopg2 nodejs npm && \ 
+ pip install -r requirements.txt &&\  
+ npm i npm@latest -g && \
+ npm install --quiet --legacy-peer-deps 
 
 # Copy over all the files
 COPY . . 

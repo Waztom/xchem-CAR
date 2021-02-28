@@ -2,8 +2,8 @@
 .gitignore
 .cache
 .vscode
-/logs/*
-/media/*
+*/logs/*
+*/media/*
 *.pot
 *.pyc
 __pycache__/
