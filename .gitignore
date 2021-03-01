@@ -12,8 +12,8 @@ CAR/media/*
 *.db
 *.rdb
 
-# Ignore .env 
-/CAR/.env
+# Ignore .env files 
+*.env
 
 # Ignore compiled main.js
 CAR/frontend/static/frontend/main.js
@@ -33,7 +33,7 @@ local_settings.py
 
 # Jupyter Notebook
 .ipynb_checkpoints
-/Notebooks/In-data/
+*/Notebooks/*
 
 # Webpack
 /frontend/bundles/*
