@@ -12,6 +12,14 @@ CAR/media/*
 *.db
 *.rdb
 
+# Ignore .env files 
+#.*env
+
+# Ignore crypt-key
+crypt-key
+
+# Ignore compiled main.js
+CAR/frontend/static/frontend/main.js
 boilerplatenotes.txt
 
 # Ignore log file
@@ -28,7 +36,7 @@ local_settings.py
 
 # Jupyter Notebook
 .ipynb_checkpoints
-/Notebooks/In-data/
+*/Notebooks/*
 
 # Webpack
 /frontend/bundles/*
@@ -65,3 +73,4 @@ pytestdebug.log
 **/*.backup.*
 **/*.back.*
 node_modules
+main.js

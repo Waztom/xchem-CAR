@@ -158,6 +158,8 @@ class IBMDrySolutionAction(models.Model):
 class IBMExtractAction(models.Model):
     class Unit(models.TextChoices):
         ml = "ml"
+        mmol = "mmol"
+        moleq = "moleq"
 
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
@@ -175,6 +177,8 @@ class IBMFilterAction(models.Model):
 
     class Unit(models.TextChoices):
         ml = "ml"
+        mmol = "mmol"
+        moleq = "moleq"
 
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
@@ -188,17 +192,18 @@ class IBMFilterAction(models.Model):
         choices=Unit.choices, default=Unit.ml, max_length=10,
     )
 
-    extractionsolventforprecipitate = models.CharField(max_length=255, null=True)
-    extractionsolventforprecipitatequantity = models.IntegerField(null=True)
-    extractionsolventforprecipitatequantityunit = models.CharField(
+    extractionforprecipitatesolvent = models.CharField(max_length=255, null=True)
+    extractionforprecipitatesolventquantity = models.IntegerField(null=True)
+    extractionforprecipitatesolventquantityunit = models.CharField(
         choices=Unit.choices, default=Unit.ml, max_length=10,
     )
 
 
 class IBMMakeSolutionAction(models.Model):
     class Unit(models.TextChoices):
-        mmol = "mmol"
         ml = "ml"
+        mmol = "mmol"
+        moleq = "moleq"
 
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
@@ -218,6 +223,8 @@ class IBMMakeSolutionAction(models.Model):
 class IBMPartitionAction(models.Model):
     class Unit(models.TextChoices):
         ml = "ml"
+        mmol = "mmol"
+        moleq = "moleq"
 
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
@@ -238,6 +245,8 @@ class IBMPartitionAction(models.Model):
 class IBMpHAction(models.Model):
     class Unit(models.TextChoices):
         ml = "ml"
+        mmol = "mmol"
+        moleq = "moleq"
 
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
@@ -260,6 +269,7 @@ class IBMQuenchAction(models.Model):
     class Unit(models.TextChoices):
         ml = "ml"
         mmol = "mmol"
+        moleq = "moleq"
 
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
@@ -334,6 +344,8 @@ class IBMStoreAction(models.Model):
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
     material = models.CharField(max_length=255)
+    materialsmiles = models.CharField(max_length=255, null=True)
+    materialimage = models.FileField(upload_to="storeimages/", max_length=255, null=True)
 
 
 class IBMWaitAction(models.Model):

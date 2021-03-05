@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack --mode development --watch ./CAR/frontend/src/index.js --output-path ./CAR/frontend/static/frontend/",
-    "build": "webpack --mode production ./CAR/frontend/src/index.js --output-path ./CAR/frontend/static/frontend/"
+    "dev": "webpack --mode development --watch ./frontend/src/index.js --output-path ./frontend/static/frontend/",
+    "build": "webpack --mode production ./frontend/src/index.js --output-path ./frontend/static/frontend/"
   },
   "keywords": [],
   "author": "",

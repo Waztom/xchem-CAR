@@ -1,0 +1,62 @@
+version: "3"
+
+services:
+  app:
+    build: .
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    command: >
+      sh -c "cd /app &&
+             npm run build &&
+             python3 manage.py migrate && 
+             python3 manage.py wait-for-db &&
+             python3 manage.py makemigrations &&
+             python3 manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - redis
+      - rabbit
+
+  db:
+    image: postgres:10-alpine
+    restart: on-failure
+    env_file:
+      - ./.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+
+  redis:
+    image: redis:alpine
+
+  celery:
+    restart: always
+    build: .
+    command: >
+      sh -c "cd /app && 
+             celery -A CAR worker -l info"
+    volumes:
+      - .:/app
+    env_file:
+      - ./.env
+    depends_on:
+      - redis
+      - rabbit
+
+  rabbit:
+    image: rabbitmq:alpine
+    restart: on-failure
+    env_file:
+      - ./.env
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+volumes:
+  pgdata:
+  node_modules:
