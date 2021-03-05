@@ -13,7 +13,7 @@ CAR/media/*
 *.rdb
 
 # Ignore .env files 
-*.env
+.*env
 
 # Ignore compiled main.js
 CAR/frontend/static/frontend/main.js

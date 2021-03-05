@@ -13,7 +13,7 @@ services:
       - ..:/workspace:cached
       - node_modules:/workspace/CAR/node_modules
     env_file:
-      - ./.env
+      - ./.devcontainerenv
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
 
@@ -24,7 +24,7 @@ services:
     image: postgres:10-alpine
     restart: on-failure
     env_file:
-      - ./.env
+      - ./.devcontainerenv
     volumes:
       - pgdata:/var/lib/postgresql/data/
 
@@ -39,13 +39,13 @@ services:
     volumes:
       - ..:/workspace:cached
     env_file:
-      - ./.env
+      - ./.devcontainerenv
 
   rabbit:
     image: rabbitmq:alpine
     restart: on-failure
     env_file:
-      - ./.env
+      - ./.devcontainerenv
 
 volumes:
   pgdata:
