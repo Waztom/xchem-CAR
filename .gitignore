@@ -70,3 +70,4 @@ pytestdebug.log
 **/*.backup.*
 **/*.back.*
 node_modules
+main.js
