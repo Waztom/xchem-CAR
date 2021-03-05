@@ -15,6 +15,9 @@ CAR/media/*
 # Ignore .env files 
 #.*env
 
+# Ignore crypt-key
+crypt-key
+
 # Ignore compiled main.js
 CAR/frontend/static/frontend/main.js
 boilerplatenotes.txt
