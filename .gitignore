@@ -12,8 +12,10 @@ CAR/media/*
 *.db
 *.rdb
 
-# Ignore .env files 
+# Ignore .env files
 #.*env
+
+Deploy_compare
 
 # Ignore crypt-key
 crypt-key
