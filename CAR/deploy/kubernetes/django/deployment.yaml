@@ -20,17 +20,46 @@ spec:
           ports:
             - containerPort: 8000
           env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: SECRET_KEY
+            - name: IBM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: IBM_API_KEY
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: DB_NAME
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: DB_HOST
+            - name: CELERY_BROKER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: CELERY_BROKER_URL
+            - name: CELERY_RESULT_BACKEND
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: CELERY_RESULT_BACKEND
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: postgres-credentials
-                  key: user
-
+                  name: env-credentials
+                  key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-credentials
-                  key: password
+                  name: env-credentials
+                  key: POSTGRES_PASSWORD
 
             - name: POSTGRES_HOST
               value: postgres-service

@@ -1,0 +1,363 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-service
+spec:
+  ports:
+  - port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    pod: django
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  ports:
+  - port: 5433
+    protocol: TCP
+    targetPort: 5433
+  selector:
+    app: postgres-container
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+spec:
+  ports:
+  - port: 5672
+  selector:
+    app: rabbitmq
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  ports:
+  - port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    pod: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    deployment: celery-worker
+  name: celery-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: celery-worker
+  template:
+    metadata:
+      labels:
+        pod: celery-worker
+    spec:
+      containers:
+      - command:
+        - celery
+        - -A
+        - CAR
+        - worker
+        - -l
+        - info
+        env:
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: SECRET_KEY
+              name: env-credentials
+        - name: IBM_API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: IBM_API_KEY
+              name: env-credentials
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              key: DB_NAME
+              name: env-credentials
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              key: DB_HOST
+              name: env-credentials
+        - name: CELERY_BROKER_URL
+          valueFrom:
+            secretKeyRef:
+              key: CELERY_BROKER_URL
+              name: env-credentials
+        - name: CELERY_RESULT_BACKEND
+          valueFrom:
+            secretKeyRef:
+              key: CELERY_RESULT_BACKEND
+              name: env-credentials
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_USER
+              name: env-credentials
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_PASSWORD
+              name: env-credentials
+        - name: POSTGRES_HOST
+          value: postgres-service
+        - name: REDIS_HOST
+          value: redis-service
+        - name: RABBIT_HOST
+          value: rabbit-service
+        image: waztom/car:latest
+        name: celery-worker
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: django
+  name: django
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: django
+  template:
+    metadata:
+      labels:
+        pod: django
+    spec:
+      containers:
+      - env:
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: SECRET_KEY
+              name: env-credentials
+        - name: IBM_API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: IBM_API_KEY
+              name: env-credentials
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              key: DB_NAME
+              name: env-credentials
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              key: DB_HOST
+              name: env-credentials
+        - name: CELERY_BROKER_URL
+          valueFrom:
+            secretKeyRef:
+              key: CELERY_BROKER_URL
+              name: env-credentials
+        - name: CELERY_RESULT_BACKEND
+          valueFrom:
+            secretKeyRef:
+              key: CELERY_RESULT_BACKEND
+              name: env-credentials
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_USER
+              name: env-credentials
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_PASSWORD
+              name: env-credentials
+        - name: POSTGRES_HOST
+          value: postgres-service
+        - name: REDIS_HOST
+          value: redis-service
+        - name: RABBIT_HOST
+          value: rabbit-service
+        image: waztom/car:latest
+        name: django
+        ports:
+        - containerPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-container
+  template:
+    metadata:
+      labels:
+        app: postgres-container
+        tier: backend
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_USER
+              name: env-credentials
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_PASSWORD
+              name: env-credentials
+        - name: POSTGRES_DB
+          value: kubernetes_django
+        image: postgres:10-alpine
+        name: postgres-container
+        ports:
+        - containerPort: 5433
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgres-volume-mount
+      volumes:
+      - name: postgres-volume-mount
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - image: rabbitmq:alpine
+        name: rabbitmq
+        ports:
+        - containerPort: 5672
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: redis
+  template:
+    metadata:
+      labels:
+        pod: redis
+    spec:
+      containers:
+      - image: redis:alpine
+        name: master
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+---
+apiVersion: v1
+kind: Job
+metadata:
+  name: django-migrations
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      containers:
+      - command:
+        - python3
+        - manage.py
+        - migrate
+        env:
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: SECRET_KEY
+              name: env-credentials
+        - name: IBM_API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: IBM_API_KEY
+              name: env-credentials
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              key: DB_NAME
+              name: env-credentials
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              key: DB_HOST
+              name: env-credentials
+        - name: CELERY_BROKER_URL
+          valueFrom:
+            secretKeyRef:
+              key: CELERY_BROKER_URL
+              name: env-credentials
+        - name: CELERY_RESULT_BACKEND
+          valueFrom:
+            secretKeyRef:
+              key: CELERY_RESULT_BACKEND
+              name: env-credentials
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_USER
+              name: env-credentials
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_PASSWORD
+              name: env-credentials
+        - name: POSTGRES_HOST
+          value: postgres-service
+        image: waztom/car:latest
+        name: django
+      restartPolicy: Never
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  labels:
+    type: local
+  name: postgres-pv
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 2Gi
+  hostPath:
+    path: /data/postgres-pv
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    type: local
+  name: postgres-pvc
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  volumeName: postgres-pv

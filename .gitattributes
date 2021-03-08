@@ -4,4 +4,4 @@
 
 # Git crypt files
 .*env filter=git-crypt diff=git-crypt
-secrets.yaml filter=git-crypt diff=git-crypt
+env.yaml filter=git-crypt diff=git-crypt

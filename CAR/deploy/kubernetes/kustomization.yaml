@@ -1,0 +1,6 @@
+bases:
+- ./celery
+- ./django
+- ./postgres
+- ./rabbit
+- ./redis

@@ -20,14 +20,14 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: postgres-credentials
-                  key: user
+                  name: env-credentials
+                  key: POSTGRES_USER
 
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-credentials
-                  key: password
+                  name: env-credentials
+                  key: POSTGRES_PASSWORD
 
             - name: POSTGRES_DB
               value: kubernetes_django
