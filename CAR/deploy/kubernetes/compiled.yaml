@@ -347,17 +347,3 @@ spec:
   hostPath:
     path: /data/postgres-pv
   storageClassName: standard
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  labels:
-    type: local
-  name: postgres-pvc
-spec:
-  accessModes:
-  - ReadWriteMany
-  resources:
-    requests:
-      storage: 2Gi
-  volumeName: postgres-pv
