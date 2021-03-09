@@ -15,7 +15,7 @@ WORKDIR /workspace
 RUN \
  apt-get update && \
  apt-get upgrade -y && \
- apt-get install --no-install-recommends -y python3-rdkit python3-pip python3-pandas python3-psycopg2 nodejs npm git git-crypt && \ 
+ apt-get install --no-install-recommends -y python3-rdkit python3-pip python3-pandas python3-psycopg2 nodejs npm git git-crypt nano && \ 
  apt-get autoclean -y &&\
  pip install -r requirements-dev.txt &&\  
  npm i npm@latest -g && \
