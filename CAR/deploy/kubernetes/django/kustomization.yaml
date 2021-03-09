@@ -1,4 +1,5 @@
 resources:
 - deployment.yaml
-- job-migrations.yaml
+#- job-migrations.yaml
 - service.yaml
+- env.yaml

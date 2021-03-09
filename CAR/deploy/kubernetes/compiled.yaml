@@ -332,18 +332,3 @@ spec:
         image: waztom/car:latest
         name: django
       restartPolicy: Never
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  labels:
-    type: local
-  name: postgres-pv
-spec:
-  accessModes:
-  - ReadWriteMany
-  capacity:
-    storage: 2Gi
-  hostPath:
-    path: /data/postgres-pv
-  storageClassName: standard

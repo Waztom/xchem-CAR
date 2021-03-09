@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        pod: django
+        app: django
     spec:
       containers:
         - name: django

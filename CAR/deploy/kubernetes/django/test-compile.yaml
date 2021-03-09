@@ -1,0 +1,90 @@
+apiVersion: v1
+data:
+  CELERY_BROKER_URL: amqp://user:password@broker:5672
+  CELERY_RESULT_BACKEND: redis://redis:6379
+  DB_HOST: db
+  DB_NAME: postgres
+  IBM_API_KEY: apk-ae2dc67309cb8b9ec10f442e82c36c9a2c12a74f4e4459ea0c0205c4e8083a32165bc9923d057f9f6c2c2951ebb9a6e6d235f31f2d98fc3642122e3c293abb9ad794951d2b510ca301a2477127b35f31
+  POSTGRES_PASSWORD: PT53WfqLTriqG-lYP3MvfJQtUj3eZfbawwNmkB7ArVPOgMSciHIJ6ZdQzv9GSZXSybPqofUMvjqqADwG
+  POSTGRES_USER: postgres
+  SECRET_KEY: k#2y_6)fp_)itq82rpkwdl&r)po#7dh!$1&*sfo-1!_t**x)cf
+kind: Secret
+metadata:
+  name: env-credentials
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-service
+spec:
+  ports:
+  - port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: django
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: django
+  name: django
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: django
+  template:
+    metadata:
+      labels:
+        app: django
+    spec:
+      containers:
+      - env:
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: SECRET_KEY
+              name: env-credentials
+        - name: IBM_API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: IBM_API_KEY
+              name: env-credentials
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              key: DB_NAME
+              name: env-credentials
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              key: DB_HOST
+              name: env-credentials
+        - name: CELERY_BROKER_URL
+          valueFrom:
+            secretKeyRef:
+              key: CELERY_BROKER_URL
+              name: env-credentials
+        - name: CELERY_RESULT_BACKEND
+          valueFrom:
+            secretKeyRef:
+              key: CELERY_RESULT_BACKEND
+              name: env-credentials
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_USER
+              name: env-credentials
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_PASSWORD
+              name: env-credentials
+        image: waztom/car:latest
+        name: django
+        ports:
+        - containerPort: 8000
