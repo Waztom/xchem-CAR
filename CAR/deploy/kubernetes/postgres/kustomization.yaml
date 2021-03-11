@@ -1,4 +1,5 @@
 resources:
-  - deployment.yaml
-  - service.yaml
-  - volume.yaml
+- deployment.yaml
+- service.yaml
+- volume_claim.yaml
+- volume.yaml
