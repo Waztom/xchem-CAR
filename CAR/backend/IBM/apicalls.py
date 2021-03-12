@@ -45,7 +45,7 @@ def getIBMRetroSyn(rxn4chemistry_wrapper, smiles, max_steps):
 
     while results["results"] is None:
         try:
-            time.sleep(30)
+            time.sleep(10)
             response = rxn4chemistry_wrapper.predict_automatic_retrosynthesis(
                 product=smiles, max_steps=max_steps
             )
@@ -106,12 +106,12 @@ def collectIBMReactionInfo(rxn4chemistry_wrapper, pathway):
     reaction_info = {}
 
     try:
-        time.sleep(60)
+        time.sleep(10)
         pathway_synthesis_response = rxn4chemistry_wrapper.create_synthesis_from_sequence(
             sequence_id=pathway["sequenceId"]
         )
         pathway_synthesis_id = pathway_synthesis_response["synthesis_id"]
-        time.sleep(60)
+        # time.sleep(60)
         synthesis_tree, reactions, actions = rxn4chemistry_wrapper.get_synthesis_plan(
             synthesis_id=pathway_synthesis_id
         )
