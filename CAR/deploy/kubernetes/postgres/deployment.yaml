@@ -31,7 +31,6 @@ spec:
 
             - name: POSTGRES_DB
               value: kubernetes_django
-
           ports:
             - containerPort: 5433
           volumeMounts:
