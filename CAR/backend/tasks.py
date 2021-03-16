@@ -34,8 +34,8 @@ def delete_tmp_file(filepath):
 # Celery validate task
 @shared_task
 def validateFileUpload(csv_fp, project_info=None, validate_only=True):
-    """ Celery task to process validate the uploaded files for retrosynthesis planning.
-    
+    """Celery task to process validate the uploaded files for retrosynthesis planning.
+
     Parameters
     ----------
     csv_fp: str
@@ -46,7 +46,7 @@ def validateFileUpload(csv_fp, project_info=None, validate_only=True):
     validate_only: boolean
         set to True to delete tmp file saved for validation and set to False to save tmp file and keep
         for uploading and creating model objects
-    
+
     Returns
     -------
     validate_output: tuple
@@ -77,9 +77,9 @@ def validateFileUpload(csv_fp, project_info=None, validate_only=True):
         uploaded_csv_df["Targets"] = smiles_list
         amounts_list = [amount for amount in uploaded_csv_df["Ammount_required (mg)"]]
 
-        for index, smi, ammount in zip(indexes, smiles_list, amounts_list):
-            validate_dict = checkSMILES(smi, index, validate_dict)
-            validate_dict = checkIsNumber(ammount, index, validate_dict)
+        for index, smi, amount in zip(indexes, smiles_list, amounts_list):
+            validate_dict = checkSMILES(target_smiles=smi, index=index, validate_dict=validate_dict)
+            validate_dict = checkIsNumber(amount=amount, index=index, validate_dict=validate_dict)
 
     if len(validate_dict["warning_string"]) != 0:
         validated = False
@@ -124,104 +124,118 @@ def uploadIBMReaction(validate_output):
             # Number of steps/name of reactants from IBM API???????
             # Create a Target model and return target id
             target_id = createTargetModel(
-                project_id=project_id, smiles=smiles, target_no=target_no, target_mass=target_mass,
+                project_id=project_id,
+                smiles=smiles,
+                target_no=target_no,
+                target_mass=target_mass,
             )
 
             # Create IBM
             # Run IBM API cal to get retrosyn info
             max_steps = 3
             results = getIBMRetroSyn(
-                rxn4chemistry_wrapper=rxn4chemistry_wrapper, smiles=smiles, max_steps=max_steps,
+                rxn4chemistry_wrapper=rxn4chemistry_wrapper,
+                smiles=smiles,
+                max_steps=max_steps,
             )
 
-            # Set maximum number of attempts. Sometimes variation in routes is
-            # very similar and wastes times
-            max_attempts = 3
-            attempts_dict = {}
+            # Check if IBM API has been successful
+            if results:
+                # Set maximum number of attempts. Sometimes variation in routes is
+                # very similar and wastes times
+                max_attempts = 3
+                attempts_dict = {}
 
-            # Set maximum number of methods/pathways to collect
-            no_pathways_found = len(results["retrosynthetic_paths"])
+                # Set maximum number of methods/pathways to collect
+                no_pathways_found = len(results["retrosynthetic_paths"])
 
-            if no_pathways_found <= 3:
-                max_pathways = no_pathways_found
-            if no_pathways_found > 3:
-                max_pathways = 3
+                if no_pathways_found <= 3:
+                    max_pathways = no_pathways_found
+                if no_pathways_found > 3:
+                    max_pathways = 3
 
-            pathway_no = 1
+                pathway_no = 1
 
-            pathway_filter = []
+                pathway_filter = []
 
-            for pathway in results["retrosynthetic_paths"]:
-                print(pathway_no)
-                try:
-                    attempts_dict[pathway_no] += 1
-                except:
-                    attempts_dict[pathway_no] = 1
+                for pathway in results["retrosynthetic_paths"]:
+                    print(pathway_no)
+                    try:
+                        attempts_dict[pathway_no] += 1
+                    except:
+                        attempts_dict[pathway_no] = 1
 
-                no_attempts = attempts_dict[pathway_no]
+                    no_attempts = attempts_dict[pathway_no]
 
-                if no_attempts > max_attempts:
-                    break
+                    if no_attempts > max_attempts:
+                        break
 
-                if pathway_no <= max_pathways and pathway["confidence"] > 0.90:
+                    if pathway_no <= max_pathways and pathway["confidence"] > 0.90:
 
-                    # Get reaction info about pathway
-                    reaction_info = collectIBMReactionInfo(
-                        rxn4chemistry_wrapper=rxn4chemistry_wrapper, pathway=pathway
-                    )
-
-                    # Need to add check if reaction class and reactants already exist -
-                    # in other words looking for diversity and not dulpication
-                    # of reactions. This ignores actions of the method
-                    method_integer = filtermethod(reaction_info=reaction_info)
-
-                    if method_integer not in pathway_filter:
-                        pathway_no += 1
-
-                        pathway_filter.append(method_integer)
-
-                        # Create a Method model
-                        method_id = createMethodModel(
-                            target_id=target_id, smiles=smiles, max_steps=max_steps,
+                        # Get reaction info about pathway
+                        reaction_info = collectIBMReactionInfo(
+                            rxn4chemistry_wrapper=rxn4chemistry_wrapper, pathway=pathway
                         )
 
-                        product_no = 1
-                        for product_smiles, reaction_class, actions in zip(
-                            reaction_info["product_smiles"],
-                            reaction_info["rclass"],
-                            reaction_info["actions"],
-                        ):
-                            # Product_smiles and reaction class is a list of individual elements
-                            # Reactants and actions is a list of lists
+                        # Check if reaction info call has been successful
+                        if reaction_info:
 
-                            # Create a Reaction model
-                            reaction_id = createReactionModel(
-                                method_id=method_id, reaction_class=reaction_class
-                            )
+                            # Need to add check if reaction class and reactants already exist -
+                            # in other words looking for diversity and not dulpication
+                            # of reactions. This ignores actions of the method
+                            method_integer = filtermethod(reaction_info=reaction_info)
 
-                            # Create a Product model
-                            createProductModel(
-                                reaction_id=reaction_id,
-                                project_name=project_name,
-                                target_no=target_no,
-                                pathway_no=pathway_no,
-                                product_no=product_no,
-                                product_smiles=product_smiles,
-                            )
+                            if method_integer not in pathway_filter:
+                                pathway_no += 1
 
-                            # Create action models
-                            action_no = 1
-                            for action in actions:
-                                created_model = createActionModel(
-                                    reaction_id=reaction_id, action_no=action_no, action=action,
+                                pathway_filter.append(method_integer)
+
+                                # Create a Method model
+                                method_id = createMethodModel(
+                                    target_id=target_id,
+                                    smiles=smiles,
+                                    max_steps=max_steps,
                                 )
-                                if created_model:
-                                    action_no += 1
 
-                            product_no += 1
+                                product_no = 1
+                                for product_smiles, reaction_class, actions in zip(
+                                    reaction_info["product_smiles"],
+                                    reaction_info["rclass"],
+                                    reaction_info["actions"],
+                                ):
+                                    # Product_smiles and reaction class is a list of individual elements
+                                    # Reactants and actions is a list of lists
 
-                if pathway_no > max_pathways:
-                    break
+                                    # Create a Reaction model
+                                    reaction_id = createReactionModel(
+                                        method_id=method_id, reaction_class=reaction_class
+                                    )
+
+                                    # Create a Product model
+                                    createProductModel(
+                                        reaction_id=reaction_id,
+                                        project_name=project_name,
+                                        target_no=target_no,
+                                        pathway_no=pathway_no,
+                                        product_no=product_no,
+                                        product_smiles=product_smiles,
+                                    )
+
+                                    # Create action models
+                                    action_no = 1
+                                    for action in actions:
+                                        created_model = createActionModel(
+                                            reaction_id=reaction_id,
+                                            action_no=action_no,
+                                            action=action,
+                                        )
+                                        if created_model:
+                                            action_no += 1
+
+                                    product_no += 1
+
+                    if pathway_no > max_pathways:
+                        break
 
             target_no += 1
 
@@ -230,4 +244,3 @@ def uploadIBMReaction(validate_output):
     default_storage.delete(csv_fp)
 
     return validate_dict, validated
-

@@ -36,8 +36,8 @@ def createIBMProject(project_name):
 
 def getIBMRetroSyn(rxn4chemistry_wrapper, smiles, max_steps):
     """
-        Use the IBM API to get some possible retrosynthesis routes
-        """
+    Use the IBM API to get some possible retrosynthesis routes
+    """
     # Create dummy dictionary to create while loop to catch when status is a SUCCESS
     results = {}
     results["status"] = None
@@ -45,7 +45,7 @@ def getIBMRetroSyn(rxn4chemistry_wrapper, smiles, max_steps):
 
     while results["results"] is None:
         try:
-            time.sleep(30)
+            time.sleep(10)
             response = rxn4chemistry_wrapper.predict_automatic_retrosynthesis(
                 product=smiles, max_steps=max_steps
             )
@@ -56,7 +56,7 @@ def getIBMRetroSyn(rxn4chemistry_wrapper, smiles, max_steps):
                 )
                 results["results"] = results
         except Exception as e:
-            print(e)
+            return None
     return results["results"]
 
 
@@ -105,20 +105,23 @@ def collect_reactants(tree):
 def collectIBMReactionInfo(rxn4chemistry_wrapper, pathway):
     reaction_info = {}
 
-    time.sleep(60)
-    pathway_synthesis_response = rxn4chemistry_wrapper.create_synthesis_from_sequence(
-        sequence_id=pathway["sequenceId"]
-    )
-    pathway_synthesis_id = pathway_synthesis_response["synthesis_id"]
-    time.sleep(60)
-    synthesis_tree, reactions, actions = rxn4chemistry_wrapper.get_synthesis_plan(
-        synthesis_id=pathway_synthesis_id
-    )
+    try:
+        time.sleep(10)
+        pathway_synthesis_response = rxn4chemistry_wrapper.create_synthesis_from_sequence(
+            sequence_id=pathway["sequenceId"]
+        )
+        pathway_synthesis_id = pathway_synthesis_response["synthesis_id"]
+        # time.sleep(60)
+        synthesis_tree, reactions, actions = rxn4chemistry_wrapper.get_synthesis_plan(
+            synthesis_id=pathway_synthesis_id
+        )
 
-    reaction_info["actions"] = collect_actions(synthesis_tree)
-    # Can we join these into one loop?
-    reaction_info["rclass"] = collect_rclass(pathway)
-    reaction_info["product_smiles"] = collect_products(pathway)
-    reaction_info["reactants"] = collect_reactants(pathway)
+        reaction_info["actions"] = collect_actions(synthesis_tree)
+        # Can we join these into one loop?
+        reaction_info["rclass"] = collect_rclass(pathway)
+        reaction_info["product_smiles"] = collect_products(pathway)
+        reaction_info["reactants"] = collect_reactants(pathway)
 
-    return reaction_info
+        return reaction_info
+    except:
+        return None

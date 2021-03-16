@@ -32,6 +32,7 @@ class Target(models.Model):
         g = "g"
         mg = "mg"
 
+    status = models.BooleanField(default=True)
     project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
     smiles = models.CharField(max_length=255, db_index=True, null=True)
     image = models.FileField(upload_to="targetimages/", max_length=255)
@@ -42,6 +43,7 @@ class Target(models.Model):
 
 class Method(models.Model):
     target_id = models.ForeignKey(Target, on_delete=models.CASCADE)
+    status = models.BooleanField(default=True)
     nosteps = models.IntegerField(null=True)
 
 
@@ -86,7 +88,11 @@ class IBMAddAction(models.Model):
     material = models.CharField(max_length=255)
     materialsmiles = models.CharField(max_length=255, null=True)
     materialquantity = models.IntegerField()
-    materialquantityunit = models.CharField(choices=Unit.choices, default=Unit.mmol, max_length=10,)
+    materialquantityunit = models.CharField(
+        choices=Unit.choices,
+        default=Unit.mmol,
+        max_length=10,
+    )
 
     dropwise = models.BooleanField(default=False)
     atmosphere = models.CharField(choices=Atmosphere.choices, default=Atmosphere.air, max_length=10)
@@ -189,13 +195,17 @@ class IBMFilterAction(models.Model):
     rinsingsolvent = models.CharField(max_length=255, null=True)
     rinsingsolventquantity = models.IntegerField(null=True)
     rinsingsolventquantityunit = models.CharField(
-        choices=Unit.choices, default=Unit.ml, max_length=10,
+        choices=Unit.choices,
+        default=Unit.ml,
+        max_length=10,
     )
 
     extractionforprecipitatesolvent = models.CharField(max_length=255, null=True)
     extractionforprecipitatesolventquantity = models.IntegerField(null=True)
     extractionforprecipitatesolventquantityunit = models.CharField(
-        choices=Unit.choices, default=Unit.ml, max_length=10,
+        choices=Unit.choices,
+        default=Unit.ml,
+        max_length=10,
     )
 
 
@@ -373,4 +383,3 @@ class IBMWashAction(models.Model):
     materialquantity = models.IntegerField(null=True)
     materialquantityunit = models.CharField(choices=Unit.choices, default=Unit.ml, max_length=10)
     numberofrepetitions = models.IntegerField(null=True)
-
