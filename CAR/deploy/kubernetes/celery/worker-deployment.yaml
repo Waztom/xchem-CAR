@@ -59,6 +59,16 @@ spec:
                 secretKeyRef:
                   name: env-credentials
                   key: POSTGRES_PASSWORD
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: RABBITMQ_DEFAULT_USER
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: RABBITMQ_DEFAULT_PASS
 
             - name: POSTGRES_HOST
               value: postgres-service

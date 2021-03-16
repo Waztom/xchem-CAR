@@ -17,3 +17,14 @@ spec:
           image: rabbitmq:alpine
           ports:
             - containerPort: 5672
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: RABBITMQ_DEFAULT_USER
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: RABBITMQ_DEFAULT_PASS
