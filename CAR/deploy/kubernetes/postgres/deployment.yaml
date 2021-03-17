@@ -30,7 +30,11 @@ spec:
                   key: POSTGRES_PASSWORD
 
             - name: POSTGRES_DB
-              value: kubernetes_django
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: POSTGRES_NAME
+
           ports:
             - containerPort: 5432
           volumeMounts:

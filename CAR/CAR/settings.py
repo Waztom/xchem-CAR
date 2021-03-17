@@ -85,11 +85,11 @@ WSGI_APPLICATION = "CAR.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ["DB_NAME"],
+        "NAME": os.environ["POSTGRES_NAME"],
         "USER": os.environ["POSTGRES_USER"],
         "PASSWORD": os.environ["POSTGRES_PASSWORD"],  # NB must get this stuff in .env file!
         "HOST": os.environ["POSTGRES_HOST"],  # set in docker-compose.yml
-        "PORT": 5432,  # default postgres port
+        "PORT": os.environ["POSTGRES_PORT"],  # default postgres port
     }
 }
 
