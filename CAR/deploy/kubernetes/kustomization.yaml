@@ -1,9 +1,9 @@
 resources:
-- env.yaml
+  - env.yaml
 
 bases:
-- ./celery
-- ./django
-- ./postgres
-- ./rabbit
-- ./redis
+  - ./postgres
+  - ./rabbit
+  - ./redis
+  - ./celery
+  - ./django
