@@ -21,7 +21,7 @@ spec:
             - containerPort: 8000
           imagePullPolicy: Always
           env:
-            - name: SECRET_KEY
+          - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: env-credentials
@@ -36,11 +36,16 @@ spec:
                 secretKeyRef:
                   name: env-credentials
                   key: DB_NAME
-            - name: DB_HOST
+            - name: POSTGRES_HOST
               valueFrom:
                 secretKeyRef:
                   name: env-credentials
-                  key: DB_HOST
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: POSTGRES_PORT
             - name: CELERY_BROKER_URL
               valueFrom:
                 secretKeyRef:

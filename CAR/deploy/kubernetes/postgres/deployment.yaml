@@ -32,7 +32,7 @@ spec:
             - name: POSTGRES_DB
               value: kubernetes_django
           ports:
-            - containerPort: 5433
+            - containerPort: 5432
           volumeMounts:
             - name: postgres-volume-mount
               mountPath: /var/lib/postgresql/data
