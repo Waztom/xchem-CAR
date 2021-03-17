@@ -89,7 +89,7 @@ DATABASES = {
         "USER": os.environ["POSTGRES_USER"],
         "PASSWORD": os.environ["POSTGRES_PASSWORD"],  # NB must get this stuff in .env file!
         "HOST": os.environ["POSTGRES_HOST"],  # set in docker-compose.yml
-        "PORT": os.environ["POSTGRES_PORT"],  # default postgres port
+        "PORT": 5432,  # default postgres port
     }
 }
 
