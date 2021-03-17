@@ -21,12 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+DEBBUG = False
 
-ALLOWED_HOSTS = []
+# NB Need to change this
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -81,13 +83,13 @@ WSGI_APPLICATION = "CAR.wsgi.application"
 # DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3",}}
 # Postgres DB
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ['DB_NAME'],
-        'USER': os.environ['POSTGRES_USER'],
-        'PASSWORD': os.environ['POSTGRES_PASSWORD'], # NB must get this stuff in .env file! 
-        'HOST': os.environ['DB_HOST'], # set in docker-compose.yml
-        'PORT': 5432 # default postgres port
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ["POSTGRES_NAME"],
+        "USER": os.environ["POSTGRES_USER"],
+        "PASSWORD": os.environ["POSTGRES_PASSWORD"],  # NB must get this stuff in .env file!
+        "HOST": os.environ["POSTGRES_HOST"],  # set in docker-compose.yml
+        "PORT": os.environ["POSTGRES_PORT"],  # default postgres port
     }
 }
 
@@ -95,10 +97,18 @@ DATABASES = {
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
 ]
 
 
@@ -139,15 +149,20 @@ LOGGING = {
             "filename": str(BASE_DIR) + "/logs/logfile.log",
         },
     },
-    "loggers": {"django": {"handlers": ["file"], "level": "DEBUG", "propagate": True,},},
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
 }
 
 # celery setup
 CELERY = {
-    'CELERY_BROKER_URL' : os.environ['CELERY_BROKER_URL'], # 'amqp://localhost' for local devlopment
-    'CELERY_RESULT_BACKEND': os.environ['CELERY_RESULT_BACKEND'], # 'redis://redis:6379'
-    'CELERY_ACCEPT_CONTENT': ['application/json'],
-    'CELERY_RESULT_SERIALIZER': 'json',
-    'CELERY_TASK_SERIALIZER': 'json',
+    "CELERY_BROKER_URL": os.environ["CELERY_BROKER_URL"],  # 'amqp://localhost' for local devlopment
+    "CELERY_RESULT_BACKEND": os.environ["CELERY_RESULT_BACKEND"],  # 'redis://redis:6379'
+    "CELERY_ACCEPT_CONTENT": ["application/json"],
+    "CELERY_RESULT_SERIALIZER": "json",
+    "CELERY_TASK_SERIALIZER": "json",
 }
-

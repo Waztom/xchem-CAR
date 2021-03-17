@@ -17,38 +17,24 @@ spec:
       containers:
         - name: celery-worker
           image: waztom/car:latest
+          imagePullPolicy: Always
           command: ["celery", "-A", "CAR", "worker", "-l", "info"]
           env:
-            - name: SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: env-credentials
-                  key: SECRET_KEY
             - name: IBM_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: env-credentials
                   key: IBM_API_KEY
-            - name: DB_NAME
+            - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: env-credentials
-                  key: DB_NAME
-            - name: DB_HOST
+                  key: SECRET_KEY
+            - name: POSTGRES_NAME
               valueFrom:
                 secretKeyRef:
                   name: env-credentials
-                  key: DB_HOST
-            - name: CELERY_BROKER_URL
-              valueFrom:
-                secretKeyRef:
-                  name: env-credentials
-                  key: CELERY_BROKER_URL
-            - name: CELERY_RESULT_BACKEND
-              valueFrom:
-                secretKeyRef:
-                  name: env-credentials
-                  key: CELERY_RESULT_BACKEND
+                  key: POSTGRES_NAME
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -59,6 +45,26 @@ spec:
                 secretKeyRef:
                   name: env-credentials
                   key: POSTGRES_PASSWORD
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: POSTGRES_PORT
+            - name: CELERY_BROKER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: CELERY_BROKER_URL
+            - name: CELERY_RESULT_BACKEND
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: CELERY_RESULT_BACKEND
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:
