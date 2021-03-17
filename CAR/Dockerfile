@@ -1,10 +1,9 @@
 FROM debian:bullseye-slim
 
-# Copy Python and Node reqs
-COPY package.json /app/package.json
-COPY requirements.txt /app/requirements.txt
-
 WORKDIR /app
+
+# Copy over all the files
+COPY . . 
 
 # Update and install
 RUN \
@@ -14,8 +13,13 @@ RUN \
  apt-get autoclean -y &&\
  pip install -r requirements.txt &&\  
  npm i npm@latest -g && \
- npm install --quiet --legacy-peer-deps 
+ npm install --quiet --legacy-peer-deps &&\
+ mkdir logs &&\
+ cd logs &&\
+ touch logfile.log
 
-# Copy over all the files
-COPY . . 
+# Expose port
+EXPOSE 8000
 
+# Run on Entry
+CMD cd /app/ ; npm run build ; python3 manage.py wait-for-db ; python3 manage.py migrate backend  ; python3 manage.py makemigrations backend ; python3 manage.py runserver 0.0.0.0:8000

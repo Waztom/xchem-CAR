@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker
+  labels:
+    deployment: celery-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: celery-worker
+  template:
+    metadata:
+      labels:
+        pod: celery-worker
+    spec:
+      containers:
+        - name: celery-worker
+          image: waztom/car:latest
+          command: ["celery", "-A", "CAR", "worker", "-l", "info"]
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: SECRET_KEY
+            - name: IBM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: IBM_API_KEY
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: DB_NAME
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: DB_HOST
+            - name: CELERY_BROKER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: CELERY_BROKER_URL
+            - name: CELERY_RESULT_BACKEND
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: CELERY_RESULT_BACKEND
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: POSTGRES_PASSWORD
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: RABBITMQ_DEFAULT_USER
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: env-credentials
+                  key: RABBITMQ_DEFAULT_PASS
+
+            - name: POSTGRES_HOST
+              value: postgres-service
+
+            - name: REDIS_HOST
+              value: redis-service
+
+            - name: RABBIT_HOST
+              value: rabbit-service

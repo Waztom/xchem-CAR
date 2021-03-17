@@ -1,0 +1,2 @@
+resources:
+- worker-deployment.yaml
