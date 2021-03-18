@@ -28,11 +28,10 @@ DEBUG = True
 # DEBBUG = False
 
 # NB Need to change this
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["car.diamond.ac.uk"]
 
 
 # Application definition
-
 INSTALLED_APPS = [
     "backend",
     "rest_framework",
