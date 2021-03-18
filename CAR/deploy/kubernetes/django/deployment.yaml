@@ -1,18 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: django
-  labels:
-    app: django
+  name: django-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      pod: django
+      app: django
   template:
     metadata:
       labels:
-        pod: django
+        app: django
     spec:
       containers:
         - name: django
