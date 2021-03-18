@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: django-ingress
+  annotations:
+    nginx.org/websocket-services: "django-service"
+spec:
+  tls:
+    - hosts:
+        - car.diamond.ac.uk
+  rules:
+    - host: car.diamond.ac.uk
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: django-service
+              servicePort: 8000
