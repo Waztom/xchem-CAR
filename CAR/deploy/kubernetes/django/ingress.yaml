@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: django-ingress
   annotations:
-    nginx.org/websocket-services: "django-service" 
+    nginx.org/websocket-services: django-service
 spec:
   tls:
     - hosts:
