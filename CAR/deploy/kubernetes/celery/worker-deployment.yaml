@@ -84,3 +84,11 @@ spec:
 
             - name: RABBIT_HOST
               value: rabbit-service
+          volumeMounts:
+            - name: django-volume-mount
+              mountPath: /app/media/
+
+      volumes:
+        - name: django-volume-mount
+          persistentVolumeClaim:
+            claimName: django-pvc

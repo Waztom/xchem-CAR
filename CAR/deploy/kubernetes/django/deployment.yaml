@@ -1,26 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: django
-  labels:
-    app: django
+  name: django-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      pod: django
+      app: django
   template:
     metadata:
       labels:
-        pod: django
+        app: django
     spec:
       containers:
         - name: django
           image: waztom/car:latest
-          command: ["/bin/bash", "-c", "--"]
-          args: ["while true; do sleep 30; done;"]
           ports:
-            - containerPort: 8000
+            - name: http
+              containerPort: 8000
           imagePullPolicy: Always
           env:
             - name: IBM_API_KEY
@@ -87,3 +84,11 @@ spec:
 
             - name: RABBIT_HOST
               value: rabbit-service
+          volumeMounts:
+            - name: django-volume-mount
+              mountPath: /app/media/
+
+      volumes:
+        - name: django-volume-mount
+          persistentVolumeClaim:
+            claimName: django-pvc
