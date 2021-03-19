@@ -1,5 +1,5 @@
 resources:
   - deployment.yaml
   - service.yaml
-  - ingress.yam
+  - ingress.yaml
   - volume_claim.yaml

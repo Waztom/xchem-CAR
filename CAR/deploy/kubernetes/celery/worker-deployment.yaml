@@ -86,7 +86,7 @@ spec:
               value: rabbit-service
           volumeMounts:
             - name: django-volume-mount
-              mountPath: /media
+              mountPath: /app/media/
 
       volumes:
         - name: django-volume-mount
