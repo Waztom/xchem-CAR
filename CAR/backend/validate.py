@@ -54,13 +54,11 @@ def checkSMILES(target_smiles, index, validate_dict):
 
 
 def checkIsNumber(amount, index, validate_dict):
+    print(type(amount))
     if type(amount) != float:
         validate_dict = add_warning(
-            target_name=target_smiles,
             field="check_number",
-            warning_string="Input target smiles: '{}' at index {} is not a valid number".format(
-                target_smiles, index
-            ),
+            warning_string="Target mass {} at index {} is not a valid number".format(amount, index),
             validate_dict=validate_dict,
         )
 
