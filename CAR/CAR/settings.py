@@ -28,7 +28,7 @@ DEBUG = True
 # DEBBUG = False
 
 # NB Need to change this
-ALLOWED_HOSTS = ["car.diamond.ac.uk", ".localhost", "127.0.0.1", "[::1]"]
+ALLOWED_HOSTS = ["car.diamond.ac.uk", "car.xchem.diamond.ac.uk", ".localhost", "127.0.0.1", "[::1]"]
 
 
 # Application definition
