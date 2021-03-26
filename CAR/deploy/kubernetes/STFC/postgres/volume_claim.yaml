@@ -1,0 +1,13 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgres-pvc
+  labels:
+    type: local
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: "nfs"
+  resources:
+    requests:
+      storage: 5Gi
