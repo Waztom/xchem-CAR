@@ -1,3 +1,4 @@
+#redundent script?
 from django.http import JsonResponse
 from backend.models import Project   
 
