@@ -1,19 +1,21 @@
 class Deck ():
 
-    def __init__(self):
+    def __init__(self, index=None):
+        self.deckindex = index
         self.PlateList = []
     
     def nextfreeplate(self):
         pass
 
     def addplate(self, location, numwells=None, platewellVolume=None):
-        self.PlateList.append(Plate(index=len(self.PlateList), numwells=numwells,platewellVolume=platewellVolume))
+        self.PlateList.append(Plate(self, index=len(self.PlateList), numwells=numwells,platewellVolume=platewellVolume))
 
 
 
 class Plate ():
 
-    def __init__(self, index=None, numwells=None, platewellVolume=None):
+    def __init__(self, Deck, index=None, numwells=None, platewellVolume=None):
+        self.deck = Deck
         self.plateindex = index
         self.numwells = numwells
         self.platewellVolume = None
@@ -21,7 +23,7 @@ class Plate ():
         self.setupwells()
 
     def __str__(self):
-        return 'Plate number {}'.format(self.plateindex)
+        return 'Deck {}, Plate number {}'.format(self.deck.deckindex, self.plateindex)
 
     def setupwells(self):
         self.setofwells = []
@@ -31,9 +33,9 @@ class Plate ():
 
 
     def nextfreewell(self):
-        for i in Wells:
+        for i in self.setofwells:
             for j in i:
-                if self.Wells[i,j].VolumeUsed == 0:
+                if self.setofwells[i,j].VolumeUsed == 0:
                     print(str(i)+","+str(j))
                     return [i,j]
 
@@ -45,10 +47,10 @@ class Plate ():
         goalinstances = []
         if start_smiles == True:
             pass
-            start_smiles.append([i,j])
+            #start_smiles.append([i,j])
         if goal_smiles == True:
             pass
-            goalinstances.append([i,j])
+            #goalinstances.append([i,j])
         return[startinstances, goalinstances]
 
 
@@ -63,16 +65,16 @@ class Well ():
         self.GoalSmiles = GoalSmiles
         
     def __repr__(self):
-        return 'P{}W{}'.format(self.plate.plateindex, self.wellindex)
+        return 'D{}P{}W{}'.format(self.plate.deck.deckindex, self.plate.plateindex, self.wellindex)
 
     def __str__(self):
-        return 'Plate {}, Well {}'.format(self.plate.plateindex, self.wellindex)
+        return 'Deck {}, Plate {}, Well {}'.format(self.plate.deck.deckindex, self.plate.plateindex, self.wellindex)
     
     def add(self, Ammount):
         SafetyMargin = 10
-        WorkingVolumeused = self.VolumeUsed+ammount
-        if WorkingVolumeused >= Volume*(1-(SafetyMargin/100)):
-            raise NameError("the resultant value of adding "+str(Ammount)+"ul  to "+str(self.VolumeUsed)+"ul would be "+str(WorkingVolumeused)+"ul exceeding the well's volume of "+str(Volume)+"ul (with a saftey margin of "+str(SafetyMargin)+"%)")
+        WorkingVolumeused = self.VolumeUsed+Ammount
+        if WorkingVolumeused >= self.Volume*(1-(SafetyMargin/100)):
+            raise NameError("the resultant value of adding "+str(Ammount)+"ul  to "+str(self.VolumeUsed)+"ul would be "+str(WorkingVolumeused)+"ul exceeding the well's volume of "+str(self.Volume)+"ul (with a saftey margin of "+str(SafetyMargin)+"%)")
         elif WorkingVolumeused < 0:
             raise NameError("the resultant value of adding "+str(Ammount)+"ul  to "+str(self.VolumeUsed)+"ul would be "+str(WorkingVolumeused)+"ul")
         else:
