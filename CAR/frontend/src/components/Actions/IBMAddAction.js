@@ -3,12 +3,16 @@ import Image from "react-bootstrap/Image";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import Button from "react-bootstrap/Button";
+import { Trash } from "react-bootstrap-icons";
 
 import SetQuantity from "../SetActionInputs/SetQuantity";
 import SetDropwise from "../SetActionInputs/SetDropwise";
 import SetAtmosphere from "../SetActionInputs/SetAtmosphere";
 
-const IBMAddAction = ({ action, actionno, updateAction }) => {
+import JSME from "../MolDrawer/JSME";
+
+const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
   const actiontype = action.actiontype.capitalize();
 
   return (
@@ -40,6 +44,13 @@ const IBMAddAction = ({ action, actionno, updateAction }) => {
           ></SetAtmosphere>
         </Col>
       </Row>
+      <Button
+        key={action.id}
+        onClick={() => handleDelete(action.actiontype, action.id)}
+      >
+        <Trash></Trash>
+      </Button>
+      <JSME></JSME>
     </Container>
   );
 };
