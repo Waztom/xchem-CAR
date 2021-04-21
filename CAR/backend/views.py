@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.views import View
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.conf import settings
 from celery.result import AsyncResult
@@ -58,9 +59,7 @@ class UploadProject(View):
                 # Start chained celery tasks. NB first function passes tuple
                 # to second function - see tasks.py
                 task_upload = (
-                    validateFileUpload.s(
-                        tmp_file, project_info=project_info, validate_only=False
-                    )
+                    validateFileUpload.s(tmp_file, project_info=project_info, validate_only=False)
                     | uploadIBMReaction.s()
                 ).apply_async()
 
@@ -81,8 +80,8 @@ class UploadProject(View):
 # Add upload and validate views here!!!!
 # Task functions common between Compound Sets and Target Set pages.
 class ValidateTaskView(View):
-    """ View to handle dynamic loading of validation results from `backend.tasks.validateFileUpload` - the validation of files
-    uploaded to backend/upload 
+    """View to handle dynamic loading of validation results from `backend.tasks.validateFileUpload` - the validation of files
+    uploaded to backend/upload
     Methods
     -------
     allowed requests:
@@ -94,7 +93,7 @@ class ValidateTaskView(View):
     """
 
     def get(self, request, validate_task_id):
-        """ Get method for `ValidateTaskView`. Takes a validate task id, checks it's status and returns the status,
+        """Get method for `ValidateTaskView`. Takes a validate task id, checks it's status and returns the status,
         and result if the task is complete
         Parameters
         ----------
@@ -148,7 +147,9 @@ class ValidateTaskView(View):
 
                 table = pd.DataFrame.from_dict(validate_dict)
                 html_table = table.to_html()
-                html_table += """<p> Your data was <b>not</b> validated. The table above shows errors</p>"""
+                html_table += (
+                    """<p> Your data was <b>not</b> validated. The table above shows errors</p>"""
+                )
 
                 response_data["html"] = html_table
                 response_data["validated"] = "Not validated"
@@ -159,7 +160,7 @@ class ValidateTaskView(View):
 
 
 class UploadTaskView(View):
-    """ View to handle dynamic loading of upload results from `backend.tasks.UploadIBMReaction` - the upload of files
+    """View to handle dynamic loading of upload results from `backend.tasks.UploadIBMReaction` - the upload of files
     for a computed set by a user at viewer/upload_cset or a target set by a user at viewer/upload_tset
     Methods
     -------
@@ -172,7 +173,7 @@ class UploadTaskView(View):
     """
 
     def get(self, request, upload_task_id):
-        """ Get method for `UploadTaskView`. Takes an upload task id, checks it's status and returns the status,
+        """Get method for `UploadTaskView`. Takes an upload task id, checks it's status and returns the status,
         and result if the task is complete
         Parameters
         ----------
@@ -225,8 +226,24 @@ class UploadTaskView(View):
             # NB get tuple from validate task
             validate_dict = results[0]
             validated = results[1]
+            project_info = results[2]
+
+            submitter_name = project_info["submittername"]
+            submitter_email = project_info["submitteremail"]
+            project_name = project_info["project_name"]
 
             if validated:
+                # Send email when data successfully uploaded
+                send_mail(
+                    "Project - {} - data uploaded to CAR".format(project_name),
+                    "Hi {} - Good news, your data has been successfully processed and is available at https://car.xchem.diamond.ac.uk/".format(
+                        submitter_name
+                    ),
+                    "waztom@gmail.com",
+                    [submitter_email],
+                    fail_silently=False,
+                )
+
                 # Upload/Update output tasks send back a tuple
                 # First element defines the source of the upload task (cset, tset)
                 response_data["validated"] = "Validated"
@@ -239,7 +256,9 @@ class UploadTaskView(View):
 
                 table = pd.DataFrame.from_dict(validate_dict)
                 html_table = table.to_html()
-                html_table += """<p> Your data was <b>not</b> validated. The table above shows errors</p>"""
+                html_table += (
+                    """<p> Your data was <b>not</b> validated. The table above shows errors</p>"""
+                )
 
                 response_data["validated"] = "Not validated"
                 response_data["html"] = html_table
@@ -247,6 +266,16 @@ class UploadTaskView(View):
                 return JsonResponse(response_data)
 
             else:
+                send_mail(
+                    "Project - {} - data upload failed to CAR".format(project_name),
+                    "Hi {} - Hmmmm, not so good news, your data failed to be processed and uploaded to CAR. Please try again or contact Warren by responding to this email".format(
+                        submitter_name
+                    ),
+                    "waztom@gmail.com",
+                    [submitter_email],
+                    fail_silently=False,
+                )
+
                 # Error output
                 html_table = """<p> Your data was <b>not</b> processed.</p>"""
                 response_data["processed"] = "None"
@@ -254,4 +283,3 @@ class UploadTaskView(View):
                 return JsonResponse(response_data)
 
         return JsonResponse(response_data)
-

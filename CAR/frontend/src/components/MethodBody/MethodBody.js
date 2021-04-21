@@ -6,15 +6,8 @@ import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 import Button from "react-bootstrap/Button";
 import Accordion from "react-bootstrap/Accordion";
-import Image from "react-bootstrap/Image";
 import CardDeck from "react-bootstrap/CardDeck";
 import Spinner from "react-bootstrap/Spinner";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import { Form } from "react-bootstrap";
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
 
 import IBMAddAction from "../Actions/IBMAddAction";
 import IBMConcentrateAction from "../Actions/IBMConcentrateAction";
@@ -162,13 +155,14 @@ const ActionsList = ({ reactionid }) => {
     });
   }
 
-  function getComponent(action, actionno, updateAction) {
+  function getComponent(action, actionno, updateAction, handleDelete) {
     const components = {
       add: (
         <IBMAddAction
           action={action}
           actionno={actionno}
           updateAction={updateAction}
+          handleDelete={handleDelete}
         ></IBMAddAction>
       ),
       "collect-layer": (
@@ -297,7 +291,6 @@ const ActionsList = ({ reactionid }) => {
         ></IBMWashAction>
       ),
     };
-
     return components[action.actiontype];
   }
 
@@ -305,6 +298,22 @@ const ActionsList = ({ reactionid }) => {
     console.log(changekey);
     var foundIndex = Actions.findIndex((x) => x.id == actionid);
     Actions[foundIndex][changekey] = changevalue;
+  }
+
+  async function deleteAction(actiontype, actionid) {
+    try {
+      const response = await axios.delete(
+        `api/IBM${actiontype}actions/${actionid}/`
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function handleDelete(actiontype, actionid) {
+    deleteAction(actiontype, actionid);
+    const newActionList = Actions.filter((item) => item.id !== actionid);
+    setActions(newActionList);
   }
 
   return (
@@ -332,7 +341,12 @@ const ActionsList = ({ reactionid }) => {
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                     >
-                      {getComponent(action, actionno, updateAction)}
+                      {getComponent(
+                        action,
+                        actionno,
+                        updateAction,
+                        handleDelete
+                      )}
                     </ListGroup.Item>
                   )}
                 </Draggable>
@@ -412,7 +426,7 @@ const ReactionAccordian = ({ methodid }) => {
 const MethodCard = ({ method }) => {
   return (
     <CardDeck>
-      <Card border="light" style={{ width: "30rem" }} key={method.id}>
+      <Card className="synthesiscard" key={method.id}>
         <Card.Body>
           <Card.Title>Synthetic steps</Card.Title>
           <ReactionAccordian
@@ -480,7 +494,7 @@ const MethodBody = ({ targetid, deleteTarget }) => {
     );
   } else {
     return (
-      <ListGroup horizontal>
+      <ListGroup className="targetmethods" horizontal>
         {Methods.map((method) => (
           <ListGroup.Item key={method.id}>
             <MethodCard method={method} key={method.id} />

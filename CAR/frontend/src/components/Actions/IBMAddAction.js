@@ -1,15 +1,70 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
+
 import Image from "react-bootstrap/Image";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import Button from "react-bootstrap/Button";
+import { Trash } from "react-bootstrap-icons";
 
 import SetQuantity from "../SetActionInputs/SetQuantity";
 import SetDropwise from "../SetActionInputs/SetDropwise";
 import SetAtmosphere from "../SetActionInputs/SetAtmosphere";
 
-const IBMAddAction = ({ action, actionno, updateAction }) => {
+import JSMEModal from "../MolDrawer/JSMEModal";
+import MolAlert from "../MolDrawer/MolAlert";
+
+import "../styles.css";
+
+const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
   const actiontype = action.actiontype.capitalize();
+  const id = action.id;
+  const [Show, setShow] = useState(false);
+  const [ShowAlert, setShowAlert] = useState(false);
+  const [Smiles, setSmiles] = useState(action.materialsmiles);
+  const [SVG, setSVG] = useState(action.materialimage);
+
+  function handleShow() {
+    setShow(true);
+  }
+
+  function handleClose(smiles) {
+    setShow(false);
+    var mol = window.checkmol(smiles);
+    if (mol) {
+      setShowAlert(false);
+      var origmol = window.checkmol(Smiles);
+      var origsmiles = origmol.get_smiles();
+      var canonsmiles = mol.get_smiles();
+    } else {
+      setShowAlert(true);
+      console.log("mol invalid");
+    }
+    if (canonsmiles !== origsmiles) {
+      setSmiles(canonsmiles);
+      var svg = window.getsvg(mol);
+      var blob = new Blob([svg], { type: "image/svg+xml" });
+      var url = URL.createObjectURL(blob);
+      setSVG(url);
+      patchSVG(canonsmiles);
+    }
+  }
+
+  async function patchSVG(value) {
+    try {
+      const response = await axios.patch(
+        `api/IBM${action.actiontype}actions/${id}/`,
+        {
+          materialsmiles: value,
+          changeimage: 0,
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+    console.log(value);
+  }
 
   return (
     <Container key={actionno}>
@@ -18,13 +73,15 @@ const IBMAddAction = ({ action, actionno, updateAction }) => {
       </h5>
       <Row>
         <Col>
-          <Image
-            width={350}
-            height={350}
-            src={action.materialimage}
-            alt={action.material}
-            fluid
-          />
+          <MolAlert show={ShowAlert}></MolAlert>
+          <JSMEModal
+            show={Show}
+            handleClose={handleClose}
+            smiles={Smiles}
+          ></JSMEModal>
+          <Button className="editcompound" onClick={() => handleShow()}>
+            <Image src={SVG} alt={action.material} fluid />
+          </Button>
           <SetQuantity
             action={action}
             updateAction={updateAction}
@@ -38,6 +95,16 @@ const IBMAddAction = ({ action, actionno, updateAction }) => {
             action={action}
             updateAction={updateAction}
           ></SetAtmosphere>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Button
+            key={action.id}
+            onClick={() => handleDelete(action.actiontype, action.id)}
+          >
+            <Trash></Trash>
+          </Button>
         </Col>
       </Row>
     </Container>

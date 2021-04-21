@@ -99,7 +99,11 @@ class IBMAddAction(models.Model):
 
     # These are extras for helping robotic execution/calcs
     molecularweight = models.FloatField(null=True)
-    materialimage = models.FileField(upload_to="addactionimages/", max_length=255, null=True)
+    materialimage = models.FileField(
+        upload_to="addactionimages/",
+        max_length=255,
+        null=True,
+    )
 
 
 class IBMCollectLayerAction(models.Model):

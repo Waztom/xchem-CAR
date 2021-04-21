@@ -112,6 +112,8 @@ def uploadIBMReaction(validate_output):
     if validated:
         # Create project model and return project id
         project_id, project_name = createProjectModel(project_info)
+        # Add project name to project info dict for emailing when upload complete
+        project_info["project_name"] = project_name
 
         # Create an IBM project
         IBM_project_id, rxn4chemistry_wrapper = createIBMProject(project_name)
@@ -243,4 +245,4 @@ def uploadIBMReaction(validate_output):
 
     default_storage.delete(csv_fp)
 
-    return validate_dict, validated
+    return validate_dict, validated, project_info
