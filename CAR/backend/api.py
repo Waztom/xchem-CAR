@@ -24,8 +24,10 @@ from .models import (
     IBMWashAction,
 )
 
-
 from rest_framework import viewsets, permissions, filters
+from rest_framework.decorators import action
+from django.http import JsonResponse
+from django.core.files.base import ContentFile
 
 # Import standard serializers
 from .serializers import (
@@ -59,6 +61,11 @@ from .serializers import (
     IBMWaitActionSerializer,
     IBMWashActionSerializer,
 )
+
+from .IBM.createmodels import createSVGString
+from rdkit import Chem
+from rdkit.Chem import Descriptors
+from django.core.files.storage import default_storage
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -135,6 +142,101 @@ class IBMAddActionViewSet(viewsets.ModelViewSet):
     serializer_class = IBMAddActionSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["=reaction_id__id"]
+
+    def get_patch_object(self, pk):
+        return IBMAddAction.objects.get(pk=pk)
+
+    # @action(methods=["PATCH"], detail=True)
+    def partial_update(self, request, pk):
+        addaction = self.get_patch_object(pk)
+
+        try:
+            request.data["changeimage"]
+            materialsmiles = request.data["materialsmiles"]
+            mol = Chem.MolFromSmiles(materialsmiles)
+            molecular_weight = Descriptors.ExactMolWt(mol)
+            add_svg_string = createSVGString(materialsmiles)
+            add_svg_fn = default_storage.save(
+                "addactionimages/{}.svg".format(materialsmiles),
+                ContentFile(add_svg_string),
+            )
+            addaction.materialsmiles = materialsmiles
+            addaction.molecularweight = molecular_weight
+            addaction.materialimage = add_svg_fn
+            addaction.save()
+            data = IBMAddActionSerializer(addaction).data
+
+            return JsonResponse(data)
+            # data = {
+            #     "materialsmiles": materialsmiles,
+            #     "molecularweight": molecular_weight,
+            #     "materialimage": add_svg_fn,
+            # }
+
+            # serializer = IBMAddActionSerializer(
+            #     addaction, data=data, partial=True
+            # )  # set partial=True to update a data partially
+            # serializer.is_valid()
+            # print(serializer.errors)
+            # if serializer.is_valid():
+            #     serializer.save()
+            #     return JsonResponse(code=201, data=serializer.data)
+            # else:
+            #     return JsonResponse(code=400, data="wrong parameters")
+        except:
+            serializer = IBMAddActionSerializer(addaction, data=request.data, partial=True)
+            print(serializer.errors)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse(code=201, data=serializer.data)
+            else:
+                return JsonResponse(code=400, data="wrong parameters")
+
+    # def post(self, request, **kwargs):
+
+    #     addaction = self.get_object()
+    #     print("////////////////////////////////////////////////////")
+    #     print(request.data)
+    #     self.queryset = IBMAddAction.objects.filter(id=addaction.id)
+
+    #     self.serializer_class = IBMAddActionSerializer
+
+    #     materialsmiles = request.data["materialsmiles"]
+    #     reaction_id = request.data["reaction_id"]
+    #     action_no = request.data["reactionno"]
+    #     material = request.data["material"]
+
+    #     mol = Chem.MolFromSmiles(materialsmiles)
+    #     molecular_weight = Descriptors.ExactMolWt(mol)
+    #     add_svg_string = createSVGString(materialsmiles)
+    #     add_svg_fn = default_storage.save(
+    #         "addactionimages/{}-{}-{}.svg".format(reaction_id, action_no, material),
+    #         ContentFile(add_svg_string),
+    #     )
+
+    #     print(data)
+
+    #     data = {
+    #         "reaction_id": reaction_id,
+    #         "actiontype": request.data["actiontype"],
+    #         "actionno": action_no,
+    #         "material": material,
+    #         "materialsmiles": materialsmiles,
+    #         "materialquantity": request.data["materialquantity"],
+    #         "materialquantityunit": request.data["materialquantityunit"],
+    #         "dropwise": request.data["dropwise"],
+    #         "atmosphere": request.data["atmosphere"],
+    #         "molecularweight": molecular_weight,
+    #         "materialimage": add_svg_fn,
+    #     }
+
+    #     serializer = IBMAddActionSerializer(data=data)
+
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     else:
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class IBMCollectLayerActionViewSet(viewsets.ModelViewSet):

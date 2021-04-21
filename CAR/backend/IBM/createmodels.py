@@ -172,7 +172,7 @@ def createTargetModel(project_id, smiles, target_no, target_mass):
     Function that creates a Target object
     if the csv file uploaded is validated and
     the user wants to upload the data
-    
+
     project_id: string
         id of project created for upload
     smiles: string

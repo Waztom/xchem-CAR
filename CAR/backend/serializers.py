@@ -176,4 +176,3 @@ class IBMWashActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = IBMWashAction
         fields = "__all__"
-

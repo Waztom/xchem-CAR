@@ -1,0 +1,15 @@
+.editcompound {
+  background-color: whitesmoke;
+  margin: 5px;
+}
+
+.drawmodal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  border: lightblue;
+  border-style: solid;
+  border-radius: 25px;
+  padding: 25px;
+  transform: translate(-50%, -50%);
+}
