@@ -105,9 +105,9 @@ def createSVGString(smiles):
     mol = Chem.MolFromSmiles(smiles)
 
     # Initiate drawer and set size/font size
-    drawer = Draw.rdMolDraw2D.MolDraw2DSVG(900, 200)
-    drawer.SetFontSize(16)
-    drawer.SetLineWidth(6)
+    drawer = Draw.rdMolDraw2D.MolDraw2DSVG(100, 50)
+    drawer.SetFontSize(8)
+    drawer.SetLineWidth(1)
     # Test
     # drawer.drawOptions().bondLineWidth = 5
     # drawer.drawOptions().padding = 1

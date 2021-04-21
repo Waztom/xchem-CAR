@@ -15,13 +15,7 @@ const IBMStoreAction = ({ action, actionno }) => {
       </h5>
       <Row>
         <Col>
-          <Image
-            width={350}
-            height={350}
-            src={action.materialimage}
-            alt={action.material}
-            fluid
-          />
+          <Image src={action.materialimage} alt={action.material} fluid />
         </Col>
       </Row>
     </Container>

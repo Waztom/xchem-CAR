@@ -30,6 +30,13 @@ DEBUG = True
 # NB Need to change this
 ALLOWED_HOSTS = ["car.diamond.ac.uk", "car.xchem.diamond.ac.uk", ".localhost", "127.0.0.1", "[::1]"]
 
+# Sendgrid email settings
+EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_HOST_USER = "apikey"
+EMAIL_HOST_PASSWORD = os.environ["SENDGRID_API_KEY"]
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
 
 # Application definition
 INSTALLED_APPS = [

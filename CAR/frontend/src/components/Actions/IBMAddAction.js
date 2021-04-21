@@ -80,7 +80,7 @@ const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
             smiles={Smiles}
           ></JSMEModal>
           <Button className="editcompound" onClick={() => handleShow()}>
-            <Image width={300} height={100} src={SVG} alt={action.material} />
+            <Image src={SVG} alt={action.material} fluid />
           </Button>
           <SetQuantity
             action={action}

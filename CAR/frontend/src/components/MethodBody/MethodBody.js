@@ -426,7 +426,7 @@ const ReactionAccordian = ({ methodid }) => {
 const MethodCard = ({ method }) => {
   return (
     <CardDeck>
-      <Card border="light" style={{ width: "30rem" }} key={method.id}>
+      <Card className="synthesiscard" key={method.id}>
         <Card.Body>
           <Card.Title>Synthetic steps</Card.Title>
           <ReactionAccordian
@@ -494,7 +494,7 @@ const MethodBody = ({ targetid, deleteTarget }) => {
     );
   } else {
     return (
-      <ListGroup horizontal>
+      <ListGroup className="targetmethods" horizontal>
         {Methods.map((method) => (
           <ListGroup.Item key={method.id}>
             <MethodCard method={method} key={method.id} />

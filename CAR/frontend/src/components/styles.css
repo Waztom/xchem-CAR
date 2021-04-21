@@ -13,3 +13,14 @@
   padding: 25px;
   transform: translate(-50%, -50%);
 }
+
+.targetmethods {
+  border: none;
+  padding: 0%;
+}
+
+.synthesiscard {
+  padding: 2px;
+  border: none;
+  width: 28rem;
+}
