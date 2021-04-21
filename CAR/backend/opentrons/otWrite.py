@@ -102,13 +102,13 @@ class otScript():
 
     
 
-    def runall(self):
+    def setup(self):
         self.setupScript()
         self.setupLabwear()
         self.setupPipettes()
 
     def example(self):
-        runall()
+        setup()
         self.movefluids("left", "plate['A1']", "plate['B2']",100)
 
 

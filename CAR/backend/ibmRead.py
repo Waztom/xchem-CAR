@@ -7,6 +7,7 @@ import numpy as np
 import backend.opentrons.otWrite
 
 
+
 def getactions():
     """this, using pandas, is not a sustanable aproach and will proberbly not scale"""
     IBMAddAction = pd.DataFrame(list(backend.models.IBMAddAction.objects.all().values()))
@@ -36,10 +37,7 @@ def getactions():
     AllActions = AllActions.append(IBMQuenchAction)
     IBMRefluxAction = pd.DataFrame(list(backend.models.IBMRefluxAction.objects.all().values()))
     AllActions = AllActions.append(IBMRefluxAction)
-    IBMSetTemperatureAction = pd.DataFrame(list(backend.models.IBMSetTemperatureAction.objects.all().values()))
-    AllActions = AllActions.append(IBMSetTemperatureAction)
-    IBMStirAction = pd.DataFrame(list(backend.models.IBMStirAction.objects.all().values()))
-    AllActions = AllActions.append(IBMStirAction)
+    IBMSetTemperatureAction = pd.D(IBMStirAction)
     IBMStoreAction = pd.DataFrame(list(backend.models.IBMStoreAction.objects.all().values()))
     AllActions = AllActions.append(IBMStoreAction)
     IBMWaitAction = pd.DataFrame(list(backend.models.IBMWaitAction.objects.all().values()))
@@ -79,4 +77,3 @@ def basiccomprehension(AllActions):
     print(reactions)
     return reactions
     # return something here
-
