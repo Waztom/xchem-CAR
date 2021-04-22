@@ -1,9 +1,9 @@
 import React, { useState, useRef } from "react";
-import axios from "axios";
 
 import { Form } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
 import IntegerWarning from "../Tooltips/IntegerWarning";
+import { isFloat, isInt, patchChange } from "../Utils";
 
 const SetQuantity = ({ action, updateAction, name }) => {
   const quantname = name + "quantity";
@@ -19,49 +19,27 @@ const SetQuantity = ({ action, updateAction, name }) => {
   const [Unit, setUnit] = useState(unit);
   const [Show, setShow] = useState(false);
 
-  async function patchQuantity(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        [quantname]: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async function patchQuantityUnit(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        [unitname]: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
+  function hideTooltip() {
+    setTimeout(() => setShow(false), 2000);
   }
 
   const handleQuantityChange = (e) => {
     const inputQuantity = e.target.value;
 
-    if (!isNaN(inputQuantity)) {
+    if (isFloat(Number(inputQuantity)) || isInt(Number(inputQuantity))) {
       setQuantity(inputQuantity);
-      patchQuantity(Number(inputQuantity));
-      updateAction(id, quantname, Number(inputQuantity));
+      patchChange(actiontype, id, quantname, inputQuantity);
+      updateAction(id, quantname, inputQuantity);
     } else {
       setQuantity(Quantity);
       setShow(true);
     }
   };
 
-  // Could not find a way to handle timers better - without
-  // passing this function to child component...
-  function hideTooltip() {
-    setTimeout(() => setShow(false), 2000);
-  }
-
   const handleUnitChange = (e) => {
     const inputUnit = e.target.value;
     setUnit(inputUnit);
-    patchQuantityUnit(inputUnit);
+    patchChange(actiontype, id, unitname, inputUnit);
     updateAction(id, unitname, inputUnit);
   };
 

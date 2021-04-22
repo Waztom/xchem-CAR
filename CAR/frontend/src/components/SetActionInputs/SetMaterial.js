@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
+import { patchChange } from "../Utils";
 
 const SetMaterial = ({ action, updateAction }) => {
   const material = action.material;
@@ -11,20 +11,10 @@ const SetMaterial = ({ action, updateAction }) => {
 
   const [Material, setMaterial] = useState(material);
 
-  async function patchMaterial(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        material: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   const handleMaterialChange = (e) => {
     const newmaterial = e.target.value;
     setMaterial(newmaterial);
-    patchMaterial(newmaterial);
+    patchChange(actiontype, id, "material", newmaterial);
     updateAction(id, "material", newmaterial);
   };
 

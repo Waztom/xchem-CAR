@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 import { Form } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
+import { patchChange } from "../Utils";
 
 const SetDropwise = ({ action, updateAction }) => {
   const dropwise = action.dropwise;
@@ -11,20 +11,10 @@ const SetDropwise = ({ action, updateAction }) => {
 
   const [DropWise, setDropwise] = useState(dropwise);
 
-  async function patchDropWise(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        dropwise: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   const handleDropWiseChange = (e) => {
     const newdropwise = e.target.value;
     setDropwise(newdropwise);
-    patchDropWise(newdropwise);
+    patchChange(actiontype, id, "dropwise", newdropwise);
     updateAction(id, "dropwise", newdropwise);
   };
 

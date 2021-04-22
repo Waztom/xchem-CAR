@@ -1,9 +1,9 @@
 import React, { useState, useRef } from "react";
-import axios from "axios";
 
 import { Form } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
 import IntegerWarning from "../Tooltips/IntegerWarning";
+import { isFloat, isInt, patchChange } from "../Utils";
 
 const SetDuration = ({ action, updateAction }) => {
   const duration = action.duration;
@@ -16,32 +16,16 @@ const SetDuration = ({ action, updateAction }) => {
   const [Unit, setUnit] = useState(unit);
   const [Show, setShow] = useState(false);
 
-  async function patchDuration(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        duration: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async function patchDurationUnit(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        durationunit: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
+  function hideTooltip() {
+    setTimeout(() => setShow(false), 2000);
   }
 
   const handleDurationChange = (e) => {
     const inputDuration = e.target.value;
 
-    if (!isNaN(inputDuration)) {
+    if (isFloat(Number(inputDuration)) || isInt(Number(inputDuration))) {
       setDuration(inputDuration);
-      patchDuration(Number(inputDuration));
+      patchChange(actiontype, id, "duration", inputDuration);
       updateAction(id, "duration", Number(inputDuration));
     } else {
       setDuration(Duration);
@@ -49,16 +33,10 @@ const SetDuration = ({ action, updateAction }) => {
     }
   };
 
-  // Could not find a way to handle timers better - without
-  // passing this function to child component...
-  function hideTooltip() {
-    setTimeout(() => setShow(false), 2000);
-  }
-
   const handleUnitChange = (e) => {
     const newunit = e.target.value;
     setUnit(newunit);
-    patchDurationUnit(newunit);
+    patchChange(actiontype, id, "durationunit", newunit);
     updateAction(id, "durationunit", newunit);
   };
 

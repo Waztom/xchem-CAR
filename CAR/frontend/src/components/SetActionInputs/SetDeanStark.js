@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 import { Form } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
+import { patchChange } from "../Utils";
 
 const SetDeanStark = ({ action, updateAction }) => {
   const deanstark = action.deanstarkapparatus;
@@ -11,20 +11,10 @@ const SetDeanStark = ({ action, updateAction }) => {
 
   const [DeanStark, setDeanStark] = useState(deanstark);
 
-  async function patchDeanStark(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        deanstarkapparatus: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   const handleDeanStarkChange = (e) => {
     const newdeanstark = e.target.value;
     setDeanStark(newdeanstark);
-    patchDeanStark(newdeanstark);
+    patchChange(actiontype, id, "deanstarkapparatus", newdeanstark);
     updateAction(id, "deanstarkapparatus", newdeanstark);
   };
 

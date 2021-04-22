@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
+import { patchChange } from "../Utils";
 
 const SetDryingAgent = ({ action, updateAction }) => {
   const dryingagent = action.dryingagent;
@@ -11,20 +11,10 @@ const SetDryingAgent = ({ action, updateAction }) => {
 
   const [DryingAgent, setDryingAgent] = useState(dryingagent);
 
-  async function patchDryingAgent(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        [dryingagent]: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   const handleDryingAgentChange = (e) => {
     const newdryingagent = e.target.value;
     setDryingAgent(newdryingagent);
-    patchDryingAgent(newdryingagent);
+    patchChange(actiontype, id, "dryingagent", newdryingagent);
     updateAction(id, "dryingagent", newdryingagent);
   };
 

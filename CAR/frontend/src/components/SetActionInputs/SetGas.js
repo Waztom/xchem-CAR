@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
+import { patchChange } from "../Utils";
 
 const SetGas = ({ action, updateAction }) => {
   const gas = action.gas;
@@ -11,20 +11,10 @@ const SetGas = ({ action, updateAction }) => {
 
   const [Gas, setGas] = useState(gas);
 
-  async function patchGas(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        gas: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   const handleGasChange = (e) => {
     const newgas = e.target.value;
     setGas(newgas);
-    patchGas(newgas);
+    patchChange(actiontype, id, "gas", newgas);
     updateAction(id, "gas", newgas);
   };
 

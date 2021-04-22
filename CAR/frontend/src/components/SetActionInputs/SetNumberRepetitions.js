@@ -1,9 +1,9 @@
 import React, { useState, useRef } from "react";
-import axios from "axios";
 
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
 import IntegerWarning from "../Tooltips/IntegerWarning";
+import { isInt, patchChange } from "../Utils";
 
 const SetNumberRepetitions = ({ action, updateAction }) => {
   const numberrepetitions = action.numberofrepetitions;
@@ -14,33 +14,22 @@ const SetNumberRepetitions = ({ action, updateAction }) => {
   const [NumberRepetitions, setNumberRepetitions] = useState(numberrepetitions);
   const [Show, setShow] = useState(false);
 
-  async function patchNumberRepetitions(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        numberofrepetitions: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  const handleNumberRepetitionsChange = (e) => {
-    const inputQuantity = e.target.value;
-
-    if (!isNaN(inputQuantity) && Number.isInteger(inputQuantity)) {
-      setNumberRepetitions(inputQuantity);
-      patchNumberRepetitions(Number(inputQuantity));
-      updateAction(id, "numberofrepetitions", Number(inputQuantity));
-    } else {
-      setShow(true);
-    }
-  };
-
-  // Could not find a way to handle timers better - without
-  // passing this function to child component...
   function hideTooltip() {
     setTimeout(() => setShow(false), 2000);
   }
+
+  const handleNumberRepetitionsChange = (e) => {
+    const inputQuantity = Number(e.target.value);
+
+    if (isInt(inputQuantity)) {
+      setNumberRepetitions(inputQuantity);
+      patchChange(actiontype, id, "numberofrepetitions", inputQuantity);
+      updateAction(id, "numberofrepetitions", inputQuantity);
+    } else {
+      setNumberRepetitions(NumberRepetitions);
+      setShow(true);
+    }
+  };
 
   return (
     <InputGroup size="sm" className="mb-3" key={id.toString()}>
@@ -52,7 +41,7 @@ const SetNumberRepetitions = ({ action, updateAction }) => {
       <FormControl
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={NumberRepetitions}
+        value={NumberRepetitions}
         onChange={(event) => handleNumberRepetitionsChange(event)}
         ref={target}
       />
