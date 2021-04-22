@@ -9,7 +9,7 @@ const SetpH = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [pH, setpH] = useState({ ph });
+  const [pH, setpH] = useState(ph);
 
   async function patchpH(value) {
     try {
@@ -41,7 +41,7 @@ const SetpH = ({ action, updateAction }) => {
       <FormControl
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={pH.ph}
+        placeholder={pH}
         onChange={(event) => handlepHChange(event)}
       />
     </InputGroup>

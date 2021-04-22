@@ -1,18 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 
 import { Form } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
+import IntegerWarning from "../Tooltips/IntegerWarning";
 
 const SetDuration = ({ action, updateAction }) => {
   const duration = action.duration;
   const unit = action.durationunit;
   const actiontype = action.actiontype;
   const id = action.id;
+  const target = useRef(null);
 
-  const [Duration, setDuration] = useState({ duration });
-  const [Unit, setUnit] = useState({ unit });
+  const [Duration, setDuration] = useState(duration);
+  const [Unit, setUnit] = useState(unit);
+  const [Show, setShow] = useState(false);
 
   async function patchDuration(value) {
     try {
@@ -35,16 +37,23 @@ const SetDuration = ({ action, updateAction }) => {
   }
 
   const handleDurationChange = (e) => {
-    const inputQuantity = e.target.value;
+    const inputDuration = e.target.value;
 
-    if (!isNaN(inputQuantity)) {
-      setDuration(inputQuantity);
-      patchDuration(Number(inputQuantity));
-      updateAction(id, "duration", inputQuantity);
+    if (!isNaN(inputDuration)) {
+      setDuration(inputDuration);
+      patchDuration(Number(inputDuration));
+      updateAction(id, "duration", Number(inputDuration));
     } else {
-      alert("Please input an integer value");
+      setDuration(Duration);
+      setShow(true);
     }
   };
+
+  // Could not find a way to handle timers better - without
+  // passing this function to child component...
+  function hideTooltip() {
+    setTimeout(() => setShow(false), 2000);
+  }
 
   const handleUnitChange = (e) => {
     const newunit = e.target.value;
@@ -58,18 +67,25 @@ const SetDuration = ({ action, updateAction }) => {
       <InputGroup.Prepend>
         <InputGroup.Text id="inputGroup-sizing-sm">Duration</InputGroup.Text>
       </InputGroup.Prepend>
-      <FormControl
+      <Form.Control
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={Duration.duration}
         onChange={(event) => handleDurationChange(event)}
+        value={Duration}
+        ref={target}
       />
+      <IntegerWarning
+        show={Show}
+        target={target}
+        hideTooltip={hideTooltip}
+        postion="right"
+      ></IntegerWarning>
       <Form.Control
         as="select"
         onChange={(event) => handleUnitChange(event)}
         size="sm"
         type="text"
-        value={Unit.unit}
+        value={Unit}
       >
         <option>seconds</option>
         <option>minutes</option>

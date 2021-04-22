@@ -9,7 +9,7 @@ const SetDryingAgent = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [DryingAgent, setDryingAgent] = useState({ dryingagent });
+  const [DryingAgent, setDryingAgent] = useState(dryingagent);
 
   async function patchDryingAgent(value) {
     try {
@@ -38,7 +38,7 @@ const SetDryingAgent = ({ action, updateAction }) => {
       <FormControl
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={DryingAgent.dryingagent}
+        placeholder={DryingAgent}
         onChange={(event) => handleDryingAgentChange(event)}
       />
     </InputGroup>

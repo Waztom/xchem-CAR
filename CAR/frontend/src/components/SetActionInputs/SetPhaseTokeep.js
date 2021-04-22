@@ -9,7 +9,7 @@ const SetPhaseTokeep = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [PhaseToKeep, setPhaseToKeep] = useState({ phasetokeep });
+  const [PhaseToKeep, setPhaseToKeep] = useState(phasetokeep);
 
   async function patchPhaseToKeep(value) {
     try {
@@ -40,7 +40,7 @@ const SetPhaseTokeep = ({ action, updateAction }) => {
         onChange={(event) => handlePhaseToKeepChange(event)}
         size="sm"
         type="text"
-        value={PhaseToKeep.phasetokeep}
+        value={PhaseToKeep}
       >
         <option>Filtrate</option>
         <option>Precipitate</option>

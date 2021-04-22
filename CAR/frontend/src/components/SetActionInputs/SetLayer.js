@@ -9,7 +9,7 @@ const SetLayer = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Layer, setLayer] = useState({ layer });
+  const [Layer, setLayer] = useState(layer);
 
   async function patchLayer(value) {
     try {
@@ -38,7 +38,7 @@ const SetLayer = ({ action, updateAction }) => {
         onChange={(event) => handleLayerChange(event)}
         size="sm"
         type="text"
-        value={Layer.layer}
+        value={Layer}
       >
         <option>Organic</option>
         <option>Aqueous</option>

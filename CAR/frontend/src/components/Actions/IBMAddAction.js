@@ -15,15 +15,15 @@ import SetAtmosphere from "../SetActionInputs/SetAtmosphere";
 import JSMEModal from "../MolDrawer/JSMEModal";
 import MolAlert from "../MolDrawer/MolAlert";
 
-import "../styles.css";
-
 const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
-  const actiontype = action.actiontype.capitalize();
-  const id = action.id;
+  const [Action, setAction] = useState(action);
   const [Show, setShow] = useState(false);
   const [ShowAlert, setShowAlert] = useState(false);
-  const [Smiles, setSmiles] = useState(action.materialsmiles);
-  const [SVG, setSVG] = useState(action.materialimage);
+
+  const actiontype = Action.actiontype;
+  const id = Action.id;
+  const Smiles = Action.materialsmiles;
+  const SVG = Action.materialimage;
 
   function handleShow() {
     setShow(true);
@@ -42,24 +42,22 @@ const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
       console.log("mol invalid");
     }
     if (canonsmiles !== origsmiles) {
-      setSmiles(canonsmiles);
-      var svg = window.getsvg(mol);
-      var blob = new Blob([svg], { type: "image/svg+xml" });
-      var url = URL.createObjectURL(blob);
-      setSVG(url);
       patchSVG(canonsmiles);
     }
   }
 
   async function patchSVG(value) {
     try {
-      const response = await axios.patch(
-        `api/IBM${action.actiontype}actions/${id}/`,
+      const patchresponse = await axios.patch(
+        `api/IBM${Action.actiontype}actions/${id}/`,
         {
           materialsmiles: value,
-          changeimage: 0,
         }
       );
+      const fetchresponse = await axios.get(
+        `api/IBM${Action.actiontype}actions/${id}/`
+      );
+      setAction(fetchresponse.data);
     } catch (error) {
       console.log(error);
     }
@@ -69,7 +67,7 @@ const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
   return (
     <Container key={actionno}>
       <h5>
-        {actionno}. {actiontype}
+        {actionno}. {actiontype.capitalize()}
       </h5>
       <Row>
         <Col>
@@ -83,26 +81,23 @@ const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
             <Image src={SVG} alt={action.material} fluid />
           </Button>
           <SetQuantity
-            action={action}
+            action={Action}
             updateAction={updateAction}
             name={"material"}
           ></SetQuantity>
           <SetDropwise
-            action={action}
+            action={Action}
             updateAction={updateAction}
           ></SetDropwise>
           <SetAtmosphere
-            action={action}
+            action={Action}
             updateAction={updateAction}
           ></SetAtmosphere>
         </Col>
       </Row>
       <Row>
         <Col>
-          <Button
-            key={action.id}
-            onClick={() => handleDelete(action.actiontype, action.id)}
-          >
+          <Button key={id} onClick={() => handleDelete(actiontype, id)}>
             <Trash></Trash>
           </Button>
         </Col>

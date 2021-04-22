@@ -1,21 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 
 import { Form } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
+import IntegerWarning from "../Tooltips/IntegerWarning";
 
 const SetQuantity = ({ action, updateAction, name }) => {
   const quantname = name + "quantity";
   const unitname = name + "quantityunit";
+  const target = useRef(null);
 
   const quantity = action[quantname];
   const unit = action[unitname];
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Quantity, setQuantity] = useState({ quantity });
-  const [Unit, setUnit] = useState({ unit });
+  const [Quantity, setQuantity] = useState(quantity);
+  const [Unit, setUnit] = useState(unit);
+  const [Show, setShow] = useState(false);
 
   async function patchQuantity(value) {
     try {
@@ -41,17 +43,23 @@ const SetQuantity = ({ action, updateAction, name }) => {
     const inputQuantity = e.target.value;
 
     if (!isNaN(inputQuantity)) {
-      setQuantity(e.target.value);
-      patchQuantity(Number(e.target.value));
+      setQuantity(inputQuantity);
+      patchQuantity(Number(inputQuantity));
       updateAction(id, quantname, Number(inputQuantity));
     } else {
-      alert("Please input an integer value");
+      setQuantity(Quantity);
+      setShow(true);
     }
   };
 
+  // Could not find a way to handle timers better - without
+  // passing this function to child component...
+  function hideTooltip() {
+    setTimeout(() => setShow(false), 2000);
+  }
+
   const handleUnitChange = (e) => {
     const inputUnit = e.target.value;
-
     setUnit(inputUnit);
     patchQuantityUnit(inputUnit);
     updateAction(id, unitname, inputUnit);
@@ -62,18 +70,25 @@ const SetQuantity = ({ action, updateAction, name }) => {
       <InputGroup.Prepend>
         <InputGroup.Text id="inputGroup-sizing-sm">Quantity</InputGroup.Text>
       </InputGroup.Prepend>
-      <FormControl
+      <Form.Control
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={Quantity.quantity}
+        value={Quantity}
         onChange={(event) => handleQuantityChange(event)}
+        ref={target}
       />
+      <IntegerWarning
+        show={Show}
+        target={target}
+        hideTooltip={hideTooltip}
+        placement="top"
+      ></IntegerWarning>
       <Form.Control
         as="select"
         onChange={(event) => handleUnitChange(event)}
         size="sm"
         type="text"
-        value={Unit.unit}
+        value={Unit}
       >
         <option>moleq</option>
         <option>ml</option>

@@ -9,7 +9,7 @@ const SetGas = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Gas, setGas] = useState({ gas });
+  const [Gas, setGas] = useState(gas);
 
   async function patchGas(value) {
     try {
@@ -36,7 +36,7 @@ const SetGas = ({ action, updateAction }) => {
       <FormControl
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={Gas.gas}
+        placeholder={Gas}
         onChange={(event) => handleGasChange(event)}
       />
     </InputGroup>

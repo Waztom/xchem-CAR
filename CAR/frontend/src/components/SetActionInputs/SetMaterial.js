@@ -9,7 +9,7 @@ const SetMaterial = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Material, setMaterial] = useState({ material });
+  const [Material, setMaterial] = useState(material);
 
   async function patchMaterial(value) {
     try {
@@ -36,7 +36,7 @@ const SetMaterial = ({ action, updateAction }) => {
       <FormControl
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={Material.material}
+        placeholder={Material}
         onChange={(event) => handleMaterialChange(event)}
       />
     </InputGroup>

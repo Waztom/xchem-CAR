@@ -9,7 +9,7 @@ const SetStirring = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [StirringSpeed, setStirringSpeed] = useState({ stirringspeed });
+  const [StirringSpeed, setStirringSpeed] = useState(stirringspeed);
 
   async function patchStirringSpeed(value) {
     try {
@@ -40,7 +40,7 @@ const SetStirring = ({ action, updateAction }) => {
         onChange={(event) => handleStirringSpeedChange(event)}
         size="sm"
         type="text"
-        value={StirringSpeed.stirringspeed}
+        value={StirringSpeed}
       >
         <option>gentle</option>
         <option>normal</option>

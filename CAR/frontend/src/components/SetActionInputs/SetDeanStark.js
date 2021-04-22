@@ -9,7 +9,7 @@ const SetDeanStark = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [DeanStark, setDeanStark] = useState({ deanstark });
+  const [DeanStark, setDeanStark] = useState(deanstark);
 
   async function patchDeanStark(value) {
     try {
@@ -38,7 +38,7 @@ const SetDeanStark = ({ action, updateAction }) => {
         onChange={(event) => handleDeanStarkChange(event)}
         size="sm"
         type="text"
-        value={DeanStark.deanstark}
+        value={DeanStark}
       >
         <option>True</option>
         <option>False</option>

@@ -151,16 +151,19 @@ class IBMAddActionViewSet(viewsets.ModelViewSet):
         addaction = self.get_patch_object(pk)
 
         if "materialsmiles" in request.data:
-            request.data["changeimage"]
             materialsmiles = request.data["materialsmiles"]
             mol = Chem.MolFromSmiles(materialsmiles)
             molecular_weight = Descriptors.ExactMolWt(mol)
             add_svg_string = createSVGString(materialsmiles)
+            # Delete previous image
+            svg_fp = addaction.materialimage.path
+            default_storage.delete(svg_fp)
+            # Add new image
             add_svg_fn = default_storage.save(
                 "addactionimages/{}.svg".format(materialsmiles),
                 ContentFile(add_svg_string),
             )
-            # addaction.materialsmiles = materialsmiles
+            addaction.materialsmiles = materialsmiles
             addaction.molecularweight = molecular_weight
             addaction.materialimage = add_svg_fn
             addaction.save()
@@ -169,7 +172,6 @@ class IBMAddActionViewSet(viewsets.ModelViewSet):
                 return JsonResponse(data=serialized_data)
             else:
                 return JsonResponse(data="wrong parameters")
-
         else:
             serializer = IBMAddActionSerializer(addaction, data=request.data, partial=True)
             if serializer.is_valid():

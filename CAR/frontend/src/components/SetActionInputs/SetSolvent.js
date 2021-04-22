@@ -22,7 +22,7 @@ const SetSolvent = ({ action, updateAction, name }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Solvent, setSolvent] = useState({ solvent });
+  const [Solvent, setSolvent] = useState(solvent);
 
   async function patchSolvent(value) {
     try {
@@ -66,7 +66,7 @@ const SetSolvent = ({ action, updateAction, name }) => {
       <FormControl
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={Solvent.solvent}
+        placeholder={Solvent}
         onChange={(event) => handleSolventChange(event)}
       />
     </InputGroup>

@@ -9,7 +9,7 @@ const SetAtmosphere = ({ action, updateAction }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Atmosphere, setAtmosphere] = useState({ atmosphere });
+  const [Atmosphere, setAtmosphere] = useState(atmosphere);
 
   async function patchAtmosphere(value) {
     try {
@@ -38,7 +38,7 @@ const SetAtmosphere = ({ action, updateAction }) => {
         onChange={(event) => handleAtmosphereChange(event)}
         size="sm"
         type="text"
-        value={Atmosphere.atmosphere}
+        value={Atmosphere}
       >
         <option>Nitrogen</option>
         <option>Air</option>
