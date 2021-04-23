@@ -9,12 +9,18 @@ class Deck ():
 
     def __str__(self):
         return 'Deck {}'.format(self.deckindex)
+
+    def __len__(self):
+        return len(self.PlateList)
+
+    def __getitem__(self, position):
+        return self.PlateList[position]
     
     def nextfreeplate(self):
         freeplates = []
         for plate in self.PlateList:
             if plate.isempty():
-                freeplates.append(plate.plateindex)
+                freeplates.append(plate.plateIndex)
         if len(freeplates)>=1:
             nextfreeplate= int(freeplates[0])
         else:
@@ -22,7 +28,8 @@ class Deck ():
         return nextfreeplate
 
     def addplate(self, location, numwells=None, platewellVolume=None):
-        self.PlateList.append(Plate(self, index=len(self.PlateList), numwells=numwells,platewellVolume=platewellVolume))
+        self.PlateList.append(Plate(self, index=len(self.PlateList)+1, numwells=numwells,platewellVolume=platewellVolume))
+        return self.PlateList[-1]
 
 
 
@@ -30,17 +37,28 @@ class Plate ():
 
     def __init__(self, Deck, index=None, numwells=None, platewellVolume=None):
         self.deck = Deck
-        self.plateindex = index
+        self.plateIndex = index
         self.numwells = numwells
         self.platewellVolume = platewellVolume
         self.WellList = None
         self.setupwells()
+        self.strName = "plate_"+str(numwells)
 
     def __repr__(self):
-        return 'D{}P{}'.format(self.deck.deckindex, self.plateindex)
+        return 'D{}P{}'.format(self.deck.deckindex, self.plateIndex)
 
     def __str__(self):
-        return 'Deck {}, Plate number {}'.format(self.deck.deckindex, self.plateindex)
+        return 'Deck {}, Plate number {}'.format(self.deck.deckindex, self.plateIndex)
+
+    def __len__(self):
+        return len(self.WellList)
+
+    def __getitem__(self, position):
+        return self.WellList[position]
+    
+    def printplate(self):
+        for well in self.WellList:
+            print(str(well.StartSmiles) + " " + str(well.GoalSmiles) + " " + str(well.VolumeUsed)+ "/" + str(well.Volume))
 
     def setupwells(self):
         self.WellList = []
@@ -93,20 +111,24 @@ class Well ():
         self.GoalSmiles = GoalSmiles
         
     def __repr__(self):
-        return 'D{}P{}W{}'.format(self.plate.deck.deckindex, self.plate.plateindex, self.wellindex)
+        return 'D{}P{}W{}'.format(self.plate.deck.deckindex, self.plate.plateIndex, self.wellindex)
 
     def __str__(self):
-        return 'Deck {}, Plate {}, Well {}'.format(self.plate.deck.deckindex, self.plate.plateindex, self.wellindex)
+        return 'Deck {}, Plate {}, Well {}'.format(self.plate.deck.deckindex, self.plate.plateIndex, self.wellindex)
     
-    def add(self, Ammount):
+    def add(self, Ammount, smiles=""):
         SafetyMargin = 5 # percentage of the well's volume to be keept empty to prevent overvlow
         WorkingVolumeused = self.VolumeUsed+Ammount
         if WorkingVolumeused >= float(self.Volume)*(1-(SafetyMargin/100)):
             raise NameError("the resultant value of adding "+str(Ammount)+"ul  to "+str(self.VolumeUsed)+"ul would be "+str(WorkingVolumeused)+"ul exceeding the well's volume of "+str(self.Volume)+"ul (with a saftey margin of "+str(SafetyMargin)+"%)")
+            self.VolumeUsed = False
         elif WorkingVolumeused < 0:
             raise NameError("the resultant value of adding "+str(Ammount)+"ul to "+str(self.VolumeUsed)+"ul would be "+str(WorkingVolumeused)+"ul")
+            self.VolumeUsed = False
         else:
             self.VolumeUsed = WorkingVolumeused
+            if smiles != "":
+                self.changesmiles(start_smiles=smiles)
         return self.VolumeUsed
     
     def isempty(self):

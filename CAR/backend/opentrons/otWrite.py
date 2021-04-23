@@ -36,10 +36,11 @@ class otScript():
 
         script.close()
     
-    def setupLabwear(self):
+    def setupLabwear(self, platelist = ['corning_96_wellplate_360ul_flat', 2], tipOutput = ["opentrons_96_filtertiprack_200ul"]):
         script = open(self.filepath, "a")
         script.write("\n\t# labware")
-        script.write("\n\tplate = protocol.load_labwear('"+str()+"', '"+str()+"')")
+        for plate in platelist:
+            script.write("\n\tplate = protocol.load_labwear('"+str(plate.strName)+"', '"+str(plate.plateIndex)+"')")
         script.write("\n\ttiprack = protocol.load_labware('"+str()+"', '"+str()+"')\n")
 
         script.close()
@@ -102,13 +103,13 @@ class otScript():
 
     
 
-    def setup(self):
+    def quickSetup(self):
         self.setupScript()
         self.setupLabwear()
         self.setupPipettes()
 
     def example(self):
-        setup()
+        quickSetup()
         self.movefluids("left", "plate['A1']", "plate['B2']",100)
 
 

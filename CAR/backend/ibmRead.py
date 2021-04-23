@@ -37,18 +37,20 @@ def getactions():
     AllActions = AllActions.append(IBMQuenchAction)
     IBMRefluxAction = pd.DataFrame(list(backend.models.IBMRefluxAction.objects.all().values()))
     AllActions = AllActions.append(IBMRefluxAction)
-    IBMSetTemperatureAction = pd.D(IBMStirAction)
+    IBMSetTemperatureAction = pd.DataFrame(list(backend.models.IBMSetTemperatureAction.objects.all().values()))
+    AllActions = AllActions.append(IBMSetTemperatureAction)
+    IBMStirAction = pd.DataFrame(list(backend.models.IBMStirAction.objects.all().values()))
+    AllActions = AllActions.append(IBMStirAction)
     IBMStoreAction = pd.DataFrame(list(backend.models.IBMStoreAction.objects.all().values()))
     AllActions = AllActions.append(IBMStoreAction)
     IBMWaitAction = pd.DataFrame(list(backend.models.IBMWaitAction.objects.all().values()))
     AllActions = AllActions.append(IBMWaitAction)
     IBMWashAction = pd.DataFrame(list(backend.models.IBMWashAction.objects.all().values()))
     AllActions = AllActions.append(IBMWashAction)
-
     #sort
     AllActions = AllActions.sort_values(['reaction_id_id', 'actionno'])
 
-    print(AllActions)
+    #print(AllActions)
     return AllActions
 
 def getReactionActions(AllActions, ReactionID):
@@ -64,7 +66,6 @@ def getReactionActions(AllActions, ReactionID):
     ReactionActions = AllActions[ReactionMask]
     return(ReactionActions)
 
-
 def basiccomprehension(AllActions):
     reactions = []
     for reaction in AllActions.reaction_id_id.unique():
@@ -72,7 +73,7 @@ def basiccomprehension(AllActions):
         actionlist = []
         for index, row in reactionactions.iterrows():
             actionlist.append(row['actiontype']) 
-        print(str(reaction)+" "+str(actionlist))
+        #print(str(reaction)+" "+str(actionlist))
         reactions.append([reaction, actionlist])
     print(reactions)
     return reactions
