@@ -1,30 +1,20 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 import { Form } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
+import { patchChange } from "../Utils";
 
 const SetAtmosphere = ({ action, updateAction }) => {
   const atmosphere = action.atmosphere.capitalize();
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Atmosphere, setAtmosphere] = useState({ atmosphere });
-
-  async function patchAtmosphere(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        atmosphere: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const [Atmosphere, setAtmosphere] = useState(atmosphere);
 
   const handleAtmosphereChange = (e) => {
     const newatmosphere = e.target.value.toLowerCase();
     setAtmosphere(e.target.value);
-    patchAtmosphere(newatmosphere);
+    patchChange(actiontype, id, "atmosphere", newatmosphere);
     updateAction(id, "atmosphere", newatmosphere);
   };
 
@@ -38,7 +28,7 @@ const SetAtmosphere = ({ action, updateAction }) => {
         onChange={(event) => handleAtmosphereChange(event)}
         size="sm"
         type="text"
-        value={Atmosphere.atmosphere}
+        value={Atmosphere}
       >
         <option>Nitrogen</option>
         <option>Air</option>

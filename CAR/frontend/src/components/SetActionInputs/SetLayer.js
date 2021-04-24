@@ -1,30 +1,20 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 import { Form } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
+import { patchChange } from "../Utils";
 
 const SetLayer = ({ action, updateAction }) => {
   const layer = action.layer.capitalize();
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Layer, setLayer] = useState({ layer });
-
-  async function patchLayer(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        layer: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const [Layer, setLayer] = useState(layer);
 
   const handleLayerChange = (e) => {
     const newlayer = e.target.value.toLowerCase();
     setLayer(e.target.value);
-    patchLayer(newlayer);
+    patchChange(actiontype, id, "layer", newlayer);
     updateAction(id, "layer", newlayer);
   };
 
@@ -38,7 +28,7 @@ const SetLayer = ({ action, updateAction }) => {
         onChange={(event) => handleLayerChange(event)}
         size="sm"
         type="text"
-        value={Layer.layer}
+        value={Layer}
       >
         <option>Organic</option>
         <option>Aqueous</option>

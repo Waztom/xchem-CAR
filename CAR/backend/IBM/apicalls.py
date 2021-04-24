@@ -2,8 +2,16 @@ from rxn4chemistry import RXN4ChemistryWrapper
 import os
 import time
 from rdkit.Chem import AllChem
+from rdkit import Chem
 import requests
 import json
+from .common_solvents import common_solvents
+
+
+def canonSmiles(smiles):
+    mol = Chem.MolFromSmiles(smiles)
+    canon_smiles = Chem.MolToSmiles(mol)
+    return canon_smiles
 
 
 def convertIBMNameToSmiles(chemical_name):
@@ -85,7 +93,7 @@ def collect_rclass(tree):
 def collect_products(tree):
     products = []
     if "children" in tree and len(tree["children"]):
-        products.append(tree["smiles"])
+        products.append(canonSmiles(tree["smiles"]))
 
     for node in tree["children"]:
         products.extend(collect_products(node))
@@ -95,11 +103,35 @@ def collect_products(tree):
 def collect_reactants(tree):
     reactants = []
     if "children" in tree and len(tree["children"]):
-        reactants.append([node["smiles"] for node in tree["children"]])
+        reactants.append([canonSmiles(node["smiles"]) for node in tree["children"]])
 
     for node in tree["children"]:
         reactants.extend(collect_reactants(node))
     return reactants
+
+
+def collect_reactions(tree):
+    reactions = []
+    if "children" in tree and len(tree["children"]):
+        reactions.append(
+            AllChem.ReactionFromSmarts(
+                "{}>>{}".format(
+                    ".".join(
+                        [
+                            canonSmiles(node["smiles"])
+                            for node in tree["children"]
+                            if canonSmiles(node["smiles"]) not in common_solvents
+                        ]
+                    ),
+                    tree["smiles"],
+                ),
+                useSmiles=True,
+            )
+        )
+
+    for node in tree["children"]:
+        reactions.extend(collect_reactions(node))
+    return reactions
 
 
 def collectIBMReactionInfo(rxn4chemistry_wrapper, pathway):
@@ -111,7 +143,7 @@ def collectIBMReactionInfo(rxn4chemistry_wrapper, pathway):
             sequence_id=pathway["sequenceId"]
         )
         pathway_synthesis_id = pathway_synthesis_response["synthesis_id"]
-        # time.sleep(60)
+        time.sleep(10)
         synthesis_tree, reactions, actions = rxn4chemistry_wrapper.get_synthesis_plan(
             synthesis_id=pathway_synthesis_id
         )
@@ -121,6 +153,7 @@ def collectIBMReactionInfo(rxn4chemistry_wrapper, pathway):
         reaction_info["rclass"] = collect_rclass(pathway)
         reaction_info["product_smiles"] = collect_products(pathway)
         reaction_info["reactants"] = collect_reactants(pathway)
+        reaction_info["reactions"] = collect_reactions(pathway)
 
         return reaction_info
     except:

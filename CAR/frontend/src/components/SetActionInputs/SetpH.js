@@ -1,35 +1,33 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, useRef } from "react";
 
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
+import IntegerWarning from "../TooltipsWarnings/IntegerWarning";
+import { isFloat, isInt, patchChange } from "../Utils";
 
 const SetpH = ({ action, updateAction }) => {
   const ph = action.pH;
   const actiontype = action.actiontype;
   const id = action.id;
+  const target = useRef(null);
 
-  const [pH, setpH] = useState({ ph });
+  const [pH, setpH] = useState(ph);
+  const [Show, setShow] = useState(false);
 
-  async function patchpH(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        pH: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
+  function hideTooltip() {
+    setTimeout(() => setShow(false), 2000);
   }
 
   const handlepHChange = (e) => {
     const inputQuantity = e.target.value;
 
-    if (!isNaN(inputQuantity)) {
+    if (isFloat(Number(inputQuantity)) || isInt(Number(inputQuantity))) {
       setpH(inputQuantity);
-      patchpH(Number(inputQuantity));
+      patchChange(actiontype, id, "pH", inputQuantity);
       updateAction(id, "pH", inputQuantity);
     } else {
-      alert("Please input an integer value");
+      setpH(pH);
+      setShow(true);
     }
   };
 
@@ -41,9 +39,16 @@ const SetpH = ({ action, updateAction }) => {
       <FormControl
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={pH.ph}
+        placeholder={pH}
         onChange={(event) => handlepHChange(event)}
+        ref={target}
       />
+      <IntegerWarning
+        show={Show}
+        target={target}
+        hideTooltip={hideTooltip}
+        placement="top"
+      ></IntegerWarning>
     </InputGroup>
   );
 };

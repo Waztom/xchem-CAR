@@ -1,30 +1,20 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 import { Form } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
+import { patchChange } from "../Utils";
 
 const SetStirring = ({ action, updateAction }) => {
   const stirringspeed = action.stirringspeed;
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [StirringSpeed, setStirringSpeed] = useState({ stirringspeed });
-
-  async function patchStirringSpeed(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        stirringspeed: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const [StirringSpeed, setStirringSpeed] = useState(stirringspeed);
 
   const handleStirringSpeedChange = (e) => {
     const newspeed = e.target.value;
     setStirringSpeed(newspeed);
-    patchStirringSpeed(nwspeed);
+    patchChange(actiontype, id, "stirringspeed", newspeed);
     updateAction(id, "stirringspeed", newspeed);
   };
 
@@ -40,11 +30,11 @@ const SetStirring = ({ action, updateAction }) => {
         onChange={(event) => handleStirringSpeedChange(event)}
         size="sm"
         type="text"
-        value={StirringSpeed.stirringspeed}
+        value={StirringSpeed}
       >
         <option>gentle</option>
         <option>normal</option>
-        <option>vigourous</option>
+        <option>vigorous</option>
       </Form.Control>
     </InputGroup>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
@@ -8,6 +8,11 @@ import Button from "react-bootstrap/Button";
 import Accordion from "react-bootstrap/Accordion";
 import CardDeck from "react-bootstrap/CardDeck";
 import Spinner from "react-bootstrap/Spinner";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Image from "react-bootstrap/Image";
 
 import IBMAddAction from "../Actions/IBMAddAction";
 import IBMConcentrateAction from "../Actions/IBMConcentrateAction";
@@ -30,6 +35,7 @@ import IBMWaitAction from "../Actions/IBMwaitAction";
 import IBMWashAction from "../Actions/IBMWashAction";
 
 import ProductImage from "../Images/ProductImage";
+import ReactionImage from "../Images/ReactionImage";
 
 String.prototype.capitalize = function () {
   return this.charAt(0).toUpperCase() + this.slice(1);
@@ -365,6 +371,7 @@ const ReactionAccordian = ({ methodid }) => {
   const [isLoading, setLoading] = useState(true);
   const [Reactions, setReactions] = useState([]);
   const [isLoadingActions, setLoadActions] = useState(false);
+  const ref = useRef(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -400,13 +407,34 @@ const ReactionAccordian = ({ methodid }) => {
               as={Button}
               variant="link"
               eventKey={reaction.id}
-              onClick={(event) => loadActions()}
+              onClick={() => loadActions()}
             >
-              <ProductImage
-                key={reaction.id}
-                reactionid={reaction.id}
-              ></ProductImage>
-              {reaction.reactionclass}
+              <Container fluid="md" className="reaction-container">
+                <Row className="reaction-container">
+                  <Col md="auto">
+                    <OverlayTrigger
+                      placement="top"
+                      delay={{ show: 0, hide: 0 }}
+                      overlay={
+                        <Image
+                          className="reaction-image"
+                          src={reaction.reactionimage}
+                          fluid
+                        />
+                      }
+                    >
+                      <Button className="reaction-image-button">
+                        <ProductImage
+                          ref={ref}
+                          key={reaction.id}
+                          reactionid={reaction.id}
+                        ></ProductImage>
+                      </Button>
+                    </OverlayTrigger>
+                  </Col>
+                  <Col className="reaction-name">{reaction.reactionclass}</Col>
+                </Row>
+              </Container>
             </Accordion.Toggle>
           </Card.Header>
           {isLoadingActions && (

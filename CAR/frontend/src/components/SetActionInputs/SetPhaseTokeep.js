@@ -1,30 +1,20 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 import { Form } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
+import { patchChange } from "../Utils";
 
 const SetPhaseTokeep = ({ action, updateAction }) => {
   const phasetokeep = action.phasetokeep.capitalize();
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [PhaseToKeep, setPhaseToKeep] = useState({ phasetokeep });
-
-  async function patchPhaseToKeep(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        phasetokeep: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const [PhaseToKeep, setPhaseToKeep] = useState(phasetokeep);
 
   const handlePhaseToKeepChange = (e) => {
     const newphasetokeep = e.target.value.toLowerCase();
     setPhaseToKeep(newphasetokeep);
-    patchPhaseToKeep(newphasetokeep);
+    patchChange(actiontype, id, "phasetokeep", newphasetokeep);
     updateAction(id, "phasetokeep", newphasetokeep);
   };
 
@@ -40,7 +30,7 @@ const SetPhaseTokeep = ({ action, updateAction }) => {
         onChange={(event) => handlePhaseToKeepChange(event)}
         size="sm"
         type="text"
-        value={PhaseToKeep.phasetokeep}
+        value={PhaseToKeep}
       >
         <option>Filtrate</option>
         <option>Precipitate</option>

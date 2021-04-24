@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
+import { patchChange } from "../Utils";
 
 const SetSolvent = ({ action, updateAction, name }) => {
   const checkName = (name) => {
@@ -22,17 +22,7 @@ const SetSolvent = ({ action, updateAction, name }) => {
   const actiontype = action.actiontype;
   const id = action.id;
 
-  const [Solvent, setSolvent] = useState({ solvent });
-
-  async function patchSolvent(value) {
-    try {
-      const response = await axios.patch(`api/IBM${actiontype}actions/${id}/`, {
-        [solvname]: value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const [Solvent, setSolvent] = useState(solvent);
 
   const handleSolventChange = (e) => {
     console.log(action);
@@ -40,7 +30,7 @@ const SetSolvent = ({ action, updateAction, name }) => {
 
     const newsolvent = e.target.value;
     setSolvent(newsolvent);
-    patchSolvent(newsolvent);
+    patchChange(actiontype, id, solvname, newsolvent);
     updateAction(id, solvname, newsolvent);
   };
 
@@ -66,7 +56,7 @@ const SetSolvent = ({ action, updateAction, name }) => {
       <FormControl
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={Solvent.solvent}
+        placeholder={Solvent}
         onChange={(event) => handleSolventChange(event)}
       />
     </InputGroup>

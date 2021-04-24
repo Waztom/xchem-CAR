@@ -13,8 +13,8 @@ import MethodBody from "../MethodBody/MethodBody";
 
 // Start with main body and then add components
 const SetTargetMassInput = ({ targetmass, unit, targetid }) => {
-  const [TargetMass, setTargetMass] = useState({ targetmass });
-  const [Unit, setUnit] = useState({ unit });
+  const [TargetMass, setTargetMass] = useState(targetmass);
+  const [Unit, setUnit] = useState(unit);
 
   async function patchTargetMass(value) {
     try {
@@ -60,7 +60,7 @@ const SetTargetMassInput = ({ targetmass, unit, targetid }) => {
       <FormControl
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={TargetMass.targetmass}
+        placeholder={TargetMass}
         onChange={(event) => handleTargetMassChange(event)}
       />
       <Form.Control
@@ -68,7 +68,7 @@ const SetTargetMassInput = ({ targetmass, unit, targetid }) => {
         onChange={(event) => handleUnitChange(event)}
         size="sm"
         type="text"
-        value={Unit.unit}
+        value={Unit}
       >
         <option>mg</option>
         <option>g</option>

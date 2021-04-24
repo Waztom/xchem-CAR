@@ -98,7 +98,7 @@ const Header = ({ changeProject, deleteProject }) => {
                   show={show}
                   handleClose={handleClose}
                   handleDelete={handleDelete}
-                  id={project.id}
+                  id={project.id + 1}
                 ></DeleteModal>
               </React.Fragment>
             ))}
