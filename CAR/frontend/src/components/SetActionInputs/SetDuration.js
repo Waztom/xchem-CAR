@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 
 import { Form } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
-import IntegerWarning from "../Tooltips/IntegerWarning";
+import IntegerWarning from "../TooltipsWarnings/IntegerWarning";
 import { isFloat, isInt, patchChange } from "../Utils";
 
 const SetDuration = ({ action, updateAction }) => {

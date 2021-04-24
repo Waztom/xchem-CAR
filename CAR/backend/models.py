@@ -50,6 +50,11 @@ class Method(models.Model):
 class Reaction(models.Model):
     method_id = models.ForeignKey(Method, on_delete=models.CASCADE)
     reactionclass = models.CharField(max_length=255)
+    reactionimage = models.FileField(
+        upload_to="reactionimages/",
+        max_length=255,
+        null=True,
+    )
 
 
 class Product(models.Model):

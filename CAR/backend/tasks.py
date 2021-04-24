@@ -107,7 +107,7 @@ def uploadIBMReaction(validate_output):
     if not validated:
         # Delete tempory file if only validate selected
         default_storage.delete(csv_fp)
-        return (validate_dict, validated)
+        return (validate_dict, validated, project_info)
 
     if validated:
         # Create project model and return project id
@@ -181,7 +181,6 @@ def uploadIBMReaction(validate_output):
 
                         # Check if reaction info call has been successful
                         if reaction_info:
-
                             # Need to add check if reaction class and reactants already exist -
                             # in other words looking for diversity and not dulpication
                             # of reactions. This ignores actions of the method
@@ -200,17 +199,20 @@ def uploadIBMReaction(validate_output):
                                 )
 
                                 product_no = 1
-                                for product_smiles, reaction_class, actions in zip(
+                                for product_smiles, reaction_class, actions, reaction_smarts in zip(
                                     reaction_info["product_smiles"],
                                     reaction_info["rclass"],
                                     reaction_info["actions"],
+                                    reaction_info["reactions"],
                                 ):
                                     # Product_smiles and reaction class is a list of individual elements
                                     # Reactants and actions is a list of lists
 
                                     # Create a Reaction model
                                     reaction_id = createReactionModel(
-                                        method_id=method_id, reaction_class=reaction_class
+                                        method_id=method_id,
+                                        reaction_class=reaction_class,
+                                        reaction_smarts=reaction_smarts,
                                     )
 
                                     # Create a Product model

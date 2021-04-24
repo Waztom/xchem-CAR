@@ -1,5 +1,5 @@
 import functools
-from .createmodels import common_solvents
+from .common_solvents import common_solvents
 
 
 def convert(bytes_list):
@@ -34,4 +34,3 @@ def filtermethod(reaction_info):
     method_integer = sum(reactant_integers) + sum(rxn_classes_integers)
 
     return method_integer
-

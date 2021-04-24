@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
-import IntegerWarning from "../Tooltips/IntegerWarning";
+import IntegerWarning from "../TooltipsWarnings/IntegerWarning";
 import { isInt, patchChange } from "../Utils";
 
 const SetNumberRepetitions = ({ action, updateAction }) => {

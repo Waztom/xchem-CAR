@@ -13,7 +13,7 @@ import SetDropwise from "../SetActionInputs/SetDropwise";
 import SetAtmosphere from "../SetActionInputs/SetAtmosphere";
 
 import JSMEModal from "../MolDrawer/JSMEModal";
-import MolAlert from "../MolDrawer/MolAlert";
+import MolAlert from "../TooltipsWarnings/MolAlert";
 
 const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
   const [Action, setAction] = useState(action);

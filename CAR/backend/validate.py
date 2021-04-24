@@ -54,8 +54,7 @@ def checkSMILES(target_smiles, index, validate_dict):
 
 
 def checkIsNumber(amount, index, validate_dict):
-    print(type(amount))
-    if type(amount) != float:
+    if not isinstance(amount, (int, float)):
         validate_dict = add_warning(
             field="check_number",
             warning_string="Target mass {} at index {} is not a valid number".format(amount, index),

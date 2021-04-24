@@ -44,53 +44,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from .apicalls import convertIBMNameToSmiles
-
-# Check if reactant_smiles is a common solvent
-# Get smiles from csv file!!!!!
-common_solvents = {
-    "CC(C)=O": "acetone",
-    "CC#N": "acetonitrile",
-    "c1ccccc1": "benzene",
-    "CCCCO": "1-butanol",
-    "CCC(C)O": "2-butanol",
-    "CCC(C)=O": "2-butanone",
-    "CC(C)(C)O": "t-butyl alcohol",
-    "ClC(Cl)(Cl)Cl": "carbon tetrachloride",
-    "Clc1ccccc1": "chlorobenzene",
-    "ClC(Cl)Cl": "chloroform",
-    "C1CCCCC1": "cyclohexane",
-    "ClCCCl": "1,2-dichloroethane",
-    "OCCOCCO": "diethylene glycol",
-    "CCOCC": "diethyl ether",
-    "COC": "dimethyl ether",
-    "COCCOC": "1,2-dimethoxy-ethane",
-    "CN(C)C=O": "dimethyl-formamide ",
-    "C[S](C)=O": "dimethyl sulfoxide",
-    "C1COCCO1": "1,4-dioxane",
-    "CCO": "ethanol",
-    "CCOC(C)=O": "ethyl acetate",
-    "OCCO": "ethylene glycol",
-    "OCC(O)CO": "glycerin",
-    "CCCCCCC": "heptane",
-    "CN(C)[P](=O)(N(C)C)N(C)C": "hexamethylphosphoramide",
-    "CN(C)P(N(C)C)N(C)C": "hexamethylphosphoroustriamide",
-    "CCCCCC": "hexane",
-    "CO": "methanol",
-    "COC(C)(C)C": "methyl t-butyl ether",
-    "ClCCl": "methylene chloride",
-    "CN1CCCC1=O": "N-methyl-2-pyrrolidinone",
-    "C[N+]([O-])=O": "nitromethane",
-    "CCCCC": "pentane",
-    "CCCC(C)C": "isohexane",
-    "CCCO": "1-propanol",
-    "CC(C)O": "2-propanol",
-    "C1CCOC1": "tetrahydrofuran",
-    "Cc1ccccc1": "toluene",
-    "O": "water",
-    "Cc1ccccc1C": "o-xylene",
-    "Cc1cccc(C)c1": "m-xylene",
-    "Cc1ccc(C)cc1": "p-xylene",
-}
+from .common_solvents import common_solvents
 
 
 def createSVGString(smiles):
@@ -115,6 +69,25 @@ def createSVGString(smiles):
     drawer.FinishDrawing()
     svg_string = drawer.GetDrawingText()
 
+    return svg_string
+
+
+def createReactionSVGString(smarts):
+    """
+    Function that creates a SVG image string from smarts string
+
+    target_name: string
+        unique name of target
+    smiles: string
+        a valid smiles
+    """
+    # Initiate drawer and set size/font size
+    drawer = Draw.rdMolDraw2D.MolDraw2DSVG(900, 200)
+    # drawer.SetFontSize(8)
+    # drawer.SetLineWidth(1)
+    drawer.DrawReaction(smarts)
+    drawer.FinishDrawing()
+    svg_string = drawer.GetDrawingText()
     return svg_string
 
 
@@ -207,7 +180,7 @@ def createMethodModel(target_id, smiles, max_steps):
     return method.id
 
 
-def createReactionModel(method_id, reaction_class):
+def createReactionModel(method_id, reaction_class, reaction_smarts):
     # Function that takes in all the info from IBM API call
     # and creates a reaction object
 
@@ -216,6 +189,11 @@ def createReactionModel(method_id, reaction_class):
     method_obj = Method.objects.get(id=method_id)
     reaction.method_id = method_obj
     reaction.reactionclass = reaction_class
+    reaction_svg_string = createReactionSVGString(reaction_smarts)
+    reaction_svg_fn = default_storage.save(
+        "reactionimages/" + reaction_class + ".svg", ContentFile(reaction_svg_string)
+    )
+    reaction.reactionimage = reaction_svg_fn
     reaction.save()
 
     return reaction.id
