@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+import math
 import re
 #import os,sys
 #sys.path.insert(0,'..')
@@ -27,7 +28,7 @@ class otSession():
         
         self.getactions(reactionnumber)
         self.tipoptions = []
-        self.tipsneeded = [[],[]]
+        self.tipsneeded = {}
         self.tipRackList = []
 
         self.output = otWrite.otScript(filepath=self.outputpath, protocolName=self.name)
@@ -105,9 +106,6 @@ class otSession():
         
         self.reactionPlate = self.deck.add("Plate", 2, 12, 500, "ReactionPlate")
 
-        self.orderPlate.printplate()
-        print()
-        self.reactionPlate.printplate()
 
 
     def choosetip(self, volume, tipoptions= []):
@@ -119,14 +117,10 @@ class otSession():
             # review wether to use tip options or self.tipoptions for rest of function
         for tip in self.tipoptions:
             if tip >= volume:
-                print(self.tipsneeded[:][0])
-                if tip in self.tipsneeded[:][0]:
-                    print("debug1")
-                    neededindex = self.tipsneeded[:][0].index(tip)
-                    self.tipsneeded[neededindex][1] += self.tipsneeded[neededindex][1]
+                if tip in self.tipsneeded:
+                    self.tipsneeded[tip]+=1
                 else:
-                    print("debug2")
-                    self.tipsneeded.append([tip,1])
+                    self.tipsneeded[tip] = 1
                     #self.tipsneeded[1].append(1)
                 return tip 
         return False
@@ -138,26 +132,30 @@ class otSession():
         print("###tipsneeded###\n"+str(self.tipsneeded)+"\n######")
         for tip in self.tipsneeded :
             print("#tip##\n"+str(tip)+"\n###")
-            if tip != []:
-                tip = tip[0]
-            
-            location = len(self.deck.PlateList)
 
-            if tip == 10:
-                self.deck.add("TipRack", location, numwells=96, platewellVolume=10, platename = "opentrons_96_filtertiprack_10ul")
-                self.tipRackList.append(["opentrons_96_filtertiprack_10ul", self.deck.nextfreeplate()])
-            elif tip == 20:
-                self.deck.add("TipRack", location, numwells=96, platewellVolume=20, platename = "opentrons_96_filtertiprack_20ul")
-                self.tipRackList.append(["opentrons_96_filtertiprack_20ul", self.deck.nextfreeplate()])
-            elif tip == 200:
-                self.deck.add("TipRack", location, numwells=96, platewellVolume=200, platename = "opentrons_96_filtertiprack_200ul")
-                self.tipRackList.append(["opentrons_96_filtertiprack_200ul", self.deck.nextfreeplate()])
-            elif tip == 300:
-                self.deck.add("TipRack", location, numwells=96, platewellVolume=300, platename = "opentrons_96_filtertiprack_300ul")
-                self.tipRackList.append(["opentrons_96_filtertiprack_300ul", self.deck.nextfreeplate()])
-            elif tip == 1000:
-                self.deck.add("TipRack", location, numwells=96, platewellVolume=1000, platename = "opentrons_96_filtertiprack_1000ul")
-                self.tipRackList.append(["opentrons_96_filtertiprack_1000ul", self.deck.nextfreeplate()])
+            numplates = math.ceil(self.tipsneeded[tip]/96)
+
+            while numplates >= 1:
+
+                location = len(self.deck.PlateList)
+
+                if tip == 10:
+                    self.deck.add("TipRack", location, numwells=96, platewellVolume=10, platename = "opentrons_96_filtertiprack_10ul")
+                    self.tipRackList.append(["opentrons_96_filtertiprack_10ul", self.deck.nextfreeplate()])
+                elif tip == 20:
+                    self.deck.add("TipRack", location, numwells=96, platewellVolume=20, platename = "opentrons_96_filtertiprack_20ul")
+                    self.tipRackList.append(["opentrons_96_filtertiprack_20ul", self.deck.nextfreeplate()])
+                elif tip == 200:
+                    self.deck.add("TipRack", location, numwells=96, platewellVolume=200, platename = "opentrons_96_filtertiprack_200ul")
+                    self.tipRackList.append(["opentrons_96_filtertiprack_200ul", self.deck.nextfreeplate()])
+                elif tip == 300:
+                    self.deck.add("TipRack", location, numwells=96, platewellVolume=300, platename = "opentrons_96_filtertiprack_300ul")
+                    self.tipRackList.append(["opentrons_96_filtertiprack_300ul", self.deck.nextfreeplate()])
+                elif tip == 1000:
+                    self.deck.add("TipRack", location, numwells=96, platewellVolume=1000, platename = "opentrons_96_filtertiprack_1000ul")
+                    self.tipRackList.append(["opentrons_96_filtertiprack_1000ul", self.deck.nextfreeplate()])
+
+                numplates -= 1
         print("###tipracklist###\n"+str(self.tipRackList)+"\n######")
         return self.tipRackList
 
