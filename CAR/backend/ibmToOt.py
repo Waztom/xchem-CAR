@@ -31,6 +31,8 @@ class otSession():
         self.tipsneeded = {}
         self.tipRackList = []
 
+        self.pipettesneeded = {}
+
         self.output = otWrite.otScript(filepath=self.outputpath, protocolName=self.name)
         self.output.setupScript()
         self.setupPlate()
@@ -39,6 +41,8 @@ class otSession():
         self.choosetip(201)
         self.tipOutput()
         self.output.setupLabwear(self.deck.PlateList, self.tipRackList)
+        self.pipettesChoose()
+        self.output.setupPipettes(self.pipettesneeded)
     
     def namecheck(self):
         trialname = self.name
@@ -159,6 +163,12 @@ class otSession():
         print("###tipracklist###\n"+str(self.tipRackList)+"\n######")
         return self.tipRackList
 
+    def pipettesChoose (self):
+        if len(self.tipsneeded) <= 2:
+            if len(self.tipsneeded) > 0 :
+                for pipette in self.tipsneeded:
+                    self.pipettesneeded[str(pipette)] = self.deck.findPippets(pipette)
+        return self.pipettesneeded
 
 
 

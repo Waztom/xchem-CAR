@@ -48,12 +48,23 @@ class otScript():
         
         script.close()
 
-    def setupPipettes(self):
-        script = open(self.filepath, "a")
-        script.write("\n\t# pipettes\n")
-        script.write("\tleft_pipette = protocol.load_instrument('"+str()+"', '"+str()+"', '"+str()+"')\n")
 
+    def setupPipettes(self, pipettesneeded):
+        script = open(self.filepath, "a")
+        script.write("\n\n\t# pipettes\n")
+        mountnumber = 0
+        for pipette in pipettesneeded:
+            if mountnumber == 0:
+                mount = "left"
+                mountnumber += 1
+            elif mountnumber == 1:
+                mount = "right"
+            else:
+                break
+            script.write("\t"+str(mount)+"_pipette = protocol.load_instrument('p"+str(pipette)+"_single', '"+str(mount)+"', tip_racks="+(str(pipettesneeded[pipette])).replace("'","")+")\n")
         script.close()
+        #left
+        #right
 
     def writeCommand(self, comandString):
         script = open(self.filepath, "a")

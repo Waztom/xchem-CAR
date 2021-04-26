@@ -34,6 +34,16 @@ class Deck ():
         DeckObject(self, Type, index=self.nextfreeplate(), numwells=numwells,platewellVolume=platewellVolume, platename=platename)
         return self.PlateList[-1]
 
+    def findPippets (self, volume):
+        releventracks = []
+        for plate in self.PlateList:
+            if plate.platetype == "TipRack":
+                if int(plate.tipVolume) == int(volume):
+                    releventracks.append(plate.plateName)
+        return releventracks
+                    
+
+
 class DeckObject ():
     def __init__(self, Deck, Type, index=None, numwells=None, platewellVolume=None, platename="", numTips=None, tipVolume=None):
         if Type == "Plate":
@@ -44,6 +54,7 @@ class DeckObject ():
 class Plate ():
 
     def __init__(self, Deck, index=None, numwells=None, platewellVolume=None, platename=""):
+        self.platetype = "Plate"
         self.deck = Deck
         self.plateIndex = index
         self.numwells = numwells
@@ -116,7 +127,7 @@ class Plate ():
 class TipRack ():
     
     def __init__(self, Deck, index=None, numTips=None, tipVolume=None, platename=""):
-        print(str(index)+str(numTips)+str(tipVolume)+str(platename))
+        self.platetype = "TipRack"
         self.deck = Deck
         self.plateIndex = index
         self.numTips = numTips
