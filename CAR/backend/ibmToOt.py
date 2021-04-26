@@ -33,6 +33,10 @@ class otSession():
         self.output = otWrite.otScript(filepath=self.outputpath, protocolName=self.name)
         self.output.setupScript()
         self.setupPlate()
+        self.choosetip(190)
+        self.choosetip(200)
+        self.choosetip(201)
+        self.tipOutput()
         self.output.setupLabwear(self.deck.PlateList, self.tipRackList)
     
     def namecheck(self):
@@ -87,7 +91,7 @@ class otSession():
         self.maxtransfer = materials['materialquantity'].max()
         self.totalvolume = materials['materialquantity'].sum()
 
-        self.orderPlate = self.deck.addplate(1,12,500)
+        self.orderPlate = self.deck.add("Plate", 1,12,500, "OrderPlate")
 
         plate = ['','','','','','','','','',''] #note: need to fix so not fixed posibles
         for i in range(len(materials)):
@@ -99,7 +103,7 @@ class otSession():
                 plate[wellnumber] = [materials.loc[i,'materialquantity'], materials.loc[i,'materialsmiles']] 
         print(plate)
         
-        self.reactionPlate = self.deck.addplate(2, 12, 500)
+        self.reactionPlate = self.deck.add("Plate", 2, 12, 500, "ReactionPlate")
 
         self.orderPlate.printplate()
         print()
@@ -115,12 +119,15 @@ class otSession():
             # review wether to use tip options or self.tipoptions for rest of function
         for tip in self.tipoptions:
             if tip >= volume:
-                if tip in self.tipsneeded:
-                    neededindex = self.tipsneeded[0].index(tip)
-                    self.tipsneeded[1][neededindex] += self.tipsneeded[1][neededindex]
+                print(self.tipsneeded[:][0])
+                if tip in self.tipsneeded[:][0]:
+                    print("debug1")
+                    neededindex = self.tipsneeded[:][0].index(tip)
+                    self.tipsneeded[neededindex][1] += self.tipsneeded[neededindex][1]
                 else:
-                    self.tipsneeded[0].append(tip)
-                    self.tipsneeded[1].append(1)
+                    print("debug2")
+                    self.tipsneeded.append([tip,1])
+                    #self.tipsneeded[1].append(1)
                 return tip 
         return False
     
@@ -128,17 +135,30 @@ class otSession():
 
     def tipOutput(self):
         self.tipRackList = []
+        print("###tipsneeded###\n"+str(self.tipsneeded)+"\n######")
         for tip in self.tipsneeded :
+            print("#tip##\n"+str(tip)+"\n###")
+            if tip != []:
+                tip = tip[0]
+            
+            location = len(self.deck.PlateList)
+
             if tip == 10:
-                self.tipRackList.append("opentrons_96_filtertiprack_10ul")
+                self.deck.add("TipRack", location, numwells=96, platewellVolume=10, platename = "opentrons_96_filtertiprack_10ul")
+                self.tipRackList.append(["opentrons_96_filtertiprack_10ul", self.deck.nextfreeplate()])
             elif tip == 20:
-                self.tipRackList.append("opentrons_96_filtertiprack_20ul")
+                self.deck.add("TipRack", location, numwells=96, platewellVolume=20, platename = "opentrons_96_filtertiprack_20ul")
+                self.tipRackList.append(["opentrons_96_filtertiprack_20ul", self.deck.nextfreeplate()])
             elif tip == 200:
-                self.tipRackList.append("opentrons_96_filtertiprack_200ul")
+                self.deck.add("TipRack", location, numwells=96, platewellVolume=200, platename = "opentrons_96_filtertiprack_200ul")
+                self.tipRackList.append(["opentrons_96_filtertiprack_200ul", self.deck.nextfreeplate()])
             elif tip == 300:
-                self.tipRackList.append("opentrons_96_tiprack_300ul")
+                self.deck.add("TipRack", location, numwells=96, platewellVolume=300, platename = "opentrons_96_filtertiprack_300ul")
+                self.tipRackList.append(["opentrons_96_filtertiprack_300ul", self.deck.nextfreeplate()])
             elif tip == 1000:
-                self.tipRackList.append("opentrons_96_filtertiprack_1000ul")
+                self.deck.add("TipRack", location, numwells=96, platewellVolume=1000, platename = "opentrons_96_filtertiprack_1000ul")
+                self.tipRackList.append(["opentrons_96_filtertiprack_1000ul", self.deck.nextfreeplate()])
+        print("###tipracklist###\n"+str(self.tipRackList)+"\n######")
         return self.tipRackList
 
 
@@ -158,13 +178,13 @@ class otSession():
 
         #elf.output.movefluids(1, fromAdress, toAdress, volume, dispenseVolume=None, writetoscript=True)
 
-print("test")
+#print("test")
 a = otSession("test")
 #print(a.deck)
 a.getactions(1)
 #print(a.actions)
 #print(a.outputpath)
-print(list(a.actions.columns))
+#print(list(a.actions.columns))
 #print(a.actions['material'])
 #a.ittrActions()
 a.setupPlate()

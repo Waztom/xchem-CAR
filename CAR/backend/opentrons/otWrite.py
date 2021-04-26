@@ -36,13 +36,16 @@ class otScript():
 
         script.close()
     
-    def setupLabwear(self, platelist = ['corning_96_wellplate_360ul_flat', 2], tipOutput = ["opentrons_96_filtertiprack_200ul"]):
+    def setupLabwear(self, platelist, tipOutput):
         script = open(self.filepath, "a")
         script.write("\n\t# labware")
         for plate in platelist:
-            script.write("\n\tplate = protocol.load_labwear('"+str(plate.strName)+"', '"+str(plate.plateIndex)+"')")
-        script.write("\n\ttiprack = protocol.load_labware('"+str()+"', '"+str()+"')\n")
-
+            if plate.plateName == "":
+                uniquename = (str("plate_"+str(plate.plateIndex))).replace(" ", "")
+            else:
+                uniquename = str(str(plate.plateName)+"_"+str(plate.plateIndex)).replace(" ","")
+            script.write("\n\t"+uniquename+" = protocol.load_labwear('"+str(plate.plateTypeName)+"', '"+str(plate.plateIndex)+"')")
+        
         script.close()
 
     def setupPipettes(self):

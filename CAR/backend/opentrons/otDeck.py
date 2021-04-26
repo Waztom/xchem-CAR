@@ -4,6 +4,7 @@ class Deck ():
         self.deckindex = index
         self.PlateList = []
 
+
     def __repr__(self):
         return 'D{}'.format(self.deckindex)
 
@@ -17,32 +18,40 @@ class Deck ():
         return self.PlateList[position]
     
     def nextfreeplate(self):
-        freeplates = []
-        for plate in self.PlateList:
-            if plate.isempty():
-                freeplates.append(plate.plateIndex)
-        if len(freeplates)>=1:
-            nextfreeplate= int(freeplates[0])
-        else:
-            nextfreeplate = "no free wells"
-        return nextfreeplate
+        # freeplates = []
+        # for plate in self.PlateList:
+        #     if plate.isempty():
+        #         freeplates.append(plate.plateIndex)
+        # if len(freeplates)>=1:
+        #     nextfreeplate= int(freeplates[0])
+        # else:
+        #     nextfreeplate = "no free wells"
+        nextfreeplateindex = len(self.PlateList)+1
+        #nextfreeplateindex = 1
+        return nextfreeplateindex
 
-    def addplate(self, location, numwells=None, platewellVolume=None):
-        self.PlateList.append(Plate(self, index=len(self.PlateList)+1, numwells=numwells,platewellVolume=platewellVolume))
+    def add(self, Type, location, numwells=None, platewellVolume=None, platename = ""):
+        DeckObject(self, Type, index=self.nextfreeplate(), numwells=numwells,platewellVolume=platewellVolume, platename=platename)
         return self.PlateList[-1]
 
-
+class DeckObject ():
+    def __init__(self, Deck, Type, index=None, numwells=None, platewellVolume=None, platename="", numTips=None, tipVolume=None):
+        if Type == "Plate":
+            Deck.PlateList.append(Plate(Deck, index, numwells, platewellVolume, platename))
+        elif Type == "TipRack":
+            Deck.PlateList.append(TipRack(Deck, index, numTips=numwells, tipVolume=platewellVolume, platename=platename))
 
 class Plate ():
 
-    def __init__(self, Deck, index=None, numwells=None, platewellVolume=None):
+    def __init__(self, Deck, index=None, numwells=None, platewellVolume=None, platename=""):
         self.deck = Deck
         self.plateIndex = index
         self.numwells = numwells
         self.platewellVolume = platewellVolume
         self.WellList = None
         self.setupwells()
-        self.strName = "plate_"+str(numwells)
+        self.plateTypeName= "plate_"+str(numwells)
+        self.plateName = platename
 
     def __repr__(self):
         return 'D{}P{}'.format(self.deck.deckindex, self.plateIndex)
@@ -65,6 +74,11 @@ class Plate ():
         for well in range(self.numwells):
             self.WellList.append(Well(self, wellindex=well, Volume=self.platewellVolume, VolumeUsed=0, StartSmiles="", GoalSmiles=""))
         return self.WellList
+
+    def addplacehoder(self):
+        pass
+        #self.WelList(self.nextfreewell()) = ""
+        
 
 
     def nextfreewell(self):
@@ -98,7 +112,45 @@ class Plate ():
             pass
             #goalinstances.append([i,j])
         return[startinstances, goalinstances]
+    
+class TipRack ():
+    
+    def __init__(self, Deck, index=None, numTips=None, tipVolume=None, platename=""):
+        print(str(index)+str(numTips)+str(tipVolume)+str(platename))
+        self.deck = Deck
+        self.plateIndex = index
+        self.numTips = numTips
+        self.tipVolume = tipVolume
+        self.TipList = []
+        self.setupTips()
+        self.plateTypeName= platename
+        self.plateName = "tips_"+str(numTips)+"_"+str(tipVolume)
 
+    def __repr__(self):
+        return 'D{}T{}'.format(self.deckindex, self.plateIndex)
+
+    def __str__(self):
+        return 'Deck {} TipRack {}'.format(self.deckindex, self.plateIndex)
+
+    def __len__(self):
+        return len(self.TipList)
+
+    def __getitem__(self, position):
+        return self.TipList[position]
+    
+    def setupTips (self):
+        for i in range(self.numTips):
+            self.TipList.append(True)
+        return self.TipList
+
+    def nextFreeTip (self):
+        for i in range(len(self.TipList)):
+            if self.TipList[i] == True:
+                return i
+        return False
+
+    def useTip (self, index):
+        self.TipList[index] = False
 
 class Well ():
     
@@ -147,3 +199,55 @@ class Well ():
             if type(goal_smiles) == str:
                 self.GoalSmiles = goal_smiles
         return [self.StartSmiles, self.GoalSmiles]
+
+
+# class TipBlock ():
+
+#     def __init__(self, Deck, index=None, numtips=None, tipvolume=None, platename=""):
+#         self.deck = Deck
+#         self.plateIndex = index
+#         self.numTips = numtips
+#         self.tipVolume = tipvolume
+#         self.tipList = None
+#         self.setuptips()
+#         self.plateTypeName= "tips_"+str(numTips)+"_"+str(tipVolume)+"u"
+#         self.plateName = platename
+
+#     def __repr__(self):
+#         return 'D{}T{}'.format(self.deck.deckindex, self.plateIndex)
+
+#     def __str__(self):
+#         return 'Deck {}, Tipblock number {}'.format(self.deck.deckindex, self.plateIndex)
+
+#     def __len__(self):
+#         return len(self.WellList)
+
+#     def __getitem__(self, position):
+#         return self.WellList[position]
+    
+#     def printtips(self):
+#         for well in self.WellList:
+#             print(str(well.StartSmiles) + " " + str(well.GoalSmiles) + " " + str(well.VolumeUsed)+ "/" + str(well.Volume))
+
+    
+#     def setuptips(self):
+#         self.TipList = [True] * self.numTips
+#         return self.TipList
+
+#     def nextfreewell(self):
+#         freewells = []
+#         for well in self.WellList:
+#             if well.isempty():
+#                 freewells.append(well.wellindex)
+#         if len(freewells)>=1:
+#             nextfreewell = int(freewells[0])
+#         else:
+#             nextfreewell = "no free wells"
+#         return nextfreewell
+
+#     def isempty(self):
+#         isempty = True
+#         for well in self.WellList:
+#             if not well.isempty():
+#                 isempty = False
+#         return isempty
