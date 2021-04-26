@@ -49,19 +49,12 @@ class otScript():
         script.close()
 
 
-    def setupPipettes(self, pipettesneeded):
+    def setupPipettes(self, pipettelist):
         script = open(self.filepath, "a")
         script.write("\n\n\t# pipettes\n")
         mountnumber = 0
-        for pipette in pipettesneeded:
-            if mountnumber == 0:
-                mount = "left"
-                mountnumber += 1
-            elif mountnumber == 1:
-                mount = "right"
-            else:
-                break
-            script.write("\t"+str(mount)+"_pipette = protocol.load_instrument('p"+str(pipette)+"_single', '"+str(mount)+"', tip_racks="+(str(pipettesneeded[pipette])).replace("'","")+")\n")
+        for pipette in pipettelist:
+            script.write("\t"+str(pipette.mount)+"_pipette = protocol.load_instrument('"+str(pipette.model)+"', '"+str(pipette.mount)+"', tip_racks="+str(pipette.tipRacks).replace("'","")+")\n")
         script.close()
         #left
         #right
@@ -88,7 +81,7 @@ class otScript():
         moveCommands = ["\n\t# "+str(humanread),
             str(pipetteName)+".pick_up_tip()",
             str(pipetteName)+".aspirate("+str(volume)+", "+str(fromAdress)+")",
-            str(pipetteName)+".aspirate("+str(dispenseVolume)+", "+str(toAdress)+")",
+            str(pipetteName)+".dispense("+str(dispenseVolume)+", "+str(toAdress)+")",
             str(pipetteName)+".drop_tip()"]
         if writetoscript is True:
             self.writeCommand(moveCommands)
@@ -129,7 +122,7 @@ class otScript():
 
 
     def convertReactionToActions(self, reaction):
-        print("\n\n\t\tReaction: "+str(reaction))
+        #print("\n\n\t\tReaction: "+str(reaction))
         for step in reaction:
             if step == 'add':
                 self.movefluids('pipetteName', 'fromAdress', 'toAdress', '10')
@@ -142,6 +135,6 @@ class otScript():
             script = open(self.filepath, "a")
             script.write("\n\n\t# Reaction no: "+str(reaction[0])+"\n")
             script.close()
-            print("\n\n\tReaction no: "+str(reaction[0]))
+            #print("\n\n\tReaction no: "+str(reaction[0]))
             self.convertReactionToActions(reaction[1])
         

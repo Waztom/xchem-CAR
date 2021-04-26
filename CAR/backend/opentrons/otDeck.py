@@ -3,6 +3,8 @@ class Deck ():
     def __init__(self, index=None):
         self.deckindex = index
         self.PlateList = []
+        self.PipetteList = []
+        
 
 
     def __repr__(self):
@@ -15,7 +17,13 @@ class Deck ():
         return len(self.PlateList)
 
     def __getitem__(self, position):
-        return self.PlateList[position]
+        if type(position) == int:
+            return self.PlateList[position]
+        elif type(position) == str:
+            for i in range(len(self.PlateList)):
+                if (self.PlateList[i].plateName == position) or (self.PlateList[i].plateTypeName == position):
+                    return self.PlateList[i]
+        print("'"+str(position)+"' not found")
     
     def nextfreeplate(self):
         # freeplates = []
@@ -41,6 +49,18 @@ class Deck ():
                 if int(plate.tipVolume) == int(volume):
                     releventracks.append(plate.plateName)
         return releventracks
+
+    def findTipRacks (self, volume):
+        releventracks = []
+        for plate in self.PlateList:
+            if plate.platetype == "TipRack":
+                if int(plate.tipVolume) == int(volume):
+                    releventracks.append(plate.plateName)
+        return releventracks
+
+    def addPipette (self, name, model, mount, volume):
+        #self.PipetteList.append(self, pipette(len(self.PipetteList), name, model, mount, volume))
+        self.PipetteList.append(Pipette(self, len(self.PipetteList), name, model, mount, volume))
                     
 
 
@@ -63,6 +83,7 @@ class Plate ():
         self.setupwells()
         self.plateTypeName= "plate_"+str(numwells)
         self.plateName = platename
+        self.activeWell = self.nextfreewell()
 
     def __repr__(self):
         return 'D{}P{}'.format(self.deck.deckindex, self.plateIndex)
@@ -75,7 +96,7 @@ class Plate ():
 
     def __getitem__(self, position):
         return self.WellList[position]
-    
+
     def printplate(self):
         for well in self.WellList:
             print(str(well.StartSmiles) + " " + str(well.GoalSmiles) + " " + str(well.VolumeUsed)+ "/" + str(well.Volume))
@@ -111,18 +132,21 @@ class Plate ():
         return isempty
 
     def smilesearch(self, smiles, start_smiles=None, goal_smiles=None):
-        if start_smiles == None & goal_smiles == None:
+        if (start_smiles == None) & (goal_smiles == None):
             start_smiles = True
             goal_smiles = True
         startinstances = []
         goalinstances = []
-        if start_smiles == True:
-            pass
-            #start_smiles.append([i,j])
-        if goal_smiles == True:
-            pass
-            #goalinstances.append([i,j])
+        for well in self.WellList:
+            if start_smiles == True:
+                if well.StartSmiles == smiles:
+                    startinstances.append(well.wellindex)
+            if goal_smiles == True:
+                if well.StartSmiles == smiles:
+                    startinstances.append(well.wellindex)
         return[startinstances, goalinstances]
+
+
     
 class TipRack ():
     
@@ -211,54 +235,12 @@ class Well ():
                 self.GoalSmiles = goal_smiles
         return [self.StartSmiles, self.GoalSmiles]
 
-
-# class TipBlock ():
-
-#     def __init__(self, Deck, index=None, numtips=None, tipvolume=None, platename=""):
-#         self.deck = Deck
-#         self.plateIndex = index
-#         self.numTips = numtips
-#         self.tipVolume = tipvolume
-#         self.tipList = None
-#         self.setuptips()
-#         self.plateTypeName= "tips_"+str(numTips)+"_"+str(tipVolume)+"u"
-#         self.plateName = platename
-
-#     def __repr__(self):
-#         return 'D{}T{}'.format(self.deck.deckindex, self.plateIndex)
-
-#     def __str__(self):
-#         return 'Deck {}, Tipblock number {}'.format(self.deck.deckindex, self.plateIndex)
-
-#     def __len__(self):
-#         return len(self.WellList)
-
-#     def __getitem__(self, position):
-#         return self.WellList[position]
-    
-#     def printtips(self):
-#         for well in self.WellList:
-#             print(str(well.StartSmiles) + " " + str(well.GoalSmiles) + " " + str(well.VolumeUsed)+ "/" + str(well.Volume))
-
-    
-#     def setuptips(self):
-#         self.TipList = [True] * self.numTips
-#         return self.TipList
-
-#     def nextfreewell(self):
-#         freewells = []
-#         for well in self.WellList:
-#             if well.isempty():
-#                 freewells.append(well.wellindex)
-#         if len(freewells)>=1:
-#             nextfreewell = int(freewells[0])
-#         else:
-#             nextfreewell = "no free wells"
-#         return nextfreewell
-
-#     def isempty(self):
-#         isempty = True
-#         for well in self.WellList:
-#             if not well.isempty():
-#                 isempty = False
-#         return isempty
+class Pipette():
+    def __init__(self, deck, pipetteIndex, name, model, mount, volume):
+        self.deck = deck
+        self.pipetteIndex = pipetteIndex
+        self.name = name
+        self.model = model
+        self.mount = mount
+        self.volume = volume
+        self.tipRacks = self.deck.findTipRacks(self.volume)

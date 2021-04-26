@@ -31,29 +31,35 @@ class otSession():
         self.tipsneeded = {}
         self.tipRackList = []
 
-        self.pipettesneeded = {}
+        self.pipettesneeded = []
 
         self.output = otWrite.otScript(filepath=self.outputpath, protocolName=self.name)
         self.output.setupScript()
         self.setupPlate()
-        self.choosetip(190)
-        self.choosetip(200)
-        self.choosetip(201)
+        
+        
+        self.preselecttips()
+        
+        
+        
         self.tipOutput()
         self.output.setupLabwear(self.deck.PlateList, self.tipRackList)
-        self.pipettesChoose()
-        self.output.setupPipettes(self.pipettesneeded)
+        self.setupPipettes()
+        self.output.setupPipettes(self.deck.PipetteList)
+
+
+        self.ittrActions()
+
+
     
     def namecheck(self):
         trialname = self.name
         if re.match("^[\w-]+$", trialname):
-            print("\""+str(trialname)+"\" is valid")
+            pass
         else:
-            print("\""+ str(trialname)+"\" is NOT valid")
             trialname = re.sub(r"^[\w-]+$", '', trialname)
             if trialname == '':
                 trialname = "unamaed"
-            print("new name: "+ str(trialname))
 
         self.name = trialname
         return trialname
@@ -78,20 +84,9 @@ class otSession():
         self.actions = reactionsactions
         return reactionsactions
 
-    def ittrActions(self):
-        # note: add checks to prevent errors if df of diffrent format or blank is presented
-        actionsCoppy = self.actions
-        actionsCoppy = actionsCoppy.sort_values(['id', 'actionno'], ascending=(True, False))
-        for actionindex in range(len(self.actions)):
-            print(actionindex)
-            currentactionmask = self.actions['actionno'] == actionindex+1
-            currentaction = self.actions[currentactionmask]
-            self.processAction(currentaction)
-
     def setupPlate(self):
         startingSteps = self.actions.loc[(self.actions['actiontype']) == "add"]
         materials = startingSteps[['materialsmiles', 'materialquantity']]
-        print(materials)
 
         self.maxtransfer = materials['materialquantity'].max()
         self.totalvolume = materials['materialquantity'].sum()
@@ -106,11 +101,16 @@ class otSession():
             if outcome != False:
                 #add otWrite setup plate here
                 plate[wellnumber] = [materials.loc[i,'materialquantity'], materials.loc[i,'materialsmiles']] 
-        print(plate)
         
         self.reactionPlate = self.deck.add("Plate", 2, 12, 500, "ReactionPlate")
 
-
+    def preselecttips(self):
+        for actionindex in range(len(self.actions)):
+            currentactionmask = self.actions['actionno'] == actionindex+1
+            currentaction = self.actions[currentactionmask]
+            currentactiontype = (currentaction['actiontype'].to_string(index=False)).strip()
+            if currentactiontype == "add":
+                self.choosetip(currentaction['materialquantity'].values[0], tipoptions = [])
 
     def choosetip(self, volume, tipoptions= []):
         if tipoptions == []:
@@ -133,9 +133,7 @@ class otSession():
 
     def tipOutput(self):
         self.tipRackList = []
-        print("###tipsneeded###\n"+str(self.tipsneeded)+"\n######")
         for tip in self.tipsneeded :
-            print("#tip##\n"+str(tip)+"\n###")
 
             numplates = math.ceil(self.tipsneeded[tip]/96)
 
@@ -160,36 +158,65 @@ class otSession():
                     self.tipRackList.append(["opentrons_96_filtertiprack_1000ul", self.deck.nextfreeplate()])
 
                 numplates -= 1
-        print("###tipracklist###\n"+str(self.tipRackList)+"\n######")
         return self.tipRackList
 
-    def pipettesChoose (self):
+    def setupPipettes (self):
         if len(self.tipsneeded) <= 2:
             if len(self.tipsneeded) > 0 :
                 for pipette in self.tipsneeded:
-                    self.pipettesneeded[str(pipette)] = self.deck.findPippets(pipette)
-        return self.pipettesneeded
+                    self.pipettesneeded.append(pipette)
+        mountnumber = 0
+        for pipette in self.pipettesneeded:
+            if mountnumber == 0:
+                mount = "left"
+                mountnumber += 1
+            elif mountnumber == 1:
+                mount = "right"
+            else:
+                break
+            self.deck.addPipette(str(str(mount)+"_"+str(pipette)), str("p"+str(pipette)+"_single"), mount, pipette)
+            
 
-
+    def ittrActions(self):
+        # note: add checks to prevent errors if df of diffrent format or blank is presented
+        # actionsCoppy = self.actions
+        # actionsCoppy = actionsCoppy.sort_values(['id', 'actionno'], ascending=(True, False))
+       # print(self.actions)
+        for actionindex in range(len(self.actions)):
+            currentactionmask = self.actions['actionno'] == actionindex+1
+            currentaction = self.actions[currentactionmask]
+            #print("current: "+str(currentaction))
+            self.processAction(currentaction)
 
     def processAction(self, currentaction):
         currentactiontype = (currentaction['actiontype'].to_string(index=False)).strip()
-        print(currentactiontype)
-        if currentactiontype == " add":
-            print("\tadd")
+        #print("current type: "+str(currentactiontype))
+        if currentactiontype == "add":
+            #print("add")
             self.actionAdd(currentaction)
+        elif currentactiontype == "stir":
+            self.output.unsuportedAction("stir at a "+str(currentaction['stirringspeed'].values[0])+" speed at "+str(currentaction['temperature'].values[0])+" Celsius for"+str(currentaction['duration'].values[0])+" "+str(currentaction['durationunit'].values[0]))
+        elif currentactiontype == "set-temprature":
+            self.output.unsuportedAction("set temprature to "+str(currentaction['temperature'].values[0])+" Celsius for"+str(currentaction['duration'].values[0])+" "+str(currentaction['durationunit'].values[0]))
+        elif currentactiontype == "store":
+            self.output.unsuportedAction("store product ("+str(currentaction['material'].values[0])+")")
+        else:
+            self.output.unsuportedAction(str(currentaction['actiontype'].values[0])+" is not currently supported ")
+        
 
     def actionAdd(self, currentaction):
-        well = self.deck.PlateList[1].nextfreewell()
-        print(well)
-        print(currentaction)
-
-        #elf.output.movefluids(1, fromAdress, toAdress, volume, dispenseVolume=None, writetoscript=True)
+        self.choosetip(currentaction['materialquantity'].values[0])
+        self.output.movefluids(1,
+            str("OrderPlate"+str(self.deck['OrderPlate'].smilesearch(currentaction['materialsmiles'].values[0], start_smiles = True)[0])+""),
+            str("ReactionPlate["+str(self.deck['ReactionPlate'].activeWell)+"]"),
+            currentaction['materialquantity'].values[0],
+            dispenseVolume=None,
+            writetoscript=True)
 
 #print("test")
-a = otSession("test")
+a = otSession("test", 1)
+#b = otSession("2", 2)
 #print(a.deck)
-a.getactions(1)
 #print(a.actions)
 #print(a.outputpath)
 #print(list(a.actions.columns))

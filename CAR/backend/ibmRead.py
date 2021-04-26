@@ -60,8 +60,8 @@ def getReactionActions(AllActions, ReactionID):
         ReactionID = [ReactionID.item()]
 
         
-    print(ReactionID)
-    print(type(ReactionID))
+    #print(ReactionID)
+    #print(type(ReactionID))
     ReactionMask = AllActions.reaction_id_id.isin(ReactionID)
     ReactionActions = AllActions[ReactionMask]
     return(ReactionActions)
@@ -75,6 +75,6 @@ def basiccomprehension(AllActions):
             actionlist.append(row['actiontype']) 
         #print(str(reaction)+" "+str(actionlist))
         reactions.append([reaction, actionlist])
-    print(reactions)
+    #print(reactions)
     return reactions
     # return something here
