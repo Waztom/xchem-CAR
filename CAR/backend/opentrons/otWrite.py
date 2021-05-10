@@ -26,6 +26,7 @@ class otScript():
 
         script = open(self.filepath, "w")
         script.write("from opentrons import protocol_api\n")
+        script.write("# "+str(self.protocolName)+" for \""+str(self.author)+str("\" produced by XChem Car (https://car.xchem.diamond.ac.uk)"))
         script.write("\n# metadata\n metadata = {")
         script.write("\n\t'protocolName': '"+str(self.protocolName)+"',")
         script.write("\n\t'author': '"+str(self.author)+"',")
@@ -36,20 +37,28 @@ class otScript():
 
         script.close()
     
-    def setupLabwear(self):
+    def setupLabwear(self, platelist, tipOutput):
         script = open(self.filepath, "a")
         script.write("\n\t# labware")
-        script.write("\n\tplate = protocol.load_labwear('"+str()+"', '"+str()+"')")
-        script.write("\n\ttiprack = protocol.load_labware('"+str()+"', '"+str()+"')\n")
-
+        for plate in platelist:
+            if plate.plateName == "":
+                uniquename = (str("plate_"+str(plate.plateIndex))).replace(" ", "")
+            else:
+                uniquename = str(str(plate.plateName)+"_"+str(plate.plateIndex)).replace(" ","")
+            script.write("\n\t"+uniquename+" = protocol.load_labwear('"+str(plate.plateTypeName)+"', '"+str(plate.plateIndex)+"')")
+        
         script.close()
 
-    def setupPipettes(self):
+
+    def setupPipettes(self, pipettelist):
         script = open(self.filepath, "a")
-        script.write("\n\t# pipettes\n")
-        script.write("\tleft_pipette = protocol.load_instrument('"+str()+"', '"+str()+"', '"+str()+"')\n")
-
+        script.write("\n\n\t# pipettes\n")
+        mountnumber = 0
+        for pipette in pipettelist:
+            script.write("\t"+str(pipette.mount)+"_pipette = protocol.load_instrument('"+str(pipette.model)+"', '"+str(pipette.mount)+"', tip_racks="+str(pipette.tipRacks).replace("'","")+")\n")
         script.close()
+        #left
+        #right
 
     def writeCommand(self, comandString):
         script = open(self.filepath, "a")
@@ -73,7 +82,7 @@ class otScript():
         moveCommands = ["\n\t# "+str(humanread),
             str(pipetteName)+".pick_up_tip()",
             str(pipetteName)+".aspirate("+str(volume)+", "+str(fromAdress)+")",
-            str(pipetteName)+".aspirate("+str(dispenseVolume)+", "+str(toAdress)+")",
+            str(pipetteName)+".dispense("+str(dispenseVolume)+", "+str(toAdress)+")",
             str(pipetteName)+".drop_tip()"]
         if writetoscript is True:
             self.writeCommand(moveCommands)
@@ -102,19 +111,19 @@ class otScript():
 
     
 
-    def runall(self):
+    def quickSetup(self):
         self.setupScript()
         self.setupLabwear()
         self.setupPipettes()
 
     def example(self):
-        runall()
+        quickSetup()
         self.movefluids("left", "plate['A1']", "plate['B2']",100)
 
 
 
     def convertReactionToActions(self, reaction):
-        print("\n\n\t\tReaction: "+str(reaction))
+        #print("\n\n\t\tReaction: "+str(reaction))
         for step in reaction:
             if step == 'add':
                 self.movefluids('pipetteName', 'fromAdress', 'toAdress', '10')
@@ -127,6 +136,6 @@ class otScript():
             script = open(self.filepath, "a")
             script.write("\n\n\t# Reaction no: "+str(reaction[0])+"\n")
             script.close()
-            print("\n\n\tReaction no: "+str(reaction[0]))
+            #print("\n\n\tReaction no: "+str(reaction[0]))
             self.convertReactionToActions(reaction[1])
         

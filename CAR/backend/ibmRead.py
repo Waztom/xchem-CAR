@@ -7,6 +7,7 @@ import numpy as np
 import backend.opentrons.otWrite
 
 
+
 def getactions():
     """this, using pandas, is not a sustanable aproach and will proberbly not scale"""
     IBMAddAction = pd.DataFrame(list(backend.models.IBMAddAction.objects.all().values()))
@@ -46,11 +47,10 @@ def getactions():
     AllActions = AllActions.append(IBMWaitAction)
     IBMWashAction = pd.DataFrame(list(backend.models.IBMWashAction.objects.all().values()))
     AllActions = AllActions.append(IBMWashAction)
-
     #sort
     AllActions = AllActions.sort_values(['reaction_id_id', 'actionno'])
 
-    print(AllActions)
+    #print(AllActions)
     return AllActions
 
 def getReactionActions(AllActions, ReactionID):
@@ -60,12 +60,11 @@ def getReactionActions(AllActions, ReactionID):
         ReactionID = [ReactionID.item()]
 
         
-    print(ReactionID)
-    print(type(ReactionID))
+    #print(ReactionID)
+    #print(type(ReactionID))
     ReactionMask = AllActions.reaction_id_id.isin(ReactionID)
     ReactionActions = AllActions[ReactionMask]
     return(ReactionActions)
-
 
 def basiccomprehension(AllActions):
     reactions = []
@@ -74,9 +73,8 @@ def basiccomprehension(AllActions):
         actionlist = []
         for index, row in reactionactions.iterrows():
             actionlist.append(row['actiontype']) 
-        print(str(reaction)+" "+str(actionlist))
+        #print(str(reaction)+" "+str(actionlist))
         reactions.append([reaction, actionlist])
-    print(reactions)
+    #print(reactions)
     return reactions
     # return something here
-
