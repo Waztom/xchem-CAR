@@ -61,7 +61,6 @@ class Deck ():
     def addPipette (self, name, model, mount, volume):
         #self.PipetteList.append(self, pipette(len(self.PipetteList), name, model, mount, volume))
         self.PipetteList.append(Pipette(self, len(self.PipetteList), name, model, mount, volume))
-                    
 
 
 class DeckObject ():

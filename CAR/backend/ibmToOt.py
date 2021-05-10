@@ -13,10 +13,13 @@ import opentrons.otDeck as otDeck
 
 
 class otSession():
-    def __init__(self, name, reactionnumber=1):
+    def __init__(self, name, reactionnumber=1, author=None, description=None,):
 
         self.name = name
         self.namecheck()
+
+        self.author=author
+        self.description=description,
         
 
         self.actions = []
@@ -33,7 +36,7 @@ class otSession():
 
         self.pipettesneeded = []
 
-        self.output = otWrite.otScript(filepath=self.outputpath, protocolName=self.name)
+        self.output = otWrite.otScript(filepath=self.outputpath, protocolName=self.name, author=self.author, description=self.description)
         self.output.setupScript()
         self.setupPlate()
         
@@ -94,14 +97,13 @@ class otSession():
         self.orderPlate = self.deck.add("Plate", 1,12,500, "OrderPlate")
 
         plate = ['','','','','','','','','',''] #note: need to fix so not fixed posibles
-        for i in range(len(materials)):
+        for i in materials.index.values:
             wellnumber = self.orderPlate.nextfreewell()
-            outcome = self.orderPlate.WellList[wellnumber].add(materials.loc[i,'materialquantity'],
-                smiles = materials.loc[i,'materialsmiles'])
+            outcome = self.orderPlate.WellList[wellnumber].add(materials.loc[i,'materialquantity'], smiles = materials.loc[i,'materialsmiles'])
             if outcome != False:
                 #add otWrite setup plate here
                 plate[wellnumber] = [materials.loc[i,'materialquantity'], materials.loc[i,'materialsmiles']] 
-        
+
         self.reactionPlate = self.deck.add("Plate", 2, 12, 500, "ReactionPlate")
 
     def preselecttips(self):
@@ -191,17 +193,34 @@ class otSession():
     def processAction(self, currentaction):
         currentactiontype = (currentaction['actiontype'].to_string(index=False)).strip()
         #print("current type: "+str(currentactiontype))
-        if currentactiontype == "add":
-            #print("add")
-            self.actionAdd(currentaction)
-        elif currentactiontype == "stir":
-            self.output.unsuportedAction("stir at a "+str(currentaction['stirringspeed'].values[0])+" speed at "+str(currentaction['temperature'].values[0])+" Celsius for"+str(currentaction['duration'].values[0])+" "+str(currentaction['durationunit'].values[0]))
-        elif currentactiontype == "set-temprature":
-            self.output.unsuportedAction("set temprature to "+str(currentaction['temperature'].values[0])+" Celsius for"+str(currentaction['duration'].values[0])+" "+str(currentaction['durationunit'].values[0]))
-        elif currentactiontype == "store":
-            self.output.unsuportedAction("store product ("+str(currentaction['material'].values[0])+")")
-        else:
-            self.output.unsuportedAction(str(currentaction['actiontype'].values[0])+" is not currently supported ")
+        numreps = currentaction['numberofrepetitions'].values
+        if str(numreps) == "[nan]":
+            numreps = 0
+        elif str(numreps) == "[None]":
+            numreps = 0
+        elif str(numreps) == "[]":
+            numreps = 0
+
+        #print("numrepsa: "+str(numreps))
+        numreps = int(numreps)
+
+        #print(currentaction)
+        #print("numreps: "+str(numreps))
+
+
+        repetitions = 0
+        while repetitions  <= numreps:
+            if currentactiontype == "add":
+                self.actionAdd(currentaction)
+            elif currentactiontype == "stir":
+                self.output.unsuportedAction("stir at a "+str(currentaction['stirringspeed'].values[0])+" speed at "+str(currentaction['temperature'].values[0])+" Celsius for "+str(currentaction['duration'].values[0])+" "+str(currentaction['durationunit'].values[0]))
+            elif currentactiontype == "set-temprature":
+                self.output.unsuportedAction("set temprature to "+str(currentaction['temperature'].values[0])+" Celsius for"+str(currentaction['duration'].values[0])+" "+str(currentaction['durationunit'].values[0]))
+            elif currentactiontype == "store":
+                self.output.unsuportedAction("store product ("+str(currentaction['material'].values[0])+")")
+            else:
+                self.output.unsuportedAction(str(currentaction['actiontype'].values)+" is not currently supported ")
+            repetitions +=1
         
 
     def actionAdd(self, currentaction):
@@ -213,15 +232,25 @@ class otSession():
             dispenseVolume=None,
             writetoscript=True)
 
+
+allactions = ibmRead.getactions()
+# print(allactions)
+# print(allactions.columns)
+#reactionsactions = ibmRead.getReactionActions(allactions, reactionno)
+print(allactions['actiontype'].unique())
+
 #print("test")
-a = otSession("test", 1)
-#b = otSession("2", 2)
+#a = otSession("test", 1)
+# print(allactions['reaction_id_id'].unique())
+for reactionnumber in allactions['reaction_id_id'].unique():
+    print("genrating: "+"ittraexample"+str(reactionnumber))
+    b = otSession("ittraexample"+str(reactionnumber), int(reactionnumber), "Example Author", "N/A")
 #print(a.deck)
 #print(a.actions)
 #print(a.outputpath)
 #print(list(a.actions.columns))
 #print(a.actions['material'])
 #a.ittrActions()
-a.setupPlate()
+#a.setupPlate()
 
 #print(a.actions.materialquantity)

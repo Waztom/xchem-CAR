@@ -26,6 +26,7 @@ class otScript():
 
         script = open(self.filepath, "w")
         script.write("from opentrons import protocol_api\n")
+        script.write("# "+str(self.protocolName)+" for \""+str(self.author)+str("\" produced by XChem Car (https://car.xchem.diamond.ac.uk)"))
         script.write("\n# metadata\n metadata = {")
         script.write("\n\t'protocolName': '"+str(self.protocolName)+"',")
         script.write("\n\t'author': '"+str(self.author)+"',")
