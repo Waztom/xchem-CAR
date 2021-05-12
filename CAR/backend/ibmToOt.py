@@ -145,19 +145,19 @@ class otSession():
 
                 if tip == 10:
                     self.deck.add("TipRack", location, numwells=96, platewellVolume=10, platename = "opentrons_96_filtertiprack_10ul")
-                    self.tipRackList.append(["opentrons_96_filtertiprack_10ul", self.deck.nextfreeplate()])
+                    self.tipRackList.append(["opentrons_96_filtertiprack_10ul", self.deck.nextfreeplate(), tip])
                 elif tip == 20:
                     self.deck.add("TipRack", location, numwells=96, platewellVolume=20, platename = "opentrons_96_filtertiprack_20ul")
-                    self.tipRackList.append(["opentrons_96_filtertiprack_20ul", self.deck.nextfreeplate()])
+                    self.tipRackList.append(["opentrons_96_filtertiprack_20ul", self.deck.nextfreeplate(), tip])
                 elif tip == 200:
                     self.deck.add("TipRack", location, numwells=96, platewellVolume=200, platename = "opentrons_96_filtertiprack_200ul")
-                    self.tipRackList.append(["opentrons_96_filtertiprack_200ul", self.deck.nextfreeplate()])
+                    self.tipRackList.append(["opentrons_96_filtertiprack_200ul", self.deck.nextfreeplate(), tip])
                 elif tip == 300:
                     self.deck.add("TipRack", location, numwells=96, platewellVolume=300, platename = "opentrons_96_filtertiprack_300ul")
-                    self.tipRackList.append(["opentrons_96_filtertiprack_300ul", self.deck.nextfreeplate()])
+                    self.tipRackList.append(["opentrons_96_filtertiprack_300ul", self.deck.nextfreeplate(), tip])
                 elif tip == 1000:
                     self.deck.add("TipRack", location, numwells=96, platewellVolume=1000, platename = "opentrons_96_filtertiprack_1000ul")
-                    self.tipRackList.append(["opentrons_96_filtertiprack_1000ul", self.deck.nextfreeplate()])
+                    self.tipRackList.append(["opentrons_96_filtertiprack_1000ul", self.deck.nextfreeplate(), tip])
 
                 numplates -= 1
         return self.tipRackList
@@ -212,27 +212,51 @@ class otSession():
         while repetitions  <= numreps:
             if currentactiontype == "add":
                 self.actionAdd(currentaction)
+            if currentactiontype == "collect-layer":
+                self.actionCollectLayer(currentaction)
+            if currentactiontype == "wash":
+                self.actionWash(currentaction)
             elif currentactiontype == "stir":
                 self.output.unsuportedAction("stir at a "+str(currentaction['stirringspeed'].values[0])+" speed at "+str(currentaction['temperature'].values[0])+" Celsius for "+str(currentaction['duration'].values[0])+" "+str(currentaction['durationunit'].values[0]))
             elif currentactiontype == "set-temprature":
                 self.output.unsuportedAction("set temprature to "+str(currentaction['temperature'].values[0])+" Celsius for"+str(currentaction['duration'].values[0])+" "+str(currentaction['durationunit'].values[0]))
             elif currentactiontype == "store":
                 self.output.unsuportedAction("store product ("+str(currentaction['material'].values[0])+")")
+            elif currentactiontype == "extract":
+                self.output.unsuportedAction("extract ("+str(currentaction['material'].values[0])+")")
+            elif currentactiontype == "concentrate":
+                self.output.unsuportedAction("concentrate ("+str(currentaction['material'].values[0])+")")
             else:
                 self.output.unsuportedAction(str(currentaction['actiontype'].values)+" is not currently supported ")
             repetitions +=1
         
 
     def actionAdd(self, currentaction):
-        self.choosetip(currentaction['materialquantity'].values[0])
-        self.output.movefluids(1,
+        print(currentaction)
+        tipvolume = self.choosetip(currentaction['materialquantity'].values[0])
+        print(tipvolume)
+        pipetteName = self.deck.findTipRacks(tipvolume)
+        print(pipetteName)
+        pipetteName = pipetteName[0]
+
+        self.output.movefluids( pipetteName, 
             str("OrderPlate"+str(self.deck['OrderPlate'].smilesearch(currentaction['materialsmiles'].values[0], start_smiles = True)[0])+""),
             str("ReactionPlate["+str(self.deck['ReactionPlate'].activeWell)+"]"),
             currentaction['materialquantity'].values[0],
             dispenseVolume=None,
             writetoscript=True)
 
+    def actionWash(self, currentaction):
+        self.choosetip(currentaction['solventquantity'].values[0])
+        self.output.movefluids(1,
+            str("OrderPlate"+str(self.deck['OrderPlate'].smilesearch(currentaction['solvent'].values[0], start_smiles = True)[0])+""),
+            str("ReactionPlate["+str(self.deck['ReactionPlate'].activeWell)+"]"),
+            currentaction['solventquantity'].values[0],
+            dispenseVolume=None,
+            writetoscript=True)
 
+    def actionCollectLayer(self, currentaction):
+        self.output.unsuportedAction("collect layer not supported ")
 allactions = ibmRead.getactions()
 # print(allactions)
 # print(allactions.columns)
@@ -244,7 +268,7 @@ print(allactions['actiontype'].unique())
 # print(allactions['reaction_id_id'].unique())
 for reactionnumber in allactions['reaction_id_id'].unique():
     print("genrating: "+"ittraexample"+str(reactionnumber))
-    b = otSession("ittraexample"+str(reactionnumber), int(reactionnumber), "Example Author", "N/A")
+    b = otSession("ittraexample"+str(reactionnumber), int(reactionnumber), "Example Author", "example description")
 #print(a.deck)
 #print(a.actions)
 #print(a.outputpath)
