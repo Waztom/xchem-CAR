@@ -1,6 +1,8 @@
 # this is vunrable to python injection by the lack of checking of metadata inputs
 # this opens and closes files frequently, could be improved by creating string to hold the file data before writing to file once
 
+import os
+
 class otScript():
     def __init__(self, filepath, protocolName=None, author=None, description=None, apiLevel='2.9'):
         self.filepath = filepath
@@ -14,6 +16,7 @@ class otScript():
         #self.setupScript()
 
     def setupScript(self):
+        self.dirsetup()
         """This is vunrable to injection atacks """
         if self.protocolName == None:
                 self.protocolName = input("Please name the Protocol Name: \t")
@@ -69,6 +72,10 @@ class otScript():
                 script.write("\t"+str(command)+"\n")
 
         script.close()
+
+    def dirsetup(self, path="../output/"):
+        if not os.path.exists(path):
+            os.makedirs(path)
     
     def movefluids(self, pipetteName, fromAdress, toAdress, volume, dispenseVolume=None, writetoscript=True):
         if dispenseVolume == None:

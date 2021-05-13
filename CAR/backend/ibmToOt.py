@@ -87,24 +87,48 @@ class otSession():
         self.actions = reactionsactions
         return reactionsactions
 
-    def setupPlate(self):
-        startingSteps = self.actions.loc[(self.actions['actiontype']) == "add"]
-        materials = startingSteps[['materialsmiles', 'materialquantity']]
+    def setupPlate(self, incAddMaterials=True, incWashMaterials=True,incExtract=False):
+        #print(self.actions)
+        allmaterials = pd.DataFrame(columns=['material', 'materialquantity'])
 
-        self.maxtransfer = materials['materialquantity'].max()
-        self.totalvolume = materials['materialquantity'].sum()
+        if incAddMaterials == True:
+            addingSteps = self.actions.loc[(self.actions['actiontype']) == "add"]
+            materials = addingSteps[['materialsmiles', 'materialquantity']]
+            materials = materials.rename(columns={'materialsmiles':'material'})
+            allmaterials = pd.concat([allmaterials, materials], ignore_index=True)
+
+        if incWashMaterials==True:
+            solventSteps = self.actions.loc[(self.actions['actiontype']) == "wash"]
+            washmaterials = solventSteps[['material', 'materialquantity']]
+            allmaterials = pd.concat([allmaterials, washmaterials], ignore_index=True)
+
+        if incExtract == True:
+            extractSteps = self.actions.loc[(self.actions['actiontype']) == "extract"]
+            extractsolvents = solventSteps[['solvent', 'solventquantity']]
+            extractsolvents = extractsolvents.rename(columns={'solvent':'material'})
+            extractsolvents = extractsolvents.rename(columns={'solventquantity':'materialquantity'})
+            allmaterials = pd.concat([allmaterials, extractsolvents], ignore_index=True)
+
+        #print(allmaterials)
+
+        self.maxtransfer = allmaterials['materialquantity'].max()
+        self.totalvolume = allmaterials['materialquantity'].sum()
 
         self.orderPlate = self.deck.add("Plate", 1,12,500, "OrderPlate")
 
         plate = ['','','','','','','','','',''] #note: need to fix so not fixed posibles
-        for i in materials.index.values:
+        for i in allmaterials.index.values:
             wellnumber = self.orderPlate.nextfreewell()
-            outcome = self.orderPlate.WellList[wellnumber].add(materials.loc[i,'materialquantity'], smiles = materials.loc[i,'materialsmiles'])
+            outcome = self.orderPlate.WellList[wellnumber].add(allmaterials.loc[i,'materialquantity'], smiles = allmaterials.loc[i,'material'])
             if outcome != False:
                 #add otWrite setup plate here
-                plate[wellnumber] = [materials.loc[i,'materialquantity'], materials.loc[i,'materialsmiles']] 
+                plate[wellnumber] = [allmaterials.loc[i,'materialquantity'], allmaterials.loc[i,'material']] 
 
         self.reactionPlate = self.deck.add("Plate", 2, 12, 500, "ReactionPlate")
+        # for well in range(len(self.orderPlate)):
+        #     print(self.orderPlate[well].StartSmiles)
+        # print(self.orderPlate.smilesearch('C(Cl)Cl'))
+        # print(self.orderPlate.smilesearch('brine'))
 
     def preselecttips(self):
         for actionindex in range(len(self.actions)):
@@ -184,7 +208,7 @@ class otSession():
         # actionsCoppy = self.actions
         # actionsCoppy = actionsCoppy.sort_values(['id', 'actionno'], ascending=(True, False))
        # print(self.actions)
-        for actionindex in range(len(self.actions)):
+        for actionindex in range(len(self.actions)+1):
             currentactionmask = self.actions['actionno'] == actionindex+1
             currentaction = self.actions[currentactionmask]
             #print("current: "+str(currentaction))
@@ -192,51 +216,58 @@ class otSession():
 
     def processAction(self, currentaction):
         currentactiontype = (currentaction['actiontype'].to_string(index=False)).strip()
-        #print("current type: "+str(currentactiontype))
-        numreps = currentaction['numberofrepetitions'].values
-        if str(numreps) == "[nan]":
-            numreps = 0
-        elif str(numreps) == "[None]":
-            numreps = 0
-        elif str(numreps) == "[]":
-            numreps = 0
+        if currentactiontype != 'Series([], )':
+            print(f"#### {currentactiontype}")
+            #print("current type: "+str(currentactiontype))
+            numreps = currentaction['numberofrepetitions'].values
+            if str(numreps) == "[nan]":
+                numreps = 0
+            elif str(numreps) == "[None]":
+                numreps = 0
+            elif str(numreps) == "[]":
+                numreps = 0
 
-        #print("numrepsa: "+str(numreps))
-        numreps = int(numreps)
+            #print("numrepsa: "+str(numreps))
+            numreps = int(numreps)
 
-        #print(currentaction)
-        #print("numreps: "+str(numreps))
+            #print(currentaction)
+            #print("numreps: "+str(numreps))
 
 
-        repetitions = 0
-        while repetitions  <= numreps:
-            if currentactiontype == "add":
-                self.actionAdd(currentaction)
-            if currentactiontype == "collect-layer":
-                self.actionCollectLayer(currentaction)
-            if currentactiontype == "wash":
-                self.actionWash(currentaction)
-            elif currentactiontype == "stir":
-                self.output.unsuportedAction("stir at a "+str(currentaction['stirringspeed'].values[0])+" speed at "+str(currentaction['temperature'].values[0])+" Celsius for "+str(currentaction['duration'].values[0])+" "+str(currentaction['durationunit'].values[0]))
-            elif currentactiontype == "set-temprature":
-                self.output.unsuportedAction("set temprature to "+str(currentaction['temperature'].values[0])+" Celsius for"+str(currentaction['duration'].values[0])+" "+str(currentaction['durationunit'].values[0]))
-            elif currentactiontype == "store":
-                self.output.unsuportedAction("store product ("+str(currentaction['material'].values[0])+")")
-            elif currentactiontype == "extract":
-                self.output.unsuportedAction("extract ("+str(currentaction['material'].values[0])+")")
-            elif currentactiontype == "concentrate":
-                self.output.unsuportedAction("concentrate ("+str(currentaction['material'].values[0])+")")
-            else:
-                self.output.unsuportedAction(str(currentaction['actiontype'].values)+" is not currently supported ")
-            repetitions +=1
+            repetitions = 0
+            while repetitions  <= numreps:
+                #print(currentaction)
+                if currentactiontype == "add":
+                    self.actionAdd(currentaction)
+                elif currentactiontype == "collect-layer":
+                    self.actionCollectLayer(currentaction)
+                elif currentactiontype == "wash":
+                    self.actionWash(currentaction)
+                elif currentactiontype == "stir":
+                    self.output.unsuportedAction("stir at a "+str(currentaction['stirringspeed'].values[0])+" speed at "+str(currentaction['temperature'].values[0])+" Celsius for "+str(currentaction['duration'].values[0])+" "+str(currentaction['durationunit'].values[0]))
+                elif currentactiontype == "set-temperature":
+                    if currentaction['duration'].values[0] in ['nan','NaN',0,'0']:
+                        self.output.unsuportedAction(f"set temperature to {currentaction['temperature'].values[0]} Celsius for {currentaction['duration'].values[0]} {currentaction['durationunit'].values[0]}")
+                    else:
+                        self.output.unsuportedAction(f"set temperature to {currentaction['temperature'].values[0]} Celsius")
+
+                elif currentactiontype == "store":
+                    self.output.unsuportedAction("store product ("+str(currentaction['material'].values[0])+")")
+                elif currentactiontype == "extract":
+                    self.actionExtract(currentaction)
+                elif currentactiontype == "concentrate":
+                    self.actionConcentrate(currentaction)
+                else:
+                    print(f"unsupported{currentaction['actiontype'].values}")
+                    self.output.unsuportedAction(f"{currentaction['actiontype'].values[0]} is not currently supported ")
+                repetitions +=1
         
 
     def actionAdd(self, currentaction):
-        print(currentaction)
+        print("add")
         tipvolume = self.choosetip(currentaction['materialquantity'].values[0])
-        print(tipvolume)
+        #print(tipvolume)
         pipetteName = self.deck.findTipRacks(tipvolume)
-        print(pipetteName)
         pipetteName = pipetteName[0]
 
         self.output.movefluids( pipetteName, 
@@ -247,18 +278,36 @@ class otSession():
             writetoscript=True)
 
     def actionWash(self, currentaction):
-        self.choosetip(currentaction['solventquantity'].values[0])
-        self.output.movefluids(1,
-            str("OrderPlate"+str(self.deck['OrderPlate'].smilesearch(currentaction['solvent'].values[0], start_smiles = True)[0])+""),
+        print("wash")
+        tipvolume = self.choosetip(currentaction['materialquantity'].values[0])
+        #print(tipvolume)
+        pipetteName = self.deck.findTipRacks(tipvolume)
+        pipetteName = pipetteName[0]
+
+        self.output.movefluids(pipetteName,
+            str("OrderPlate"+str(self.deck['OrderPlate'].smilesearch(currentaction['material'].values[0], start_smiles = True)[0])+""),
             str("ReactionPlate["+str(self.deck['ReactionPlate'].activeWell)+"]"),
-            currentaction['solventquantity'].values[0],
+            currentaction['materialquantity'].values[0],
             dispenseVolume=None,
             writetoscript=True)
 
     def actionCollectLayer(self, currentaction):
-        self.output.unsuportedAction("collect layer not supported ")
+        print("collect")
+        self.output.unsuportedAction("Collect-Layer not yet supported ")
+
+
+    def actionExtract(self, currentaction):
+        print("Extract")
+        self.output.unsuportedAction(f"Extract using {currentaction['solventquantity'].values[0]} {currentaction['solventquantityunit'].values[0]} of {currentaction['solvent'].values[0]}")
+        # for col in currentaction:
+        #     print(currentaction[col].values[0])
+
+    def actionConcentrate(self, currentaction):
+        print("Concentrate")
+        self.output.unsuportedAction("Concentrate not yet supported ")
+    
 allactions = ibmRead.getactions()
-# print(allactions)
+print(allactions)
 # print(allactions.columns)
 #reactionsactions = ibmRead.getReactionActions(allactions, reactionno)
 print(allactions['actiontype'].unique())
