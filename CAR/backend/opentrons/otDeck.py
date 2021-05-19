@@ -44,11 +44,11 @@ class Deck ():
 
     def findPippets (self, volume):
         releventracks = []
-        for plate in self.PlateList:
-            if plate.platetype == "TipRack":
-                if int(plate.tipVolume) == int(volume):
-                    releventracks.append(plate.plateName)
-        return releventracks
+        for pipette in self.PipetteList:
+            if int(pipette.volume) == int(volume):
+                return pipette
+            else:
+                return False
 
     def findTipRacks (self, volume):
         releventracks = []
@@ -80,7 +80,7 @@ class Plate ():
         self.platewellVolume = platewellVolume
         self.WellList = None
         self.setupwells()
-        self.plateTypeName= "plate_"+str(numwells)
+        self.plateTypeName= "plateone_96_wellplate_2500ul"
         self.plateName = platename
         self.activeWell = self.nextfreewell()
 
@@ -158,13 +158,13 @@ class TipRack ():
         self.TipList = []
         self.setupTips()
         self.plateTypeName= platename
-        self.plateName = "tips_"+str(numTips)+"_"+str(tipVolume)
+        self.plateName = f"tips_{self.numTips}_{self.tipVolume}_{self.plateIndex}"
 
     def __repr__(self):
         return 'D{}T{}'.format(self.deckindex, self.plateIndex)
 
     def __str__(self):
-        return 'Deck {} TipRack {}'.format(self.deckindex, self.plateIndex)
+        return plateName
 
     def __len__(self):
         return len(self.TipList)

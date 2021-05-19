@@ -30,12 +30,9 @@ class otScript():
         script = open(self.filepath, "w")
         script.write("from opentrons import protocol_api\n")
         script.write("# "+str(self.protocolName)+" for \""+str(self.author)+str("\" produced by XChem Car (https://car.xchem.diamond.ac.uk)"))
-        script.write("\n# metadata\n metadata = {")
-        script.write("\n\t'protocolName': '"+str(self.protocolName)+"',")
-        script.write("\n\t'author': '"+str(self.author)+"',")
-        script.write("\n\t'description': '"+str(self.description)+"',")
-        script.write("\n\t'apiLevel': '"+str(self.apiLevel)+"'}\n")
-
+        script.write("\n# metadata")
+        script.write("\nmetadata = {'protocolName': '"+str(self.protocolName)+"', 'author': '"+str(self.author)+"','description': '"+str(self.description[0])+"','apiLevel': '"+str(self.apiLevel)+"'}\n")
+        script.write("\n\nfrom opentrons import protocol_api\n")
         script.write("\ndef run(protocol: protocol_api.ProtocolContext):\n")
 
         script.close()
@@ -47,8 +44,13 @@ class otScript():
             if plate.plateName == "":
                 uniquename = (str("plate_"+str(plate.plateIndex))).replace(" ", "")
             else:
-                uniquename = str(str(plate.plateName)+"_"+str(plate.plateIndex)).replace(" ","")
-            script.write("\n\t"+uniquename+" = protocol.load_labwear('"+str(plate.plateTypeName)+"', '"+str(plate.plateIndex)+"')")
+                if plate.platetype == "Plate":
+                    uniquename = str(str(plate.plateName)+"_"+str(plate.plateIndex)).replace(" ","")
+
+                    uniquename = plate.plateName # debug line
+                else:
+                    uniquename = plate.plateName
+            script.write(f"\n\t{uniquename} = protocol.load_labware('{plate.plateTypeName}', '{plate.plateIndex}')")
         
         script.close()
 
@@ -58,7 +60,7 @@ class otScript():
         script.write("\n\n\t# pipettes\n")
         mountnumber = 0
         for pipette in pipettelist:
-            script.write("\t"+str(pipette.mount)+"_pipette = protocol.load_instrument('"+str(pipette.model)+"', '"+str(pipette.mount)+"', tip_racks="+str(pipette.tipRacks).replace("'","")+")\n")
+            script.write("\t"+str(pipette.name)+" = protocol.load_instrument('"+str(pipette.model)+"', '"+str(pipette.mount)+"', tip_racks="+str(pipette.tipRacks).replace("'","")+")\n")
         script.close()
         #left
         #right
@@ -95,12 +97,25 @@ class otScript():
             self.writeCommand(moveCommands)
         return moveCommands
 
+    def transferfluids(self, pipetteName, fromAdress, toAdress, volume, writetoscript=True, takedistance=2, dispensedistance = -5):
+        humanread = f"transfer - {volume}ul from {fromAdress} to {toAdress}"
+
+        self.humanreadable.append(['OT',humanread])
+
+        moveCommands = ["\n\t# "+str(humanread),
+            str(pipetteName)+f".transfer({volume}, {fromAdress}.bottom({takedistance}), {toAdress}.top({dispensedistance}), air_gap = 15)"]
+        if writetoscript is True:
+            self.writeCommand(moveCommands)
+        return moveCommands
+
 
     def readScript(self):
         script = open(self.filepath, "a")
         scriptContent = script.read()
         print(scriptContent)
         return scriptContent
+
+    
 
 
     def unsuportedAction(self, actionDetails):

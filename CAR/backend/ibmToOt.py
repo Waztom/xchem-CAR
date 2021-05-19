@@ -13,7 +13,7 @@ import opentrons.otDeck as otDeck
 
 
 class otSession():
-    def __init__(self, name, reactionnumber=1, author=None, description=None,):
+    def __init__(self, name, actions, author=None, description=None, split=None):
 
         self.name = name
         self.namecheck()
@@ -29,7 +29,8 @@ class otSession():
         self.outputpath = "None"
         self.pathnamecheck()
         
-        self.getactions(reactionnumber)
+        # self.getactions(actions)
+        self.actions = actions
         self.tipoptions = []
         self.tipsneeded = {}
         self.tipRackList = []
@@ -50,9 +51,11 @@ class otSession():
         self.setupPipettes()
         self.output.setupPipettes(self.deck.PipetteList)
 
-
+        #if split == None:
+        #    self.ittrActions()
+        #else:
+        #    self.splitittract(split)
         self.ittrActions()
-
 
     
     def namecheck(self):
@@ -81,12 +84,22 @@ class otSession():
         self.outputpath = trialfile
         return self.outputpath
 
-    def getactions(self, reactionno):
+    def getactions(self, reactionno, split=None):
+        if type(reactionno) == 'list':
+            if len(reactionno) == 0:
+                pass
+            elif len(reacitonno) == 1:
+                pass
+            else:
+                pass
+
         allactions = ibmRead.getactions()
         reactionsactions = ibmRead.getReactionActions(allactions, reactionno)
         self.actions = reactionsactions
         return reactionsactions
 
+    def actionfilter(self, split):
+        pass
     def setupPlate(self, incAddMaterials=True, incWashMaterials=True,incExtract=False):
         #print(self.actions)
         allmaterials = pd.DataFrame(columns=['material', 'materialquantity'])
@@ -141,7 +154,8 @@ class otSession():
     def choosetip(self, volume, tipoptions= []):
         if tipoptions == []:
             if self.tipoptions == []:
-                self.tipoptions = [10, 20, 200, 300, 1000]
+                #self.tipoptions = [10, 20, 200, 300, 1000]
+                self.tipoptions = [300] # debuging
         else:
             pass
             # review wether to use tip options or self.tipoptions for rest of function
@@ -168,20 +182,20 @@ class otSession():
                 location = len(self.deck.PlateList)
 
                 if tip == 10:
-                    self.deck.add("TipRack", location, numwells=96, platewellVolume=10, platename = "opentrons_96_filtertiprack_10ul")
-                    self.tipRackList.append(["opentrons_96_filtertiprack_10ul", self.deck.nextfreeplate(), tip])
+                    self.deck.add("TipRack", location, numwells=96, platewellVolume=10, platename = "opentrons_96_tiprack_10ul")
+                    self.tipRackList.append(["opentrons_96_tiprack_10ul", self.deck.nextfreeplate(), tip])
                 elif tip == 20:
-                    self.deck.add("TipRack", location, numwells=96, platewellVolume=20, platename = "opentrons_96_filtertiprack_20ul")
-                    self.tipRackList.append(["opentrons_96_filtertiprack_20ul", self.deck.nextfreeplate(), tip])
+                    self.deck.add("TipRack", location, numwells=96, platewellVolume=20, platename = "opentrons_96_tiprack_20ul")
+                    self.tipRackList.append(["opentrons_96_tiprack_20ul", self.deck.nextfreeplate(), tip])
                 elif tip == 200:
-                    self.deck.add("TipRack", location, numwells=96, platewellVolume=200, platename = "opentrons_96_filtertiprack_200ul")
-                    self.tipRackList.append(["opentrons_96_filtertiprack_200ul", self.deck.nextfreeplate(), tip])
+                    self.deck.add("TipRack", location, numwells=96, platewellVolume=200, platename = "opentrons_96_rtiprack_200ul")
+                    self.tipRackList.append(["opentrons_96_tiprack_200ul", self.deck.nextfreeplate(), tip])
                 elif tip == 300:
-                    self.deck.add("TipRack", location, numwells=96, platewellVolume=300, platename = "opentrons_96_filtertiprack_300ul")
-                    self.tipRackList.append(["opentrons_96_filtertiprack_300ul", self.deck.nextfreeplate(), tip])
+                    self.deck.add("TipRack", location, numwells=96, platewellVolume=300, platename = "opentrons_96_tiprack_300ul")
+                    self.tipRackList.append(["opentrons_96_tiprack_300ul", self.deck.nextfreeplate(), tip])
                 elif tip == 1000:
-                    self.deck.add("TipRack", location, numwells=96, platewellVolume=1000, platename = "opentrons_96_filtertiprack_1000ul")
-                    self.tipRackList.append(["opentrons_96_filtertiprack_1000ul", self.deck.nextfreeplate(), tip])
+                    self.deck.add("TipRack", location, numwells=96, platewellVolume=1000, platename = "opentrons_96_tiprack_1000ul")
+                    self.tipRackList.append(["opentrons_96_tiprack_1000ul", self.deck.nextfreeplate(), tip])
 
                 numplates -= 1
         return self.tipRackList
@@ -200,22 +214,74 @@ class otSession():
                 mount = "right"
             else:
                 break
-            self.deck.addPipette(str(str(mount)+"_"+str(pipette)), str("p"+str(pipette)+"_single"), mount, pipette)
+            self.deck.addPipette(str(f"{mount}_{pipette}_pipette"), str("p"+str(pipette)+"_single"), mount, pipette)
             
 
     def ittrActions(self):
         # note: add checks to prevent errors if df of diffrent format or blank is presented
         # actionsCoppy = self.actions
         # actionsCoppy = actionsCoppy.sort_values(['id', 'actionno'], ascending=(True, False))
-       # print(self.actions)
-        for actionindex in range(len(self.actions)+1):
-            currentactionmask = self.actions['actionno'] == actionindex+1
-            currentaction = self.actions[currentactionmask]
-            #print("current: "+str(currentaction))
+        print(self.actions)
+        print(type(self.actions))
+        # for actionitterator in range(len(self.actions)):
+        #     print(actionitterator)
+        #     currentaction = self.actions.loc[actionitterator]
+        for currentaction in self.actions.items():
+            # currentactionmask = self.actions['actionno'] == actionindex+1
+            # currentaction = self.actions[currentactionmask]
+            print(">>>>>>>>>>Debug>>>>>>>>>>>>>")
+            print(currentaction)
             self.processAction(currentaction)
 
+    def splitittract(self, split):
+        print(split)
+        print(type(split))
+        splittype = False
+        if type(split) == 'int':
+            subset = self.actions[split]
+            for actionindex in range(len(subset)+1):
+                currentactionmask = subset['actionno'] == actionindex+1
+                currentaction = subset[currentactionmask]                    
+                #print("current: "+str(currentaction))
+                self.processAction(currentaction)
+            
+        elif type(split) == "<class 'list'>":
+            print(type(split[0]))
+            if type(split[0]) == 'int':
+                subset = self.actions[split[0]:split[1]]
+                print("intlistsplit")
+                for actionindex in range(len(subset)+1):
+                    currentactionmask = subset['actionno'] == actionindex+1
+                    currentaction = subset[currentactionmask]
+                    #print("current: "+str(currentaction))
+                    self.processAction(currentaction)
+
+            elif type(split[0])=='str':
+                print("stirlistsplit")
+                subset = self.actions['actiontype' in split]
+                for actionindex in range(len(subset)+1):
+                    currentactionmask = subset['actionno'] == actionindex+1
+                    currentaction = subset[currentactionmask]
+                    #print("current: "+str(currentaction))
+                    self.processAction(currentaction)
+            else:
+                print(type(split[0]))
+
+        elif type(split) == 'str':
+                subset = self.actions['actiontype' == split]
+                for actionindex in range(len(subset)+1):
+                    currentactionmask = subset['actionno'] == actionindex+1
+                    currentaction = subset[currentactionmask]
+                    #print("current: "+str(currentaction))
+                    self.processAction(currentaction)
+        else:
+            print("debug1")
+
+
     def processAction(self, currentaction):
-        currentactiontype = (currentaction['actiontype'].to_string(index=False)).strip()
+        print(f"currentaction {currentaction}")
+        currentactiontype = currentaction['actiontype'].to_string(index=False)
+        currentactiontype = currentactiontype.strip()
         if currentactiontype != 'Series([], )':
             print(f"#### {currentactiontype}")
             #print("current type: "+str(currentactiontype))
@@ -227,8 +293,11 @@ class otSession():
             elif str(numreps) == "[]":
                 numreps = 0
 
-            #print("numrepsa: "+str(numreps))
-            numreps = int(numreps)
+            print("numrepsa: "+str(numreps))
+            try:
+                numreps = int(numreps)
+            except:
+                numreps = 0
 
             #print(currentaction)
             #print("numreps: "+str(numreps))
@@ -267,15 +336,12 @@ class otSession():
         print("add")
         tipvolume = self.choosetip(currentaction['materialquantity'].values[0])
         #print(tipvolume)
-        pipetteName = self.deck.findTipRacks(tipvolume)
-        pipetteName = pipetteName[0]
+        pipetteName = (self.deck.findPippets(tipvolume)).name
 
-        self.output.movefluids( pipetteName, 
-            str("OrderPlate"+str(self.deck['OrderPlate'].smilesearch(currentaction['materialsmiles'].values[0], start_smiles = True)[0])+""),
-            str("ReactionPlate["+str(self.deck['ReactionPlate'].activeWell)+"]"),
-            currentaction['materialquantity'].values[0],
-            dispenseVolume=None,
-            writetoscript=True)
+        self.output.transferfluids( pipetteName, 
+            (f"OrderPlate.wells(){self.deck['OrderPlate'].smilesearch(currentaction['materialsmiles'].values[0], start_smiles = True)[0]}"),
+            (f"ReactionPlate.wells()[{self.deck['ReactionPlate'].activeWell}]"),
+            currentaction['materialquantity'].values[0])
 
     def actionWash(self, currentaction):
         print("wash")
@@ -284,12 +350,10 @@ class otSession():
         pipetteName = self.deck.findTipRacks(tipvolume)
         pipetteName = pipetteName[0]
 
-        self.output.movefluids(pipetteName,
-            str("OrderPlate"+str(self.deck['OrderPlate'].smilesearch(currentaction['material'].values[0], start_smiles = True)[0])+""),
-            str("ReactionPlate["+str(self.deck['ReactionPlate'].activeWell)+"]"),
-            currentaction['materialquantity'].values[0],
-            dispenseVolume=None,
-            writetoscript=True)
+        self.output.transferfluids(pipetteName,
+            (f"OrderPlate.wells()[{self.deck['OrderPlate'].smilesearch(currentaction['material'].values[0], start_smiles = True)[0]}]"),
+            (f"ReactionPlate.wells()[{self.deck['ReactionPlate'].activeWell}]"),
+            currentaction['materialquantity'].values[0])
 
     def actionCollectLayer(self, currentaction):
         print("collect")
@@ -308,16 +372,91 @@ class otSession():
     
 allactions = ibmRead.getactions()
 print(allactions)
-# print(allactions.columns)
+print(allactions.columns)
 #reactionsactions = ibmRead.getReactionActions(allactions, reactionno)
 print(allactions['actiontype'].unique())
+
+def docheck(row):
+    if row['actiontype'] in ['add', 'wash', "extract"]:
+        return True
+    else:
+        return False
+
+def actionfilter(allactions,  actions=None, reactionset=None):
+    if reactionset != None:
+        subSetReactAct = allactions.loc[(allactions['reaction_id_id']).isin(reactionset)]
+    else:
+        subSetReactAct = allactions
+    print(subSetReactAct)
+    
+    if actions != None:
+        actionsfiltered = subSetReactAct.loc[(subSetReactAct['actiontype']).isin(actions)]
+    else:
+        actionsfiltered = subSetReactAct
+
+    actionsfiltered['doable'] = actionsfiltered.apply (lambda row: docheck(row), axis=1)  
+    # print(actionsfiltered)
+    return actionsfiltered
+
+def blockdefine(actionsfiltered):
+    actionswithblocks =pd.DataFrame(columns=['id', 'reaction_id_id', 'actiontype', 'actionno', 'material',
+        'materialsmiles', 'materialquantity', 'materialquantityunit',
+        'dropwise', 'atmosphere', 'molecularweight', 'materialimage', 'layer',
+        'solvent', 'solventquantity', 'solventquantityunit',
+        'numberofrepetitions', 'temperature', 'duration', 'durationunit',
+        'stirringspeed', 'doable', 'blocknum', 'blockbool']) 
+
+    for reaction in actionsfiltered['reaction_id_id'].unique():
+        actions = actionsfiltered.loc[actionsfiltered['reaction_id_id'] == reaction]
+        currentblocknum = 0
+        currentblockbool = False
+        blocklist = {}
+        blocklist = [[],[]]
+
+        for index, row in actions.iterrows():
+            # print(f"action {row}")
+            # print(f"index #{index}#")
+            # print(f"action: {row}")
+            if currentblockbool != row.loc['doable']:
+                currentblocknum+=1
+                currentblockbool= row.loc['doable']
+                #print(f"block {currentblocknum}, {currentblockbool})")
+            blocklist[0].append(currentblocknum)
+            blocklist[1].append(currentblockbool)
+
+            #print(f"\t{currentblocknum}")
+            #append block column
+            #append block bool column
+            # print(action['actiontype'])
+        actions["blocknum"] = blocklist[0]
+        actions["blockbool"] = blocklist[1]
+        #print(actions)
+        actionswithblocks = actionswithblocks.append(actions, ignore_index=True)
+        #print(blocklist)
+    #print(actionswithblocks.sort_values(by=['blocknum', 'reaction_id_id', 'actionno']))
+    return actionswithblocks
+
+actionsfiltered = actionfilter(allactions, actions=None, reactionset=[1,2,6])
+actionsfiltered = blockdefine(actionsfiltered)
+
+
+
+for blocknum in actionsfiltered['blocknum'].unique():
+    #print(f"block num \n\t{blocknum}")
+    block = actionsfiltered[actionsfiltered['blocknum'] == blocknum]
+    #print(block)
+    if block['blockbool'].values[0] == True:
+        print("activeblock")
+        b = otSession(f"block_{blocknum}", block, "Example Author", "example description")
+    else:
+        print("inactive block")
 
 #print("test")
 #a = otSession("test", 1)
 # print(allactions['reaction_id_id'].unique())
-for reactionnumber in allactions['reaction_id_id'].unique():
-    print("genrating: "+"ittraexample"+str(reactionnumber))
-    b = otSession("ittraexample"+str(reactionnumber), int(reactionnumber), "Example Author", "example description")
+# for reactionnumber in allactions['reaction_id_id'].unique():
+#     print("genrating: "+"ittraexample"+str(reactionnumber))
+#     b = otSession("ittraexample"+str(reactionnumber), int(reactionnumber), "Example Author", "example description", [0,3])
 #print(a.deck)
 #print(a.actions)
 #print(a.outputpath)
