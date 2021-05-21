@@ -43,7 +43,7 @@ class Deck ():
         return self.PlateList[-1]
 
     def findPippets (self, volume):
-        releventracks = []
+        print(f"finding {volume} in {self.PipetteList}")
         for pipette in self.PipetteList:
             if int(pipette.volume) == int(volume):
                 return pipette
@@ -59,6 +59,7 @@ class Deck ():
         return releventracks
 
     def addPipette (self, name, model, mount, volume):
+        print(f"adding pipette: name:{name}, model:{model}, mount:{mount}, volume{volume}")
         #self.PipetteList.append(self, pipette(len(self.PipetteList), name, model, mount, volume))
         self.PipetteList.append(Pipette(self, len(self.PipetteList), name, model, mount, volume))
 
@@ -97,8 +98,17 @@ class Plate ():
         return self.WellList[position]
 
     def printplate(self):
-        for well in self.WellList:
-            print(str(well.StartSmiles) + " " + str(well.GoalSmiles) + " " + str(well.VolumeUsed)+ "/" + str(well.Volume))
+        if self.numwells == 96:
+            welnum = 1
+            for well in self.WellList:
+                if welnum % 8 == 0:
+                    print(f"{well.StartSmiles} {well.GoalSmiles} {well.VolumeUsed}/{well.Volume}", end="\n")
+                else:
+                    print(f"{well.StartSmiles} {well.GoalSmiles} {well.VolumeUsed}/{well.Volume}", end="\t")
+                welnum += 1
+        else:
+            for well in self.WellList:
+                print(f"{well.StartSmiles} {well.GoalSmiles} {well.VolumeUsed}/{well.Volume}\t")
 
     def setupwells(self):
         self.WellList = []
@@ -161,7 +171,7 @@ class TipRack ():
         self.plateName = f"tips_{self.numTips}_{self.tipVolume}_{self.plateIndex}"
 
     def __repr__(self):
-        return 'D{}T{}'.format(self.deckindex, self.plateIndex)
+        return 'D{}T{}'.format(self.deck.deckindex, self.plateIndex)
 
     def __str__(self):
         return plateName
