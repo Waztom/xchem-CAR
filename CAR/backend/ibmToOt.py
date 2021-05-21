@@ -8,6 +8,7 @@ import ibmRead
 
 import opentrons.otWrite as otWrite
 import opentrons.otDeck as otDeck
+import Ordering.OutputPlateTxt as OutputPlateTxt
 
 
 
@@ -78,11 +79,11 @@ class otSession():
 
     def pathnamecheck(self):
         self.namecheck()
-        trialfile = Path("../output/" + self.name + ".py")
+        trialfile = Path("../output/Opentrons/" + self.name + ".py")
         if trialfile.exists():
             suffixnumber = 1
             while trialfile.exists():
-                trialfile = Path("../output/" + self.name + "(" + str(suffixnumber) + ")" + ".py")
+                trialfile = Path("../output/Opentrons/" + self.name + "(" + str(suffixnumber) + ")" + ".py")
                 #print("Debug, trying: "+str(trialfile))
                 suffixnumber += 1
             
@@ -144,6 +145,8 @@ class otSession():
             wellnumber = self.orderPlate.nextfreewell()
             outcome = self.orderPlate.WellList[wellnumber].add(allmaterials.loc[i,'materialquantity'], smiles = allmaterials.loc[i,'material'])
         #print(self.orderPlate.printplate())
+        currentblocknum = self.actions['blocknum'].values[0]
+        OutputPlateTxt.PlateTxt(self.orderPlate, self.name, self.author, currentblocknum )
             # if outcome != False:
             #     plate[wellnumber] = [allmaterials.loc[i,'materialquantity'], allmaterials.loc[i,'material']] 
 
@@ -428,7 +431,7 @@ class otSession():
         print("wash")
         tipvolume = self.choosetip(currentaction['materialquantity'].values[0])
         print(tipvolume)
-        pipetteName = self.deck.findTipRacks(tipvolume)
+        pipetteName = (self.deck.findPippets(tipvolume)).name
         print("wash debug")
         print(pipetteName)
         pipetteName = pipetteName[0]

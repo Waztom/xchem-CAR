@@ -43,7 +43,6 @@ class Deck ():
         return self.PlateList[-1]
 
     def findPippets (self, volume):
-        print(f"finding {volume} in {self.PipetteList}")
         for pipette in self.PipetteList:
             if int(pipette.volume) == int(volume):
                 return pipette

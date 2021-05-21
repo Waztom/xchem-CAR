@@ -75,7 +75,7 @@ class otScript():
 
         script.close()
 
-    def dirsetup(self, path="../output/"):
+    def dirsetup(self, path="../output/Opentrons"):
         if not os.path.exists(path):
             os.makedirs(path)
     
