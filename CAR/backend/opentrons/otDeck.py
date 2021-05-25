@@ -1,3 +1,5 @@
+import math
+
 class Deck ():
 
     def __init__(self, index=None):
@@ -80,7 +82,7 @@ class Plate ():
         self.platewellVolume = platewellVolume
         self.WellList = None
         self.setupwells()
-        self.plateTypeName= "plateone_96_wellplate_2500ul"
+        self.plateTypeName= "plateone_96_wellplate_500ul"
         self.plateName = platename
         self.activeWell = self.nextfreewell()
 
@@ -96,6 +98,21 @@ class Plate ():
     def __getitem__(self, position):
         return self.WellList[position]
 
+    def dimentionShift(self, index, RowLetters = True, numrows = 8):
+        print(index)
+        print(self.numwells)
+        row = ((index)%numrows)+1
+        #col = math.ceil((index+2)*10/self.numwells) #BUG: not correctly calculating column number
+        col = math.floor((1/numrows)*index)+1
+
+        print(f"index:{index}\t\trow:{row}\t\t col:{col}")
+
+        if RowLetters == True:
+            characters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','T','U','V','W','X','Y','Z']
+            row = characters[(row-1)%numrows]
+        print(f"{row},{col}")
+        return [row, col]
+        
     def printplate(self):
         if self.numwells == 96:
             welnum = 1
@@ -112,7 +129,7 @@ class Plate ():
     def setupwells(self):
         self.WellList = []
         for well in range(self.numwells):
-            self.WellList.append(Well(self, wellindex=well, Volume=self.platewellVolume, VolumeUsed=0, StartSmiles="", GoalSmiles=""))
+            self.WellList.append(Well(self, wellindex=well, Volume=self.platewellVolume, VolumeUsed=0, StartSmiles="", GoalSmiles="", MaterialName=""))
         return self.WellList
 
     def addplacehoder(self):
@@ -139,7 +156,8 @@ class Plate ():
                 isempty = False
         return isempty
 
-    def smilesearch(self, smiles, start_smiles=None, goal_smiles=None):
+    def smilesearch(self, smiles, start_smiles=None, start_solvent= None, goal_smiles=None):
+
         if (start_smiles == None) & (goal_smiles == None):
             start_smiles = True
             goal_smiles = True
@@ -148,7 +166,8 @@ class Plate ():
         for well in self.WellList:
             if start_smiles == True:
                 if well.StartSmiles == smiles:
-                    startinstances.append(well.wellindex)
+                    if well.StartSolvent == start_solvent or start_solvent == '*':
+                        startinstances.append(well.wellindex)
             if goal_smiles == True:
                 if well.StartSmiles == smiles:
                     startinstances.append(well.wellindex)
@@ -197,13 +216,16 @@ class TipRack ():
 
 class Well ():
     
-    def __init__(self, Plate, wellindex=None, Volume=None, VolumeUsed=0, StartSmiles=None, GoalSmiles=None):
+    def __init__(self, Plate, wellindex=None, Volume=None, VolumeUsed=0, StartSmiles=None, StartSolvent = None, GoalSmiles=None, MaterialName = None):
         self.plate = Plate
         self.wellindex = wellindex
         self.Volume = float(Volume)
         self.VolumeUsed = float(VolumeUsed)
         self.StartSmiles = StartSmiles
+        self.StartSolvent = StartSolvent
         self.GoalSmiles = GoalSmiles
+        self.MaterialName = MaterialName
+
         
     def __repr__(self):
         return 'D{}P{}W{}'.format(self.plate.deck.deckindex, self.plate.plateIndex, self.wellindex)
@@ -211,7 +233,7 @@ class Well ():
     def __str__(self):
         return 'Deck {}, Plate {}, Well {}'.format(self.plate.deck.deckindex, self.plate.plateIndex, self.wellindex)
     
-    def add(self, Ammount, smiles=""):
+    def add(self, Ammount, smiles="", solvent = "", MaterialName=""):
         SafetyMargin = 5 # percentage of the well's volume to be keept empty to prevent overvlow
         WorkingVolumeused = self.VolumeUsed+Ammount
         if WorkingVolumeused >= float(self.Volume)*(1-(SafetyMargin/100)):
@@ -224,6 +246,8 @@ class Well ():
             self.VolumeUsed = WorkingVolumeused
             if smiles != "":
                 self.changesmiles(start_smiles=smiles)
+                self.changesolvent(start_solvent=solvent)
+                self.changename(name=MaterialName)
         return self.VolumeUsed
     
     def isempty(self):
@@ -242,6 +266,17 @@ class Well ():
             if type(goal_smiles) == str:
                 self.GoalSmiles = goal_smiles
         return [self.StartSmiles, self.GoalSmiles]
+
+    def changesolvent(self, start_solvent):
+        if type(start_solvent) != None:
+            if type(start_solvent) == str:
+                self.StartSolvent = start_solvent
+    
+    def changename(self, name):
+        if type(name) != None:
+            if type(name) == str:
+                self.MaterialName = name
+
 
 class Pipette():
     def __init__(self, deck, pipetteIndex, name, model, mount, volume):

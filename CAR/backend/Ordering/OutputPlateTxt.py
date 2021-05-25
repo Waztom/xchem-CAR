@@ -1,5 +1,4 @@
-# this is vunrable to python injection by the lack of checking of metadata inputs
-# this opens and closes files frequently, could be improved by creating string to hold the file data before writing to file once
+#should add a ~10% increase in the volume needed to account for loss and inefficicncies
 
 import os
 
@@ -16,7 +15,7 @@ class PlateTxt():
         if not os.path.exists(path):
             os.makedirs(path)
 
-    def setupScript(self, indextype = "1D"):
+    def setupScript(self, indextype = "2D", volumeMultiplyer = 1.1):
         self.dirsetup()
         """This is vunrable to injection atacks """
         if self.protocolName == None:
@@ -36,15 +35,22 @@ class PlateTxt():
         
         welnum = 1
 
-        script.write("\n\n####################################################\n")
+        script.write("\n\n_________________________________________________________\n")
         for well in self.plate.WellList:
             if well.VolumeUsed > 0:
                 if indextype == "1D":
-                    script.write(f"{well.wellindex}\t")
-                script.write(f"{well.StartSmiles}\t")
-                script.write(f"\t{well.VolumeUsed}ul of {well.Volume}ul\t")
+                    script.write(f"{well.wellindex}\n")
+                elif indextype == "2D":
+                    alphanumericindex = self.plate.dimentionShift(well.wellindex)
+                    script.write(f"{alphanumericindex[0]}{alphanumericindex[1]} ({well.wellindex})\n")
+                    
+                if well.MaterialName != None and well.MaterialName != "":
+                    script.write(f"\t{well.MaterialName}")
+                script.write(f"\t{well.StartSmiles}\n")
+                script.write(f"\t{well.StartSolvent}\n")
+                script.write(f"\t{well.VolumeUsed*volumeMultiplyer}ul of {well.Volume}ul\n")
             
-                script.write("\n####################################################\n")
+                script.write("_________________________________________________________\n")
             welnum += 1
 
 

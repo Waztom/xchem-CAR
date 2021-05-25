@@ -9,6 +9,7 @@ import ibmRead
 import opentrons.otWrite as otWrite
 import opentrons.otDeck as otDeck
 import Ordering.OutputPlateTxt as OutputPlateTxt
+import HumanRead.HumanRead as HumanRead
 
 
 
@@ -106,16 +107,23 @@ class otSession():
 
     def actionfilter(self, split):
         pass
+
+    def combinestrings(self, row):
+        print(f"{row['material']}\t{row['solvent']}\t{str(str(row['material'])+str(row['solvent']))}")
+        return str(str(row['material'])+str(row['solvent']))
     def setupPlate(self, incAddMaterials=True, incWashMaterials=True, incExtract=True):
         numwells = 96
         #print(self.actions)
         
-        allmaterials = pd.DataFrame(columns=['material', 'materialquantity'])
+        allmaterials = pd.DataFrame(columns=['material', 'materialsmiles' 'materialquantity', 'solvent', 'materialKey'])
 
         if incAddMaterials == True:
             addingSteps = self.actions.loc[(self.actions['actiontype']) == "add"] #water smiles seems indistinguishable from oxygen
-            materials = addingSteps[['materialsmiles', 'materialquantity']]
-            materials = materials.rename(columns={'materialsmiles':'material'})
+            materials = addingSteps[['material','materialsmiles', 'materialquantity', 'solvent']]
+            key = addingSteps[['materialsmiles']]
+            key = key.rename(columns={'materialsmiles':'materialKey'})
+            materials = pd.concat([materials, key], axis = 1)
+            print(materials)
             allmaterials = pd.concat([allmaterials, materials], ignore_index=True)
 
         if incWashMaterials==True:
@@ -130,8 +138,13 @@ class otSession():
             extractsolvents = extractsolvents.rename(columns={'solventquantity':'materialquantity'})
             allmaterials = pd.concat([allmaterials, extractsolvents], ignore_index=True)
             
-        allmaterials = allmaterials.groupby(allmaterials["material"]).aggregate({"materialquantity":"sum" })
-        allmaterials = allmaterials.reset_index()
+        allmaterials['matAndSolv'] = allmaterials.apply(lambda row: self.combinestrings(row), axis=1)  
+        allmaterials = allmaterials.groupby(['matAndSolv']).aggregate({"materialquantity":"sum", "material":'first', 'solvent':'first', 'materialsmiles':'first'})
+        allmaterials = allmaterials.sort_values(['solvent','materialquantity'], ascending = False)
+        #experement with adding a working materials+sovlent collum to group by then drop that col
+        print(allmaterials)
+        print("\n")
+        #allmaterials = allmaterials.reset_index()
         
         #print(allmaterials.columns)
         #print(allmaterials)
@@ -142,8 +155,12 @@ class otSession():
 
         # plate = ['','','','','','','','','',''] #note: need to fix so not fixed posibles
         for i in allmaterials.index.values:
+            if allmaterials.loc[i, 'material'] == "" or allmaterials.loc[i, 'material'] == None or allmaterials.loc[i, 'material'] == 'NaN':
+                matName = allmaterials.loc[i, 'materialsmiles']
+            else:
+                matName = allmaterials.loc[i, 'material']
             wellnumber = self.orderPlate.nextfreewell()
-            outcome = self.orderPlate.WellList[wellnumber].add(allmaterials.loc[i,'materialquantity'], smiles = allmaterials.loc[i,'material'])
+            outcome = self.orderPlate.WellList[wellnumber].add(allmaterials.loc[i,'materialquantity'], smiles = allmaterials.loc[i,'materialsmiles'], solvent = allmaterials.loc[i, 'solvent'], MaterialName=matName)
         #print(self.orderPlate.printplate())
         currentblocknum = self.actions['blocknum'].values[0]
         OutputPlateTxt.PlateTxt(self.orderPlate, self.name, self.author, currentblocknum )
@@ -155,6 +172,7 @@ class otSession():
         #     print(self.orderPlate[well].StartSmiles)
         # print(self.orderPlate.smilesearch('C(Cl)Cl'))
         # print(self.orderPlate.smilesearch('brine'))
+
 
     def preselecttips(self):
         for actionindex in range(len(self.actions)):
@@ -278,7 +296,7 @@ class otSession():
     #     print(self.actions)
     #     for Index in range(len(self.actions.index.values)):
     #         print(Index)
-    #         currentaction = self.actions.iloc[Index]
+    #         cuotScriprrentaction = self.actions.iloc[Index]
             
     #         print(currentaction)
     #         print(len(currentaction))
@@ -423,7 +441,7 @@ class otSession():
         pipetteName = (self.deck.findPippets(tipvolume)).name
 
         self.output.transferfluids( pipetteName, 
-            (f"OrderPlate.wells(){self.deck['OrderPlate'].smilesearch(currentaction['materialsmiles'].values[0], start_smiles = True)[0]}"),
+            (f"OrderPlate.wells(){self.deck['OrderPlate'].smilesearch(currentaction['materialsmiles'].values[0], start_smiles = True, start_solvent=currentaction['solvent'].values[0])[0]}"),
             (f"ReactionPlate.wells()[{currentaction['outputwell'].values[0]}]"),
             currentaction['materialquantity'].values[0])
 
@@ -437,7 +455,7 @@ class otSession():
         pipetteName = pipetteName[0]
 
         self.output.transferfluids(pipetteName,
-            (f"OrderPlate.wells()[{self.deck['OrderPlate'].smilesearch(currentaction['material'].values[0], start_smiles = True)[0]}]"),
+            (f"OrderPlate.wells()[{self.deck['OrderPlate'].smilesearch(currentaction['material'].values[0], start_smiles = True, start_solvent=currentaction['solvent'].values[0])[0]}]"),
             (f"ReactionPlate.wells()[{currentaction['outputwell'].values[0]}]"),
             currentaction['materialquantity'].values[0])
 
@@ -456,8 +474,10 @@ class otSession():
         print("Concentrate")
         self.output.unsuportedAction("Concentrate not yet supported ")
     
-allactions = ibmRead.getactions()
-# print(allactions)
+#allactions = ibmRead.getactions() #activate to enable workng with front end
+allactions = pd.read_csv("../../debuging/for-Olivia-actions-final-test-1(1).csv", index_col=0, sep = ';')
+
+print(allactions)
 # print(allactions.columns)
 #reactionsactions = ibmRead.getReactionActions(allactions, reactionno)
 #print(allactions['actiontype'].unique())
@@ -522,20 +542,29 @@ def blockdefine(actionsfiltered):
     #print(actionswithblocks.sort_values(by=['blocknum', 'reaction_id_id', 'actionno']))
     return actionswithblocks
 
-actionsfiltered = actionfilter(allactions, actions=None, reactionset=[1,2,6])
+actionsfiltered = actionfilter(allactions, actions=None)
 actionsfiltered = blockdefine(actionsfiltered)
 
 
+protocolOut = HumanRead.HumanReadable("../output/protocols/example.md")
+protocolOut.setupDoc()
+
 
 for blocknum in actionsfiltered['blocknum'].unique():
+    
     print(f"block num \t{blocknum}")
     block = actionsfiltered[actionsfiltered['blocknum'] == blocknum]
     #print(block)
+    blockbool = None
     if block['blockbool'].values[0] == True:
+        blockbool = True
         print("activeblock")
         b = otSession(f"block_{blocknum}", block, "Example Author", "example description")
     else:
+        blockbool = False
         print("inactive block")
+        b = None
+    protocolOut.newBlock(blocknum, block['blockbool'].values[0], b)
 
 #print("test")
 #a = otSession("test", 1)
