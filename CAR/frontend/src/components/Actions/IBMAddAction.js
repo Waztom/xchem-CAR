@@ -9,8 +9,6 @@ import Button from "react-bootstrap/Button";
 import { Trash } from "react-bootstrap-icons";
 
 import SetQuantity from "../SetActionInputs/SetQuantity";
-import SetDropwise from "../SetActionInputs/SetDropwise";
-import SetAtmosphere from "../SetActionInputs/SetAtmosphere";
 
 import JSMEModal from "../MolDrawer/JSMEModal";
 import MolAlert from "../TooltipsWarnings/MolAlert";
@@ -85,14 +83,6 @@ const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
             updateAction={updateAction}
             name={"material"}
           ></SetQuantity>
-          <SetDropwise
-            action={Action}
-            updateAction={updateAction}
-          ></SetDropwise>
-          <SetAtmosphere
-            action={Action}
-            updateAction={updateAction}
-          ></SetAtmosphere>
         </Col>
       </Row>
       <Row>
