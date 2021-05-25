@@ -23,11 +23,19 @@
     "python.pythonPath": "/usr/local/lib/python3.9",
     "python.linting.enabled": true,
     "python.linting.flake8Enabled": true,
-    "python.formatting.blackPath": "/usr/local/lib/python3.9/dist-packages/black",
-    "python.formatting.blackArgs": ["--line-length", "100"],
-    "python.formatting.blackPath": "black",
     "python.formatting.provider": "black",
-    "python.linting.flake8Path": "/usr/local/lib/python3.9/dist-packages/flake8"
+    "python.formatting.blackPath": "/usr/local/bin/black",
+    "python.formatting.blackArgs": ["--line-length", "100"],
+    "python.linting.flake8Path": "/usr/local/bin/flake8",
+    "python.linting.flake8Args": [
+      "--ignore=E203",
+      "--ignore=E266",
+      "--ignore=E501",
+      "--ignore=W503",
+      "--max-line-length=100",
+      "--select = B,C,E,F,W,T4,B9",
+      "--max-complexity = 18"
+    ]
   },
 
   // Add the IDs of extensions you want installed when the container is created.
