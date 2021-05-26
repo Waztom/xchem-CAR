@@ -1,21 +1,23 @@
+
 # this is vunrable to python injection by the lack of checking of metadata inputs
 # this opens and closes files frequently, could be improved by creating string to hold the file data before writing to file once
 
 import os
+from datetime import datetime
+now = datetime.now()
 
-class otScript():
-    def __init__(self, filepath, protocolName=None, author=None, description=None, apiLevel='2.9'):
-        self.filepath = filepath
+class HumanReadable():
+    def __init__(self, filepath, protocolName=None, author=None, description=None, fileFormat = ['md']):
+        self.filepath = '../output/protocols/example.md'
         self.protocolName = protocolName
         self.author = author
         self.description = description
-        self.apiLevel = apiLevel
+        self.fileFormat = fileFormat
 
-        self.humanreadable = []
 
-        #self.setupScript()
+        #self.setupDoc()
 
-    def setupScript(self):
+    def setupDoc(self):
         self.dirsetup()
         """This is vunrable to injection atacks """
         if self.protocolName == None:
@@ -24,18 +26,36 @@ class otScript():
                 self.author = input("Please name the author Name: \t")
         if self.description == None:
                 self.description = input("Please name the description: \t")
-        if self.apiLevel == None:
-                self.apiLevel = input("Please name the API Level: \t")
 
-        script = open(self.filepath, "w")
-        script.write("from opentrons import protocol_api\n")
-        script.write("# "+str(self.protocolName)+" for \""+str(self.author)+str("\" produced by XChem Car (https://car.xchem.diamond.ac.uk)"))
-        script.write("\n# metadata")
-        script.write("\nmetadata = {'protocolName': '"+str(self.protocolName)+"', 'author': '"+str(self.author)+"','description': '"+str(self.description[0])+"','apiLevel': '"+str(self.apiLevel)+"'}\n")
-        script.write("\n\nfrom opentrons import protocol_api\n")
-        script.write("\ndef run(protocol: protocol_api.ProtocolContext):\n")
+        if  'txt' in self.fileFormat:
+            file = open(f"{self.filepath}.txt", "w")
+            file.write("from opentrons import protocol_api\n")
+            file.write("# "+str(self.protocolName)+" for \""+str(self.author)+str("\" produced by XChem Car (https://car.xchem.diamond.ac.uk)"))
+            file.write("\n# metadata")
+            file.write("\nmetadata = {'protocolName': '"+str(self.protocolName)+"', 'author': '"+str(self.author)+"','description': '"+str(self.description[0])+"','apiLevel': '"+str(self.apiLevel)+"'}\n")
+            file.write("\n\nfrom opentrons import protocol_api\n")
+            file.write("\ndef run(protocol: protocol_api.ProtocolContext):\n")
 
-        script.close()
+            file.close()
+        elif 'md' in self.fileFormat:
+            file = open(self.filepath, "w")
+            file.write(f"# Protocol: \"{self.protocolName}\"\n")
+            file.write(f"***Produced by XChem Car (https://car.xchem.diamond.ac.uk)**, for {self.author} on {now.strftime('%d/%m/%Y %H:%M:%S')}*\n")
+            if self.description != None:
+                file.write(f"\n**Description:** \n*{self.description}*\n")
+
+            file.close()
+
+    def newBlock(self, blocknum, blockbool, blocksession):
+            file = open(self.filepath, "a")
+            if blockbool == True:
+                file.write(f"## Block: \'**{blocknum}**\'  - *Robotic*\n")
+                file.write("\n*To be executed on the **Robot***\n")
+                file.write(str(blocksession.deck.PlateList))
+            else:
+                file.write(f"## Block: \'**{blocknum}**\'  - *Manual*\n")
+                file.write("\n*To be compleated **manually***\n")
+            file.close()
     
     def setupLabwear(self, platelist, tipOutput):
         script = open(self.filepath, "a")
@@ -79,7 +99,7 @@ class otScript():
         if not os.path.exists(path):
             os.makedirs(path)
     
-    def movefluids(self, pipetteName, fromAdress, toAdress, volume, dispenseVolume=None, writetoscript=True, fromalphanumeric = None, toalphanumeric = None):
+    def movefluids(self, pipetteName, fromAdress, toAdress, volume, dispenseVolume=None, writetoscript=True):
         if dispenseVolume == None:
             dispenseVolume = volume
             humanread = "move - "+str(volume)+"ul from "+str(fromAdress)+" to "+str(toAdress)
@@ -97,11 +117,8 @@ class otScript():
             self.writeCommand(moveCommands)
         return moveCommands
 
-    def transferfluids(self, pipetteName, fromAdress, toAdress, volume, writetoscript=True, takedistance=2, dispensedistance = -5, fromalphanumeric = None, toalphanumeric = None):
-        if fromalphanumeric != None and toalphanumeric != None:
-            humanread = f"transfer - {volume:.1f}ul from {fromalphanumeric[0]}{fromalphanumeric[1]} to {toalphanumeric[0]}{toalphanumeric[1]}"
-        else:
-            humanread = f"transfer - {volume:.1f}ul from {fromAdress} to {toAdress}"
+    def transferfluids(self, pipetteName, fromAdress, toAdress, volume, writetoscript=True, takedistance=2, dispensedistance = -5):
+        humanread = f"transfer - {volume}ul from {fromAdress} to {toAdress}"
 
         self.humanreadable.append(['OT',humanread])
 
