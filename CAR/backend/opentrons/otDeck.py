@@ -52,6 +52,7 @@ class Deck ():
                 return False
 
     def findTipRacks (self, volume):
+        print(f"searching for tips: {volume} in {self.PipetteList}")
         releventracks = []
         for plate in self.PlateList:
             if plate.platetype == "TipRack":
@@ -82,7 +83,17 @@ class Plate ():
         self.platewellVolume = platewellVolume
         self.WellList = None
         self.setupwells()
-        self.plateTypeName= "plateone_96_wellplate_500ul"
+        print(f"{self.numwells},{self.platewellVolume}")
+        if numwells == 24:
+            self.plateTypeName= "24_reservoir_2500ul"
+        if numwells == 96:
+            if platewellVolume == 2500:
+                self.plateTypeName= "plateone_96_wellplate_2500ul"
+                self.platewellVolume = 2500
+            elif platewellVolume == 500:
+                self.plateTypeName= "plateone_96_wellplate_500ul"
+                self.platewellVolume = 500
+        print(self.plateTypeName)
         self.plateName = platename
         self.activeWell = self.nextfreewell()
 
@@ -99,13 +110,16 @@ class Plate ():
         return self.WellList[position]
 
     def dimentionShift(self, index, RowLetters = True, numrows = 8):
-        print(index)
-        print(self.numwells)
+        if self.numwells == 96:
+            numrows = 8
+        elif self.numwells == 24:
+            numrows = 4
+
+
+
         row = ((index)%numrows)+1
         #col = math.ceil((index+2)*10/self.numwells) #BUG: not correctly calculating column number
         col = math.floor((1/numrows)*index)+1
-
-        print(f"index:{index}\t\trow:{row}\t\t col:{col}")
 
         if RowLetters == True:
             characters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','T','U','V','W','X','Y','Z']
@@ -157,7 +171,6 @@ class Plate ():
         return isempty
 
     def smilesearch(self, smiles, start_smiles=None, start_solvent= None, goal_smiles=None):
-
         if (start_smiles == None) & (goal_smiles == None):
             start_smiles = True
             goal_smiles = True
@@ -166,7 +179,7 @@ class Plate ():
         for well in self.WellList:
             if start_smiles == True:
                 if well.StartSmiles == smiles:
-                    if well.StartSolvent == start_solvent or start_solvent == '*':
+                    if well.StartSolvent == start_solvent or start_solvent == '*' or (well.StartSolvent == None and str(start_solvent) == "nan"):
                         startinstances.append(well.wellindex)
             if goal_smiles == True:
                 if well.StartSmiles == smiles:

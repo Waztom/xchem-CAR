@@ -109,10 +109,9 @@ class otSession():
         pass
 
     def combinestrings(self, row):
-        print(f"{row['material']}\t{row['solvent']}\t{str(str(row['material'])+str(row['solvent']))}")
-        return str(str(row['material'])+str(row['solvent']))
-    def setupPlate(self, incAddMaterials=True, incWashMaterials=True, incExtract=True):
-        numwells = 96
+        print(f"{row['materialsmiles']}\t{row['solvent']})")
+        return str(str(row['materialsmiles'])+str(row['solvent']))
+    def setupPlate(self, incAddMaterials=True, incWashMaterials=True, incExtract=True, inputnumwells = 24, inputwellvolume = 2500):
         #print(self.actions)
         
         allmaterials = pd.DataFrame(columns=['material', 'materialsmiles' 'materialquantity', 'solvent', 'materialKey'])
@@ -151,7 +150,7 @@ class otSession():
         self.maxtransfer = allmaterials['materialquantity'].max()
         self.totalvolume = allmaterials['materialquantity'].sum()
 
-        self.orderPlate = self.deck.add("Plate", 1, numwells, 500, "OrderPlate")
+        self.orderPlate = self.deck.add("Plate", 1, inputnumwells, inputwellvolume, "OrderPlate")
 
         # plate = ['','','','','','','','','',''] #note: need to fix so not fixed posibles
         for i in allmaterials.index.values:
@@ -167,7 +166,7 @@ class otSession():
             # if outcome != False:
             #     plate[wellnumber] = [allmaterials.loc[i,'materialquantity'], allmaterials.loc[i,'material']] 
 
-        self.reactionPlate = self.deck.add("Plate", 2, 12, 500, "ReactionPlate")
+        self.reactionPlate = self.deck.add("Plate", 2, 96, 500, "ReactionPlate")
         # for well in range(len(self.orderPlate)):
         #     print(self.orderPlate[well].StartSmiles)
         # print(self.orderPlate.smilesearch('C(Cl)Cl'))
@@ -175,12 +174,17 @@ class otSession():
 
 
     def preselecttips(self):
-        for actionindex in range(len(self.actions)):
-            currentactionmask = self.actions['actionno'] == actionindex+1
-            currentaction = self.actions[currentactionmask]
-            currentactiontype = (currentaction['actiontype'].to_string(index=False)).strip()
-            if currentactiontype == "add":
-                self.choosetip(currentaction['materialquantity'].values[0], tipoptions = [])
+        print(self.actions)
+        for index, row in self.actions.iterrows():
+            currentactiontype = row["actiontype"]
+            # currentactionmask = self.actions['actionno'] == actionindex+1
+            # # print(currentactionmask)
+            # currentaction = self.actions[currentactionmask]
+            # print(currentaction)
+            # currentactiontype = (currentaction['actiontype'].to_string(index=False)).strip()
+            # print(currentactiontype)
+            if currentactiontype == "add": # or wash or extract
+                self.choosetip(row['materialquantity'], tipoptions = [])
 
     def choosetip(self, volume, tipoptions= []):
         if tipoptions == []:
@@ -233,6 +237,7 @@ class otSession():
 
     def setupPipettes (self):
         print("setitng up pipettes")
+        print(self.tipsneeded)
         if self.definedpipettes == None:
             if len(self.tipsneeded) <= 2:
                 if len(self.tipsneeded) > 0 :
@@ -255,59 +260,7 @@ class otSession():
                 if defined[2] != "multi":
                     self.deck.addPipette(str(f"{defined[0]}_{defined[1]}_{defined[2]}_pipette"), defined[3], defined[0], defined[1])
 
-            
 
-    # def ittrActions(self):
-    #     # note: add checks to prevent errors if df of diffrent format or blank is presented
-    #     actionsCoppy = self.actions
-    #     actionsCoppy = actionsCoppy.sort_values(['id', 'actionno'], ascending=(True, False))
-    #     print(actionsCoppy)
-    #     print(type(actionsCoppy))
-    #     for index, currentaction in actionsCoppy.iterrows():
-    #         print(f"currentaction pure: {currentaction}")
-    #         print(f"type currentaction: {type(currentaction)}\n")
-    #         print(currentaction[0])
-    #         print("\n\n")
-    #         print(currentaction[1])
-    #         currentaction = currentaction[0].to_frame() 
-    #         print(">>>>>>>>>>Debug>>>>>>>>>>>>>")
-    #         #currentaction = pd.DataFrame(currentaction, columns=actionsCoppy.columns)
-    #         print(currentaction)
-    #         print("\n\nend of ittractions main loop \n\n")
-
-    #         self.processAction(currentaction)
-    # def ittrActions(self):
-    #     for actionindex in range(len(self.actions)+1):
-    #         currentactionmask = self.actions['actionno'] == actionindex+1
-    #         currentaction = self.actions[currentactionmask]
-    #         print("current: "+str(type(currentaction)))
-    #         self.processAction(currentaction)
-    # def ittrActions(self):
-    #     print(self.actions)
-    #     for Index, row in self.actions.iterrows():
-    #         self.processAction(row)
-    #         print("!!!!!!Debug!!!!!")
-    #         print(row)
-    #         print(type(row))
-    #         row = pd.DataFrame(row, index = [Index])
-    #         print(row)
-    #         print(type(row))
-    # def ittrActions(self):
-    #     print(self.actions)
-    #     for Index in range(len(self.actions.index.values)):
-    #         print(Index)
-    #         cuotScriprrentaction = self.actions.iloc[Index]
-            
-    #         print(currentaction)
-    #         print(len(currentaction))
-    #         print(type(currentaction))
-    #         currentaction = currentaction.to_frame('id')
-    #         print(currentaction)
-    #         print(type(currentaction))
-    #         print(currentaction.columns)
-    #         print(currentaction["actiontype"])
-            
-    #         self.processAction(currentaction)
     def ittrActions(self):
         #print(self.actions)
         reactionids = self.actions['reaction_id_id'].unique().tolist()
@@ -384,7 +337,6 @@ class otSession():
         currentactiontype = currentaction['actiontype'].to_string(index=False)
         currentactiontype = currentactiontype.strip()
         if currentactiontype != 'Series([], )':
-            print(f"#### {currentactiontype}")
             #print("current type: "+str(currentactiontype))
             numreps = currentaction['numberofrepetitions'].values
             if str(numreps) == "[nan]":
@@ -396,7 +348,6 @@ class otSession():
             elif numreps == 0:
                 numreps = 1
 
-            print("numrepsa: "+str(numreps))
             try:
                 numreps = int(numreps)
             except:
@@ -436,8 +387,9 @@ class otSession():
         
 
     def actionAdd(self, currentaction):
-        print("add")
+        #print("add")
         tipvolume = self.choosetip(currentaction['materialquantity'].values[0])
+        print(f"tipvolume {tipvolume}")
         pipetteName = (self.deck.findPippets(tipvolume)).name
 
         self.output.transferfluids( pipetteName, 
@@ -475,7 +427,7 @@ class otSession():
         self.output.unsuportedAction("Concentrate not yet supported ")
     
 #allactions = ibmRead.getactions() #activate to enable workng with front end
-allactions = pd.read_csv("../../debuging/for-Olivia-actions-final-test-1(1).csv", index_col=0, sep = ';')
+allactions = pd.read_csv("../../debuging/for-Olivia-actions-final-test-2.csv", index_col=0, sep = ';')
 
 print(allactions)
 # print(allactions.columns)
