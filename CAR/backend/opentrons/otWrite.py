@@ -4,12 +4,13 @@
 import os
 
 class otScript():
-    def __init__(self, filepath, protocolName=None, author=None, description=None, apiLevel='2.9'):
+    def __init__(self, deck, filepath,  protocolName=None, author=None, description=None, apiLevel='2.9'):
         self.filepath = filepath
         self.protocolName = protocolName
         self.author = author
         self.description = description
         self.apiLevel = apiLevel
+        self.deck = deck
 
         self.humanreadable = []
 

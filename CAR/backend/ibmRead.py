@@ -78,3 +78,17 @@ def basiccomprehension(AllActions):
     #print(reactions)
     return reactions
     # return something here
+
+def idToProduct(rId, spoof=None):
+    
+    print(f"id: {rId}")
+    if spoof == None:
+        print(pd.DataFrame(list(backend.models.Product.objects.all().values())))
+        product = list(backend.models.Product.objects.filter(reaction_id_id=rId))
+        print(product)
+        product = [product[0].smiles, product[0].name]
+    else:
+        spoof=[[222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 243, 244, 255, 256, 257, 258, 259, 260, 261, 262],[222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 243, 244, 255, 256, 257, 258, 259, 260, 261, 262]]
+        rId = spoof[0].index(rId)
+        product = [spoof[0][rId], spoof[1][rId]]
+    return product

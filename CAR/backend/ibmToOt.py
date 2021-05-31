@@ -16,6 +16,8 @@ import HumanRead.HumanRead as HumanRead
 
 class otSession():
     def __init__(self, name, actions, author=None, description=None, split=None):
+        self.idspoof=[[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58],[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58]]
+        self.idspoof=[[222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 243, 244, 255, 256, 257, 258, 259, 260, 261, 262],[222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 243, 244, 255, 256, 257, 258, 259, 260, 261, 262]]
         setpipettes = True
         if setpipettes == True:
             self.definedpipettes = [["Left", 300, "multi", "p300_multi_gen2"],["Right", 300, "single", "p300_single"]]
@@ -31,7 +33,7 @@ class otSession():
 
         self.actions = []
 
-        self.deck = otDeck.Deck()
+        self.deck = otDeck.Deck(index=name)
         
         self.outputpath = "None"
         self.pathnamecheck()
@@ -44,7 +46,7 @@ class otSession():
 
         self.pipettesneeded = []
 
-        self.output = otWrite.otScript(filepath=self.outputpath, protocolName=self.name, author=self.author, description=self.description)
+        self.output = otWrite.otScript(deck = self.deck, filepath=self.outputpath, protocolName=self.name, author=self.author, description=self.description)
         self.output.setupScript()
         self.setupPlate()
         
@@ -64,7 +66,25 @@ class otSession():
         #    self.splitittract(split)
         self.ittrActions()
 
-    
+        print(self.deck.PlateList)
+        for plate in self.deck.PlateList:
+            print(f"plate: {plate}")
+            if plate.platetype == "Plate":
+                plate.printself()
+                print(f"Plate: {plate} - {plate.plateName}")
+                savedplate = plate.saveplate()
+        # self.deck.addDefinedPlate("Plate", 1, savedplate, 96, 2500, "testplate",  inputPlate=True )
+        
+        self.deck.addDefinedFromFile(savedplate)
+
+        for plate in self.deck.PlateList:
+            print(f"plate: {plate}")
+            if plate.platetype == "Plate":
+                plate.printself()
+                print(f"Plate: {plate} - {plate.plateName}")
+                savedplate = plate.saveplate()
+
+            
     def namecheck(self):
         trialname = self.name
         if re.match("^[\w-]+$", trialname):
@@ -122,7 +142,7 @@ class otSession():
             key = addingSteps[['materialsmiles']]
             key = key.rename(columns={'materialsmiles':'materialKey'})
             materials = pd.concat([materials, key], axis = 1)
-            print(materials)
+            # print(materials)
             allmaterials = pd.concat([allmaterials, materials], ignore_index=True)
 
         if incWashMaterials==True:
@@ -141,8 +161,8 @@ class otSession():
         allmaterials = allmaterials.groupby(['matAndSolv']).aggregate({"materialquantity":"sum", "material":'first', 'solvent':'first', 'materialsmiles':'first'})
         allmaterials = allmaterials.sort_values(['solvent','materialquantity'], ascending = False)
         #experement with adding a working materials+sovlent collum to group by then drop that col
-        print(allmaterials)
-        print("\n")
+        # print(allmaterials)
+        # print("\n")
         #allmaterials = allmaterials.reset_index()
         
         #print(allmaterials.columns)
@@ -150,7 +170,7 @@ class otSession():
         self.maxtransfer = allmaterials['materialquantity'].max()
         self.totalvolume = allmaterials['materialquantity'].sum()
 
-        self.orderPlate = self.deck.add("Plate", 1, inputnumwells, inputwellvolume, "OrderPlate")
+        self.orderPlate = self.deck.add("Plate", 1, inputnumwells, inputwellvolume, "OrderPlate",  inputPlate=True)
 
         # plate = ['','','','','','','','','',''] #note: need to fix so not fixed posibles
         for i in allmaterials.index.values:
@@ -166,11 +186,29 @@ class otSession():
             # if outcome != False:
             #     plate[wellnumber] = [allmaterials.loc[i,'materialquantity'], allmaterials.loc[i,'material']] 
 
-        self.reactionPlate = self.deck.add("Plate", 2, 96, 500, "ReactionPlate")
-        # for well in range(len(self.orderPlate)):
-        #     print(self.orderPlate[well].StartSmiles)
-        # print(self.orderPlate.smilesearch('C(Cl)Cl'))
-        # print(self.orderPlate.smilesearch('brine'))
+
+
+        reactionids = self.actions['reaction_id_id'].unique()
+        print(f"reactioids: {reactionids}")
+        for reactionid in reactionids:
+            print(f"\tReactionID: {reactionid}")
+            outplate = False
+            while outplate == False:
+                outplate = self.deck.nextplatewithspace(searchtype = "outputs")
+                if outplate != False:
+                    well = outplate.nextfreewell()
+                    # print(well.VolumeAvailable)
+                else:
+                    self.reactionPlate = self.deck.add("Plate", 2, 96, 500, "ReactionPlate",  outputPlate=True)
+                    print(self.reactionPlate)
+            productreturn = ibmRead.idToProduct(reactionid, spoof=True)
+            print("debog")
+            print(productreturn)
+            print(f"{outplate.WellList[well].StartSmiles},{outplate.WellList[well].reactionid}")
+            outplate.WellList[well].changename(productreturn[0])
+            outplate.WellList[well].changesmiles(start_smiles=productreturn[1])
+            print(f"{outplate.WellList[well].StartSmiles},{outplate.WellList[well].reactionid}")
+            
 
 
     def preselecttips(self):
@@ -237,7 +275,7 @@ class otSession():
 
     def setupPipettes (self):
         print("setitng up pipettes")
-        print(self.tipsneeded)
+        # print(self.tipsneeded)
         if self.definedpipettes == None:
             if len(self.tipsneeded) <= 2:
                 if len(self.tipsneeded) > 0 :
@@ -281,8 +319,8 @@ class otSession():
     
     
     def splitittract(self, split):
-        print(split)
-        print(type(split))
+        # print(split)
+        # print(type(split))
         splittype = False
         if type(split) == 'int':
             subset = self.actions[split]
@@ -387,16 +425,38 @@ class otSession():
         
 
     def actionAdd(self, currentaction):
+        # print(currentaction)
+        volumetomove = currentaction['materialquantity'].values[0]
+        # print(volumetomove)
         #print("add")
-        tipvolume = self.choosetip(currentaction['materialquantity'].values[0])
-        print(f"tipvolume {tipvolume}")
+        tipvolume = self.choosetip(volumetomove)
+        # print(f"tipvolume {tipvolume}")
         pipetteName = (self.deck.findPippets(tipvolume)).name
 
-        self.output.transferfluids( pipetteName, 
-            (f"OrderPlate.wells(){self.deck['OrderPlate'].smilesearch(currentaction['materialsmiles'].values[0], start_smiles = True, start_solvent=currentaction['solvent'].values[0])[0]}"),
-            (f"ReactionPlate.wells()[{currentaction['outputwell'].values[0]}]"),
-            currentaction['materialquantity'].values[0])
 
+
+        startsearch = self.deck.decksearch(currentaction['materialsmiles'].values[0], currentaction['solvent'].values[0], inputsearch = True)
+        startplate = None
+        startwell = None
+        for plateresult in startsearch:
+            for wellresult in plateresult[1]:
+                if round(wellresult['volume'],2) >= round(volumetomove,2):
+                    startplate = plateresult[0]
+                    startwell = wellresult['index']
+                    # print(f"taking {volumetomove} from {startplate}-[{startwell}] which has {wellresult['volume']}")
+        # print(f"{startplate},{startwell}")
+        #print(self.deck['OrderPlate'].smilesearch(currentaction['materialsmiles'].values[0], start_smiles = True, start_solvent=currentaction['solvent'].values[0])[0])
+
+        if self.deck[startplate][startwell].changevolume(-volumetomove) is True:
+            if self.deck['ReactionPlate'][currentaction['outputwell'].values[0]].changevolume(volumetomove) is True:
+                self.output.transferfluids(pipetteName, 
+                    (f"{startplate}.wells()[{startwell}]"),
+                    (f"ReactionPlate.wells()[{currentaction['outputwell'].values[0]}]"),
+                    volumetomove)
+            else:
+                self.deck[startplate][startwell].changevolume(volumetomove) #correcting failed addition
+        else:
+            raise ValueError(f"unable to take {volumetomove} from {startplate}-[{startwell}] which has {wellresult['volume']}ul left")
     def actionWash(self, currentaction):
         print("wash")
         tipvolume = self.choosetip(currentaction['materialquantity'].values[0])
@@ -425,7 +485,8 @@ class otSession():
     def actionConcentrate(self, currentaction):
         print("Concentrate")
         self.output.unsuportedAction("Concentrate not yet supported ")
-    
+
+ibmRead.idToProduct(4) 
 #allactions = ibmRead.getactions() #activate to enable workng with front end
 allactions = pd.read_csv("../../debuging/for-Olivia-actions-final-test-2.csv", index_col=0, sep = ';')
 
