@@ -247,7 +247,7 @@ class Well ():
         return 'Deck {}, Plate {}, Well {}'.format(self.plate.deck.deckindex, self.plate.plateIndex, self.wellindex)
     
     def add(self, Ammount, smiles="", solvent = "", MaterialName=""):
-        SafetyMargin = 5 # percentage of the well's volume to be keept empty to prevent overvlow
+        SafetyMargin = 0 # percentage of the well's volume to be keept empty to prevent overvlow
         WorkingVolumeused = self.VolumeUsed+Ammount
         if WorkingVolumeused >= float(self.Volume)*(1-(SafetyMargin/100)):
             raise NameError("the resultant value of adding "+str(Ammount)+"ul  to "+str(self.VolumeUsed)+"ul would be "+str(WorkingVolumeused)+"ul exceeding the well's volume of "+str(self.Volume)+"ul (with a saftey margin of "+str(SafetyMargin)+"%)")

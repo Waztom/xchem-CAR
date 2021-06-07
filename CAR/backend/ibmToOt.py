@@ -186,7 +186,7 @@ class otSession():
             if currentactiontype == "add": # or wash or extract
                 self.choosetip(row['materialquantity'], tipoptions = [])
 
-    def choosetip(self, volume, tipoptions= []):
+    def choosetip(self, volume, tipoptions= [], overideselection= True):
         if tipoptions == []:
             if self.tipoptions == []:
                 #self.tipoptions = [10, 20, 200, 300, 1000]
@@ -201,6 +201,13 @@ class otSession():
                 else:
                     self.tipsneeded[tip] = 1
                     #self.tipsneeded[1].append(1)
+                return tip 
+            else:
+                if overideselection == True:
+                    if tip in self.tipsneeded:
+                        self.tipsneeded[tip]+=1
+                    else:
+                        self.tipsneeded[tip] = 1
                 return tip 
         return False
     
@@ -427,7 +434,7 @@ class otSession():
         self.output.unsuportedAction("Concentrate not yet supported ")
     
 #allactions = ibmRead.getactions() #activate to enable workng with front end
-allactions = pd.read_csv("../../debuging/for-Olivia-actions-final-test-2.csv", index_col=0, sep = ';')
+allactions = pd.read_csv("../../debuging/for-Olivia-actions-final-test-3.csv", index_col=0, sep = ';')
 
 print(allactions)
 # print(allactions.columns)
