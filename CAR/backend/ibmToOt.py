@@ -14,59 +14,97 @@ import HumanRead.HumanRead as HumanRead
 
 
 
-class otSession():
-    def __init__(self, name, actions, author=None, description=None, split=None):
-        setpipettes = True
-        if setpipettes == True:
-            self.definedpipettes = [["Left", 300, "multi", "p300_multi_gen2"],["Right", 300, "single", "p300_single"]]
+class otSession(): # WTOSCR: otsession could be renamed to otsessionblock or similar
+    """A Class used to cordinate the conversion from the *actions* passed into a script to to exicute on the Robot
+    
+
+    :param name: A name to be used for this run
+    :type name: str
+    :param actions: the set of all actions to be exicuted in this run
+    :type actions: Pandas DataFrame
+    :param author: the name of the individual generating the script, defults to "None"
+    :type author: str, optional
+    :param description: a description of the protocol being genrated, defults to "None"
+    :type description: str, optional
+    :param split: NOT CURRENTLY FUNCTIONAL - a definition of a subset of the actions passed to implement, defults to "None"
+    :type split: , optional
+
+    """
+
+    def __init__(self, name, actions, author=None, description=None, split=None, currentpipettesetup = [["Left", 300, "multi", "p300_multi_gen2"],["Right", 300, "single", "p300_single"]]):
+
+        # setup name
+        self.name = name # WTOSCR: currently using block name, would make sense to also include refrence to project name and block number
+        self.namecheck()
+
+        # setup protocol metadata
+        self.author=author
+        self.description=description
+        
+        # create blank actions list
+        self.actions = actions
+
+        #decalre defined pipettes if they exist
+        # WTOSCR: could be improved by having currentpipettesetup defult to none
+        if self.currentpipettesetup != None:
+            self.definedpipettes = currentpipettesetup
         else:
             self.definedpipettes = None
 
-        self.name = name
-        self.namecheck()
-
-        self.author=author
-        self.description=description,
-        
-
-        self.actions = []
-
+        # Instantiate Deck to model physical constraints and locations involved in protocol
         self.deck = otDeck.Deck()
+
+        #setup name for robot py file        
+        self.outputpath = "None" # WTOSCR: create and save script in DJango model
+        self.pathnamecheck() # generate unique name
+
+        # Create and setup main robotic .py script to write output to
+        self.output = otWrite.otScript(filepath=self.outputpath, protocolName=self.name, author=self.author, description=self.description)
+        self.output.setupScript()
         
-        self.outputpath = "None"
-        self.pathnamecheck()
-        
-        # self.getactions(actions)
-        self.actions = actions
+        # set create blank variables to be used for hardware setup
         self.tipoptions = []
         self.tipsneeded = {}
         self.tipRackList = []
-
         self.pipettesneeded = []
-
-        self.output = otWrite.otScript(filepath=self.outputpath, protocolName=self.name, author=self.author, description=self.description)
-        self.output.setupScript()
+        
+        # create list of plates to place plates to use in reactions
         self.setupPlate()
         
-        
+        # Generate idea of what tips will be used in protocol
         self.preselecttips()
         
-        
-        
+        #
         self.tipOutput()
+        
+        # write hardwear setup to robotics .py script
         self.output.setupLabwear(self.deck.PlateList, self.tipRackList)
+
         self.setupPipettes()
         self.output.setupPipettes(self.deck.PipetteList)
 
+        # legacy code to run only subset of selected actions form actions
         #if split == None:
         #    self.ittrActions()
         #else:
         #    self.splitittract(split)
+
+        # loop through all listeded actions 
         self.ittrActions()
+
+
+        # WTOSCR: add qc.text file at end of session once output plates are filled
 
     
     def namecheck(self):
+        """checks if self.name is file name safe 
+
+        :return: trialname: a name to use for the protocol
+        :rtype: trialname: str
+        """
+        # creates trialname to hold the current idea of what the name should be
         trialname = self.name
+        
         if re.match("^[\w-]+$", trialname):
             pass
         else:
@@ -79,15 +117,24 @@ class otSession():
 
 
     def pathnamecheck(self):
+        """a function to ensure the output file name is unique (acheived though itterating suffix number till name is unique)
+
+        :return: a unique filepaht for the genrated script
+        :rtype: str
+        """
         self.namecheck()
+
+        #create trialfile to hold current idea of what the name should be
         trialfile = Path("../output/Opentrons/" + self.name + ".py")
+
         if trialfile.exists():
+            # if the filename exists loop thorugh the suffix number increasing by one each time till the name is not matched
             suffixnumber = 1
-            while trialfile.exists():
+            while trialfile.exists(): # WTOSCR: use unique filename/filepath in django model
                 trialfile = Path("../output/Opentrons/" + self.name + "(" + str(suffixnumber) + ")" + ".py")
-                #print("Debug, trying: "+str(trialfile))
                 suffixnumber += 1
-            
+
+        # set the filepath to trialfile and return filepath
         self.outputpath = trialfile
         return self.outputpath
 
@@ -111,51 +158,43 @@ class otSession():
     def combinestrings(self, row):
         print(f"{row['materialsmiles']}\t{row['solvent']})")
         return str(str(row['materialsmiles'])+str(row['solvent']))
-    def setupPlate(self, incAddMaterials=True, incWashMaterials=True, incExtract=True, inputnumwells = 24, inputwellvolume = 2500):
+    def setupPlate(self, inputnumwells = 24, inputwellvolume = 2500, incAddMaterials=True, incWashMaterials=True, incExtract=True):
+        # WTOSCR: currently relying on user input of number of wells and input well volume, a function should be created along the line of the pipette selection process to automaticaly choose which plate should be used
+        # WTOSCR: do we need autogenrated plate size selection - proberbly more for output plate but the same funciton should work for both
         #print(self.actions)
         
-        allmaterials = pd.DataFrame(columns=['material', 'materialsmiles' 'materialquantity', 'solvent', 'materialKey'])
+        allmaterials = pd.DataFrame(columns=['material', 'materialsmiles' 'materialquantity', 'solvent', 'materialKey']) # WTOSCR: should proberbly check about a Django model
 
+        # each block getting a list of materials associated with that action type and concatinating them to the pandas Dataframe, All materials
         if incAddMaterials == True:
-            addingSteps = self.actions.loc[(self.actions['actiontype']) == "add"] #water smiles seems indistinguishable from oxygen
+            addingSteps = self.actions.loc[(self.actions['actiontype']) == "add"] 
             materials = addingSteps[['material','materialsmiles', 'materialquantity', 'solvent']]
             key = addingSteps[['materialsmiles']]
-            key = key.rename(columns={'materialsmiles':'materialKey'})
+            key = key.rename(columns={'materialsmiles':'materialKey'}) # material key is smiles
             materials = pd.concat([materials, key], axis = 1)
             print(materials)
             allmaterials = pd.concat([allmaterials, materials], ignore_index=True)
 
-        if incWashMaterials==True:
+        if incWashMaterials==True:  # WTOSCR: review if properly implemented and bring inline with add 
             solventSteps = self.actions.loc[(self.actions['actiontype']) == "wash"]
-            washmaterials = solventSteps[['material', 'materialquantity']]
-            allmaterials = pd.concat([allmaterials, washmaterials], ignore_index=True)
-
-        if incExtract == True:
-            extractSteps = self.actions.loc[(self.actions['actiontype']) == "extract"]
-            extractsolvents = solventSteps[['solvent', 'solventquantity']]
-            extractsolvents = extractsolvents.rename(columns={'solvent':'material'})
-            extractsolvents = extractsolvents.rename(columns={'solventquantity':'materialquantity'})
+            washmaterials = solventSteps[['material', 'materialquantitcombinestringsquantity':'materialquantity'})
             allmaterials = pd.concat([allmaterials, extractsolvents], ignore_index=True)
             
         allmaterials['matAndSolv'] = allmaterials.apply(lambda row: self.combinestrings(row), axis=1)  
         allmaterials = allmaterials.groupby(['matAndSolv']).aggregate({"materialquantity":"sum", "material":'first', 'solvent':'first', 'materialsmiles':'first'})
         allmaterials = allmaterials.sort_values(['solvent','materialquantity'], ascending = False)
         #experement with adding a working materials+sovlent collum to group by then drop that col
-        print(allmaterials)
-        print("\n")
-        #allmaterials = allmaterials.reset_index()
         
-        #print(allmaterials.columns)
-        #print(allmaterials)
-        self.maxtransfer = allmaterials['materialquantity'].max()
-        self.totalvolume = allmaterials['materialquantity'].sum()
+        
+        self.maxvolume = allmaterials['materialquantity'].max() # not currently used
+        self.totalvolume = allmaterials['materialquantity'].sum() # not currently used
 
-        self.orderPlate = self.deck.add("Plate", 1, inputnumwells, inputwellvolume, "OrderPlate")
+        self.orderPlate = self.deck.add("Plate", 1, inputnumwells, inputwellvolume, "OrderPlate") #WTOSCR: index is hard coded
 
         # plate = ['','','','','','','','','',''] #note: need to fix so not fixed posibles
         for i in allmaterials.index.values:
             if allmaterials.loc[i, 'material'] == "" or allmaterials.loc[i, 'material'] == None or allmaterials.loc[i, 'material'] == 'NaN':
-                matName = allmaterials.loc[i, 'materialsmiles']
+                matName = allmaterials.loc[i, 'materialsmiles'] # implement chemical name check for all reactants and reagents
             else:
                 matName = allmaterials.loc[i, 'material']
             wellnumber = self.orderPlate.nextfreewell()
@@ -163,10 +202,13 @@ class otSession():
         #print(self.orderPlate.printplate())
         currentblocknum = self.actions['blocknum'].values[0]
         OutputPlateTxt.PlateTxt(self.orderPlate, self.name, self.author, currentblocknum )
+        # WTOSCR: add qc.text file at end of session once output plates are filled
+        # if well overvlows (outcome == False) needs to move to next weel
             # if outcome != False:
             #     plate[wellnumber] = [allmaterials.loc[i,'materialquantity'], allmaterials.loc[i,'material']] 
+        # WTOSCR: add handleing materials spread across many wells in fluid handeling steps
 
-        self.reactionPlate = self.deck.add("Plate", 2, 96, 500, "ReactionPlate")
+        self.reactionPlate = self.deck.add("Plate", 2, 96, 500, "ReactionPlate") #WTOSCR: index is hard coded
         # for well in range(len(self.orderPlate)):
         #     print(self.orderPlate[well].StartSmiles)
         # print(self.orderPlate.smilesearch('C(Cl)Cl'))
@@ -174,7 +216,6 @@ class otSession():
 
 
     def preselecttips(self):
-        print(self.actions)
         for index, row in self.actions.iterrows():
             currentactiontype = row["actiontype"]
             # currentactionmask = self.actions['actionno'] == actionindex+1
@@ -266,23 +307,18 @@ class otSession():
             for defined in self.definedpipettes:
                 if defined[2] != "multi":
                     self.deck.addPipette(str(f"{defined[0]}_{defined[1]}_{defined[2]}_pipette"), defined[3], defined[0], defined[1])
+                # WTOSCR: need to add handleing for multichannle pipettes
 
 
     def ittrActions(self):
         #print(self.actions)
-        reactionids = self.actions['reaction_id_id'].unique().tolist()
+        reactionids = self.actions['reaction_id_id'].unique().tolist() # WTOSCR: Django implementaiton
         for Index in range(len(self.actions.index.values)):
             columns  = self.actions.columns.values
-            #print(columns)
             currentaction = pd.DataFrame(index = [Index], columns = columns)
-            # print(currentaction)
             for col in columns:
                 currentaction[col] = self.actions.iloc[Index][col]
-            # print(currentaction)
-            # print(currentaction["reaction_id_id"].values)
-            # print(type(currentaction["reaction_id_id"].values))
             currentaction["outputwell"] = reactionids.index(currentaction["reaction_id_id"].values)
-            # print(currentaction)
 
             self.processAction(currentaction)
     
@@ -333,18 +369,12 @@ class otSession():
 
 
     def processAction(self, currentaction):
-        # print(f"\ncurrent action in process action {currentaction}")
-        # print("\n\n")
-        #print(currentaction)
-        # print("\n")
-        # print(currentaction.columns)
-        # print("\n")
-        # print(currentaction['actiontype'])
-        # print("\n\n")
         currentactiontype = currentaction['actiontype'].to_string(index=False)
         currentactiontype = currentactiontype.strip()
         if currentactiontype != 'Series([], )':
-            #print("current type: "+str(currentactiontype))
+            # WTOSCR: what to do if it is equal to series([],)
+            # WTOSCR: check django compatability
+
             numreps = currentaction['numberofrepetitions'].values
             if str(numreps) == "[nan]":
                 numreps = 1
@@ -360,13 +390,9 @@ class otSession():
             except:
                 numreps = 1
 
-            #print(currentaction)
-            #print("numreps: "+str(numreps))
-
 
             repetitions = 0
             while repetitions  < numreps:
-                #print(currentaction)
                 if currentactiontype == "add":
                     self.actionAdd(currentaction)
                 elif currentactiontype == "collect-layer":
@@ -432,11 +458,14 @@ class otSession():
     def actionConcentrate(self, currentaction):
         print("Concentrate")
         self.output.unsuportedAction("Concentrate not yet supported ")
+
+
+# WTOSCR: Actual start of script run, is it worth making another class here?
     
 #allactions = ibmRead.getactions() #activate to enable workng with front end
 allactions = pd.read_csv("../../debuging/for-Olivia-actions-final-test-3.csv", index_col=0, sep = ';')
 
-print(allactions)
+
 # print(allactions.columns)
 #reactionsactions = ibmRead.getReactionActions(allactions, reactionno)
 #print(allactions['actiontype'].unique())
@@ -447,23 +476,23 @@ def docheck(row):
     else:
         return False
 
-def actionfilter(allactions,  actions=None, reactionset=None):
+def actionfilter(allactions,  actions=None, reactionset=None): # WTOSCR: needs splittting into filter and checking for doability
     if reactionset != None:
         subSetReactAct = allactions.loc[(allactions['reaction_id_id']).isin(reactionset)]
     else:
         subSetReactAct = allactions
-    #print(subSetReactAct)
     
     if actions != None:
         actionsfiltered = subSetReactAct.loc[(subSetReactAct['actiontype']).isin(actions)]
     else:
         actionsfiltered = subSetReactAct
 
-    actionsfiltered['doable'] = actionsfiltered.apply(lambda row: docheck(row), axis=1)  
-    # print(actionsfiltered)
+    actionsfiltered['doable'] = actionsfiltered.apply(lambda row: docheck(row), axis=1)
     return actionsfiltered
 
 def blockdefine(actionsfiltered):
+    # WTOSCR: 1) add doable to action models,  2) retreive data from database
+
     actionswithblocks =pd.DataFrame(columns=['id', 'reaction_id_id', 'actiontype', 'actionno', 'material',
         'materialsmiles', 'materialquantity', 'materialquantityunit',
         'dropwise', 'atmosphere', 'molecularweight', 'materialimage', 'layer',
@@ -471,7 +500,7 @@ def blockdefine(actionsfiltered):
         'numberofrepetitions', 'temperature', 'duration', 'durationunit',
         'stirringspeed', 'doable', 'blocknum', 'blockbool']) 
 
-    for reaction in actionsfiltered['reaction_id_id'].unique():
+    for reaction in actionsfiltered['reaction_id_id'].unique(): #WTOSCR: check if two undoables produce 1 or two blocks
         actions = actionsfiltered.loc[actionsfiltered['reaction_id_id'] == reaction]
         currentblocknum = 0
         currentblockbool = False
@@ -479,26 +508,15 @@ def blockdefine(actionsfiltered):
         blocklist = [[],[]]
 
         for index, row in actions.iterrows():
-            # print(f"action {row}")
-            # print(f"index #{index}#")
-            # print(f"action: {row}")
             if currentblockbool != row.loc['doable']:
                 currentblocknum+=1
                 currentblockbool= row.loc['doable']
-                #print(f"block {currentblocknum}, {currentblockbool})")
-            blocklist[0].append(currentblocknum)
+            blocklist[0].append(currentblocknum) #WTOSCR: should be dictionary [[int,bool],[int,bool],[int,bool]]
             blocklist[1].append(currentblockbool)
 
-            #print(f"\t{currentblocknum}")
-            #append block column
-            #append block bool column
-            # print(action['actiontype'])
-        actions["blocknum"] = blocklist[0]
+        actions["blocknum"] = blocklist[0] #WTOSCR: check if can be done with django modles
         actions["blockbool"] = blocklist[1]
-        #print(actions)
         actionswithblocks = actionswithblocks.append(actions, ignore_index=True)
-        #print(blocklist)
-    #print(actionswithblocks.sort_values(by=['blocknum', 'reaction_id_id', 'actionno']))
     return actionswithblocks
 
 actionsfiltered = actionfilter(allactions, actions=None)
@@ -508,22 +526,23 @@ actionsfiltered = blockdefine(actionsfiltered)
 protocolOut = HumanRead.HumanReadable("../output/protocols/example.md")
 protocolOut.setupDoc()
 
-
-for blocknum in actionsfiltered['blocknum'].unique():
+# loop through each block in actions filtered
+for blocknum in actionsfiltered['blocknum'].unique():  
     
     print(f"block num \t{blocknum}")
     block = actionsfiltered[actionsfiltered['blocknum'] == blocknum]
-    #print(block)
-    blockbool = None
+    blockbool = None # WTOSCR: blockbool seems to be unused, should it be removed?
     if block['blockbool'].values[0] == True:
-        blockbool = True
+        blockbool = True # WTOSCR: blockbool seems to be unused, should it be removed?
         print("activeblock")
-        b = otSession(f"block_{blocknum}", block, "Example Author", "example description")
+        blockSession = otSession(f"block_{blocknum}", block, "Example Author", "example description")
     else:
-        blockbool = False
+        blockbool = False # WTOSCR: blockbool seems to be unused, should it be removed?
         print("inactive block")
-        b = None
-    protocolOut.newBlock(blocknum, block['blockbool'].values[0], b)
+        blockSession = None
+
+
+    protocolOut.newBlock(blocknum, block['blockbool'].values[0], blockSession) # human read stuff
 
 #print("test")
 #a = otSession("test", 1)

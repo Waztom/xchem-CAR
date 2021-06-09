@@ -1,6 +1,8 @@
 # this is vunrable to python injection by the lack of checking of metadata inputs
 # this opens and closes files frequently, could be improved by creating string to hold the file data before writing to file once
 
+#   NOTE: in this file "humanread" referes to the comments above each line/set of lines of ot code, human readable is a list of all the comments in format [oporator (human/ot), comment]
+
 import os
 
 class otScript():
@@ -18,6 +20,8 @@ class otScript():
     def setupScript(self):
         self.dirsetup()
         """This is vunrable to injection atacks """
+
+        # asks user for metadata (should be removed at some point to avoid errors when intergrated with frontend)
         if self.protocolName == None:
                 self.protocolName = input("Please name the Protocol Name: \t")
         if self.author == None:
@@ -32,7 +36,6 @@ class otScript():
         script.write("# "+str(self.protocolName)+" for \""+str(self.author)+str("\" produced by XChem Car (https://car.xchem.diamond.ac.uk)"))
         script.write("\n# metadata")
         script.write("\nmetadata = {'protocolName': '"+str(self.protocolName)+"', 'author': '"+str(self.author)+"','description': '"+str(self.description[0])+"','apiLevel': '"+str(self.apiLevel)+"'}\n")
-        script.write("\n\nfrom opentrons import protocol_api\n")
         script.write("\ndef run(protocol: protocol_api.ProtocolContext):\n")
 
         script.close()
@@ -50,7 +53,7 @@ class otScript():
                     uniquename = plate.plateName # debug line
                 else:
                     uniquename = plate.plateName
-            script.write(f"\n\t{uniquename} = protocol.load_labware('{plate.plateTypeName}', '{plate.plateIndex}')")
+            script.write(f"\n\t{uniquename} = protocol.load_labware('{plate.plateTypeName}', '{plate.plateIndex}')") # WTOSCR: may want to cast plate index to int type, but seems to work with str
         
         script.close()
 
@@ -76,6 +79,7 @@ class otScript():
         script.close()
 
     def dirsetup(self, path="../output/Opentrons"):
+        # WTOSCR: remove after django implementation
         if not os.path.exists(path):
             os.makedirs(path)
     

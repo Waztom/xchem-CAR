@@ -4,6 +4,8 @@ import os
 
 class PlateTxt():
     def __init__(self, Plate, protocolName=None, author=None, block=None):
+        # WTOSCR: index type and volume multiplyer to be moved to _init_ arguments
+        # WTOSCR: move volume multiplyer to IBMTOT aggrigation of all materials
         self.plate = Plate
         self.protocolName = protocolName    
         self.author = author

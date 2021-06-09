@@ -28,6 +28,8 @@ class Deck ():
         print("'"+str(position)+"' not found")
     
     def nextfreeplate(self):
+
+
         # freeplates = []
         # for plate in self.PlateList:
         #     if plate.isempty():
@@ -37,12 +39,16 @@ class Deck ():
         # else:
         #     nextfreeplate = "no free wells"
         nextfreeplateindex = len(self.PlateList)+1
-        #nextfreeplateindex = 1
+
+        # WTOSCR: include erros for list length >= 11 plates
         return nextfreeplateindex
 
     def add(self, Type, location, numwells=None, platewellVolume=None, platename = ""):
-        DeckObject(self, Type, index=self.nextfreeplate(), numwells=numwells,platewellVolume=platewellVolume, platename=platename)
-        return self.PlateList[-1]
+        # WTOSCR appers to not use location, instead uses next free plate, consider removing location argument
+        # WTOSCR setup 2 paths, one for tip racks and one for well plates
+        nextfreeindex = self.nextfreeplate()
+        DeckObject(self, Type, index=nextfreeindex, numwells=numwells,platewellVolume=platewellVolume, platename=platename)
+        return nextfreeindex
 
     def findPippets (self, volume):
         for pipette in self.PipetteList:
@@ -62,11 +68,11 @@ class Deck ():
 
     def addPipette (self, name, model, mount, volume):
         print(f"adding pipette: name:{name}, model:{model}, mount:{mount}, volume{volume}")
-        #self.PipetteList.append(self, pipette(len(self.PipetteList), name, model, mount, volume))
         self.PipetteList.append(Pipette(self, len(self.PipetteList), name, model, mount, volume))
 
 
 class DeckObject ():
+    # this is proberbly redundent and could be folded into deck.add
     def __init__(self, Deck, Type, index=None, numwells=None, platewellVolume=None, platename="", numTips=None, tipVolume=None):
         if Type == "Plate":
             Deck.PlateList.append(Plate(Deck, index, numwells, platewellVolume, platename))
@@ -76,14 +82,17 @@ class DeckObject ():
 class Plate ():
 
     def __init__(self, Deck, index=None, numwells=None, platewellVolume=None, platename=""):
+        # WTOSCR: should proberbly enforce being passed the number of wells rather then having it optional
         self.platetype = "Plate"
         self.deck = Deck
         self.plateIndex = index
         self.numwells = numwells
         self.platewellVolume = platewellVolume
         self.WellList = None
-        self.setupwells()
+        self.setupwells() # WTOSCR: this could read None as a number of wells, shoud a defult be given
         print(f"{self.numwells},{self.platewellVolume}")
+
+        # convert properties to plate typename/otlabwearname WTOSCR: should proberbly make cleaner
         if numwells == 24:
             self.plateTypeName= "24_reservoir_2500ul"
         if numwells == 96:
@@ -93,9 +102,9 @@ class Plate ():
             elif platewellVolume == 500:
                 self.plateTypeName= "plateone_96_wellplate_500ul"
                 self.platewellVolume = 500
-        print(self.plateTypeName)
-        self.plateName = platename
-        self.activeWell = self.nextfreewell()
+        print(self.plateTypeName) # the name that the ot knows the labwear by
+        self.plateName = platename #such as "input plate 1"
+        self.activeWell = self.nextfreewell() #WTOSCR: is this ever used or is next free well just called each time
 
     def __repr__(self):
         return 'D{}P{}'.format(self.deck.deckindex, self.plateIndex)
@@ -118,7 +127,6 @@ class Plate ():
 
 
         row = ((index)%numrows)+1
-        #col = math.ceil((index+2)*10/self.numwells) #BUG: not correctly calculating column number
         col = math.floor((1/numrows)*index)+1
 
         if RowLetters == True:
@@ -160,10 +168,11 @@ class Plate ():
         if len(freewells)>=1:
             nextfreewell = int(freewells[0])
         else:
-            nextfreewell = "no free wells"
+            nextfreewell = "no free wells" # should this be a string or should it be "Fasle"
         return nextfreewell
 
     def isempty(self):
+        #WTOSCR: Check if this is even needed
         isempty = True
         for well in self.WellList:
             if not well.isempty():

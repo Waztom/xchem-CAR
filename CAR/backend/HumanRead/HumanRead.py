@@ -1,4 +1,6 @@
 
+#WTOSCR: could this become a module, currently this is just a placeholder, move to Opentrons folder?
+
 # this is vunrable to python injection by the lack of checking of metadata inputs
 # this opens and closes files frequently, could be improved by creating string to hold the file data before writing to file once
 
