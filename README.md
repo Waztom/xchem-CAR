@@ -57,6 +57,8 @@ Once installed a box with two arrows pointing in opposite directions should appe
 git-crypt (https://github.com/AGWA/git-crypt) is used for encypting secrets required to run CAR
 you need the appropriate <em>crypt-key</em> file from the software maintainer.
 
+If you are using a Windows machine then it is necessary to download the Windows Subsystem for Linux 2. A very good guide is found here: https://www.digitalocean.com/community/tutorials/how-to-install-the-windows-subsystem-for-linux-2-on-microsoft-windows-10
+
 ## <a name="InstallGitCrypt"></a>Install Git-Crypt
 download the compressed git-crypt package (https://www.agwa.name/projects/git-crypt/downloads/git-crypt-0.6.0.tar.gz)
 
