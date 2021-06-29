@@ -76,7 +76,7 @@ once Git-Crypt is installed unlock the secrets using:
 
 # <a name="Startsystem"></a>Start system
 ### <a name="LocateReopsitory"></a>Locate Reopsitory
-* in terminal change directory to your coppy of the repo :
+* in terminal change directory to your copy of the repo :
     >```cd ```<em>```[local file path to xchem-CAR repoistory]```
 
     </em>
