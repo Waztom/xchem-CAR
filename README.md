@@ -5,7 +5,7 @@ Instructions for downloading and running XChem-CAR for developers,<br>
 [URL ONCE LIVE]
 
 **Continue with this guide if you wish to download as setup XChem-CAR 
-for development purpouses**<br><br>
+for development purposes**<br><br>
 
 ## <a name="VisualStudioCode"></a>Visual Studio Code 
 these instructions are designed for Visual Studio Code which can be installed for free from: https://code.visualstudio.com/ 
