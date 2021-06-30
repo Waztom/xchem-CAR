@@ -118,7 +118,7 @@ A fix is to change the file permission settings from your Linux terminal
 
 `sudo chown -R YOUR_NAME_HERE xchem-CAR/`
 
-Another error which cropped up was a Value Error. To solve this try creating a "logs/logfile.logs" file in /workspace/CAR/logs using the `mkdir` command in the Linux terminal
+Another error which cropped up was a Value Error. To solve this try creating a "logs/logfile.logs" file in /workspace/CAR/logs. If this directory does not exist use the `mkdir` command in the Linux terminal
 
 Try running the "Time to Launch" code again.
 
