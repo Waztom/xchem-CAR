@@ -35,6 +35,7 @@ First you'll need Docker Desktop (or the relevent Docker Engine on Linux) you ca
 ## <a name="InstallDockerCompose"></a>Install Docker Compose
 once Docker is installed also install docker compose, instructions for Mac, Windows, Linux and other options are available: https://docs.docker.com/compose/install/
 
+Note with newer versions of Docker, Docker Compose is already preinstalled
 
 ## <a name="InstallVSCodeExtention"></a>Install VS Code Extention
 Docker and Docker Compose should now be installed <br> 
@@ -98,10 +99,31 @@ once Git-Crypt is installed unlock the secrets using:
 ### <a name="StartingCelery"></a>Starting Celery
 * open a new terminal the same way as last time ([see Time to Launch](#TimeToLaunch))
 * in the new terminal type:
+    >'''cd CAR'''
     >```celery -A CAR worker -l info```
 # Opening the application
 at the end of the step "[Time to Launch](#TimeToLaunch)" an address to use the visual interface should have been displayed ("http://127.0.0.1:8000/"), Ctrl+Click on the link in terminal or copy and paste the link into your web browser to use the CAR interface
 >http://127.0.0.1:8000/
+
+
+### <a name="Troubleshooting"></a>Troubleshooting
+
+Users have reported problems with instructions in "Time to Launch":
+'''
+raise KeyError(key) from None
+KeyError: 'SendGrid_API_KEY'
+
+'''
+A fix is to change the file permission settings from your Linux terminal 
+
+'sudo chown -R YOUR_NAME_HERE xchem-CAR/'
+
+Another error which cropped up was a Value Error. To solve this try creating a "logs/logfile.logs" file in /workspace/CAR/logs using the 'mkdir' command in the Linux terminal
+
+Try running the "Time to Launch" code again.
+
+
+
     
 
 
