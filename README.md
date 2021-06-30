@@ -99,7 +99,7 @@ once Git-Crypt is installed unlock the secrets using:
 ### <a name="StartingCelery"></a>Starting Celery
 * open a new terminal the same way as last time ([see Time to Launch](#TimeToLaunch))
 * in the new terminal type:
-    >'''cd CAR'''
+    >'''cd CAR'''<br>
     >```celery -A CAR worker -l info```
 # Opening the application
 at the end of the step "[Time to Launch](#TimeToLaunch)" an address to use the visual interface should have been displayed ("http://127.0.0.1:8000/"), Ctrl+Click on the link in terminal or copy and paste the link into your web browser to use the CAR interface
