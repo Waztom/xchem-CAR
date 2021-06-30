@@ -99,7 +99,7 @@ once Git-Crypt is installed unlock the secrets using:
 ### <a name="StartingCelery"></a>Starting Celery
 * open a new terminal the same way as last time ([see Time to Launch](#TimeToLaunch))
 * in the new terminal type:
-    >'''cd CAR'''<br>
+    >```cd CAR```<br>
     >```celery -A CAR worker -l info```
 # Opening the application
 at the end of the step "[Time to Launch](#TimeToLaunch)" an address to use the visual interface should have been displayed ("http://127.0.0.1:8000/"), Ctrl+Click on the link in terminal or copy and paste the link into your web browser to use the CAR interface
@@ -109,16 +109,16 @@ at the end of the step "[Time to Launch](#TimeToLaunch)" an address to use the v
 ### <a name="Troubleshooting"></a>Troubleshooting
 
 Users have reported problems with instructions in "Time to Launch":
-'''
+```
 raise KeyError(key) from None
 KeyError: 'SendGrid_API_KEY'
 
-'''
+```
 A fix is to change the file permission settings from your Linux terminal 
 
-'sudo chown -R YOUR_NAME_HERE xchem-CAR/'
+`sudo chown -R YOUR_NAME_HERE xchem-CAR/`
 
-Another error which cropped up was a Value Error. To solve this try creating a "logs/logfile.logs" file in /workspace/CAR/logs using the 'mkdir' command in the Linux terminal
+Another error which cropped up was a Value Error. To solve this try creating a "logs/logfile.logs" file in /workspace/CAR/logs using the `mkdir` command in the Linux terminal
 
 Try running the "Time to Launch" code again.
 
