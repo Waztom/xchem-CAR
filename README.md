@@ -41,6 +41,9 @@ Note with newer versions of Docker, Docker Compose is already preinstalled
 Docker and Docker Compose should now be installed <br> 
 <em>(If on Windows/Mac, start docker desktop)</em><br>
 
+## <a name="InstallRemoteWSL"></a>Install RemoteWSL Extension
+Ctrl + SHIFT + X and type in 'Remote - WSL' install this.
+
 Open Visual Studio Code<br>
 to check docker is running correctly open the terminal and run:<br>
 >```docker --version```<br>
