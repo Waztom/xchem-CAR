@@ -67,6 +67,8 @@ If you are using a Windows machine then it is necessary to download the Windows 
 
 You will need to allow WSL integration with Docker Desktop. To do this go to settings on Docker > Resources > WSL Integration. Then enable WSL integration for your desired distribution. 
 
+Incorporation of VSCode with WSL for further information: https://code.visualstudio.com/docs/remote/wsl-tutorial
+
 **Note: We have tested this using Ubuntu 18.04 and 20.04, compatibility of other Linux distributions have not been investigated.**
 
 ## <a name="InstallGitCrypt"></a>Install Git-Crypt
