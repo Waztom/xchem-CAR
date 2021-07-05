@@ -41,9 +41,6 @@ Note with newer versions of Docker, Docker Compose is already preinstalled
 Docker and Docker Compose should now be installed <br> 
 <em>(If on Windows/Mac, start docker desktop)</em><br>
 
-## <a name="InstallRemoteWSL"></a>Install RemoteWSL Extension
-Ctrl + SHIFT + X and type in 'Remote - WSL' install this.
-
 Open Visual Studio Code<br>
 to check docker is running correctly open the terminal and run:<br>
 >```docker --version```<br>
@@ -57,6 +54,11 @@ In Visual Studio Code open the extensions panel (left-hand panel or using Ctrl+S
 Once installed a box with two arrows pointing in opposite directions should appear in the bottom left corner of Visual studio code
 <br>
 <br>
+
+## <a name="InstallRemoteWSL"></a>Install RemoteWSL Extension
+Ctrl + SHIFT + X and type in 'Remote - WSL' install this.
+
+
 # <a name="gitcrypt"></a>git-crypt
 git-crypt (https://github.com/AGWA/git-crypt) is used for encypting secrets required to run CAR
 you need the appropriate <em>crypt-key</em> file from the software maintainer.
