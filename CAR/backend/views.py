@@ -8,8 +8,8 @@ from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.conf import settings
 from celery.result import AsyncResult
-from .forms import UploadForm
-from .tasks import validateFileUpload, uploadIBMReaction
+from .forms import API_CHOICES, UploadForm
+from .tasks import validateFileUpload, uploadIBMReaction, uploadManifoldReaction
 import pandas as pd
 
 
@@ -37,13 +37,14 @@ class UploadProject(View):
             project_info["submittername"] = request.POST["submitter_name"]
             project_info["submitterorganisation"] = request.POST["submitter_organisation"]
             project_info["submitteremail"] = request.POST["submitter_email"]
-            choice = request.POST["submit_choice"]
+            validate_choice = request.POST["validate_choice"]
+            API_choice = request.POST["API_choice"]
 
             # Save csv to temp storage
             tmp_file = save_tmp_file(csvfile)
 
             # Settings for if validate option selected
-            if str(choice) == "0":
+            if str(validate_choice) == "0":
                 #### Got up to here - need to look at validate task and implement first
                 # Start celery task # Code getting stuck in celery task!!!!
                 task_validate = validateFileUpload.delay(tmp_file)
@@ -55,20 +56,39 @@ class UploadProject(View):
                 return render(request, "backend/upload.html", context)
 
             # if it's an upload, run the compound set task
-            if str(choice) == "1":
+            if str(validate_choice) == "1":
                 # Start chained celery tasks. NB first function passes tuple
                 # to second function - see tasks.py
-                task_upload = (
-                    validateFileUpload.s(tmp_file, project_info=project_info, validate_only=False)
-                    | uploadIBMReaction.s()
-                ).apply_async()
+                if str(API_choice) == "0":
+                    task_upload = (
+                        validateFileUpload.s(
+                            tmp_file, project_info=project_info, validate_only=False
+                        )
+                        | uploadManifoldReaction.s()
+                    ).apply_async()
 
-                context = {}
-                context["upload_task_id"] = task_upload.id
-                context["upload_task_status"] = task_upload.status
+                    context = {}
+                    context["upload_task_id"] = task_upload.id
+                    context["upload_task_status"] = task_upload.status
 
-                # Update client side with task id and status
-                return render(request, "backend/upload.html", context)
+                    # Update client side with task id and status
+                    return render(request, "backend/upload.html", context)
+                    pass
+
+                if str(API_choice) == "1":
+                    task_upload = (
+                        validateFileUpload.s(
+                            tmp_file, project_info=project_info, validate_only=False
+                        )
+                        | uploadIBMReaction.s()
+                    ).apply_async()
+
+                    context = {}
+                    context["upload_task_id"] = task_upload.id
+                    context["upload_task_status"] = task_upload.status
+
+                    # Update client side with task id and status
+                    return render(request, "backend/upload.html", context)
 
         else:
             form = UploadForm()
