@@ -62,7 +62,7 @@ from .serializers import (
     IBMWashActionSerializer,
 )
 
-from .IBM.createmodels import createSVGString
+from .IBM.createibmmodels import createSVGString
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 from django.core.files.storage import default_storage
