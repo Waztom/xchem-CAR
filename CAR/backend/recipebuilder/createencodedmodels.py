@@ -85,7 +85,7 @@ def getChemicalName(smiles):
         return smiles
 
 
-def createEncodedActionModel(reaction_id, action, reactants=None, target_id=None):
+def createEncodedActionModel(reaction_id, action, reactants, target_id):
     # Create a dictionary of key (action name from IBM API) and
     # funtion name to create the appropriate model
     actionMethods = {
@@ -95,7 +95,7 @@ def createEncodedActionModel(reaction_id, action, reactants=None, target_id=None
     action_type = action["name"]
 
     if action_type in actionMethods:
-        actionMethods[action_type](action_type, reaction_id, action, reactants=None, target_id=None)
+        actionMethods[action_type](action_type, reaction_id, action, reactants, target_id)
         return True
     else:
         logger.info(action_type)
@@ -141,9 +141,6 @@ def createEncodedAddAction(action_type, reaction_id, action, reactants, target_i
         add.materialquantity = calculateVolume(molar_eqv, target_mols, conc_reagents)
         add.atmosphere = "air"
         add.save()
-
-        print("XXXXXXXXXXXXXXXXXXXXXXXXXX")
-        print(action_type)
 
     except Exception as error:
         print(error)

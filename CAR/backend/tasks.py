@@ -301,7 +301,7 @@ def uploadManifoldReaction(validate_output):
                 for reaction in reactions:
                     reaction_class = reaction["name"]
                     # Check if OT friendly and in encoded recipes
-                    try:
+                    if reaction_class in encoded_recipes:
                         encoded_recipe = encoded_recipes[reaction_class]
                         reactant_SMILES = reaction["reactantSmiles"]
                         product_smiles = reaction["productSmiles"]
@@ -337,8 +337,8 @@ def uploadManifoldReaction(validate_output):
 
                         product_no += 1
 
-                    except Exception as e:
-                        print(e)
+                    else:
+                        pass
 
                 pathway_no += 1
 
