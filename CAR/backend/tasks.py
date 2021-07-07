@@ -327,12 +327,22 @@ def uploadManifoldReaction(validate_output):
                     product_no += 1
 
                     # Do Harry's stuff here!
-                    # 1. Get recipe
-                    # 2. Loop over recip to populate relevant action models
+                    # 1. Calc expected mols product from target_mass
+                    # NB need to write func that can do single plus multiple
+                    # step calcs (Do we use SA score to estimate yield?)
+                    # 2. Get recipe
+                    # 2. Loop over recipe to populate relevant action models -> do
+                    #    we need extra createmodels functions or is it possible to mix w
+                    #    exisitng modelcreator?
 
+                    # Below is an example of a loop over
+                    # the actions in a recipe
                     #     # Create action models
                     #     action_no = 1
-                    #     for action in actions:
+                    #     for action in encoded_recipe:
+                    #         # This function basically routes the type of action to
+                    # the model that needs to be populated - see createmodels.py
+                    # in the IBM folder
                     #         created_model = createActionModel(
                     #             reaction_id=reaction_id,
                     #             action_no=action_no,
@@ -340,8 +350,6 @@ def uploadManifoldReaction(validate_output):
                     #         )
                     #         if created_model:
                     #             action_no += 1
-
-                # target_no += 1
 
                 pathway_no += 1
 

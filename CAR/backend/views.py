@@ -93,8 +93,8 @@ class UploadProject(View):
         else:
             form = UploadForm()
 
-        context["form"] = form
-        return render(request, "backend/upload.html", context)
+        # context["form"] = form
+        # return render(request, "backend/upload.html", context)
 
 
 # Add upload and validate views here!!!!
