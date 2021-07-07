@@ -1,6 +1,5 @@
 from rdkit import Chem
 from rdkit.Chem import Draw
-from rdkit.Chem import AllChem
 from rdkit.Chem import Descriptors
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -170,11 +169,11 @@ def createTargetModel(project_id, smiles, target_no, target_mass):
     return target.id
 
 
-def createMethodModel(target_id, smiles, max_steps):
+def createMethodModel(target_id, nosteps):
     method = Method()
     target_obj = Target.objects.get(id=target_id)
     method.target_id = target_obj
-    method.nosteps = max_steps
+    method.nosteps = nosteps
     method.save()
 
     return method.id

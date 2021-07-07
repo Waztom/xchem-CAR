@@ -3,10 +3,7 @@ from django.core.files.storage import default_storage
 
 import pandas as pd
 
-import time
 from .validate import (
-    add_warning,
-    checkColumnNames,
     checkNumberColumns,
     checkSMILES,
     checkIsNumber,
@@ -20,11 +17,11 @@ from .IBM.createmodels import (
     createProductModel,
     createActionModel,
 )
-
-
 from .IBM.apicalls import createIBMProject, getIBMRetroSyn, collectIBMReactionInfo
-
 from .IBM.filtermethod import filtermethod
+
+from .Manifold.apicalls import getManifoldretrosynthesis
+from rdkit.Chem import AllChem
 
 
 def delete_tmp_file(filepath):
@@ -194,8 +191,7 @@ def uploadIBMReaction(validate_output):
                                 # Create a Method model
                                 method_id = createMethodModel(
                                     target_id=target_id,
-                                    smiles=smiles,
-                                    max_steps=max_steps,
+                                    nosteps=max_steps,
                                 )
 
                                 product_no = 1
@@ -244,6 +240,118 @@ def uploadIBMReaction(validate_output):
             target_no += 1
 
     # Delete tempory file
+
+    default_storage.delete(csv_fp)
+
+    return validate_dict, validated, project_info
+
+
+@shared_task
+def uploadManifoldReaction(validate_output):
+    # Validate output is a list - this is one way to get
+    # Celery chaining to work where second function uses list output
+    # from first function (validate) called
+    validate_dict, validated, csv_fp, project_info, uploaded_dict = validate_output
+
+    if not validated:
+        # Delete tempory file if only validate selected
+        default_storage.delete(csv_fp)
+        return (validate_dict, validated, project_info)
+
+    if validated:
+        # Create project model and return project id
+        project_id, project_name = createProjectModel(project_info)
+        # Add project name to project info dict for emailing when upload complete
+        project_info["project_name"] = project_name
+
+        print(project_info)
+
+        # Do Postera stuff
+        target_no = 1
+        for target_smiles, target_mass in zip(
+            uploaded_dict["Targets"], uploaded_dict["Ammount_required (mg)"]
+        ):
+
+            retrosynthesis_result = getManifoldretrosynthesis(target_smiles)
+            routes = retrosynthesis_result["routes"]
+
+            target_id = createTargetModel(
+                project_id=project_id,
+                smiles=target_smiles,
+                target_no=target_no,
+                target_mass=target_mass,
+            )
+
+            target_no += 1
+
+            pathway_no = 1
+
+            for route in routes:
+                no_steps = len(route["reactions"])
+
+                method_id = createMethodModel(
+                    target_id=target_id,
+                    nosteps=no_steps,
+                )
+
+                # Then loop over route for synthetic steps
+                reactions = route["reactions"]
+                product_no = 1
+
+                for reaction in reactions:
+                    reaction_class = reaction["name"]
+                    reactant_SMILES = reaction["reactantSmiles"]
+                    product_smiles = reaction["productSmiles"]
+
+                    # Create a Reaction model
+                    reaction_smarts = AllChem.ReactionFromSmarts(
+                        "{}>>{}".format(".".join(reactant_SMILES), product_smiles),
+                        useSmiles=True,
+                    )
+                    reaction_id = createReactionModel(
+                        method_id=method_id,
+                        reaction_class=reaction_class,
+                        reaction_smarts=reaction_smarts,
+                    )
+
+                    # Create a Product model
+                    createProductModel(
+                        reaction_id=reaction_id,
+                        project_name=project_name,
+                        target_no=target_no,
+                        pathway_no=pathway_no,
+                        product_no=product_no,
+                        product_smiles=product_smiles,
+                    )
+
+                    product_no += 1
+
+                    # Do Harry's stuff here!
+                    # 1. Calc expected mols product from target_mass
+                    # NB need to write func that can do single plus multiple
+                    # step calcs (Do we use SA score to estimate yield?)
+                    # 2. Get recipe
+                    # 2. Loop over recipe to populate relevant action models -> do
+                    #    we need extra createmodels functions or is it possible to mix w
+                    #    exisitng modelcreator?
+
+                    # Below is an example of a loop over
+                    # the actions in a recipe
+                    #     # Create action models
+                    #     action_no = 1
+                    #     for action in encoded_recipe:
+                    #         # This function basically routes the type of action to
+                    # the model that needs to be populated - see createmodels.py
+                    # in the IBM folder
+                    #         created_model = createActionModel(
+                    #             reaction_id=reaction_id,
+                    #             action_no=action_no,
+                    #             action=action,
+                    #         )
+                    #         if created_model:
+                    #             action_no += 1
+
+                pathway_no += 1
 
     default_storage.delete(csv_fp)
 
