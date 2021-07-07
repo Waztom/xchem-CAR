@@ -8,10 +8,10 @@ Instructions for downloading and running XChem-CAR for developers,<br>
 for development purposes**<br><br>
 
 ## <a name="VisualStudioCode"></a>Visual Studio Code 
-these instructions are designed for Visual Studio Code which can be istalled for free from: https://code.visualstudio.com/ 
+these instructions are designed for Visual Studio Code which can be installed for free from: https://code.visualstudio.com/ 
 
 ## <a name="GitCryptKey"></a>Git-Crypt Key
-Secrets required for running CAR are encypted, to unencrpyt and run you will need the key from the XChem-CAR softwear maintainer<br><br>
+Secrets required for running CAR are encypted, to unencrpyt and run you will need the key from the XChem-CAR software maintainer<br><br>
 
 # <a name="RepositoryfromGitHub"></a>Clone the "xchem-car" repository from GitHub
 
@@ -30,11 +30,12 @@ all branches can be found: https://github.com/Waztom/xchem-CAR/branches
 
 # <a name="Docker"></a>Docker
 ## <a name="InstallDocker"></a>Install Docker 
-First you'll need Docker Desktop (or the relevent Docker Engine on Linux) you can find the apprpriate  download like this on https://www.docker.com/get-started
+First you'll need Docker Desktop (or the relevent Docker Engine on Linux) you can find the appropriate download like this on https://www.docker.com/get-started
 
 ## <a name="InstallDockerCompose"></a>Install Docker Compose
-once Docker is installed alos install docker compose, instructions for Mac, Windows, Linux and other options are avalible: https://docs.docker.com/compose/install/
+once Docker is installed also install docker compose, instructions for Mac, Windows, Linux and other options are available: https://docs.docker.com/compose/install/
 
+Note with newer versions of Docker, Docker Compose is already preinstalled
 
 ## <a name="InstallVSCodeExtention"></a>Install VS Code Extention
 Docker and Docker Compose should now be installed <br> 
@@ -48,14 +49,27 @@ you should get a response similar to:
 >Docker version 18.09.2, build 6247962
 
 
-In Visual Studio Code open the extiensions panel (left-hand pannle or using Ctrl+Shift+X ) and search for "<em>Remote - Containers extension</em>" and click **Install**.
+In Visual Studio Code open the extensions panel (left-hand panel or using Ctrl+Shift+X ) and search for "<em>Remote - Containers extension</em>" and click **Install**.
 
-Once installed a box with two arrows pointing in oposit direcitons should appere in the bottom left corner of Visual studio code
+Once installed a box with two arrows pointing in opposite directions should appear in the bottom left corner of Visual studio code
 <br>
 <br>
+
+## <a name="InstallRemoteWSL"></a>Install RemoteWSL Extension
+Ctrl + SHIFT + X and type in 'Remote - WSL' install this.
+
+
 # <a name="gitcrypt"></a>git-crypt
 git-crypt (https://github.com/AGWA/git-crypt) is used for encypting secrets required to run CAR
-you need the appropriate <em>crypt-key</em> file from the softwear maintainer.
+you need the appropriate <em>crypt-key</em> file from the software maintainer.
+
+If you are using a Windows machine then it is necessary to download the Windows Subsystem for Linux 2. A very good guide is found here: https://www.digitalocean.com/community/tutorials/how-to-install-the-windows-subsystem-for-linux-2-on-microsoft-windows-10
+
+You will need to allow WSL integration with Docker Desktop. To do this go to settings on Docker > Resources > WSL Integration. Then enable WSL integration for your desired distribution. 
+
+Incorporation of VSCode with WSL for further information: https://code.visualstudio.com/docs/remote/wsl-tutorial
+
+**Note: We have tested this using Ubuntu 18.04 and 20.04, compatibility of other Linux distributions have not been investigated.**
 
 ## <a name="InstallGitCrypt"></a>Install Git-Crypt
 download the compressed git-crypt package (https://www.agwa.name/projects/git-crypt/downloads/git-crypt-0.6.0.tar.gz)
@@ -74,17 +88,17 @@ once Git-Crypt is installed unlock the secrets using:
 
 # <a name="Startsystem"></a>Start system
 ### <a name="LocateReopsitory"></a>Locate Reopsitory
-* in terminal change directory to your coppy of the repo :
+* in terminal change directory to your copy of the repo :
     >```cd ```<em>```[local file path to xchem-CAR repoistory]```
 
     </em>
     or open VS Code and go to File-> Open Folder and open the repository directory<br>  
 ### <a name="StartRemoteContainer"></a>Start Remote Container
 * start Visual Studio remote container with **Ctrl + Shift + P** and type **"Remote-containers: Open folder in container"** then click on that option. <br> ensure you have the repsoitory folder [your file path/xchem-CAR] selected and choose **"Ok"**/**"Open"**
-* Your container should start to build, click on the popup notificaiton at the bottom right of visual studio to view the log/progress
+* Your container should start to build, click on the popup notification at the bottom right of visual studio to view the log/progress
 
 ### <a name="TimetoLaunch"></a>Time to Launch
-* Open a new terminal that you can interact with. if the terminal is visible at the bottom of the screen click on the plus "create new intergreated terminal" or use the keybord shortcut "**Ctrl+Shift+`**" button or use the ajacent "split terminal" (or "**Ctrl+Shift+5**") button to see the new teminal ajacent to the current teminal
+* Open a new terminal that you can interact with. if the terminal is visible at the bottom of the screen click on the plus "create new integrated terminal" or use the keybord shortcut "**Ctrl+Shift+`**" button or use the adjacent "split terminal" (or "**Ctrl+Shift+5**") button to see the new terminal adjacent to the current terminal
 * you should now be in the container running Debian Linux
 * in the new teminal type:
     >```cd CAR``` <br>
@@ -92,14 +106,35 @@ once Git-Crypt is installed unlock the secrets using:
     >```python3 manage.py migrate backend``` <br>
     >```python3 manage.py runserver```<br>
 
-    before you open the application **you must** compleate the next step, starting Celery
+    before you open the application **you must** complete the next step, starting Celery
 ### <a name="StartingCelery"></a>Starting Celery
-* open a new teminal the same way as last time ([see Time to Launch](#TimeToLaunch))
-* in the new teminal type:
+* open a new terminal the same way as last time ([see Time to Launch](#TimeToLaunch))
+* in the new terminal type:
+    >```cd CAR```<br>
     >```celery -A CAR worker -l info```
 # Opening the application
-at the end of the step "[Time to Launch](#TimeToLaunch)" a address to use the visual interface should have been displayed ("http://127.0.0.1:8000/"), Ctrl+Click on the link in teminal or coppy and paste the link into your web browser to use the CAR interface
+at the end of the step "[Time to Launch](#TimeToLaunch)" an address to use the visual interface should have been displayed ("http://127.0.0.1:8000/"), Ctrl+Click on the link in terminal or copy and paste the link into your web browser to use the CAR interface
 >http://127.0.0.1:8000/
+
+
+### <a name="Troubleshooting"></a>Troubleshooting
+
+Users have reported problems with instructions in "Time to Launch":
+```
+raise KeyError(key) from None
+KeyError: 'SendGrid_API_KEY'
+
+```
+A fix is to change the file permission settings from your Linux terminal 
+
+`sudo chown -R YOUR_NAME_HERE xchem-CAR/`
+
+Another error which cropped up was a Value Error. To solve this try creating a "logs/logfile.logs" file in /workspace/CAR/logs. If this directory does not exist use the `mkdir` command in the Linux terminal
+
+Try running the "Time to Launch" code again.
+
+
+
     
 
 
