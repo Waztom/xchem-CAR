@@ -74,7 +74,6 @@ encoded_recipes = {
                     "quantity": {"value": 1.1, "unit": "moleq"},
                     "solvent": "DMA",
                     "concentration": 0.5,
-                    # stupid change
                 },
             },
         },
