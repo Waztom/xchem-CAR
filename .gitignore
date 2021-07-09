@@ -12,6 +12,9 @@ CAR/media/*
 *.db
 *.rdb
 
+# Ignore Opentrons protocol files
+CAR/output/*
+
 # Ignore .env files
 #.*env
 
