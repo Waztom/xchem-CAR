@@ -6,6 +6,8 @@ import backend.opentrons.otWrite
 
 
 def getactions():
+    # Need to make Project specific! At the moment this takes all the projects and tries to make protocols from
+    # lump of different projects
     """this, using pandas, is not a sustanable aproach and will proberbly not scale"""
     IBMAddAction = pd.DataFrame(list(backend.models.IBMAddAction.objects.all().values()))
     IBMCollectLayerAction = pd.DataFrame(
