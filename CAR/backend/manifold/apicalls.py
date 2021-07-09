@@ -18,7 +18,7 @@ def getManifoldretrosynthesis(target_smiles):
         "maxLeadTimeWeeks": 12,
         "maxSearchDepth": 3,
         "maxNumRoutesToReturn": 3,
-        "reactionTag": "",
+        "reactionTag": "diamond_robotic_synthesis",
     }
 
     response = requests.post(

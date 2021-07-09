@@ -57,9 +57,9 @@ encoded_recipes = {
         {
             "name": "stir",
             "content": {
-                "action no": 5,
-                "temperature": 25, #degrees celcius
-                "duration": 12, #in hours
+                "action_no": 5,
+                "temperature": 25,  # degrees celcius
+                "duration": {"value": 12, "unit": "hours"},  # in hours
             },
         },
     ],
@@ -74,7 +74,7 @@ encoded_recipes = {
                     "quantity": {"value": 1.1, "unit": "moleq"},
                     "solvent": "DMA",
                     "concentration": 0.5,
-                    #stupid change
+                    # stupid change
                 },
             },
         },
@@ -107,12 +107,11 @@ encoded_recipes = {
         {
             "name": "stir",
             "content": {
-                "action no": 4,
-                "temperature": 25, #degrees celcius
-                "duration": 12, #in hours
+                "action_no": 4,
+                "temperature": 25,  # degrees celcius
+                "duration": {"value": 12, "unit": "hours"},  # in hours
             },
         },
-        
     ],
     "Reductive amination": [
         {
@@ -120,7 +119,7 @@ encoded_recipes = {
             "content": {
                 "action_no": 1,
                 "material": {
-                    "SMARTS": ["[#6][CX3](=O)[#6]","[CX3H1](=O)[#6]"],# check if works 
+                    "SMARTS": ["[#6][CX3](=O)[#6]", "[CX3H1](=O)[#6]"],  # check if works
                     "SMILES": None,
                     "quantity": {"value": 1.0, "unit": "moleq"},
                     "solvent": "ACN",
@@ -167,14 +166,14 @@ encoded_recipes = {
                 },
             },
         },
-        {   "name": "stir",
+        {
+            "name": "stir",
             "content": {
-                "action no": 5,
-                "temperature": 25, #degrees celcius
-                "duration": 12, #in hours
+                "action_no": 5,
+                "temperature": 25,  # degrees celcius
+                "duration": {"value": 12, "unit": "hours"},  # in hours
             },
         },
-                                              
     ],
     "N-nucelophilic aromatic substitution": [
         {
@@ -182,9 +181,10 @@ encoded_recipes = {
             "content": {
                 "action_no": 1,
                 "material": {
-                    "SMARTS": "[c][F,Cl,Br,I]", "[$([NX3](=O)=O),$([NX3+](=O)[O-])][!#8]"
-                    #includes halides & NO2 not specifically attached to aromatic c as unlikely a Nu has NO2 attached
-                    "SMILES": None,#leaving group question eg OTs
+                    "SMARTS": "[c][F,Cl,Br,I]",
+                    "[$([NX3](=O)=O),$([NX3+](=O)[O-])][!#8]"
+                    # includes halides & NO2 not specifically attached to aromatic c as unlikely a Nu has NO2 attached
+                    "SMILES": None,  # leaving group question eg OTs
                     "quantity": {"value": 1, "unit": "moleq"},
                     "solvent": "MeOH",
                     "concentration": 0.5,
@@ -196,25 +196,21 @@ encoded_recipes = {
             "content": {
                 "action_no": 2,
                 "material": {
-                    "SMARTS": "[NX3;H2,H1;!$(NC=O)]", #allowing both 1' & 2' amine to be Nu but not 3' due to sterics
+                    "SMARTS": "[NX3;H2,H1;!$(NC=O)]",  # allowing both 1' & 2' amine to be Nu but not 3' due to sterics
                     "SMILES": None,
                     "quantity": {"value": 1.2, "unit": "moleq"},
                     "solvent": "MeOH",
                     "concentration": 0.5,
-                    
                 },
             },
         },
         {
             "name": "stir",
             "content": {
-                "action no": 3,
-                "temperature": 50, #generic elevated temperature
-                "duration": 12, #in hours
-            }, 
+                "action_no": 3,
+                "temperature": 50,  # generic elevated temperature
+                "duration": {"value": 12, "unit": "hours"},  # in hours
+            },
         },
     ],
-    
-        
 }
-

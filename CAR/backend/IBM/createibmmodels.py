@@ -49,6 +49,8 @@ from .common_solvents import common_solvents
 def calculateproductmols(target_mass, target_SMILES):
     # Calculate MW
     target_MW = Descriptors.ExactMolWt(Chem.MolFromSmiles(target_SMILES))
+    # Convert target_mass to g
+    target_mass = target_mass / 1e3
     product_moles = target_mass / target_MW
     return product_moles
 

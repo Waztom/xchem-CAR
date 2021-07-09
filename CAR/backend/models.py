@@ -82,6 +82,7 @@ class IBMAddAction(models.Model):
     class Unit(models.TextChoices):
         mmol = "mmol"
         ml = "ml"
+        ul = "ul"
         moleq = "moleq"
 
     class Atmosphere(models.TextChoices):
@@ -97,7 +98,7 @@ class IBMAddAction(models.Model):
     materialquantity = models.FloatField()
     materialquantityunit = models.CharField(
         choices=Unit.choices,
-        default=Unit.mmol,
+        default=Unit.ul,
         max_length=10,
     )
 
@@ -354,7 +355,7 @@ class IBMStirAction(models.Model):
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
     duration = models.FloatField(null=True)
-    durationunit = models.CharField(choices=Unit.choices, default=Unit.seconds, max_length=10)
+    durationunit = models.CharField(choices=Unit.choices, default=Unit.hours, max_length=10)
     temperature = models.IntegerField(null=True)
     stirringspeed = models.CharField(choices=Speed.choices, default=Speed.normal, max_length=10)
     atmosphere = models.CharField(choices=Atmosphere.choices, default=Atmosphere.air, max_length=10)

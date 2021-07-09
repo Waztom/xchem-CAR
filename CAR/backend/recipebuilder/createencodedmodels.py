@@ -86,16 +86,20 @@ def getChemicalName(smiles):
 
 
 def createEncodedActionModel(reaction_id, action, reactants, target_id):
-    # Create a dictionary of key (action name from IBM API) and
+    # Create a dictionary of key (action name from encoded recipe) and
     # funtion name to create the appropriate model
     actionMethods = {
         "add": createEncodedAddAction,
+        "stir": createEncodedStirAction,
     }
 
     action_type = action["name"]
 
     if action_type in actionMethods:
-        actionMethods[action_type](action_type, reaction_id, action, reactants, target_id)
+        if action_type == "add":
+            actionMethods[action_type](action_type, reaction_id, action, reactants, target_id)
+        else:
+            actionMethods[action_type](action_type, reaction_id, action)
         return True
     else:
         logger.info(action_type)
@@ -107,10 +111,11 @@ def createEncodedAddAction(action_type, reaction_id, action, reactants, target_i
         # Does the action have a SMARTS pattern?
         if action["content"]["material"]["SMARTS"]:
             SMARTS_pattern = action["content"]["material"]["SMARTS"]
-            for reactant in reactants:
-                pattern_check = checkSMARTSPattern(reactant, SMARTS_pattern)
-                if pattern_check:
-                    reactant_SMILES = reactant
+            for SMARTS in SMARTS_pattern:
+                for reactant in reactants:
+                    pattern_check = checkSMARTSPattern(reactant, SMARTS)
+                    if pattern_check:
+                        reactant_SMILES = reactant
         if action["content"]["material"]["SMILES"]:
             reactant_SMILES = action["content"]["material"]["SMILES"]
 
@@ -143,5 +148,28 @@ def createEncodedAddAction(action_type, reaction_id, action, reactants, target_i
         add.save()
 
     except Exception as error:
+        print(error)
+        print(action)
+
+
+def createEncodedStirAction(action_type, reaction_id, action):
+    try:
+        action_no = action["content"]["action_no"]
+        duration = action["content"]["duration"]["value"]
+        durationunit = action["content"]["duration"]["unit"]
+        temperature = action["content"]["temperature"]
+
+        stir = IBMStirAction()
+        reaction_obj = Reaction.objects.get(id=reaction_id)
+        stir.reaction_id = reaction_obj
+        stir.actiontype = action_type
+        stir.actionno = action_no
+        stir.duration = duration
+        stir.durationunit = durationunit
+        stir.temperature = temperature
+        stir.save()
+
+    except Exception as error:
+        print(action_type)
         print(error)
         print(action)
