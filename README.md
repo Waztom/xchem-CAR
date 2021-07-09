@@ -139,7 +139,7 @@ Sometimes, when a new branch is created on Github or you try to ```git pull``` p
 In your Linux terminal:
 ```cd ~``` need to be in root
 CTRL + R
-```sudo chown -R YOUR_USERNAME YOUR_WORKING_DIRECTORY_EG xchem-CAR```
+```sudo chown -R YOUR_USERNAME xchem-CAR/```
 Try pulling or creating a branch now 
 
 
