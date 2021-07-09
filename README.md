@@ -134,6 +134,22 @@ Another error which cropped up was a Value Error. To solve this try creating a "
 Try running the "Time to Launch" code again.
 
 
+### <a name="File Permissions"></a>File Permissions 
+Sometimes, when a new branch is created on Github or you try to ```git pull``` permission errors appear, below is a fix which we found to work.
+In your Linux terminal:
+```cd ~``` need to be in root
+CTRL + R
+```sudo chown -R YOUR_USERNAME YOUR_WORKING_DIRECTORY_EG xchem-CAR```
+Try pulling or creating a branch now 
+
+
+
+
+
+
+
+
+
 
     
 
