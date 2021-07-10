@@ -7,7 +7,7 @@ encoded_recipes = {
             "content": {
                 "action_no": 1,
                 "material": {
-                    "SMARTS": "[CX3](=O)[OX2H1]",
+                    "SMARTS": ["[CX3](=O)[OX2H1]"],
                     "SMILES": None,
                     "quantity": {"value": 1.0, "unit": "moleq"},
                     "solvent": "DMA",
@@ -46,7 +46,7 @@ encoded_recipes = {
             "content": {
                 "action_no": 4,
                 "material": {
-                    "SMARTS": "[NX3;H1,H2;!$(NC=O)]",
+                    "SMARTS": ["[NX3;H1,H2;!$(NC=O)]"],
                     "SMILES": None,
                     "quantity": {"value": 1.1, "unit": "moleq"},
                     "solvent": "DMA",
@@ -69,7 +69,7 @@ encoded_recipes = {
             "content": {
                 "action_no": 1,
                 "material": {
-                    "SMARTS": "[NX3;H1,H2;!$(NC=O)]",
+                    "SMARTS": ["[NX3;H1,H2;!$(NC=O)]"],
                     "SMILES": None,
                     "quantity": {"value": 1.1, "unit": "moleq"},
                     "solvent": "DMA",
@@ -82,7 +82,7 @@ encoded_recipes = {
             "content": {
                 "action_no": 2,
                 "material": {
-                    "SMARTS": "[CX3](=[OX1])[Cl]",
+                    "SMARTS": ["[CX3](=[OX1])[Cl]"],
                     "SMILES": None,
                     "quantity": {"value": 1.0, "unit": "moleq"},
                     "solvent": "DMA",
@@ -131,7 +131,7 @@ encoded_recipes = {
             "content": {
                 "action_no": 2,
                 "material": {
-                    "SMARTS": "[NX3;H1,H2;!$(NC=O)]",
+                    "SMARTS": ["[NX3;H1,H2;!$(NC=O)]"],
                     "SMILES": None,
                     "quantity": {"value": 1.0, "unit": "moleq"},
                     "solvent": "ACN",
@@ -180,8 +180,7 @@ encoded_recipes = {
             "content": {
                 "action_no": 1,
                 "material": {
-                    "SMARTS": "[c][F,Cl,Br,I]",
-                    "[$([NX3](=O)=O),$([NX3+](=O)[O-])][!#8]"
+                    "SMARTS": ["[c][F,Cl,Br,I]", "[$([NX3](=O)=O),$([NX3+](=O)[O-])][!#8]"],
                     # includes halides & NO2 not specifically attached to aromatic c as unlikely a Nu has NO2 attached
                     "SMILES": None,  # leaving group question eg OTs
                     "quantity": {"value": 1, "unit": "moleq"},
@@ -195,7 +194,9 @@ encoded_recipes = {
             "content": {
                 "action_no": 2,
                 "material": {
-                    "SMARTS": "[NX3;H2,H1;!$(NC=O)]",  # allowing both 1' & 2' amine to be Nu but not 3' due to sterics
+                    "SMARTS": [
+                        "[NX3;H2,H1;!$(NC=O)]"
+                    ],  # allowing both 1' & 2' amine to be Nu but not 3' due to sterics
                     "SMILES": None,
                     "quantity": {"value": 1.2, "unit": "moleq"},
                     "solvent": "MeOH",

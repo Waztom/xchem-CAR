@@ -287,62 +287,68 @@ def uploadManifoldReaction(validate_output):
             pathway_no = 1
 
             for route in routes:
-                print(route)
                 no_steps = len(route["reactions"])
 
                 if no_steps > 0:
-
-                    method_id = createMethodModel(
-                        target_id=target_id,
-                        nosteps=no_steps,
-                    )
-
-                    # Then loop over route for synthetic steps
+                    # Check if reactions are OT friendly
                     reactions = route["reactions"]
-                    product_no = 1
 
-                    for reaction in reactions:
-                        reaction_class = reaction["name"]
-                        # Check if OT friendly and in encoded recipes
-                        print(reaction_class)
-                        if reaction_class in encoded_recipes:
-                            encoded_recipe = encoded_recipes[reaction_class]
-                            reactant_SMILES = reaction["reactantSmiles"]
-                            product_smiles = reaction["productSmiles"]
+                    reactions_found = [
+                        reaction for reaction in reactions if reaction["name"] in encoded_recipes
+                    ]
 
-                            # Create a Reaction model
-                            reaction_smarts = AllChem.ReactionFromSmarts(
-                                "{}>>{}".format(".".join(reactant_SMILES), product_smiles),
-                                useSmiles=True,
-                            )
-                            reaction_id = createReactionModel(
-                                method_id=method_id,
-                                reaction_class=reaction_class,
-                                reaction_smarts=reaction_smarts,
-                            )
+                    if len(reactions_found) == no_steps:
 
-                            # Create a Product model
-                            createProductModel(
-                                reaction_id=reaction_id,
-                                project_name=project_name,
-                                target_no=target_no,
-                                pathway_no=pathway_no,
-                                product_no=product_no,
-                                product_smiles=product_smiles,
-                            )
+                        method_id = createMethodModel(
+                            target_id=target_id,
+                            nosteps=no_steps,
+                        )
 
-                            for action in encoded_recipe:
-                                createEncodedActionModel(
-                                    reaction_id=reaction_id,
-                                    action=action,
-                                    reactants=reactant_SMILES,
-                                    target_id=target_id,
+                        # Then loop over route for synthetic steps
+                        product_no = 1
+
+                        for reaction in reactions:
+                            reaction_class = reaction["name"]
+                            # Check if OT friendly and in encoded recipes
+                            print(reaction_class)
+                            if reaction_class in encoded_recipes:
+                                encoded_recipe = encoded_recipes[reaction_class]
+                                reactant_SMILES = reaction["reactantSmiles"]
+                                product_smiles = reaction["productSmiles"]
+
+                                # Create a Reaction model
+                                reaction_smarts = AllChem.ReactionFromSmarts(
+                                    "{}>>{}".format(".".join(reactant_SMILES), product_smiles),
+                                    useSmiles=True,
+                                )
+                                reaction_id = createReactionModel(
+                                    method_id=method_id,
+                                    reaction_class=reaction_class,
+                                    reaction_smarts=reaction_smarts,
                                 )
 
-                            product_no += 1
+                                # Create a Product model
+                                createProductModel(
+                                    reaction_id=reaction_id,
+                                    project_name=project_name,
+                                    target_no=target_no,
+                                    pathway_no=pathway_no,
+                                    product_no=product_no,
+                                    product_smiles=product_smiles,
+                                )
 
-                        else:
-                            pass
+                                for action in encoded_recipe:
+                                    createEncodedActionModel(
+                                        reaction_id=reaction_id,
+                                        action=action,
+                                        reactants=reactant_SMILES,
+                                        target_id=target_id,
+                                    )
+
+                                product_no += 1
+
+                            else:
+                                pass
 
                 pathway_no += 1
 
