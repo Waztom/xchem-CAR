@@ -111,11 +111,8 @@ def createEncodedAddAction(action_type, reaction_id, action, reactants, target_i
         # Does the action have a SMARTS pattern?
         if action["content"]["material"]["SMARTS"]:
             SMARTS_pattern = action["content"]["material"]["SMARTS"]
-            print(SMARTS_pattern)
             for pattern in SMARTS_pattern:
-                print(pattern)
                 for reactant in reactants:
-                    print(reactant)
                     pattern_check = checkSMARTSPattern(reactant, pattern)
                     if pattern_check:
                         reactant_SMILES = reactant

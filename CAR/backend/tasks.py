@@ -312,7 +312,7 @@ def uploadManifoldReaction(validate_output):
                             # Check if OT friendly and in encoded recipes
                             print(reaction_class)
                             if reaction_class in encoded_recipes:
-                                encoded_recipe = encoded_recipes[reaction_class]
+                                encoded_recipe = encoded_recipes[reaction_class]["recipe"]
                                 reactant_SMILES = reaction["reactantSmiles"]
                                 product_smiles = reaction["productSmiles"]
 
