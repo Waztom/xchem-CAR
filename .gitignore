@@ -78,4 +78,4 @@ pytestdebug.log
 **/*.backup.*
 **/*.back.*
 node_modules
-main.js
+CAR/frontend/static/frontend/main.js
