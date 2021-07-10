@@ -9,7 +9,7 @@ from .validate import (
     checkIsNumber,
 )
 
-from .IBM.createmodels import (
+from .IBM.createibmmodels import (
     createProjectModel,
     createTargetModel,
     createMethodModel,
@@ -20,7 +20,9 @@ from .IBM.createmodels import (
 from .IBM.apicalls import createIBMProject, getIBMRetroSyn, collectIBMReactionInfo
 from .IBM.filtermethod import filtermethod
 
-from .Manifold.apicalls import getManifoldretrosynthesis
+from .manifold.apicalls import getManifoldretrosynthesis
+from .recipebuilder.createencodedmodels import createEncodedActionModel
+from .recipebuilder.encodedrecipes import encoded_recipes
 from rdkit.Chem import AllChem
 
 
@@ -264,8 +266,6 @@ def uploadManifoldReaction(validate_output):
         # Add project name to project info dict for emailing when upload complete
         project_info["project_name"] = project_name
 
-        print(project_info)
-
         # Do Postera stuff
         target_no = 1
         for target_smiles, target_mass in zip(
@@ -289,67 +289,66 @@ def uploadManifoldReaction(validate_output):
             for route in routes:
                 no_steps = len(route["reactions"])
 
-                method_id = createMethodModel(
-                    target_id=target_id,
-                    nosteps=no_steps,
-                )
+                if no_steps > 0:
+                    # Check if reactions are OT friendly
+                    reactions = route["reactions"]
 
-                # Then loop over route for synthetic steps
-                reactions = route["reactions"]
-                product_no = 1
+                    reactions_found = [
+                        reaction for reaction in reactions if reaction["name"] in encoded_recipes
+                    ]
 
-                for reaction in reactions:
-                    reaction_class = reaction["name"]
-                    reactant_SMILES = reaction["reactantSmiles"]
-                    product_smiles = reaction["productSmiles"]
+                    if len(reactions_found) == no_steps:
 
-                    # Create a Reaction model
-                    reaction_smarts = AllChem.ReactionFromSmarts(
-                        "{}>>{}".format(".".join(reactant_SMILES), product_smiles),
-                        useSmiles=True,
-                    )
-                    reaction_id = createReactionModel(
-                        method_id=method_id,
-                        reaction_class=reaction_class,
-                        reaction_smarts=reaction_smarts,
-                    )
+                        method_id = createMethodModel(
+                            target_id=target_id,
+                            nosteps=no_steps,
+                        )
 
-                    # Create a Product model
-                    createProductModel(
-                        reaction_id=reaction_id,
-                        project_name=project_name,
-                        target_no=target_no,
-                        pathway_no=pathway_no,
-                        product_no=product_no,
-                        product_smiles=product_smiles,
-                    )
+                        # Then loop over route for synthetic steps
+                        product_no = 1
 
-                    product_no += 1
+                        for reaction in reactions:
+                            reaction_class = reaction["name"]
+                            # Check if OT friendly and in encoded recipes
+                            print(reaction_class)
+                            if reaction_class in encoded_recipes:
+                                encoded_recipe = encoded_recipes[reaction_class]["recipe"]
+                                reactant_SMILES = reaction["reactantSmiles"]
+                                product_smiles = reaction["productSmiles"]
 
-                    # Do Harry's stuff here!
-                    # 1. Calc expected mols product from target_mass
-                    # NB need to write func that can do single plus multiple
-                    # step calcs (Do we use SA score to estimate yield?)
-                    # 2. Get recipe
-                    # 2. Loop over recipe to populate relevant action models -> do
-                    #    we need extra createmodels functions or is it possible to mix w
-                    #    exisitng modelcreator?
+                                # Create a Reaction model
+                                reaction_smarts = AllChem.ReactionFromSmarts(
+                                    "{}>>{}".format(".".join(reactant_SMILES), product_smiles),
+                                    useSmiles=True,
+                                )
+                                reaction_id = createReactionModel(
+                                    method_id=method_id,
+                                    reaction_class=reaction_class,
+                                    reaction_smarts=reaction_smarts,
+                                )
 
-                    # Below is an example of a loop over
-                    # the actions in a recipe
-                    #     # Create action models
-                    #     action_no = 1
-                    #     for action in encoded_recipe:
-                    #         # This function basically routes the type of action to
-                    # the model that needs to be populated - see createmodels.py
-                    # in the IBM folder
-                    #         created_model = createActionModel(
-                    #             reaction_id=reaction_id,
-                    #             action_no=action_no,
-                    #             action=action,
-                    #         )
-                    #         if created_model:
-                    #             action_no += 1
+                                # Create a Product model
+                                createProductModel(
+                                    reaction_id=reaction_id,
+                                    project_name=project_name,
+                                    target_no=target_no,
+                                    pathway_no=pathway_no,
+                                    product_no=product_no,
+                                    product_smiles=product_smiles,
+                                )
+
+                                for action in encoded_recipe:
+                                    createEncodedActionModel(
+                                        reaction_id=reaction_id,
+                                        action=action,
+                                        reactants=reactant_SMILES,
+                                        target_id=target_id,
+                                    )
+
+                                product_no += 1
+
+                            else:
+                                pass
 
                 pathway_no += 1
 

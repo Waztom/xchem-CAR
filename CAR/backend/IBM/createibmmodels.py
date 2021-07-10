@@ -46,6 +46,15 @@ from .apicalls import convertIBMNameToSmiles
 from .common_solvents import common_solvents
 
 
+def calculateproductmols(target_mass, target_SMILES):
+    # Calculate MW
+    target_MW = Descriptors.ExactMolWt(Chem.MolFromSmiles(target_SMILES))
+    # Convert target_mass to g
+    target_mass = target_mass / 1e3
+    product_moles = target_mass / target_MW
+    return product_moles
+
+
 def createSVGString(smiles):
     """
     Function that creates a SVG image string from smiles string
@@ -155,6 +164,7 @@ def createTargetModel(project_id, smiles, target_no, target_mass):
     project_name = project_obj.name
     target.project_id = project_obj
     target.smiles = smiles
+    target.targetmols = calculateproductmols(target_mass, smiles)
     target.name = "{}-{}".format(project_name, target_no)
     # Create and Write svg to file
     target_svg_string = createSVGString(smiles)

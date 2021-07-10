@@ -19,6 +19,8 @@ const SetQuantity = ({ action, updateAction, name }) => {
   const [Unit, setUnit] = useState(unit);
   const [Show, setShow] = useState(false);
 
+  console.log(Unit);
+
   function hideTooltip() {
     setTimeout(() => setShow(false), 2000);
   }
@@ -70,6 +72,7 @@ const SetQuantity = ({ action, updateAction, name }) => {
       >
         <option>moleq</option>
         <option>ml</option>
+        <option>ul</option>
         <option>mmol</option>
       </Form.Control>
     </InputGroup>

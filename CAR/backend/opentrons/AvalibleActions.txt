@@ -1,4 +1,0 @@
-# Not currently used,
-'add',
-'wash',
-'store'

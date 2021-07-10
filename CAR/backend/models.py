@@ -38,6 +38,7 @@ class Target(models.Model):
     image = models.FileField(upload_to="targetimages/", max_length=255)
     name = models.CharField(max_length=255, db_index=True, unique=True)
     targetmass = models.FloatField()
+    targetmols = models.FloatField()
     unit = models.CharField(choices=Unit.choices, default=Unit.mg, max_length=10)
 
 
@@ -81,6 +82,7 @@ class IBMAddAction(models.Model):
     class Unit(models.TextChoices):
         mmol = "mmol"
         ml = "ml"
+        ul = "ul"
         moleq = "moleq"
 
     class Atmosphere(models.TextChoices):
@@ -90,12 +92,13 @@ class IBMAddAction(models.Model):
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
+    additionorder = models.IntegerField(null=True)
     material = models.CharField(max_length=255)
     materialsmiles = models.CharField(max_length=255, null=True)
     materialquantity = models.FloatField()
     materialquantityunit = models.CharField(
         choices=Unit.choices,
-        default=Unit.mmol,
+        default=Unit.ul,
         max_length=10,
     )
 
@@ -352,7 +355,7 @@ class IBMStirAction(models.Model):
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
     duration = models.FloatField(null=True)
-    durationunit = models.CharField(choices=Unit.choices, default=Unit.seconds, max_length=10)
+    durationunit = models.CharField(choices=Unit.choices, default=Unit.hours, max_length=10)
     temperature = models.IntegerField(null=True)
     stirringspeed = models.CharField(choices=Speed.choices, default=Speed.normal, max_length=10)
     atmosphere = models.CharField(choices=Atmosphere.choices, default=Atmosphere.air, max_length=10)
