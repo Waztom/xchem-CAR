@@ -1,106 +1,139 @@
+"""Checks validation of file for uploading to CAR"""
+from __future__ import annotations
+import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import rdChemReactions
 
 from .recipebuilder.encodedrecipes import encoded_recipes
 
 
-def add_warning(field, warning_string, validate_dict):
-    validate_dict["field"].append(field)
-    validate_dict["warning_string"].append(warning_string)
+class ValidateFile(object):
+    """
+    Creates a validate object for checking file validation for upload
+    """
 
-    return validate_dict
+    def __init__(self, csv_to_validate: csvFile, validate_type: str):
+        """
+        ValidateFile constructor
+        Args:
+            csv_to_validate (.csv): Uploaded .csv file for testing validation
+        """
+        self.df = pd.read_csv(csv_to_validate, encoding="ISO-8859-1")
+        self.df_columns = self.df.columns
+        self.no_df_columns = len(self.df_columns)
+        self.index_df_rows = range(0, len(self.df), 1)
+        self.target_amounts = [amount for amount in self.df["Ammount_required (mg)"]]
+        self.upload_type = validate_type
+        self.validate_dict = {"field": [], "warning_string": []}
+        self.validated = True
 
+        if self.upload_type == "custom-chem":
+            self.expected_no_columns = 4
+            self.expected_column_names = [
+                "Reactant-1",
+                "Reactant-2",
+                "Reaction-name",
+                "Ammount_required (mg)",
+            ]
+            self.checkNumberColumns()
+            self.checkColumnNames()
+            if self.validated:
+                self.reactant_pair_smiles = [
+                    reactants for reactants in zip(self.df["Reactant-1"], self.df["Reactant-2"])
+                ]
+                self.df["reactant_pair_smiles"] = self.reactant_pair_smiles
+                self.reaction_names = [reaction_name for reaction_name in self.df["Reaction-name"]]
+                self.checkReaction()
+                if self.validated:
+                    self.df["target-smiles"] = self.product_smiles
+                    self.checkIsNumber()
 
-def checkColumnNames(columns, validated, validate_dict, expected_no_columns):
-    if expected_no_columns == 2:
-        column_names = ["Targets", "Ammount_required (mg)"]
-    if expected_no_columns == 4:
-        column_names = ["Reactant-1", "Reactant-2", "Reaction-name", "Ammount_required (mg)"]
-    if not all(columns == column_names):
-        validate_dict = add_warning(
-            field="name_columns",
-            warning_string="Column names should be set to: {}".format(column_names),
-            validate_dict=validate_dict,
-        )
-        validated = False
-    return validated, validate_dict
+        if self.upload_type == "retro-API":
+            self.expected_no_columns = 2
+            self.expected_column_names = ["Targets", "Ammount_required (mg)"]
+            self.checkNumberColumns()
+            self.checkColumnNames()
+            if self.validated:
+                self.target_smiles = [smi.strip() for smi in self.df["Targets"]]
+                self.df["Targets"] = self.target_smiles
+                self.checkTargetSMILES()
+                self.checkIsNumber()
 
+    def add_warning(self, field, warning_string):
+        self.validate_dict["field"].append(field)
+        self.validate_dict["warning_string"].append(warning_string)
 
-def checkNumberColumns(columns, validated, validate_dict, expected_no_columns):
-    no_columns = len(columns)
+    def checkColumnNames(self):
+        if not all(self.df_columns == self.expected_column_names):
+            self.add_warning(
+                field="name_columns",
+                warning_string="Column names should be set to: {}".format(
+                    self.expected_column_names
+                ),
+            )
+            self.validated = False
 
-    if no_columns != expected_no_columns:
-        validate_dict = add_warning(
-            field="number_columns",
-            warning_string="Found {} column names. Set and name columns to 'Targets' only".format(
-                no_columns
-            ),
-            validate_dict=validate_dict,
-        )
-        validated = False
+    def checkNumberColumns(self):
+        if self.no_df_columns != self.expected_no_columns:
+            self.add_warning(
+                field="number_columns",
+                warning_string="Found {} columns. Expected {} columns. Set and name columns to {} only".format(
+                    self.no_df_columns,
+                    self.expected_no_columns,
+                    self.expected_column_names,
+                ),
+            )
+            self.validated = False
 
-    if no_columns == expected_no_columns:
-        validated, validate_dict = checkColumnNames(
-            columns, validated, validate_dict, expected_no_columns
-        )
+    def checkTargetSMILES(self):
+        for index, smi in zip(self.index_df_rows, self.target_smiles):
+            mol = Chem.MolFromSmiles(smi)
 
-    return validated, validate_dict
+            if mol is None:
+                self.add_warning(
+                    field="check_smiles",
+                    warning_string="Input target smiles: '{}' at index {} is not a valid smiles".format(
+                        smi,
+                        index,
+                    ),
+                )
+                self.validated = False
 
+    def checkIsNumber(self):
+        for index, amount in zip(self.index_df_rows, self.target_amounts):
+            if not isinstance(amount, (int, float)):
+                self.add_warning(
+                    field="check_number",
+                    warning_string="Target mass {} at index {} is not a valid number".format(
+                        amount, index
+                    ),
+                )
+                self.validated = False
 
-def checkSMILES(target_smiles, column_name, index, validated, validate_dict):
+    def checkReaction(self):
+        self.product_smiles = []
 
-    mol = Chem.MolFromSmiles(target_smiles)
+        for index, reactant_pair, reaction_name in zip(
+            self.index_df_rows, self.reactant_pair_smiles, self.reaction_names
+        ):
+            reaction_smarts = encoded_recipes[reaction_name]["reactionSMARTS"]
+            reacts = [Chem.MolFromSmiles(smi) for smi in reactant_pair]
 
-    if mol is None:
-        validate_dict = add_warning(
-            field="check_smiles",
-            warning_string="Input target smiles: '{}' at index {} in column {} is not a valid smiles".format(
-                target_smiles, index, column_name
-            ),
-            validate_dict=validate_dict,
-        )
-        validated = False
+            for smarts in reaction_smarts:
+                reaction = rdChemReactions.ReactionFromSmarts(smarts)
+                products = reaction.RunReactants(reacts)
+                if len(products) != 0:
+                    print(Chem.MolToSmiles(products[0][0]))
 
-    return validated, validate_dict
+            if len(products) == 0:
+                self.add_warning(
+                    field="check_reaction",
+                    warning_string="Reaction for reactants at index {} is not a valid reaction".format(
+                        index
+                    ),
+                )
+                self.validated = False
 
-
-def checkIsNumber(amount, index, validated, validate_dict):
-    if not isinstance(amount, (int, float)):
-        validate_dict = add_warning(
-            field="check_number",
-            warning_string="Target mass {} at index {} is not a valid number".format(amount, index),
-            validate_dict=validate_dict,
-        )
-        validated = False
-
-    return validated, validate_dict
-
-
-def checkReaction(reactant_pair, reaction_name, index, validated, validate_dict):
-    reaction_smarts = encoded_recipes[reaction_name]["reactionSMARTS"]
-    reacts = [Chem.MolFromSmiles(smi) for smi in reactant_pair]
-
-    for smarts in reaction_smarts:
-        print(smarts)
-        reaction = rdChemReactions.ReactionFromSmarts(smarts)
-        # Perfom reaction
-        products = reaction.RunReactants(reacts)
-        if len(products) != 0:
-            print(Chem.MolToSmiles(products[0][0]))
-
-    if len(products) == 0:
-        validate_dict = add_warning(
-            field="check_reaction",
-            warning_string="Reaction for reactants at index {} is not a valid reaction".format(
-                index
-            ),
-            validate_dict=validate_dict,
-        )
-        validated = False
-        product_smiles = "None"
-
-    if len(products) != 0:
-        product_mol = products[0][0]
-        product_smiles = Chem.MolToSmiles(product_mol)
-
-    return validated, validate_dict, product_smiles
+            if len(products) != 0:
+                product_mol = products[0][0]
+                self.product_smiles.append(Chem.MolToSmiles(product_mol))
