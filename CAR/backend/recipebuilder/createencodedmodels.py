@@ -65,14 +65,15 @@ def checkSMARTSPattern(SMILES, SMARTS_pattern):
         return False
 
 
-def calculateVolume(molar_eqv, product_moles, conc_reagents):
+def calculateVolume(
+    molar_eqv, product_moles, conc_reagents, reactant_density=None, reactant_MW=None
+):
     # NB need addition_order added to ncoded recipes - can we rather use SA score?
-    # estimated_loss = (
-    #     0.7 ** addition_order
-    # )  # Assume 70% conversion for each step//This needs to come from
-    # reaction number NOT addtion order.....
     mol_material = molar_eqv * product_moles
-    vol_material = (mol_material / conc_reagents) * 1e6  # in uL
+    if reactant_density:
+        vol_material = ((mol_material * reactant_MW) / reactant_density) * 1e3
+    else:
+        vol_material = (mol_material / conc_reagents) * 1e6  # in uL
     return vol_material
 
 
@@ -122,14 +123,13 @@ def createEncodedAddAction(action_type, reaction_id, action, reactants, target_i
         action_no = action["content"]["action_no"]
         molar_eqv = action["content"]["material"]["quantity"]["value"]
         conc_reagents = action["content"]["material"]["concentration"]
+        solvent = action["content"]["material"]["solvent"]
 
         add = IBMAddAction()
         reaction_obj = Reaction.objects.get(id=reaction_id)
         add.reaction_id = reaction_obj
         add.actiontype = action_type
         add.actionno = action_no
-        # NB function to convert reactant SMILES to IUPAC/common name
-        # For now use material smiles
         material = getChemicalName(reactant_SMILES)
         mol = Chem.MolFromSmiles(reactant_SMILES)
         molecular_weight = Descriptors.ExactMolWt(mol)
@@ -141,10 +141,21 @@ def createEncodedAddAction(action_type, reaction_id, action, reactants, target_i
             ContentFile(add_svg_string),
         )
         add.materialimage = add_svg_fn  # need material (common name)
+        add.atmosphere = "air"
         target_obj = Target.objects.get(id=target_id)
         target_mols = target_obj.targetmols
-        add.materialquantity = calculateVolume(molar_eqv, target_mols, conc_reagents)
-        add.atmosphere = "air"
+
+        if not solvent:
+            reactant_density = action["content"]["material"]["density"]
+            mol = Chem.MolFromSmiles(reactant_SMILES)
+            reactant_MW = Descriptors.ExactMolWt(mol)
+            add.materialquantity = calculateVolume(
+                molar_eqv, target_mols, conc_reagents, reactant_density, reactant_MW
+            )
+
+        if solvent:
+            add.materialquantity = calculateVolume(molar_eqv, target_mols, conc_reagents)
+
         add.save()
 
     except Exception as error:
