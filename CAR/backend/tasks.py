@@ -1,23 +1,17 @@
 from celery import shared_task
 from django.core.files.storage import default_storage
-
-import pandas as pd
-
 from .validate import ValidateFile
-
 from .IBM.createibmmodels import (
     createProjectModel,
     createTargetModel,
     createMethodModel,
     createReactionModel,
     createProductModel,
-    createActionModel,
+    CreateIBMActionModels,
 )
-from .IBM.apicalls import createIBMProject, getIBMRetroSyn, collectIBMReactionInfo
-from .IBM.filtermethod import filtermethod
-
+from .IBM.apicalls import IBMAPI
 from .manifold.apicalls import getManifoldretrosynthesis
-from .recipebuilder.createencodedmodels import createEncodedActionModel
+from .recipebuilder.createencodedmodels import CreateEncodedActionModels
 from .recipebuilder.encodedrecipes import encoded_recipes
 from rdkit.Chem import AllChem
 
@@ -54,12 +48,10 @@ def validateFileUpload(csv_fp, validate_type=None, project_info=None, validate_o
 
     validation = ValidateFile(csv_to_validate=csv_fp, validate_type=validate_type)
 
-    # Delete tempory file if only validate selected
     if validate_only:
         default_storage.delete(csv_fp)
         csv_fp = None
 
-    # Convert dataframe to dictionary to make it JSON serializable
     uploaded_dict = validation.df.to_dict("list")
     validated = validation.validated
     validate_dict = validation.validate_dict
@@ -69,56 +61,40 @@ def validateFileUpload(csv_fp, validate_type=None, project_info=None, validate_o
 
 @shared_task
 def uploadIBMReaction(validate_output):
-    # Validate output is a list - this is one way to get
-    # Celery chaining to work where second function uses list output
-    # from first function (validate) called
+
     validate_dict, validated, csv_fp, project_info, uploaded_dict = validate_output
 
     if not validated:
-        # Delete tempory file if only validate selected
         default_storage.delete(csv_fp)
         return (validate_dict, validated, project_info)
 
     if validated:
-        # Create project model and return project id
         project_id, project_name = createProjectModel(project_info)
-        # Add project name to project info dict for emailing when upload complete
         project_info["project_name"] = project_name
 
-        # Create an IBM project
-        IBM_project_id, rxn4chemistry_wrapper = createIBMProject(project_name)
+        IBM_API = IBMAPI(project_name=project_name)
 
         target_no = 1
         for smiles, target_mass in zip(
             uploaded_dict["Targets"], uploaded_dict["Ammount_required (mg)"]
         ):
 
-            # Number of steps/name of reactants from IBM API???????
-            # Create a Target model and return target id
             target_id = createTargetModel(
                 project_id=project_id,
                 smiles=smiles,
                 target_no=target_no,
                 target_mass=target_mass,
             )
-
-            # Create IBM
-            # Run IBM API cal to get retrosyn info
             max_steps = 3
-            results = getIBMRetroSyn(
-                rxn4chemistry_wrapper=rxn4chemistry_wrapper,
+            results = IBM_API.getIBMRetroSyn(
                 smiles=smiles,
                 max_steps=max_steps,
             )
 
-            # Check if IBM API has been successful
             if results:
-                # Set maximum number of attempts. Sometimes variation in routes is
-                # very similar and wastes times
                 max_attempts = 3
                 attempts_dict = {}
 
-                # Set maximum number of methods/pathways to collect
                 no_pathways_found = len(results["retrosynthetic_paths"])
 
                 if no_pathways_found <= 3:
@@ -127,11 +103,8 @@ def uploadIBMReaction(validate_output):
                     max_pathways = 3
 
                 pathway_no = 1
-
                 pathway_filter = []
-
                 for pathway in results["retrosynthetic_paths"]:
-                    print(pathway_no)
                     try:
                         attempts_dict[pathway_no] += 1
                     except:
@@ -143,25 +116,15 @@ def uploadIBMReaction(validate_output):
                         break
 
                     if pathway_no <= max_pathways and pathway["confidence"] > 0.90:
+                        reaction_info = IBM_API.collectIBMReactionInfo(pathway=pathway)
 
-                        # Get reaction info about pathway
-                        reaction_info = collectIBMReactionInfo(
-                            rxn4chemistry_wrapper=rxn4chemistry_wrapper, pathway=pathway
-                        )
-
-                        # Check if reaction info call has been successful
                         if reaction_info:
-                            # Need to add check if reaction class and reactants already exist -
-                            # in other words looking for diversity and not dulpication
-                            # of reactions. This ignores actions of the method
-                            method_integer = filtermethod(reaction_info=reaction_info)
+                            method_integer = IBM_API.filtermethod(reaction_info=reaction_info)
 
                             if method_integer not in pathway_filter:
                                 pathway_no += 1
-
                                 pathway_filter.append(method_integer)
 
-                                # Create a Method model
                                 method_id = createMethodModel(
                                     target_id=target_id,
                                     nosteps=max_steps,
@@ -174,17 +137,13 @@ def uploadIBMReaction(validate_output):
                                     reaction_info["actions"],
                                     reaction_info["reactions"],
                                 ):
-                                    # Product_smiles and reaction class is a list of individual elements
-                                    # Reactants and actions is a list of lists
 
-                                    # Create a Reaction model
                                     reaction_id = createReactionModel(
                                         method_id=method_id,
                                         reaction_class=reaction_class,
                                         reaction_smarts=reaction_smarts,
                                     )
 
-                                    # Create a Product model
                                     createProductModel(
                                         reaction_id=reaction_id,
                                         project_name=project_name,
@@ -194,16 +153,10 @@ def uploadIBMReaction(validate_output):
                                         product_smiles=product_smiles,
                                     )
 
-                                    # Create action models
-                                    action_no = 1
-                                    for action in actions:
-                                        created_model = createActionModel(
-                                            reaction_id=reaction_id,
-                                            action_no=action_no,
-                                            action=action,
-                                        )
-                                        if created_model:
-                                            action_no += 1
+                                    CreateIBMActionModels(
+                                        reaction_id=reaction_id,
+                                        actions=actions,
+                                    )
 
                                     product_no += 1
 
@@ -212,8 +165,6 @@ def uploadIBMReaction(validate_output):
 
             target_no += 1
 
-    # Delete tempory file
-
     default_storage.delete(csv_fp)
 
     return validate_dict, validated, project_info
@@ -221,23 +172,17 @@ def uploadIBMReaction(validate_output):
 
 @shared_task
 def uploadManifoldReaction(validate_output):
-    # Validate output is a list - this is one way to get
-    # Celery chaining to work where second function uses list output
-    # from first function (validate) called
+
     validate_dict, validated, csv_fp, project_info, uploaded_dict = validate_output
 
     if not validated:
-        # Delete tempory file if only validate selected
         default_storage.delete(csv_fp)
         return (validate_dict, validated, project_info)
 
     if validated:
-        # Create project model and return project id
         project_id, project_name = createProjectModel(project_info)
-        # Add project name to project info dict for emailing when upload complete
         project_info["project_name"] = project_name
 
-        # Do Postera stuff
         target_no = 1
         for target_smiles, target_mass in zip(
             uploaded_dict["Targets"], uploaded_dict["Ammount_required (mg)"]
@@ -256,12 +201,10 @@ def uploadManifoldReaction(validate_output):
             target_no += 1
 
             pathway_no = 1
-
             for route in routes:
                 no_steps = len(route["reactions"])
 
                 if no_steps > 0:
-                    # Check if reactions are OT friendly
                     reactions = route["reactions"]
 
                     reactions_found = [
@@ -275,19 +218,14 @@ def uploadManifoldReaction(validate_output):
                             nosteps=no_steps,
                         )
 
-                        # Then loop over route for synthetic steps
                         product_no = 1
-
                         for reaction in reactions:
                             reaction_class = reaction["name"]
-                            # Check if OT friendly and in encoded recipes
-                            print(reaction_class)
                             if reaction_class in encoded_recipes:
-                                encoded_recipe = encoded_recipes[reaction_class]["recipe"]
+                                actions = encoded_recipes[reaction_class]["recipe"]
                                 reactant_SMILES = reaction["reactantSmiles"]
                                 product_smiles = reaction["productSmiles"]
 
-                                # Create a Reaction model
                                 reaction_smarts = AllChem.ReactionFromSmarts(
                                     "{}>>{}".format(".".join(reactant_SMILES), product_smiles),
                                     useSmiles=True,
@@ -298,7 +236,6 @@ def uploadManifoldReaction(validate_output):
                                     reaction_smarts=reaction_smarts,
                                 )
 
-                                # Create a Product model
                                 createProductModel(
                                     reaction_id=reaction_id,
                                     project_name=project_name,
@@ -307,14 +244,12 @@ def uploadManifoldReaction(validate_output):
                                     product_no=product_no,
                                     product_smiles=product_smiles,
                                 )
-
-                                for action in encoded_recipe:
-                                    createEncodedActionModel(
-                                        reaction_id=reaction_id,
-                                        action=action,
-                                        reactants=reactant_SMILES,
-                                        target_id=target_id,
-                                    )
+                                CreateEncodedActionModels(
+                                    reaction_id=reaction_id,
+                                    actions=actions,
+                                    reactant_pair_smiles=reactant_SMILES,
+                                    target_id=target_id,
+                                )
 
                                 product_no += 1
 
@@ -330,27 +265,20 @@ def uploadManifoldReaction(validate_output):
 
 @shared_task
 def uploadCustomReaction(validate_output):
-    # Validate output is a list - this is one way to get
-    # Celery chaining to work where second function uses list output
-    # from first function (validate) called
+
     validate_dict, validated, csv_fp, project_info, uploaded_dict = validate_output
 
     if not validated:
-        # Delete tempory file if only validate selected
         default_storage.delete(csv_fp)
         return (validate_dict, validated, project_info)
 
     if validated:
-        # Create project model and return project id
         project_id, project_name = createProjectModel(project_info)
-        # Add project name to project info dict for emailing when upload complete
         project_info["project_name"] = project_name
 
-        # Do custom chem stuff
         target_no = 1
         pathway_no = 1
         product_no = 1
-
         for reactant_pair_smiles, reaction_name, target_smiles, target_mass in zip(
             uploaded_dict["reactant_pair_smiles"],
             uploaded_dict["Reaction-name"],
@@ -382,7 +310,6 @@ def uploadCustomReaction(validate_output):
                 reaction_smarts=reaction_smarts,
             )
 
-            # Create a Product model
             createProductModel(
                 reaction_id=reaction_id,
                 project_name=project_name,
@@ -392,15 +319,14 @@ def uploadCustomReaction(validate_output):
                 product_smiles=target_smiles,
             )
 
-            encoded_recipe = encoded_recipes[reaction_name]["recipe"]
+            actions = encoded_recipes[reaction_name]["recipe"]
 
-            for action in encoded_recipe:
-                createEncodedActionModel(
-                    reaction_id=reaction_id,
-                    action=action,
-                    reactants=reactant_pair_smiles,
-                    target_id=target_id,
-                )
+            CreateEncodedActionModels(
+                reaction_id=reaction_id,
+                actions=actions,
+                reactant_pair_smiles=reactant_pair_smiles,
+                target_id=target_id,
+            )
 
     default_storage.delete(csv_fp)
 

@@ -36,7 +36,8 @@ class ValidateFile(object):
                 "Ammount_required (mg)",
             ]
             self.checkNumberColumns()
-            self.checkColumnNames()
+            if self.validated:
+                self.checkColumnNames()
             if self.validated:
                 self.reactant_pair_smiles = [
                     reactants for reactants in zip(self.df["Reactant-1"], self.df["Reactant-2"])
@@ -52,12 +53,14 @@ class ValidateFile(object):
             self.expected_no_columns = 2
             self.expected_column_names = ["Targets", "Ammount_required (mg)"]
             self.checkNumberColumns()
-            self.checkColumnNames()
+            if self.validated:
+                self.checkColumnNames()
             if self.validated:
                 self.target_smiles = [smi.strip() for smi in self.df["Targets"]]
                 self.df["Targets"] = self.target_smiles
                 self.checkTargetSMILES()
-                self.checkIsNumber()
+                if self.validated:
+                    self.checkIsNumber()
 
     def add_warning(self, field, warning_string):
         self.validate_dict["field"].append(field)
