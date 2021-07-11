@@ -1,5 +1,3 @@
-# Check if reactant_smiles is a common solvent
-# Get smiles from csv file!!!!!
 common_solvents = {
     "CC(C)=O": "acetone",
     "CC#N": "acetonitrile",

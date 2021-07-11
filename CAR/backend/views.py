@@ -31,24 +31,17 @@ class UploadProject(View):
         return render(request, "backend/upload.html", {"form": form})
 
     def post(self, request):
-        # check_services - from Fragalysis to check Celery stuff. May need it
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
-            # Create dictionary of project info
             project_info = {}
-
-            # Get info from form submitted
             csvfile = request.FILES["csv_file"]
             project_info["submittername"] = request.POST["submitter_name"]
             project_info["submitterorganisation"] = request.POST["submitter_organisation"]
             project_info["submitteremail"] = request.POST["submitter_email"]
             validate_choice = request.POST["validate_choice"]
             API_choice = request.POST["API_choice"]
-
-            # Save csv to temp storage
             tmp_file = save_tmp_file(csvfile)
 
-            # Settings for if validate option selected
             if str(validate_choice) == "0":
 
                 if str(API_choice) == "2":
@@ -59,12 +52,9 @@ class UploadProject(View):
                     context["validate_task_id"] = task_validate.id
                     context["validate_task_status"] = task_validate.status
 
-                    # Update client side with task id and status
                     return render(request, "backend/upload.html", context)
 
                 else:
-                    #### Got up to here - need to look at validate task and implement first
-                    # Start celery task # Code getting stuck in celery task!!!!
                     task_validate = validateFileUpload.delay(
                         csv_fp=tmp_file, validate_type="retro-API"
                     )
@@ -72,13 +62,9 @@ class UploadProject(View):
                     context["validate_task_id"] = task_validate.id
                     context["validate_task_status"] = task_validate.status
 
-                    # Update client side with task id and status
                     return render(request, "backend/upload.html", context)
 
-            # if it's an upload, run the compound set task
             if str(validate_choice) == "1":
-                # Start chained celery tasks. NB first function passes tuple
-                # to second function - see tasks.py
                 if str(API_choice) == "0":
                     task_upload = (
                         validateFileUpload.s(
@@ -94,7 +80,6 @@ class UploadProject(View):
                     context["upload_task_id"] = task_upload.id
                     context["upload_task_status"] = task_upload.status
 
-                    # Update client side with task id and status
                     return render(request, "backend/upload.html", context)
                     pass
 
@@ -113,7 +98,6 @@ class UploadProject(View):
                     context["upload_task_id"] = task_upload.id
                     context["upload_task_status"] = task_upload.status
 
-                    # Update client side with task id and status
                     return render(request, "backend/upload.html", context)
 
                 if str(API_choice) == "2":
@@ -131,18 +115,12 @@ class UploadProject(View):
                     context["upload_task_id"] = task_upload.id
                     context["upload_task_status"] = task_upload.status
 
-                    # Update client side with task id and status
                     return render(request, "backend/upload.html", context)
 
         else:
             form = UploadForm()
 
-        # context["form"] = form
-        # return render(request, "backend/upload.html", context)
 
-
-# Add upload and validate views here!!!!
-# Task functions common between Compound Sets and Target Set pages.
 class ValidateTaskView(View):
     """View to handle dynamic loading of validation results from `backend.tasks.validateFileUpload` - the validation of files
     uploaded to backend/upload
@@ -191,10 +169,8 @@ class ValidateTaskView(View):
 
             return JsonResponse(response_data)
 
-        # Check if results ready
         if task.status == "SUCCESS":
             results = task.get()
-            # NB get tuple from validate task
             validate_dict = results[0]
             validated = results[1]
             if validated:
@@ -206,7 +182,6 @@ class ValidateTaskView(View):
                 return JsonResponse(response_data)
 
             if not validated:
-                # set pandas options to display all column data
                 pd.set_option("display.max_colwidth", None)
 
                 table = pd.DataFrame.from_dict(validate_dict)
@@ -287,7 +262,6 @@ class UploadTaskView(View):
         if task.status == "SUCCESS":
 
             results = task.get()
-            # NB get tuple from validate task
             validate_dict = results[0]
             validated = results[1]
             project_info = results[2]
@@ -297,7 +271,6 @@ class UploadTaskView(View):
             project_name = project_info["project_name"]
 
             if validated:
-                # Send email when data successfully uploaded
                 send_mail(
                     "Project - {} - data uploaded to CAR".format(project_name),
                     "Hi {} - Good news, your data has been successfully processed and is available at https://car.xchem.diamond.ac.uk/".format(
@@ -308,14 +281,10 @@ class UploadTaskView(View):
                     fail_silently=False,
                 )
 
-                # Upload/Update output tasks send back a tuple
-                # First element defines the source of the upload task (cset, tset)
                 response_data["validated"] = "Validated"
                 return JsonResponse(response_data)
 
             if not validated:
-
-                # set pandas options to display all column data
                 pd.set_option("display.max_colwidth", -1)
 
                 table = pd.DataFrame.from_dict(validate_dict)
@@ -339,8 +308,6 @@ class UploadTaskView(View):
                     [submitter_email],
                     fail_silently=False,
                 )
-
-                # Error output
                 html_table = """<p> Your data was <b>not</b> processed.</p>"""
                 response_data["processed"] = "None"
                 response_data["html"] = html_table

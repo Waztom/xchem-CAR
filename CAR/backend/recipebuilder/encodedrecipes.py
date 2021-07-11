@@ -1,5 +1,3 @@
-# Encoded recipes
-
 encoded_recipes = {
     "Amidation": {
         "reactionSMARTS": ["[#6:1](=[#8:2])-[#8].[A#7:3]>>[#6:1](=[#8:2])-[A#7:3]"],

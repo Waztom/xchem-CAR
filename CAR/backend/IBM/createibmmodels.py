@@ -3,8 +3,10 @@ from rdkit.Chem import Draw
 from rdkit.Chem import Descriptors
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-
 import pubchempy as pcp
+import os
+import json
+import requests
 
 import sys
 
@@ -42,14 +44,27 @@ import logging
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-from .apicalls import convertIBMNameToSmiles
-from .common_solvents import common_solvents
+
+def convertIBMNameToSmiles(chemical_name):
+    api_key = os.environ["IBM_API_KEY"]
+    try:
+        data = [chemical_name]
+        headers = {
+            "Authorization": api_key,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        url = "https://rxn.res.ibm.com/rxn/api/api/v1/actions/convert-material-to-smiles"
+        r = requests.post(url=url, data=json.dumps(data), headers=headers, cookies={})
+        response_dict = r.json()
+        smiles = response_dict["payload"][chemical_name]
+        return smiles
+    except:
+        return False
 
 
 def calculateproductmols(target_mass, target_SMILES):
-    # Calculate MW
     target_MW = Descriptors.ExactMolWt(Chem.MolFromSmiles(target_SMILES))
-    # Convert target_mass to g
     target_mass = target_mass / 1e3
     product_moles = target_mass / target_MW
     return product_moles
@@ -66,13 +81,9 @@ def createSVGString(smiles):
     """
     mol = Chem.MolFromSmiles(smiles)
 
-    # Initiate drawer and set size/font size
     drawer = Draw.rdMolDraw2D.MolDraw2DSVG(100, 50)
     drawer.SetFontSize(8)
     drawer.SetLineWidth(1)
-    # Test
-    # drawer.drawOptions().bondLineWidth = 5
-    # drawer.drawOptions().padding = 1
     drawer.DrawMolecule(mol)
     drawer.FinishDrawing()
     svg_string = drawer.GetDrawingText()
@@ -89,10 +100,7 @@ def createReactionSVGString(smarts):
     smiles: string
         a valid smiles
     """
-    # Initiate drawer and set size/font size
     drawer = Draw.rdMolDraw2D.MolDraw2DSVG(900, 200)
-    # drawer.SetFontSize(8)
-    # drawer.SetLineWidth(1)
     drawer.DrawReaction(smarts)
     drawer.FinishDrawing()
     svg_string = drawer.GetDrawingText()
@@ -100,8 +108,6 @@ def createReactionSVGString(smarts):
 
 
 def convertNameToSmiles(chemical_name):
-    # First try pubchem and then IBM
-    # NB do this not to make too many IBM API calls
     try:
         smiles = pcp.get_compounds(chemical_name, "name")[0].isomeric_smiles
         return smiles
@@ -119,9 +125,6 @@ def convertNameToSmiles(chemical_name):
 
 
 def checkSMILES(smiles):
-    # Sometimes IBM yields chemical name and not smiles
-    # check if this is the case using rdkit mol and if not
-    # use NIH Cactus Resolver tool to convert name to smiles
     mol = Chem.MolFromSmiles(smiles)
     if mol:
         return smiles
@@ -131,20 +134,11 @@ def checkSMILES(smiles):
 
 
 def createProjectModel(project_info):
-    # Function that creates a project object
-    # if the csv file uploaded is validated and
-    # the user wants to upload the data
-
-    # project_info is a dictionary of info passed into the validate/upload
-    # Celery tasks
-
-    # Create Project object
     project = Project()
     project.submittername = project_info["submittername"]
     project.submitterorganisation = project_info["submitterorganisation"]
     project.submitteremail = project_info["submitteremail"]
     project.save()
-
     return project.id, project.name
 
 
@@ -166,7 +160,6 @@ def createTargetModel(project_id, smiles, target_no, target_mass):
     target.smiles = smiles
     target.targetmols = calculateproductmols(target_mass, smiles)
     target.name = "{}-{}".format(project_name, target_no)
-    # Create and Write svg to file
     target_svg_string = createSVGString(smiles)
     target_svg_fn = default_storage.save(
         "targetimages/" + target.name + ".svg", ContentFile(target_svg_string)
@@ -190,10 +183,6 @@ def createMethodModel(target_id, nosteps):
 
 
 def createReactionModel(method_id, reaction_class, reaction_smarts):
-    # Function that takes in all the info from IBM API call
-    # and creates a reaction object
-
-    # Create Reaction object
     reaction = Reaction()
     method_obj = Method.objects.get(id=method_id)
     reaction.method_id = method_obj
@@ -234,8 +223,6 @@ def createAnalyseActionModel(reaction_id, action_no):
 
 
 def createActionModel(reaction_id, action_no, action):
-    # Create a dictionary of key (action name from IBM API) and
-    # funtion name to create the appropriate model
     actionMethods = {
         "add": createIBMAddAction,
         "collect-layer": createIBMCollectLayerAction,
@@ -286,13 +273,11 @@ def createIBMAddAction(action_type, reaction_id, action_no, action):
             add.materialquantity = materialquantity
             add.materialquantityunit = materialquantityunit
         if material != "SLN":
-            # Check if smiles
             smiles = checkSMILES(material)
             if not smiles:
                 add.materialquantity = materialquantity
                 add.materialquantityunit = materialquantityunit
             if smiles:
-                # Get MW
                 mol = Chem.MolFromSmiles(smiles)
                 molecular_weight = Descriptors.ExactMolWt(mol)
 

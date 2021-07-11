@@ -45,16 +45,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# Do Harry's stuff here!
-# 1. Calc expected mols product from target_mass
-# NB need to write func that can do single plus multiple
-# step calcs (Do we use SA score to estimate yield?)
-# 2. Get recipe
-# 2. Loop over recipe to populate relevant action models -> do
-#    we need extra createmodels functions or is it possible to mix w
-#    exisitng modelcreator?
-
-# Collection of util function for creating models
 def checkSMARTSPattern(SMILES, SMARTS_pattern):
     """function which checks whether the SMILES contains SMARTS"""
     pattern = Chem.MolFromSmarts(SMARTS_pattern)
@@ -86,8 +76,6 @@ def getChemicalName(smiles):
 
 
 def createEncodedActionModel(reaction_id, action, reactants, target_id):
-    # Create a dictionary of key (action name from encoded recipe) and
-    # funtion name to create the appropriate model
     actionMethods = {
         "add": createEncodedAddAction,
         "stir": createEncodedStirAction,
@@ -108,7 +96,6 @@ def createEncodedActionModel(reaction_id, action, reactants, target_id):
 
 def createEncodedAddAction(action_type, reaction_id, action, reactants, target_id):
     try:
-        # Does the action have a SMARTS pattern?
         if action["content"]["material"]["SMARTS"]:
             SMARTS_pattern = action["content"]["material"]["SMARTS"]
             for pattern in SMARTS_pattern:
@@ -128,8 +115,6 @@ def createEncodedAddAction(action_type, reaction_id, action, reactants, target_i
         add.reaction_id = reaction_obj
         add.actiontype = action_type
         add.actionno = action_no
-        # NB function to convert reactant SMILES to IUPAC/common name
-        # For now use material smiles
         material = getChemicalName(reactant_SMILES)
         mol = Chem.MolFromSmiles(reactant_SMILES)
         molecular_weight = Descriptors.ExactMolWt(mol)
@@ -140,7 +125,7 @@ def createEncodedAddAction(action_type, reaction_id, action, reactants, target_i
             "addactionimages/{}-{}-{}.svg".format(reaction_id, action_no, material),
             ContentFile(add_svg_string),
         )
-        add.materialimage = add_svg_fn  # need material (common name)
+        add.materialimage = add_svg_fn
         target_obj = Target.objects.get(id=target_id)
         target_mols = target_obj.targetmols
         add.materialquantity = calculateVolume(molar_eqv, target_mols, conc_reagents)
