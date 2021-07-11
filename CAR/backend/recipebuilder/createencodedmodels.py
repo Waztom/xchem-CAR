@@ -1,10 +1,7 @@
 from rdkit import Chem
-from rdkit.Chem import Draw
 from rdkit.Chem import Descriptors
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-
-import pubchempy as pcp
 
 import sys
 
@@ -36,6 +33,8 @@ from ..models import (
     IBMWashAction,
 )
 
+from ..utils import checkSMARTSPattern, getChemicalName, createSVGString
+
 # import the logging library
 import logging
 
@@ -64,6 +63,9 @@ class CreateEncodedActionModels(object):
         self.reactant_pair_smiles = reactant_pair_smiles
         self.target_mols = Target.objects.get(id=target_id).targetmols
 
+        for action in self.actions:
+            self.createEncodedActionModel(action)
+
     def createEncodedActionModel(self, action):
         actionMethods = {
             "add": self.createEncodedAddAction,
@@ -79,51 +81,16 @@ class CreateEncodedActionModels(object):
             logger.info(action_type)
             print(action)
 
-    def checkSMARTSPattern(self, SMILES, SMARTS_pattern):
-        """function which checks whether the SMILES contains SMARTS"""
-        pattern = Chem.MolFromSmarts(SMARTS_pattern)
-        mol = Chem.MolFromSmiles(SMILES)
-        if mol.HasSubstructMatch(pattern):
-            return True
-        else:
-            return False
-
-    def calculateVolume(self, molar_eqv, conc_reagents):
+    def calculateVolume(
+        self, molar_eqv, conc_reagents=None, reactant_density=None, reactant_MW=None
+    ):
         # NB need addition_order added to ncoded recipes - can we rather use SA score?
-        # estimated_loss = (
-        #     0.7 ** addition_order
-        # )  # Assume 70% conversion for each step//This needs to come from
-        # reaction number NOT addtion order.....
         mol_material = molar_eqv * self.target_mols
-        vol_material = (mol_material / conc_reagents) * 1e6  # in uL
+        if reactant_density:
+            vol_material = ((mol_material * reactant_MW) / reactant_density) * 1e3
+        else:
+            vol_material = (mol_material / conc_reagents) * 1e6  # in uL
         return vol_material
-
-    def getChemicalName(self, smiles):
-        try:
-            name = pcp.get_compounds(smiles, "smiles")[0].iupac_name
-            return name
-        except:
-            print("Pubchempy could not convert SMILES to a IUPAC name")
-            return smiles
-
-    def createSVGString(self, smiles):
-        """
-        Function that creates a SVG image string from smiles string
-
-        target_name: string
-            unique name of target
-        smiles: string
-            a valid smiles
-        """
-        mol = Chem.MolFromSmiles(smiles)
-        drawer = Draw.rdMolDraw2D.MolDraw2DSVG(100, 50)
-        drawer.SetFontSize(8)
-        drawer.SetLineWidth(1)
-        drawer.DrawMolecule(mol)
-        drawer.FinishDrawing()
-        svg_string = drawer.GetDrawingText()
-
-        return svg_string
 
     def createEncodedAddAction(self, action_type, action):
         try:
@@ -131,7 +98,7 @@ class CreateEncodedActionModels(object):
                 SMARTS_pattern = action["content"]["material"]["SMARTS"]
                 for pattern in SMARTS_pattern:
                     for reactant in self.reactant_pair_smiles:
-                        pattern_check = self.checkSMARTSPattern(reactant, pattern)
+                        pattern_check = checkSMARTSPattern(reactant, pattern)
                         if pattern_check:
                             reactant_SMILES = reactant
             if action["content"]["material"]["SMILES"]:
@@ -140,24 +107,38 @@ class CreateEncodedActionModels(object):
             action_no = action["content"]["action_no"]
             molar_eqv = action["content"]["material"]["quantity"]["value"]
             conc_reagents = action["content"]["material"]["concentration"]
+            solvent = action["content"]["material"]["solvent"]
 
             add = IBMAddAction()
             add.reaction_id = self.reaction_obj
             add.actiontype = action_type
             add.actionno = action_no
-            material = self.getChemicalName(reactant_SMILES)
+            material = getChemicalName(reactant_SMILES)
             mol = Chem.MolFromSmiles(reactant_SMILES)
             molecular_weight = Descriptors.ExactMolWt(mol)
             add.materialsmiles = reactant_SMILES
             add.molecularweight = molecular_weight
-            add_svg_string = self.createSVGString(reactant_SMILES)
+            add_svg_string = createSVGString(reactant_SMILES)
             add_svg_fn = default_storage.save(
                 "addactionimages/{}-{}-{}.svg".format(self.reaction_id, action_no, material),
                 ContentFile(add_svg_string),
             )
-            add.materialimage = add_svg_fn
-            add.materialquantity = self.calculateVolume(molar_eqv, conc_reagents)
+            add.materialimage = add_svg_fn  # need material (common name)
             add.atmosphere = "air"
+
+            if solvent is None:
+                reactant_density = action["content"]["material"]["density"]
+                mol = Chem.MolFromSmiles(reactant_SMILES)
+                reactant_MW = Descriptors.ExactMolWt(mol)
+                add.materialquantity = self.calculateVolume(
+                    molar_eqv=molar_eqv, reactant_density=reactant_density, reactant_MW=reactant_MW
+                )
+
+            if solvent:
+                add.materialquantity = self.calculateVolume(
+                    molar_eqv=molar_eqv, conc_reagents=conc_reagents
+                )
+
             add.save()
 
         except Exception as error:

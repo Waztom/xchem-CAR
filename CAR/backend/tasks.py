@@ -7,11 +7,11 @@ from .IBM.createibmmodels import (
     createMethodModel,
     createReactionModel,
     createProductModel,
-    createActionModel,
+    CreateIBMActionModels,
 )
 from .IBM.apicalls import IBMAPI
 from .manifold.apicalls import getManifoldretrosynthesis
-from .recipebuilder.createencodedmodels import createEncodedActionModel
+from .recipebuilder.createencodedmodels import CreateEncodedActionModels
 from .recipebuilder.encodedrecipes import encoded_recipes
 from rdkit.Chem import AllChem
 
@@ -85,7 +85,6 @@ def uploadIBMReaction(validate_output):
                 target_no=target_no,
                 target_mass=target_mass,
             )
-
             max_steps = 3
             results = IBM_API.getIBMRetroSyn(
                 smiles=smiles,
@@ -154,15 +153,10 @@ def uploadIBMReaction(validate_output):
                                         product_smiles=product_smiles,
                                     )
 
-                                    action_no = 1
-                                    for action in actions:
-                                        created_model = createActionModel(
-                                            reaction_id=reaction_id,
-                                            action_no=action_no,
-                                            action=action,
-                                        )
-                                        if created_model:
-                                            action_no += 1
+                                    CreateIBMActionModels(
+                                        reaction_id=reaction_id,
+                                        actions=actions,
+                                    )
 
                                     product_no += 1
 
@@ -228,7 +222,7 @@ def uploadManifoldReaction(validate_output):
                         for reaction in reactions:
                             reaction_class = reaction["name"]
                             if reaction_class in encoded_recipes:
-                                encoded_recipe = encoded_recipes[reaction_class]["recipe"]
+                                actions = encoded_recipes[reaction_class]["recipe"]
                                 reactant_SMILES = reaction["reactantSmiles"]
                                 product_smiles = reaction["productSmiles"]
 
@@ -250,14 +244,12 @@ def uploadManifoldReaction(validate_output):
                                     product_no=product_no,
                                     product_smiles=product_smiles,
                                 )
-
-                                for action in encoded_recipe:
-                                    createEncodedActionModel(
-                                        reaction_id=reaction_id,
-                                        action=action,
-                                        reactants=reactant_SMILES,
-                                        target_id=target_id,
-                                    )
+                                CreateEncodedActionModels(
+                                    reaction_id=reaction_id,
+                                    actions=actions,
+                                    reactant_pair_smiles=reactant_SMILES,
+                                    target_id=target_id,
+                                )
 
                                 product_no += 1
 
@@ -327,15 +319,14 @@ def uploadCustomReaction(validate_output):
                 product_smiles=target_smiles,
             )
 
-            encoded_recipe = encoded_recipes[reaction_name]["recipe"]
+            actions = encoded_recipes[reaction_name]["recipe"]
 
-            for action in encoded_recipe:
-                createEncodedActionModel(
-                    reaction_id=reaction_id,
-                    action=action,
-                    reactants=reactant_pair_smiles,
-                    target_id=target_id,
-                )
+            CreateEncodedActionModels(
+                reaction_id=reaction_id,
+                actions=actions,
+                reactant_pair_smiles=reactant_pair_smiles,
+                target_id=target_id,
+            )
 
     default_storage.delete(csv_fp)
 

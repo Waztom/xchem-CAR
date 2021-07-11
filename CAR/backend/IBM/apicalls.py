@@ -29,7 +29,6 @@ class IBMAPI(object):
         """
         self.project_name = project_name
         self.api_key = os.environ["IBM_API_KEY"]
-        print(self.api_key)
         self.createIBMProject()
 
     def createIBMProject(self):

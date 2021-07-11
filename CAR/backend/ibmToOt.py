@@ -7,8 +7,8 @@ import ibmRead
 
 import opentrons.otWrite as otWrite
 import opentrons.otDeck as otDeck
-import Ordering.OutputPlateTxt as OutputPlateTxt
-import HumanRead.HumanRead as HumanRead
+import ordering.OutputPlateTxt as OutputPlateTxt
+import humanread.HumanRead as HumanRead
 
 
 class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or similar
