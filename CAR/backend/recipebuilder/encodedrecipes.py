@@ -2,7 +2,7 @@
 
 encoded_recipes = {
     "Amidation": {
-        "reactionSMARTS": "",
+        "reactionSMARTS": ["[#6:1](=[#8:2])-[#8].[A#7:3]>>[#6:1](=[#8:2])-[A#7:3]"],
         "recipe": [
             {
                 "name": "add",
@@ -67,7 +67,7 @@ encoded_recipes = {
         ],
     },
     "Amide schotten - baumann": {
-        "reactionSMARTS": "",
+        "reactionSMARTS": ["[#6:1](=[#8:2])-[#17].[A#7:3]>>[#6:1](=[#8:2])-[A#7:3]"],
         "recipe": [
             {
                 "name": "add",
@@ -119,7 +119,13 @@ encoded_recipes = {
         ],
     },
     "Reductive amination": {
-        "reactionSMARTS": "",
+        "reactionSMARTS": [
+            "[#7:1].[#6:2]=O>>[CH1:2]-[#7R0:1]",
+            "[#7:1].[#6:2]=O>>[CH2R0:2]-[#7:1]",
+            "[#7:1].[#6:2]=O>>[CH1R0:2]-[#7:1]",
+            "[#7:1].[#6:2]=O>>[CH2:2]-[#7R0:1]",
+            "[#7:1].[#6:2]=O>>[CH3:2]-[#7R0:1]",
+        ],
         "recipe": [
             {
                 "name": "add",
@@ -184,13 +190,15 @@ encoded_recipes = {
         ],
     },
     "N-nucelophilic aromatic substitution": {
-        "reactionSMARTS": "",
+        "reactionSMARTS": ["[#6:3]-[#7:1].[c:2]Br>>[c:2][N:1][#6:3]"],
         "recipe": [
             {
                 "name": "add",
                 "content": {
                     "action_no": 1,
                     "material": {
+                        # What about looking for other nucelophiles? Check with Harry -> SMARTS above also not very general -> only
+                        # looking for amines
                         "SMARTS": ["[c][F,Cl,Br,I]", "[$([NX3](=O)=O),$([NX3+](=O)[O-])][!#8]"],
                         # includes halides & NO2 not specifically attached to aromatic c as unlikely a Nu has NO2 attached
                         "SMILES": None,  # leaving group question eg OTs

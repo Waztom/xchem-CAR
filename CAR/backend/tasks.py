@@ -3,11 +3,7 @@ from django.core.files.storage import default_storage
 
 import pandas as pd
 
-from .validate import (
-    checkNumberColumns,
-    checkSMILES,
-    checkIsNumber,
-)
+from .validate import ValidateFile
 
 from .IBM.createibmmodels import (
     createProjectModel,
@@ -32,13 +28,14 @@ def delete_tmp_file(filepath):
 
 # Celery validate task
 @shared_task
-def validateFileUpload(csv_fp, project_info=None, validate_only=True):
+def validateFileUpload(csv_fp, validate_type=None, project_info=None, validate_only=True):
     """Celery task to process validate the uploaded files for retrosynthesis planning.
 
     Parameters
     ----------
     csv_fp: str
         filepath of the uploaded csv file, which is saved to temporary storage by `viewer.views.UploadCSV`
+    validate_type: validate different types of upload files
     project_info: dict
         dictionary of project details (name, email and project_name) that will be used to create the project model
         if the csv file is validated
@@ -55,33 +52,7 @@ def validateFileUpload(csv_fp, project_info=None, validate_only=True):
             - filename (str): name of the uploaded csv file
     """
 
-    validated = True
-    smiles_list = []
-
-    validate_dict = {"field": [], "warning_string": []}
-
-    # Open csv file as Pandas df
-    uploaded_csv_df = pd.read_csv(csv_fp)
-
-    # Check no of column headings and name of column headings
-    columns = uploaded_csv_df.columns
-    validate_dict = checkNumberColumns(columns, validate_dict)
-
-    if len(validate_dict["warning_string"]) != 0:
-        validated = False
-    else:
-        # Check SMILES
-        indexes = [i for i, smi in enumerate(uploaded_csv_df["Targets"])]
-        smiles_list = [smi.strip() for smi in uploaded_csv_df["Targets"]]
-        uploaded_csv_df["Targets"] = smiles_list
-        amounts_list = [amount for amount in uploaded_csv_df["Ammount_required (mg)"]]
-
-        for index, smi, amount in zip(indexes, smiles_list, amounts_list):
-            validate_dict = checkSMILES(target_smiles=smi, index=index, validate_dict=validate_dict)
-            validate_dict = checkIsNumber(amount=amount, index=index, validate_dict=validate_dict)
-
-    if len(validate_dict["warning_string"]) != 0:
-        validated = False
+    validation = ValidateFile(csv_to_validate=csv_fp, validate_type=validate_type)
 
     # Delete tempory file if only validate selected
     if validate_only:
@@ -89,11 +60,11 @@ def validateFileUpload(csv_fp, project_info=None, validate_only=True):
         csv_fp = None
 
     # Convert dataframe to dictionary to make it JSON serializable
-    uploaded_dict = uploaded_csv_df.to_dict("list")
+    uploaded_dict = validation.df.to_dict("list")
+    validated = validation.validated
+    validate_dict = validation.validate_dict
 
     return (validate_dict, validated, csv_fp, project_info, uploaded_dict)
-
-    # Functions to request info from IBM API
 
 
 @shared_task
@@ -351,6 +322,85 @@ def uploadManifoldReaction(validate_output):
                                 pass
 
                 pathway_no += 1
+
+    default_storage.delete(csv_fp)
+
+    return validate_dict, validated, project_info
+
+
+@shared_task
+def uploadCustomReaction(validate_output):
+    # Validate output is a list - this is one way to get
+    # Celery chaining to work where second function uses list output
+    # from first function (validate) called
+    validate_dict, validated, csv_fp, project_info, uploaded_dict = validate_output
+
+    if not validated:
+        # Delete tempory file if only validate selected
+        default_storage.delete(csv_fp)
+        return (validate_dict, validated, project_info)
+
+    if validated:
+        # Create project model and return project id
+        project_id, project_name = createProjectModel(project_info)
+        # Add project name to project info dict for emailing when upload complete
+        project_info["project_name"] = project_name
+
+        # Do custom chem stuff
+        target_no = 1
+        pathway_no = 1
+        product_no = 1
+
+        for reactant_pair_smiles, reaction_name, target_smiles, target_mass in zip(
+            uploaded_dict["reactant_pair_smiles"],
+            uploaded_dict["Reaction-name"],
+            uploaded_dict["target-smiles"],
+            uploaded_dict["Ammount_required (mg)"],
+        ):
+            target_id = createTargetModel(
+                project_id=project_id,
+                smiles=target_smiles,
+                target_no=target_no,
+                target_mass=target_mass,
+            )
+
+            target_no += 1
+
+            method_id = createMethodModel(
+                target_id=target_id,
+                nosteps=1,
+            )
+
+            reaction_smarts = AllChem.ReactionFromSmarts(
+                "{}>>{}".format(".".join(reactant_pair_smiles), target_smiles),
+                useSmiles=True,
+            )
+
+            reaction_id = createReactionModel(
+                method_id=method_id,
+                reaction_class=reaction_name,
+                reaction_smarts=reaction_smarts,
+            )
+
+            # Create a Product model
+            createProductModel(
+                reaction_id=reaction_id,
+                project_name=project_name,
+                target_no=target_no,
+                pathway_no=pathway_no,
+                product_no=product_no,
+                product_smiles=target_smiles,
+            )
+
+            encoded_recipe = encoded_recipes[reaction_name]["recipe"]
+
+            for action in encoded_recipe:
+                createEncodedActionModel(
+                    reaction_id=reaction_id,
+                    action=action,
+                    reactants=reactant_pair_smiles,
+                    target_id=target_id,
+                )
 
     default_storage.delete(csv_fp)
 

@@ -9,7 +9,12 @@ from django.http import JsonResponse
 from django.conf import settings
 from celery.result import AsyncResult
 from .forms import API_CHOICES, UploadForm
-from .tasks import validateFileUpload, uploadIBMReaction, uploadManifoldReaction
+from .tasks import (
+    validateFileUpload,
+    uploadIBMReaction,
+    uploadManifoldReaction,
+    uploadCustomReaction,
+)
 import pandas as pd
 
 
@@ -45,15 +50,30 @@ class UploadProject(View):
 
             # Settings for if validate option selected
             if str(validate_choice) == "0":
-                #### Got up to here - need to look at validate task and implement first
-                # Start celery task # Code getting stuck in celery task!!!!
-                task_validate = validateFileUpload.delay(tmp_file)
-                context = {}
-                context["validate_task_id"] = task_validate.id
-                context["validate_task_status"] = task_validate.status
 
-                # Update client side with task id and status
-                return render(request, "backend/upload.html", context)
+                if str(API_choice) == "2":
+                    task_validate = validateFileUpload.delay(
+                        csv_fp=tmp_file, validate_type="custom-chem"
+                    )
+                    context = {}
+                    context["validate_task_id"] = task_validate.id
+                    context["validate_task_status"] = task_validate.status
+
+                    # Update client side with task id and status
+                    return render(request, "backend/upload.html", context)
+
+                else:
+                    #### Got up to here - need to look at validate task and implement first
+                    # Start celery task # Code getting stuck in celery task!!!!
+                    task_validate = validateFileUpload.delay(
+                        csv_fp=tmp_file, validate_type="retro-API"
+                    )
+                    context = {}
+                    context["validate_task_id"] = task_validate.id
+                    context["validate_task_status"] = task_validate.status
+
+                    # Update client side with task id and status
+                    return render(request, "backend/upload.html", context)
 
             # if it's an upload, run the compound set task
             if str(validate_choice) == "1":
@@ -62,7 +82,10 @@ class UploadProject(View):
                 if str(API_choice) == "0":
                     task_upload = (
                         validateFileUpload.s(
-                            tmp_file, project_info=project_info, validate_only=False
+                            csv_fp=tmp_file,
+                            validate_type="retro-API",
+                            project_info=project_info,
+                            validate_only=False,
                         )
                         | uploadManifoldReaction.s()
                     ).apply_async()
@@ -78,9 +101,30 @@ class UploadProject(View):
                 if str(API_choice) == "1":
                     task_upload = (
                         validateFileUpload.s(
-                            tmp_file, project_info=project_info, validate_only=False
+                            csv_fp=tmp_file,
+                            validate_type="retro-API",
+                            project_info=project_info,
+                            validate_only=False,
                         )
                         | uploadIBMReaction.s()
+                    ).apply_async()
+
+                    context = {}
+                    context["upload_task_id"] = task_upload.id
+                    context["upload_task_status"] = task_upload.status
+
+                    # Update client side with task id and status
+                    return render(request, "backend/upload.html", context)
+
+                if str(API_choice) == "2":
+                    task_upload = (
+                        validateFileUpload.s(
+                            csv_fp=tmp_file,
+                            validate_type="custom-chem",
+                            project_info=project_info,
+                            validate_only=False,
+                        )
+                        | uploadCustomReaction.s()
                     ).apply_async()
 
                     context = {}
