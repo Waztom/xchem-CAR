@@ -7,6 +7,7 @@ from .validate import (
     checkNumberColumns,
     checkSMILES,
     checkIsNumber,
+    checkReaction,
 )
 
 from .IBM.createibmmodels import (
@@ -32,13 +33,14 @@ def delete_tmp_file(filepath):
 
 # Celery validate task
 @shared_task
-def validateFileUpload(csv_fp, project_info=None, validate_only=True):
+def validateFileUpload(csv_fp, validate_type=None, project_info=None, validate_only=True):
     """Celery task to process validate the uploaded files for retrosynthesis planning.
 
     Parameters
     ----------
     csv_fp: str
         filepath of the uploaded csv file, which is saved to temporary storage by `viewer.views.UploadCSV`
+    validate_type: validate different types of upload files
     project_info: dict
         dictionary of project details (name, email and project_name) that will be used to create the project model
         if the csv file is validated
@@ -61,27 +63,86 @@ def validateFileUpload(csv_fp, project_info=None, validate_only=True):
     validate_dict = {"field": [], "warning_string": []}
 
     # Open csv file as Pandas df
-    uploaded_csv_df = pd.read_csv(csv_fp)
+    uploaded_csv_df = pd.read_csv(csv_fp, encoding="ISO-8859-1")
 
     # Check no of column headings and name of column headings
     columns = uploaded_csv_df.columns
-    validate_dict = checkNumberColumns(columns, validate_dict)
 
-    if len(validate_dict["warning_string"]) != 0:
-        validated = False
-    else:
-        # Check SMILES
-        indexes = [i for i, smi in enumerate(uploaded_csv_df["Targets"])]
-        smiles_list = [smi.strip() for smi in uploaded_csv_df["Targets"]]
-        uploaded_csv_df["Targets"] = smiles_list
-        amounts_list = [amount for amount in uploaded_csv_df["Ammount_required (mg)"]]
+    while validated == True:
+        if validate_type == "custom-chem":
+            #  Check number and names of columns
+            validated, validate_dict = checkNumberColumns(
+                columns, validated, validate_dict, expected_no_columns=4
+            )
 
-        for index, smi, amount in zip(indexes, smiles_list, amounts_list):
-            validate_dict = checkSMILES(target_smiles=smi, index=index, validate_dict=validate_dict)
-            validate_dict = checkIsNumber(amount=amount, index=index, validate_dict=validate_dict)
+            # Check SMILES
+            reactant_smiles_columns = ["Reactant-1", "Reactant-2"]
+            print(uploaded_csv_df)
 
-    if len(validate_dict["warning_string"]) != 0:
-        validated = False
+            for reactant_smile_col in reactant_smiles_columns:
+                indexes = [i for i, smi in enumerate(uploaded_csv_df[reactant_smile_col])]
+                smiles_list = [smi.strip() for smi in uploaded_csv_df[reactant_smile_col]]
+                uploaded_csv_df[reactant_smile_col] = smiles_list
+                amounts_list = [amount for amount in uploaded_csv_df["Ammount_required (mg)"]]
+
+                for index, smi, amount in zip(indexes, smiles_list, amounts_list):
+                    validated, validate_dict = checkSMILES(
+                        target_smiles=smi,
+                        column_name=reactant_smile_col,
+                        index=index,
+                        validated=validated,
+                        validate_dict=validate_dict,
+                    )
+                    validated, validate_dict = checkIsNumber(
+                        amount=amount, index=index, validated=validated, validate_dict=validate_dict
+                    )
+
+            # Check reaction SMARTS using smiles and create product column
+            reactant_pairs = [
+                reactants
+                for reactants in zip(uploaded_csv_df["Reactant-1"], uploaded_csv_df["Reactant-2"])
+            ]
+
+            reaction_names = [reaction_name for reaction_name in uploaded_csv_df["Reaction-name"]]
+            products = []
+            for index, reactant_pair, reaction_name in zip(indexes, reactant_pairs, reaction_names):
+                validated, validate_dict, product_smiles = checkReaction(
+                    reactant_pair=reactant_pair,
+                    reaction_name=reaction_name,
+                    index=index,
+                    validated=validated,
+                    validate_dict=validate_dict,
+                )
+                products.append(product_smiles)
+
+            uploaded_csv_df["Products"] = products
+
+        break
+
+    while validated == True:
+        if validate_type == "retro-API":
+            #  Check number and names of columns
+            validated, validate_dict = checkNumberColumns(
+                columns, validated, validate_dict, expected_no_columns=2
+            )
+            # Check SMILES
+            indexes = [i for i, smi in enumerate(uploaded_csv_df["Targets"])]
+            smiles_list = [smi.strip() for smi in uploaded_csv_df["Targets"]]
+            uploaded_csv_df["Targets"] = smiles_list
+            amounts_list = [amount for amount in uploaded_csv_df["Ammount_required (mg)"]]
+
+            for index, smi, amount in zip(indexes, smiles_list, amounts_list):
+                validated, validate_dict = checkSMILES(
+                    target_smiles=smi,
+                    column_name="Targets",
+                    index=index,
+                    validated=validated,
+                    validate_dict=validate_dict,
+                )
+                validated, validate_dict = checkIsNumber(
+                    amount=amount, index=index, validated=validated, validate_dict=validate_dict
+                )
+        break
 
     # Delete tempory file if only validate selected
     if validate_only:
@@ -267,6 +328,115 @@ def uploadManifoldReaction(validate_output):
         project_info["project_name"] = project_name
 
         # Do Postera stuff
+        target_no = 1
+        for target_smiles, target_mass in zip(
+            uploaded_dict["Targets"], uploaded_dict["Ammount_required (mg)"]
+        ):
+
+            retrosynthesis_result = getManifoldretrosynthesis(target_smiles)
+            routes = retrosynthesis_result["routes"]
+
+            target_id = createTargetModel(
+                project_id=project_id,
+                smiles=target_smiles,
+                target_no=target_no,
+                target_mass=target_mass,
+            )
+
+            target_no += 1
+
+            pathway_no = 1
+
+            for route in routes:
+                no_steps = len(route["reactions"])
+
+                if no_steps > 0:
+                    # Check if reactions are OT friendly
+                    reactions = route["reactions"]
+
+                    reactions_found = [
+                        reaction for reaction in reactions if reaction["name"] in encoded_recipes
+                    ]
+
+                    if len(reactions_found) == no_steps:
+
+                        method_id = createMethodModel(
+                            target_id=target_id,
+                            nosteps=no_steps,
+                        )
+
+                        # Then loop over route for synthetic steps
+                        product_no = 1
+
+                        for reaction in reactions:
+                            reaction_class = reaction["name"]
+                            # Check if OT friendly and in encoded recipes
+                            print(reaction_class)
+                            if reaction_class in encoded_recipes:
+                                encoded_recipe = encoded_recipes[reaction_class]["recipe"]
+                                reactant_SMILES = reaction["reactantSmiles"]
+                                product_smiles = reaction["productSmiles"]
+
+                                # Create a Reaction model
+                                reaction_smarts = AllChem.ReactionFromSmarts(
+                                    "{}>>{}".format(".".join(reactant_SMILES), product_smiles),
+                                    useSmiles=True,
+                                )
+                                reaction_id = createReactionModel(
+                                    method_id=method_id,
+                                    reaction_class=reaction_class,
+                                    reaction_smarts=reaction_smarts,
+                                )
+
+                                # Create a Product model
+                                createProductModel(
+                                    reaction_id=reaction_id,
+                                    project_name=project_name,
+                                    target_no=target_no,
+                                    pathway_no=pathway_no,
+                                    product_no=product_no,
+                                    product_smiles=product_smiles,
+                                )
+
+                                for action in encoded_recipe:
+                                    createEncodedActionModel(
+                                        reaction_id=reaction_id,
+                                        action=action,
+                                        reactants=reactant_SMILES,
+                                        target_id=target_id,
+                                    )
+
+                                product_no += 1
+
+                            else:
+                                pass
+
+                pathway_no += 1
+
+    default_storage.delete(csv_fp)
+
+    return validate_dict, validated, project_info
+
+
+@shared_task
+def uploadCustomReaction(validate_output):
+    # Validate output is a list - this is one way to get
+    # Celery chaining to work where second function uses list output
+    # from first function (validate) called
+    validate_dict, validated, csv_fp, project_info, uploaded_dict = validate_output
+
+    if not validated:
+        # Delete tempory file if only validate selected
+        default_storage.delete(csv_fp)
+        return (validate_dict, validated, project_info)
+
+    if validated:
+        # Create project model and return project id
+        project_id, project_name = createProjectModel(project_info)
+        # Add project name to project info dict for emailing when upload complete
+        project_info["project_name"] = project_name
+
+        # Do custom chem stuff
         target_no = 1
         for target_smiles, target_mass in zip(
             uploaded_dict["Targets"], uploaded_dict["Ammount_required (mg)"]
