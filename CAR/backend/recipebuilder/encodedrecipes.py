@@ -189,7 +189,7 @@ encoded_recipes = {
             },
         ],
     },
-    "N-nucelophilic aromatic substitution": {
+    "N-nucleophilic aromatic substitution": {
         "reactionSMARTS": ["[#6:3]-[#7:1].[c:2]Br>>[c:2][N:1][#6:3]"],
         "recipe": [
             {
