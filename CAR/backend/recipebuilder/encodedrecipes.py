@@ -59,7 +59,7 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 5,
-                    "temperature": {"value": 25, "unit": "degrees celcius"},  # degrees celcius
+                    "temperature": {"value": 25, "unit": "degC"},  # degrees celcius
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
@@ -112,7 +112,7 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 4,
-                    "temperature": {"value": 25, "unit": "degrees celcius"},  # degrees celcius
+                    "temperature": {"value": 25, "unit": "degC"},  # degrees celcius
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
@@ -183,7 +183,7 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 5,
-                    "temperature": {"value": 25, "unit": "degrees celcius"},  # degrees celcius
+                    "temperature": {"value": 25, "unit": "degC"},  # degrees celcius
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
@@ -227,7 +227,7 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 3,
-                    "temperature": {"value": 50, "unit": "degrees celcius"},  # generic elevated temperature
+                    "temperature": {"value": 50, "unit": "degC"},  # generic elevated temperature
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
