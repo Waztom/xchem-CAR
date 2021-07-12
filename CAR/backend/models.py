@@ -146,6 +146,10 @@ class IBMDegasAction(models.Model):
 
 
 class IBMDrySolidAction(models.Model):
+    class TemperatureUnit(models.TextChoices):
+        degcel = "degC"
+        kelvin = "K"
+
     class Unit(models.TextChoices):
         seconds = "seconds"
         minutes = "minutes"
@@ -159,6 +163,10 @@ class IBMDrySolidAction(models.Model):
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
     temperature = models.IntegerField(null=True)
+    temperatureunit = models.CharField(
+        choices=TemperatureUnit.choices, default=TemperatureUnit.degcel, max_length=10
+    )
+
     duration = models.FloatField(null=True)
     durationunit = models.CharField(choices=Unit.choices, default=Unit.seconds, max_length=10)
     atmosphere = models.CharField(
@@ -265,6 +273,10 @@ class IBMPartitionAction(models.Model):
 
 
 class IBMpHAction(models.Model):
+    class TemperatureUnit(models.TextChoices):
+        degcel = "degC"
+        kelvin = "K"
+
     class Unit(models.TextChoices):
         ml = "ml"
         mmol = "mmol"
@@ -279,6 +291,9 @@ class IBMpHAction(models.Model):
     pH = models.FloatField(null=True)
     dropwise = models.BooleanField(default=False)
     temperature = models.FloatField(null=True)
+    temperatureunit = models.CharField(
+        choices=TemperatureUnit.choices, default=TemperatureUnit.degcel, max_length=10
+    )
 
 
 class IBMPhaseSeparationAction(models.Model):
@@ -288,6 +303,10 @@ class IBMPhaseSeparationAction(models.Model):
 
 
 class IBMQuenchAction(models.Model):
+    class TemperatureUnit(models.TextChoices):
+        degcel = "degC"
+        kelvin = "K"
+
     class Unit(models.TextChoices):
         ml = "ml"
         mmol = "mmol"
@@ -302,6 +321,9 @@ class IBMQuenchAction(models.Model):
     materialquantityunit = models.CharField(choices=Unit.choices, default=Unit.ml, max_length=10)
     dropwise = models.BooleanField(default=False)
     temperature = models.IntegerField(null=True)
+    temperatureunit = models.CharField(
+        choices=TemperatureUnit.choices, default=TemperatureUnit.degcel, max_length=10
+    )
 
 
 class IBMRefluxAction(models.Model):
@@ -330,10 +352,17 @@ class IBMRefluxAction(models.Model):
 
 
 class IBMSetTemperatureAction(models.Model):
+    class TemperatureUnit(models.TextChoices):
+        degcel = "degC"
+        kelvin = "K"
+
     reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE)
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
     temperature = models.IntegerField()
+    temperatureunit = models.CharField(
+        choices=TemperatureUnit.choices, default=TemperatureUnit.degcel, max_length=10
+    )
 
 
 class IBMStirAction(models.Model):
@@ -362,7 +391,7 @@ class IBMStirAction(models.Model):
     durationunit = models.CharField(choices=Unit.choices, default=Unit.hours, max_length=10)
     temperature = models.IntegerField(null=True)
     temperatureunit = models.CharField(
-        choices=Unit.choices, default=TemperatureUnit.degcel, max_length=10
+        choices=TemperatureUnit.choices, default=TemperatureUnit.degcel, max_length=10
     )
     stirringspeed = models.CharField(choices=Speed.choices, default=Speed.normal, max_length=10)
     atmosphere = models.CharField(choices=Atmosphere.choices, default=Atmosphere.air, max_length=10)
