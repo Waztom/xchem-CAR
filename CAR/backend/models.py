@@ -337,6 +337,10 @@ class IBMSetTemperatureAction(models.Model):
 
 
 class IBMStirAction(models.Model):
+    class TemperatureUnit(models.TextChoices):
+        degcel = "degC"
+        kelvin = "K"
+
     class Unit(models.TextChoices):
         seconds = "seconds"
         minutes = "minutes"
@@ -357,6 +361,9 @@ class IBMStirAction(models.Model):
     duration = models.FloatField(null=True)
     durationunit = models.CharField(choices=Unit.choices, default=Unit.hours, max_length=10)
     temperature = models.IntegerField(null=True)
+    temperatureunit = models.CharField(
+        choices=Unit.choices, default=TemperatureUnit.degcel, max_length=10
+    )
     stirringspeed = models.CharField(choices=Speed.choices, default=Speed.normal, max_length=10)
     atmosphere = models.CharField(choices=Atmosphere.choices, default=Atmosphere.air, max_length=10)
 
