@@ -142,6 +142,14 @@ CTRL + R
 ```sudo chown -R YOUR_USERNAME xchem-CAR/```
 Try pulling or creating a branch now 
 
+### <a name = "Node module not found"></a>Node module not found
+
+If the nodemodules folder is empty then try the following:
+```npm install --quiet --legacy-peer-deps```
+then
+```npm run dev```
+
+
 
 
 
