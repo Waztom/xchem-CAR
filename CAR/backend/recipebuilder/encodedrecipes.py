@@ -37,7 +37,7 @@ encoded_recipes = {
                         "SMILES": "CCN(C(C)C)C(C)C",
                         "quantity": {"value": 3.5, "unit": "moleq"},
                         "solvent": None,
-                        "density": 0.79,
+                        "density": 0.74,
                         "concentration": None,
                     },
                 },
@@ -59,7 +59,7 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 5,
-                    "temperature": 25,  # degrees celcius
+                    "temperature": {"value": 25, "unit": "degrees celcius"},  # degrees celcius
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
@@ -103,7 +103,7 @@ encoded_recipes = {
                         "SMILES": "CCN(C(C)C)C(C)C",
                         "quantity": {"value": 3.5, "unit": "moleq"},
                         "solvent": None,
-                        "density": 0.79,
+                        "density": 0.74,
                         "concentration": None,
                     },
                 },
@@ -112,7 +112,7 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 4,
-                    "temperature": 25,  # degrees celcius
+                    "temperature": {"value": 25, "unit": "degrees celcius"},  # degrees celcius
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
@@ -183,7 +183,7 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 5,
-                    "temperature": 25,  # degrees celcius
+                    "temperature": {"value": 25, "unit": "degrees celcius"},  # degrees celcius
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
@@ -227,7 +227,7 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 3,
-                    "temperature": 50,  # generic elevated temperature
+                    "temperature": {"value": 50, "unit": "degrees celcius"},  # generic elevated temperature
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
