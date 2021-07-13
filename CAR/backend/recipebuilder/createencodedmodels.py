@@ -150,7 +150,8 @@ class CreateEncodedActionModels(object):
             action_no = action["content"]["action_no"]
             duration = action["content"]["duration"]["value"]
             durationunit = action["content"]["duration"]["unit"]
-            temperature = action["content"]["temperature"]
+            temperature = action["content"]["temperature"]["value"]
+            temperatureunit = action["content"]["temperature"]["unit"]
 
             stir = IBMStirAction()
             stir.reaction_id = self.reaction_obj
@@ -159,6 +160,7 @@ class CreateEncodedActionModels(object):
             stir.duration = duration
             stir.durationunit = durationunit
             stir.temperature = temperature
+            stir.temperatureunit = temperatureunit
             stir.save()
 
         except Exception as error:

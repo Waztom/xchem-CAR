@@ -18,7 +18,7 @@ class ValidateFile(object):
         Args:
             csv_to_validate (.csv): Uploaded .csv file for testing validation
         """
-        self.df = pd.read_csv(csv_to_validate, encoding="ISO-8859-1")
+        self.df = pd.read_csv(csv_to_validate, encoding="utf8")
         self.df_columns = self.df.columns
         self.no_df_columns = len(self.df_columns)
         self.index_df_rows = range(0, len(self.df), 1)
