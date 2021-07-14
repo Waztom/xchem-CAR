@@ -138,6 +138,7 @@ class CreateEncodedActionModels(object):
                 add.materialquantity = self.calculateVolume(
                     molar_eqv=molar_eqv, conc_reagents=conc_reagents
                 )
+                add.solvent = solvent
 
             add.save()
 
