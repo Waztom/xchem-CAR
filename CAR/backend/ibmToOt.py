@@ -36,7 +36,153 @@ import backend.models
 #     IBMWashAction,
 # )
 
-print("Hello")
+
+class CollectActions(object):
+    """
+    Creates a CollectActions object for extracting action steps from the
+    DB
+    """
+
+    def __init__(self, projectid: int):
+        """
+        ValidateFile constructor
+        Args:
+            project (int): Project id for genrating automated protocols
+        """
+        self.projectid = projectid
+        self.actionmodels = [
+            backend.models.IBMAddAction,
+            backend.models.IBMCollectLayerAction,
+            backend.models.IBMConcentrateAction,
+            backend.models.IBMDegasAction,
+            backend.models.IBMDrySolidAction,
+            backend.models.IBMDrySolutionAction,
+            backend.models.IBMExtractAction,
+            backend.models.IBMFilterAction,
+            backend.models.IBMMakeSolutionAction,
+            backend.models.IBMPartitionAction,
+            backend.models.IBMpHAction,
+            backend.models.IBMPhaseSeparationAction,
+            backend.models.IBMQuenchAction,
+            backend.models.IBMRefluxAction,
+            backend.models.IBMSetTemperatureAction,
+            backend.models.IBMStirAction,
+            backend.models.IBMStoreAction,
+            backend.models.IBMWaitAction,
+            backend.models.IBMWashAction,
+        ]
+
+    def getActions(self):
+        # THIS NEEDS TO BE FIXED!!!!!!
+        allactions_list_df = []
+        targets = backend.models.Target.objects.filter(project_id=self.projectid)
+        methods = [backend.models.Method.objects.filter(target_id=target.id) for target in targets]
+        reactions = [
+            backend.models.Reaction.objects.filter(method_id=method[0].id) for method in methods
+        ]
+
+        for actionmodel in self.actionmodels:
+            for reaction in reactions:
+                actions_to_add_df = pd.DataFrame(
+                    list(actionmodel.objects.filter(reaction_id=reaction[0].id).values())
+                )
+                if not actions_to_add_df.empty:
+                    allactions_list_df.append(actions_to_add_df)
+        allactions_list_df = pd.concat(allactions_list_df)
+
+        self.allactions_df = allactions_list_df.sort_values(["reaction_id_id", "actionno"])
+
+    def docheck(self, row):
+        if row["actiontype"] in ["add", "wash", "extract"]:
+            return True
+        else:
+            return False
+
+    def actionfilter(
+        self, actions=None, reactionset=None
+    ):  # WTOSCR: needs splittting into filter and checking for doability
+
+        if reactionset != None:
+            subSetReactAct = self.allactions_df.loc[
+                (self.allactions_df["reaction_id_id"]).isin(reactionset)
+            ]
+        else:
+            subSetReactAct = self.allactions_df
+
+        if actions != None:
+            self.actionsfiltered = subSetReactAct.loc[(subSetReactAct["actiontype"]).isin(actions)]
+        else:
+            self.actionsfiltered = subSetReactAct
+
+        self.actionsfiltered["doable"] = self.actionsfiltered.apply(
+            lambda row: self.docheck(row), axis=1
+        )
+
+    def blockdefine(self):
+        # WTOSCR: 1) add doable to action models,  2) retreive data from database
+
+        actionswithblocks = pd.DataFrame(
+            columns=[
+                "id",
+                "reaction_id_id",
+                "actiontype",
+                "actionno",
+                "material",
+                "materialsmiles",
+                "materialquantity",
+                "materialquantityunit",
+                "dropwise",
+                "atmosphere",
+                "molecularweight",
+                "materialimage",
+                "layer",
+                "solvent",
+                "solventquantity",
+                "solventquantityunit",
+                "numberofrepetitions",
+                "temperature",
+                "duration",
+                "durationunit",
+                "stirringspeed",
+                "doable",
+                "blocknum",
+                "blockbool",
+            ]
+        )
+
+        for reaction in self.actionsfiltered[
+            "reaction_id_id"
+        ].unique():  # WTOSCR: check if two undoables produce 1 or two blocks
+            actions = self.actionsfiltered.loc[self.actionsfiltered["reaction_id_id"] == reaction]
+            currentblocknum = 0
+            currentblockbool = False
+            blocklist = {}
+            blocklist = [[], []]
+
+            for index, row in actions.iterrows():
+                if currentblockbool != row.loc["doable"]:
+                    currentblocknum += 1
+                    currentblockbool = row.loc["doable"]
+                blocklist[0].append(
+                    currentblocknum
+                )  # WTOSCR: should be dictionary [[int,bool],[int,bool],[int,bool]]
+                blocklist[1].append(currentblockbool)
+
+            actions["blocknum"] = blocklist[0]
+            actions["blockbool"] = blocklist[1]
+            actionswithblocks = actionswithblocks.append(actions, ignore_index=True)
+        self.actionsfiltered = actionswithblocks
+
+    def startProtocol(self):
+        for blocknum in self.actionsfiltered["blocknum"].unique():
+            actionsblock = self.actionsfiltered[self.actionsfiltered["blocknum"] == blocknum]
+            if actionsblock["blockbool"].values[0] == True:
+                otSession(
+                    name=f"block_{blocknum}",
+                    actions=actionsblock,
+                    author="Example Author",
+                    description="example description",
+                )
 
 
 class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or similar
@@ -578,155 +724,8 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         self.output.unsuportedAction("Concentrate not yet supported ")
 
 
-class CollectActions(object):
-    """
-    Creates a CollectActions object for extracting action steps from the
-    DB
-    """
-
-    def __init__(self, projectid: int):
-        """
-        ValidateFile constructor
-        Args:
-            project (int): Project id for genrating automated protocols
-        """
-        self.projectid = projectid
-        self.actionmodels = [
-            backend.models.IBMAddAction,
-            backend.models.IBMCollectLayerAction,
-            backend.models.IBMConcentrateAction,
-            backend.models.IBMDegasAction,
-            backend.models.IBMDrySolidAction,
-            backend.models.IBMDrySolutionAction,
-            backend.models.IBMExtractAction,
-            backend.models.IBMFilterAction,
-            backend.models.IBMMakeSolutionAction,
-            backend.models.IBMPartitionAction,
-            backend.models.IBMpHAction,
-            backend.models.IBMPhaseSeparationAction,
-            backend.models.IBMQuenchAction,
-            backend.models.IBMRefluxAction,
-            backend.models.IBMSetTemperatureAction,
-            backend.models.IBMStirAction,
-            backend.models.IBMStoreAction,
-            backend.models.IBMWaitAction,
-            backend.models.IBMWashAction,
-        ]
-
-    def getActions(self):
-        # THIS NEEDS TO BE FIXED!!!!!!
-        self.allactions = []
-        targets = backend.models.Target.objects.filter(project_id=self.projectid)
-        methods = [backend.models.Method.objects.filter(target_id=target.id) for target in targets]
-        reactions = [
-            backend.models.Reaction.objects.filter(method_id=method[0].id) for method in methods
-        ]
-
-        for actionmodel in enumerate(self.actionmodels):
-            actions_to_add = [
-                pd.DataFrame(list(actionmodel.objects.filter(reaction_id=reaction[0].id).values()))
-                for reaction in reactions
-            ]
-            self.allactions.append(actions_to_add)
-        self.allactions = self.allactions.sort_values(["reaction_id_id", "actionno"])
-        print(self.allactions)
-
-        self.allactions = pd.concat(self.allactions, axis=1)
-
-    def docheck(self, row):
-        if row["actiontype"] in ["add", "wash", "extract"]:
-            return True
-        else:
-            return False
-
-    def actionfilter(
-        self, actions=None, reactionset=None
-    ):  # WTOSCR: needs splittting into filter and checking for doability
-
-        if reactionset != None:
-            subSetReactAct = self.allactions.loc[
-                (self.allactions["reaction_id_id"]).isin(reactionset)
-            ]
-        else:
-            subSetReactAct = self.allactions
-
-        if actions != None:
-            self.actionsfiltered = subSetReactAct.loc[(subSetReactAct["actiontype"]).isin(actions)]
-        else:
-            self.actionsfiltered = subSetReactAct
-
-        self.actionsfiltered["doable"] = self.actionsfiltered.apply(
-            lambda row: self.docheck(row), axis=1
-        )
-        self.blockdefine()
-
-    def blockdefine(self):
-        # WTOSCR: 1) add doable to action models,  2) retreive data from database
-
-        actionswithblocks = pd.DataFrame(
-            columns=[
-                "id",
-                "reaction_id_id",
-                "actiontype",
-                "actionno",
-                "material",
-                "materialsmiles",
-                "materialquantity",
-                "materialquantityunit",
-                "dropwise",
-                "atmosphere",
-                "molecularweight",
-                "materialimage",
-                "layer",
-                "solvent",
-                "solventquantity",
-                "solventquantityunit",
-                "numberofrepetitions",
-                "temperature",
-                "duration",
-                "durationunit",
-                "stirringspeed",
-                "doable",
-                "blocknum",
-                "blockbool",
-            ]
-        )
-
-        for reaction in self.actionsfiltered[
-            "reaction_id_id"
-        ].unique():  # WTOSCR: check if two undoables produce 1 or two blocks
-            actions = self.actionsfiltered.loc[self.actionsfiltered["reaction_id_id"] == reaction]
-            currentblocknum = 0
-            currentblockbool = False
-            blocklist = {}
-            blocklist = [[], []]
-
-            for index, row in actions.iterrows():
-                if currentblockbool != row.loc["doable"]:
-                    currentblocknum += 1
-                    currentblockbool = row.loc["doable"]
-                blocklist[0].append(
-                    currentblocknum
-                )  # WTOSCR: should be dictionary [[int,bool],[int,bool],[int,bool]]
-                blocklist[1].append(currentblockbool)
-
-            actions["blocknum"] = blocklist[0]
-            actions["blockbool"] = blocklist[1]
-            self.actionsfiltered = actionswithblocks.append(actions, ignore_index=True)
-
-    def startProtocol(self):
-        for blocknum in self.actionsfiltered["blocknum"].unique():
-            actionsblock = self.actionsfiltered[self.actionsfiltered["blocknum"] == blocknum]
-        if actionsblock["blockbool"].values[0] == True:
-            otSession(
-                name=f"block_{blocknum}",
-                actions=actionsblock,
-                author="Example Author",
-                description="example description",
-            )
-
-
 collected_actions = CollectActions(projectid=233)
 collected_actions.getActions()
 collected_actions.actionfilter()
+collected_actions.blockdefine()
 collected_actions.startProtocol()
