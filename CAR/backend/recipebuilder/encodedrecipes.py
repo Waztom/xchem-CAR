@@ -119,14 +119,7 @@ encoded_recipes = {
         ],
     },
     "Reductive amination": {
-        "reactionSMARTS": [
-            "[#7:1].[#6:2]=O>>[CH1:2]-[#7R0:1]",
-            "[#7:1].[#6:2]=O>>[CH2R0:2]-[#7:1]",
-            "[#7:1].[#6:2]=O>>[CH1R0:2]-[#7:1]",
-            "[#7:1].[#6:2]=O>>[CH2:2]-[#7R0:1]",
-            "[#7:1].[#6:2]=O>>[CH3:2]-[#7R0:1]",
-            # HRWT: Try this for reactionSMILES: '[NX3;H2].[CX3]=[OX1] >> [NX3;H1]'
-        ],
+        "reactionSMARTS": ["[NX3;H2].[CX3]=[OX1] >> [NX3;H1]"],
         "recipe": [
             {
                 "name": "add",
@@ -191,10 +184,7 @@ encoded_recipes = {
         ],
     },
     "N-nucleophilic aromatic substitution": {
-        "reactionSMARTS": [
-            "[#6:3]-[#7:1].[c:2][F,Cl,Br,I]>>[c:2][N:1][#6:3]"
-        ],  # HR: added more halogens
-        # HRWT: Try this for reactionSMARTS: "[c][F,Cl,Br,I].[NX3;H2,H1]>>[c:2][N:1][#6:3]"" if above does not work
+        "reactionSMARTS": ["[c][F,Cl,Br,I].[NX3;H2,H1]>>[c:2][N:1][#6:3]"],
         "recipe": [
             {
                 "name": "add",
