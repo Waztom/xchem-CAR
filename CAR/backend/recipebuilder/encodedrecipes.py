@@ -37,7 +37,7 @@ encoded_recipes = {
                         "SMILES": "CCN(C(C)C)C(C)C",
                         "quantity": {"value": 3.5, "unit": "moleq"},
                         "solvent": None,
-                        "density": 0.79,
+                        "density": 0.74,
                         "concentration": None,
                     },
                 },
@@ -59,7 +59,7 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 5,
-                    "temperature": 25,  # degrees celcius
+                    "temperature": {"value": 25, "unit": "degC"},  # degrees celcius
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
@@ -103,7 +103,7 @@ encoded_recipes = {
                         "SMILES": "CCN(C(C)C)C(C)C",
                         "quantity": {"value": 3.5, "unit": "moleq"},
                         "solvent": None,
-                        "density": 0.79,
+                        "density": 0.74,
                         "concentration": None,
                     },
                 },
@@ -112,7 +112,7 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 4,
-                    "temperature": 25,  # degrees celcius
+                    "temperature": {"value": 25, "unit": "degC"},  # degrees celcius
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
@@ -125,6 +125,7 @@ encoded_recipes = {
             "[#7:1].[#6:2]=O>>[CH1R0:2]-[#7:1]",
             "[#7:1].[#6:2]=O>>[CH2:2]-[#7R0:1]",
             "[#7:1].[#6:2]=O>>[CH3:2]-[#7R0:1]",
+            # HRWT: Try this for reactionSMILES: '[NX3;H2].[CX3]=[OX1] >> [NX3;H1]'
         ],
         "recipe": [
             {
@@ -183,14 +184,17 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 5,
-                    "temperature": 25,  # degrees celcius
+                    "temperature": {"value": 25, "unit": "degC"},  # degrees celcius
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
         ],
     },
-    "N-nucelophilic aromatic substitution": {
-        "reactionSMARTS": ["[#6:3]-[#7:1].[c:2]Br>>[c:2][N:1][#6:3]"],
+    "N-nucleophilic aromatic substitution": {
+        "reactionSMARTS": [
+            "[#6:3]-[#7:1].[c:2][F,Cl,Br,I]>>[c:2][N:1][#6:3]"
+        ],  # HR: added more halogens
+        # HRWT: Try this for reactionSMARTS: "[c][F,Cl,Br,I].[NX3;H2,H1]>>[c:2][N:1][#6:3]"" if above does not work
         "recipe": [
             {
                 "name": "add",
@@ -227,7 +231,7 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 3,
-                    "temperature": 50,  # generic elevated temperature
+                    "temperature": {"value": 50, "unit": "degC"},  # generic elevated temperature
                     "duration": {"value": 12, "unit": "hours"},  # in hours
                 },
             },
