@@ -11,7 +11,7 @@ for development purposes**<br><br>
 these instructions are designed for Visual Studio Code which can be installed for free from: https://code.visualstudio.com/ 
 
 ## <a name="GitCryptKey"></a>Git-Crypt Key
-Secrets required for running CAR are encypted, to unencrpyt and run you will need the key from the XChem-CAR software maintainer<br><br>
+Secrets required for running CAR are encrypted, to unencrypt and run you will need the key from the XChem-CAR software maintainer<br><br>
 
 # <a name="RepositoryfromGitHub"></a>Clone the "xchem-car" repository from GitHub
 
@@ -19,7 +19,7 @@ XChem-CAR uses GitHub for version control<br>
 to get started with working on CAR clone the <em>"xchem-CAR"</em> Repository from github to your device.<br><br>
 
 ### <a name="UsefulGitHubbranches"></a>Useful GitHub branches
-| Branch  | Descripton                                            | URL                                 |
+| Branch  | Description                                            | URL                                 |
 |---------|-------------------------------------------------------|-------------------------------------|
 | Main    | Most recent, stable, release                          | https://github.com/Waztom/xchem-CAR |
 | Develop | new features will be added <br> here before being released | https://github.com/Waztom/xchem-CAR/tree/Develop |
@@ -30,14 +30,14 @@ all branches can be found: https://github.com/Waztom/xchem-CAR/branches
 
 # <a name="Docker"></a>Docker
 ## <a name="InstallDocker"></a>Install Docker 
-First you'll need Docker Desktop (or the relevent Docker Engine on Linux) you can find the appropriate download like this on https://www.docker.com/get-started
+First you'll need Docker Desktop (or the relevant Docker Engine on Linux) you can find the appropriate download like this on https://www.docker.com/get-started
 
 ## <a name="InstallDockerCompose"></a>Install Docker Compose
 once Docker is installed also install docker compose, instructions for Mac, Windows, Linux and other options are available: https://docs.docker.com/compose/install/
 
 Note with newer versions of Docker, Docker Compose is already preinstalled
 
-## <a name="InstallVSCodeExtention"></a>Install VS Code Extention
+## <a name="InstallVSCodeExtention"></a>Install VS Code Extension
 Docker and Docker Compose should now be installed <br> 
 <em>(If on Windows/Mac, start docker desktop)</em><br>
 
@@ -60,7 +60,7 @@ Ctrl + SHIFT + X and type in 'Remote - WSL' install this.
 
 
 # <a name="gitcrypt"></a>git-crypt
-git-crypt (https://github.com/AGWA/git-crypt) is used for encypting secrets required to run CAR
+git-crypt (https://github.com/AGWA/git-crypt) is used for encrypting secrets required to run CAR
 you need the appropriate <em>crypt-key</em> file from the software maintainer.
 
 If you are using a Windows machine then it is necessary to download the Windows Subsystem for Linux 2. A very good guide is found here: https://www.digitalocean.com/community/tutorials/how-to-install-the-windows-subsystem-for-linux-2-on-microsoft-windows-10
@@ -87,31 +87,46 @@ once Git-Crypt is installed unlock the secrets using:
 >```git-crypt unlock [path to git-crypt crypt-key]```
 
 # <a name="Startsystem"></a>Start system
-### <a name="LocateReopsitory"></a>Locate Reopsitory
+### <a name="LocateRepository"></a>Locate Repository
 * in terminal change directory to your copy of the repo :
-    >```cd ```<em>```[local file path to xchem-CAR repoistory]```
+    >```cd ```<em>```[local file path to xchem-CAR repository]```
 
     </em>
     or open VS Code and go to File-> Open Folder and open the repository directory<br>  
 ### <a name="StartRemoteContainer"></a>Start Remote Container
-* start Visual Studio remote container with **Ctrl + Shift + P** and type **"Remote-containers: Open folder in container"** then click on that option. <br> ensure you have the repsoitory folder [your file path/xchem-CAR] selected and choose **"Ok"**/**"Open"**
+* start Visual Studio remote container with **Ctrl + Shift + P** and type **"Remote-containers: Open folder in container"** then click on that option. <br> ensure you have the repository folder [your file path/xchem-CAR] selected and choose **"Ok"**/**"Open"**
 * Your container should start to build, click on the popup notification at the bottom right of visual studio to view the log/progress
 
 ### <a name="TimetoLaunch"></a>Time to Launch
 * Open a new terminal that you can interact with. if the terminal is visible at the bottom of the screen click on the plus "create new integrated terminal" or use the keybord shortcut "**Ctrl+Shift+`**" button or use the adjacent "split terminal" (or "**Ctrl+Shift+5**") button to see the new terminal adjacent to the current terminal
 * you should now be in the container running Debian Linux
-* in the new teminal type:
+* in the new terminal type:
     >```cd CAR``` <br>
-    >```python3 manage.py makemigrations backend``` <br>
-    >```python3 manage.py migrate backend``` <br>
+    >```mkdir log && touch logsfile.log``` <br>    
+    >```python3 manage.py makemigrations``` <br>
+    >```python3 manage.py migrate``` <br>
+    >```npm install --quiet --legacy-peer-deps```<br>
+    >```python3 manage.py runserver```<br>
+* to compile the main.js file, in a separate terminal inside your development container:
+    >```npm run dev```<br>
+
+If you are only interested in running the application or developing the backend code, you will only need to run the ```npm run dev``` command
+once. For frontend developers, the npm command above tracks any changes made to the frontend code and recompiles the main.js file. 
+
+for future launches, you will not need to perform the migrations, install the node packages, compile the main.js and only need to launch the Django server by running:
+    >```cd CAR``` <br>
     >```python3 manage.py runserver```<br>
 
-    before you open the application **you must** complete the next step, starting Celery
-### <a name="StartingCelery"></a>Starting Celery
+to upload files in CAR, you need to start a Celery worker in a separate terminal inside your development container:
 * open a new terminal the same way as last time ([see Time to Launch](#TimeToLaunch))
 * in the new terminal type:
     >```cd CAR```<br>
     >```celery -A CAR worker -l info```
+ 
+if you make any changes to the Django models, you will need to run the the migrations again in the CAR directory:
+    >```python3 manage.py makemigrations```<br>
+    >```python3 manage.py migrate``` <br>
+    
 # Opening the application
 at the end of the step "[Time to Launch](#TimeToLaunch)" an address to use the visual interface should have been displayed ("http://127.0.0.1:8000/"), Ctrl+Click on the link in terminal or copy and paste the link into your web browser to use the CAR interface
 >http://127.0.0.1:8000/
@@ -119,46 +134,10 @@ at the end of the step "[Time to Launch](#TimeToLaunch)" an address to use the v
 
 ### <a name="Troubleshooting"></a>Troubleshooting
 
-Users have reported problems with instructions in "Time to Launch":
-```
-raise KeyError(key) from None
-KeyError: 'SendGrid_API_KEY'
-
-```
-A fix is to change the file permission settings from your Linux terminal 
-
-`sudo chown -R YOUR_NAME_HERE xchem-CAR/`
-
-Another error which cropped up was a Value Error. To solve this try creating a "logs/logfile.logs" file in /workspace/CAR/logs. If this directory does not exist use the `mkdir` command in the Linux terminal
-
-Try running the "Time to Launch" code again.
-
-
+WLS2/Windows users have reported problems with instructions in "Time to Launch":
 ### <a name="File Permissions"></a>File Permissions 
-Sometimes, when a new branch is created on Github or you try to ```git pull``` permission errors appear, below is a fix which we found to work.
-In your Linux terminal:
-```cd ~``` need to be in root
-CTRL + R
-```sudo chown -R YOUR_USERNAME xchem-CAR/```
-Try pulling or creating a branch now 
-
-### <a name = "Node module not found"></a>Node module not found
-
-If the nodemodules folder is empty then try the following:
-```npm install --quiet --legacy-peer-deps```
-then
-```npm run dev```
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
+Sometimes, when a new branch is created on Github, try to ```git pull```, get a keyerror for accessing the environment variables in the development container or trying to run the ```npm run dev``` yielding a ```Error: EACCES: permission denied```, you need to change the file permissions on the repo folder.
+ 
+In your WSL2 Linux terminal **NB outside** your dev container:
+* change the file permissions of the repository folder
+```sudo chown -R <username> <path to xchem-CAR>``` 
