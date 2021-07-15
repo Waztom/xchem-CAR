@@ -119,14 +119,15 @@ encoded_recipes = {
         ],
     },
     "Reductive amination": {
-        "reactionSMARTS": ["[NX3;H2].[CX3]=[OX1] >> [NX3;H1]"],
+        "reactionSMARTS": ["[#7;H2:1].[#6:2](=[#8:3])>>[#7:1]-[#6:2]"],
         "recipe": [
             {
                 "name": "add",
                 "content": {
                     "action_no": 1,
                     "material": {
-                        "SMARTS": ["[#6][CX3](=O)[#6]", "[CX3H1](=O)[#6]"],  # check if works
+                        "SMARTS": ["[#6](=[#8])"], #This now searches for any carbonyl group (low specificty)
+                         #[#6][CX3](=O)[#6]", "[CX3H1](=O)[#6] OLD code for reference
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "ACN",
@@ -139,7 +140,8 @@ encoded_recipes = {
                 "content": {
                     "action_no": 2,
                     "material": {
-                        "SMARTS": ["[NX3;H1,H2;!$(NC=O)]"],
+                        "SMARTS": ["[#6]-[NX3]"],
+                        #[#6]-[#7;H2]
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "ACN",
@@ -184,7 +186,7 @@ encoded_recipes = {
         ],
     },
     "N-nucleophilic aromatic substitution": {
-        "reactionSMARTS": ["[c][F,Cl,Br,I].[NX3;H2,H1]>>[c:2][N:1][#6:3]"], 
+        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[c:3]-[N:2]>>[c:1]-[N:2]-[c:3]"], #HR 15/07/21: Changed Reaction SMARTS
         "recipe": [
             {
                 "name": "add",
@@ -193,7 +195,7 @@ encoded_recipes = {
                     "material": {
                         # What about looking for other nucelophiles? Check with Harry -> SMARTS above also not very general -> only
                         # looking for amines
-                        "SMARTS": ["[c][F,Cl,Br,I]", "[$([NX3](=O)=O),$([NX3+](=O)[O-])][!#8]"],
+                        "SMARTS": ["[c:1]-[F,Cl,Br,I]"], #HR 15/07/21 removing nitro group as identifier
                         # includes halides & NO2 not specifically attached to aromatic c as unlikely a Nu has NO2 attached
                         "SMILES": None,  # leaving group question eg OTs
                         "quantity": {"value": 1, "unit": "moleq"},
@@ -207,9 +209,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 2,
                     "material": {
-                        "SMARTS": [
-                            "[NX3;H2,H1;!$(NC=O)]"
-                        ],  # allowing both 1' & 2' amine to be Nu but not 3' due to sterics
+                        "SMARTS": ["[c:3]-[N:2]"],  # allowing amines 
                         "SMILES": None,
                         "quantity": {"value": 1.2, "unit": "moleq"},
                         "solvent": "MeOH",
