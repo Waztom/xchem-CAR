@@ -124,7 +124,7 @@ to upload files in CAR, you need to start a Celery worker in a separate terminal
     >```celery -A CAR worker -l info```<br>
  
 if you make any changes to the Django models, you will need to run the the migrations again in the CAR directory:
-    >```python3 manage.py makemigrations```<br>
+    >```python3 manage.py makemigrations``` <br>
     >```python3 manage.py migrate``` <br>
     
 # Opening the application
