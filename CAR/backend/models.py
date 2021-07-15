@@ -112,6 +112,7 @@ class IBMAddAction(models.Model):
         max_length=255,
         null=True,
     )
+    solvent = models.CharField(max_length=255, null=True)
 
 
 class IBMCollectLayerAction(models.Model):
