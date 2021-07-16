@@ -1,8 +1,6 @@
 """Checks validation of file for uploading to CAR"""
 from __future__ import annotations
 import pandas as pd
-from rdkit import Chem
-from rdkit.Chem import rdChemReactions
 
 from .recipebuilder.encodedrecipes import encoded_recipes
 
@@ -120,10 +118,16 @@ class ValidateFile(object):
             self.index_df_rows, self.reactant_pair_smiles, self.reaction_names
         ):
             reaction_smarts = encoded_recipes[reaction_name]["reactionSMARTS"]
+            # print output and check????
             reacts = [Chem.MolFromSmiles(smi) for smi in reactant_pair]
-
+            # Do we need to still loop through SMARTS??????????
             for smarts in reaction_smarts:
                 reaction = rdChemReactions.ReactionFromSmarts(smarts)
+                # Need to inlude check for reactants in correct order using paterns from reacttion SMARTS????
+                # Check if the reactant pair can be assigned????
+
+                # This code assumes reaction order set correctly in upload csv - order should not matter and
+                # need to check reactant SMARTS and assign order if both check out
                 products = reaction.RunReactants(reacts)
                 if len(products) != 0:
                     print(Chem.MolToSmiles(products[0][0]))
