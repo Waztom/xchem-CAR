@@ -1,6 +1,8 @@
 """Checks validation of file for uploading to CAR"""
 from __future__ import annotations
 import pandas as pd
+from rdkit import Chem
+from rdkit.Chem import rdChemReactions
 
 from .recipebuilder.encodedrecipes import encoded_recipes
 
