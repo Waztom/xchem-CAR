@@ -237,7 +237,7 @@ encoded_recipes = {
                     "material":{
                         "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
                         "SMILES": None,
-                        "quantity": {"value": "Unsure yet", "unit": "moleq"},
+                        "quantity": {"value": 1, "unit": "moleq"},
                         "solvent": "EtOH",
                         "concentration": "Whatever this is",
                     },
@@ -250,7 +250,7 @@ encoded_recipes = {
                     "material":{
                         "SMARTS": ["[#6:2]-[B]"],
                         "SMILES": None,
-                        "quantity": {"value": "Unsure yet", "unit": "moleq"},
+                        "quantity": {"value": 2, "unit": "moleq"},
                         "solvent": "EtOH",
                         "concentration": "Whatever this is",
                     },
@@ -263,8 +263,8 @@ encoded_recipes = {
                     "material":{
                         "SMARTS": None,
                         "SMILES": "[Fe].Cl[Pd]Cl.[CH]1[CH][CH][C]([CH]1)P(c2ccccc2)c3ccccc3.[CH]4[CH][CH][C]([CH]4)P(c5ccccc5)c6ccccc6",
-                        #Smiles for the Pd-Ferrocene catalyst we have
-                        "quantity": {"value": "Unsure yet", "unit": "moleq"},
+                        #Smiles for the Pd-Ferrocene catalyst we have, change to Smiles for XPhosPdG3 
+                        "quantity": {"value": 10, "unit": "mol%"},
                         "solvent": "EtOH",
                         "concentration": "Whatever this is",
                     },
