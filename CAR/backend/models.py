@@ -63,6 +63,7 @@ class Product(models.Model):
     name = models.CharField(max_length=255, unique=True)
     smiles = models.CharField(max_length=255, db_index=True, null=True)
     image = models.FileField(upload_to="productimages/", max_length=255)
+    mculeid = models.CharField(max_length=255, null=True)
 
 
 class AnalyseAction(models.Model):
@@ -113,6 +114,7 @@ class IBMAddAction(models.Model):
         null=True,
     )
     solvent = models.CharField(max_length=255, null=True)
+    mculeid = models.CharField(max_length=255, null=True)
 
 
 class IBMCollectLayerAction(models.Model):

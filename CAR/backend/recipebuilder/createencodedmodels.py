@@ -1,5 +1,6 @@
 from rdkit import Chem
 from rdkit.Chem import Descriptors
+import pycule
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
