@@ -130,7 +130,7 @@ encoded_recipes = {
                          #[#6][CX3](=O)[#6]", "[CX3H1](=O)[#6] OLD code for reference
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "ACN",
+                        "solvent": "DMA",
                         "concentration": 0.5,
                     },
                 },
@@ -144,7 +144,7 @@ encoded_recipes = {
                         #[#6]-[#7;H2]
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "ACN",
+                        "solvent": "DMA",
                         "concentration": 0.5,
                     },
                 },
@@ -170,7 +170,7 @@ encoded_recipes = {
                         "SMARTS": None,
                         "SMILES": "CC(=O)O",
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "ACN",
+                        "solvent": "DMA",
                         "concentration": 0.5,
                     },
                 },
