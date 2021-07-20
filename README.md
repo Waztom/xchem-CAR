@@ -7,6 +7,10 @@ Instructions for downloading and running XChem-CAR for developers,<br>
 **Continue with this guide if you wish to download as setup XChem-CAR 
 for development purposes**<br><br>
 
+## <a name="Setting up Windows Subsystem for Linux"></a>Windows subsystem for linux
+If you're using Windows, to install git-crypt, it's strongly advised that you install Windows Subsystem for Linux (WSL). 
+For seting up WSL2 - you can follow these instructions: https://www.digitalocean.com/community/tutorials/how-to-install-the-windows-subsystem-for-linux-2-on-microsoft-windows-10 and/or https://docs.microsoft.com/en-gb/windows/wsl/install-win10
+
 ## <a name="VisualStudioCode"></a>Visual Studio Code 
 these instructions are designed for Visual Studio Code which can be installed for free from: https://code.visualstudio.com/ 
 
@@ -37,7 +41,7 @@ once Docker is installed also install docker compose, instructions for Mac, Wind
 
 Note with newer versions of Docker, Docker Compose is already preinstalled
 
-## <a name="InstallVSCodeExtention"></a>Install VS Code Extention
+## <a name="InstallVSCodeExtention"></a>Install VS Code Extensions
 Docker and Docker Compose should now be installed <br> 
 <em>(If on Windows/Mac, start docker desktop)</em><br>
 
@@ -56,7 +60,8 @@ Once installed a box with two arrows pointing in opposite directions should appe
 <br>
 
 ## <a name="InstallRemoteWSL"></a>Install RemoteWSL Extension
-Ctrl + SHIFT + X and type in 'Remote - WSL' install this.
+Ctrl + SHIFT + X and type in 'Remote - WSL' to install the extension.
+See (https://code.visualstudio.com/blogs/2020/07/01/containers-wsl) for more information about using dev containers in WSL2
 
 
 # <a name="gitcrypt"></a>git-crypt
