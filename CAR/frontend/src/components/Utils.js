@@ -18,3 +18,8 @@ export async function patchChange(actiontype, id, variablename, value) {
     console.log(error);
   }
 }
+
+export const openInNewTab = (url) => {
+  const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+  if (newWindow) newWindow.opener = null;
+};
