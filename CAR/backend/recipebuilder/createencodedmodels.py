@@ -1,12 +1,14 @@
 from rdkit import Chem
 from rdkit.Chem import Descriptors
-import pycule
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
+import os
 import sys
+from ..mcule.apicalls import MCuleAPI
 
 sys.path.append("..")
+
 
 # Import standard models
 from ..models import Project, Target, Method, Reaction, Product, AnalyseAction
@@ -63,6 +65,7 @@ class CreateEncodedActionModels(object):
         self.reaction_obj = Reaction.objects.get(id=reaction_id)
         self.reactant_pair_smiles = reactant_pair_smiles
         self.target_mols = Target.objects.get(id=target_id).targetmols
+        self.mculeapi = MCuleAPI()
 
         for action in self.actions:
             self.createEncodedActionModel(action)
@@ -118,6 +121,15 @@ class CreateEncodedActionModels(object):
             mol = Chem.MolFromSmiles(reactant_SMILES)
             molecular_weight = Descriptors.ExactMolWt(mol)
             add.materialsmiles = reactant_SMILES
+            mculeinfo = self.mculeapi.getMCuleInfo(smiles=reactant_SMILES)
+            if mculeinfo:
+                mculeid = mculeinfo[0]
+                add.mculeid = mculeid
+                add.mculeurl = mculeinfo[1]
+                priceinfo = self.mculeapi.getMCulePrice(mculeid=mculeid, amount=10)
+                if priceinfo:
+                    add.mculeprice = priceinfo[0]
+                    add.mculedeliverytime = priceinfo[1]
             add.molecularweight = molecular_weight
             add_svg_string = createSVGString(reactant_SMILES)
             add_svg_fn = default_storage.save(

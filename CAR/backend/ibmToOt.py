@@ -6,7 +6,7 @@ import re
 
 import opentrons.otWrite as otWrite
 import opentrons.otDeck as otDeck
-import ordering.OutputPlateTxt as OutputPlateTxt
+import mcule.OutputPlateTxt as OutputPlateTxt
 
 import backend.models
 

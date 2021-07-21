@@ -6,17 +6,20 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
+import Alert from "react-bootstrap/Alert";
 import { Trash } from "react-bootstrap-icons";
 
 import SetQuantity from "../SetActionInputs/SetQuantity";
-
 import JSMEModal from "../MolDrawer/JSMEModal";
 import MolAlert from "../TooltipsWarnings/MolAlert";
+
+import { openInNewTab } from "../Utils";
 
 const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
   const [Action, setAction] = useState(action);
   const [Show, setShow] = useState(false);
   const [ShowAlert, setShowAlert] = useState(false);
+  const [MCuleid, setMCuleid] = useState(action.mculeid);
 
   const actiontype = Action.actiontype;
   const id = Action.id;
@@ -78,6 +81,17 @@ const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
           <Button className="editcompound" onClick={() => handleShow()}>
             <Image src={SVG} alt={action.material} fluid />
           </Button>
+          {MCuleid !== null ? (
+            <Button onClick={() => openInNewTab(Action.mculeurl)}>
+              ${Action.mculeprice} - 10 mg <br /> {Action.mculedeliverytime}{" "}
+              days delivery time
+            </Button>
+          ) : (
+            <Button disabled="true">
+              Compound not found <br /> in MCule DB
+            </Button>
+          )}
+
           <SetQuantity
             action={Action}
             updateAction={updateAction}

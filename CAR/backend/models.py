@@ -115,6 +115,9 @@ class IBMAddAction(models.Model):
     )
     solvent = models.CharField(max_length=255, null=True)
     mculeid = models.CharField(max_length=255, null=True)
+    mculeprice = models.FloatField(null=True)
+    mculeurl = models.CharField(max_length=255, null=True)
+    mculedeliverytime = models.IntegerField(null=True)
 
 
 class IBMCollectLayerAction(models.Model):
