@@ -114,6 +114,7 @@ class IBMAddAction(models.Model):
         null=True,
     )
     solvent = models.CharField(max_length=255, null=True)
+    concentration = models.FloatField(null=True)
     mculeid = models.CharField(max_length=255, null=True)
     mculeprice = models.FloatField(null=True)
     mculeurl = models.CharField(max_length=255, null=True)

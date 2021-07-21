@@ -6,35 +6,15 @@ import re
 
 import opentrons.otWrite as otWrite
 import opentrons.otDeck as otDeck
-import mcule.OutputPlateTxt as OutputPlateTxt
+import mcule.outputplatetxt as OutputPlateTxt
 
 import backend.models
 
-# Import standard models
-# from .models import Target, Method, Reaction
+# can be used in ibmtoot by importing
+import mcule.outputplatecsv as OutputPlateCSV
 
-# # Import IBM models
-# from .models import (
-#     IBMAddAction,
-#     IBMCollectLayerAction,
-#     IBMConcentrateAction,
-#     IBMDegasAction,
-#     IBMDrySolidAction,
-#     IBMDrySolutionAction,
-#     IBMExtractAction,
-#     IBMFilterAction,
-#     IBMMakeSolutionAction,
-#     IBMPartitionAction,
-#     IBMpHAction,
-#     IBMPhaseSeparationAction,
-#     IBMQuenchAction,
-#     IBMRefluxAction,
-#     IBMSetTemperatureAction,
-#     IBMStirAction,
-#     IBMStoreAction,
-#     IBMWaitAction,
-#     IBMWashAction,
-# )
+# and calling:
+# OutputPlateTxt.PlateCSV(self.orderplate, self.name, self.author, currentblocknum)
 
 
 class CollectActions(object):
@@ -333,17 +313,33 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         # print(self.actions)
 
         allmaterials = pd.DataFrame(
-            columns=["material", "materialsmiles" "materialquantity", "solvent", "materialKey"]
+            columns=[
+                "mculeid",
+                "concentration",
+                "material",
+                "materialsmiles",
+                "materialquantity",
+                "solvent",
+                "materialKey",
+            ]
         )  # WTOSCR: should proberbly check about a Django model
 
         # each block getting a list of materials associated with that action type and concatinating them to the pandas Dataframe, All materials
         if incAddMaterials == True:
             addingSteps = self.actions.loc[(self.actions["actiontype"]) == "add"]
-            materials = addingSteps[["material", "materialsmiles", "materialquantity", "solvent"]]
+            materials = addingSteps[
+                [
+                    "mculeid",
+                    "concentration",
+                    "material",
+                    "materialsmiles",
+                    "materialquantity",
+                    "solvent",
+                ]
+            ]
             key = addingSteps[["materialsmiles"]]
             key = key.rename(columns={"materialsmiles": "materialKey"})  # material key is smiles
             materials = pd.concat([materials, key], axis=1)
-            print(materials)
             allmaterials = pd.concat([allmaterials, materials], ignore_index=True)
 
         if (
@@ -364,11 +360,12 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
                 "material": "first",
                 "solvent": "first",
                 "materialsmiles": "first",
+                "mculeid": "first",
+                "concentration": "first",
             }
         )
         allmaterials = allmaterials.sort_values(["solvent", "materialquantity"], ascending=False)
         # experement with adding a working materials+sovlent collum to group by then drop that col
-
         self.maxvolume = allmaterials["materialquantity"].max()  # not currently used
         self.totalvolume = allmaterials["materialquantity"].sum()  # not currently used
 
@@ -388,15 +385,15 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
 
         for i in allmaterials.index.values:
             if (
-                allmaterials.loc[i, "material"] == ""
-                or allmaterials.loc[i, "material"] == None
-                or allmaterials.loc[i, "material"] == "NaN"
+                allmaterials.at[i, "material"] == ""
+                or allmaterials.at[i, "material"] == None
+                or allmaterials.at[i, "material"] == "NaN"
             ):
-                matName = allmaterials.loc[
+                matName = allmaterials.at[
                     i, "materialsmiles"
                 ]  # implement chemical name check for all reactants and reagents
             else:
-                matName = allmaterials.loc[i, "material"]
+                matName = allmaterials.at[i, "material"]
 
             # Check if free well
             self.orderplate.nextfreewell()
@@ -405,14 +402,17 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
                 wellnumber = self.orderplate.nextfreewellindex
 
                 self.orderplate.WellList[wellnumber].add(
-                    Ammount=allmaterials.loc[i, "materialquantity"],
-                    smiles=allmaterials.loc[i, "materialsmiles"],
-                    solvent=allmaterials.loc[i, "solvent"],
-                    MaterialName=matName,
+                    amount=allmaterials.at[i, "materialquantity"],
+                    smiles=allmaterials.at[i, "materialsmiles"],
+                    solvent=allmaterials.at[i, "solvent"],
+                    materialname=matName,
+                    mculeid=allmaterials.at[i, "mculeid"],
+                    concentration=allmaterials.at[i, "concentration"],
                 )
 
         currentblocknum = self.actions["blocknum"].values[0]
-        OutputPlateTxt.PlateTxt(self.orderplate, self.name, self.author, currentblocknum)
+        OutputPlateCSV.PlateCSV(self.orderplate, self.name, self.author, currentblocknum)
+        # OutputPlateTxt.PlateTxt(self.orderplate, self.name, self.author, currentblocknum)
         # WTOSCR: add qc.text file at end of session once output plates are filled
         # if well overvlows (outcome == False) needs to move to next weel
         # if outcome != False:
@@ -724,7 +724,7 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         self.output.unsuportedAction("Concentrate not yet supported ")
 
 
-collected_actions = CollectActions(projectid=233)
+collected_actions = CollectActions(projectid=252)
 collected_actions.getActions()
 collected_actions.actionfilter()
 collected_actions.blockdefine()

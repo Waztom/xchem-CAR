@@ -3,7 +3,6 @@ from rdkit.Chem import Descriptors
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-import os
 import sys
 from ..mcule.apicalls import MCuleAPI
 
@@ -110,7 +109,7 @@ class CreateEncodedActionModels(object):
 
             action_no = action["content"]["action_no"]
             molar_eqv = action["content"]["material"]["quantity"]["value"]
-            conc_reagents = action["content"]["material"]["concentration"]
+            concentration = action["content"]["material"]["concentration"]
             solvent = action["content"]["material"]["solvent"]
 
             add = IBMAddAction()
@@ -118,6 +117,7 @@ class CreateEncodedActionModels(object):
             add.actiontype = action_type
             add.actionno = action_no
             material = getChemicalName(reactant_SMILES)
+            add.material = material
             mol = Chem.MolFromSmiles(reactant_SMILES)
             molecular_weight = Descriptors.ExactMolWt(mol)
             add.materialsmiles = reactant_SMILES
@@ -149,10 +149,10 @@ class CreateEncodedActionModels(object):
 
             if solvent:
                 add.materialquantity = self.calculateVolume(
-                    molar_eqv=molar_eqv, conc_reagents=conc_reagents
+                    molar_eqv=molar_eqv, conc_reagents=concentration
                 )
                 add.solvent = solvent
-
+            add.concentration = concentration
             add.save()
 
         except Exception as error:

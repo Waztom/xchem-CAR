@@ -264,6 +264,8 @@ class Well:
         StartSolvent=None,
         GoalSmiles=None,
         MaterialName=None,
+        mculeid=None,
+        concentration=None,
     ):
         self.plate = Plate
         self.wellindex = wellindex
@@ -273,6 +275,8 @@ class Well:
         self.StartSolvent = StartSolvent
         self.GoalSmiles = GoalSmiles
         self.MaterialName = MaterialName
+        self.mculeid = mculeid
+        self.concentration = concentration
 
     def __repr__(self):
         return "P{}W{}".format(self.plate.plateIndex, self.wellindex)
@@ -280,13 +284,13 @@ class Well:
     def __str__(self):
         return "Plate {}, Well {}".format(self.plate.plateIndex, self.wellindex)
 
-    def add(self, Ammount, smiles="", solvent="", MaterialName=""):
+    def add(self, mculeid, concentration, amount, smiles="", solvent="", materialname=""):
         SafetyMargin = 0  # percentage of the well's volume to be keept empty to prevent overvlow
-        WorkingVolumeused = self.VolumeUsed + Ammount
+        WorkingVolumeused = self.VolumeUsed + amount
         if WorkingVolumeused >= float(self.Volume) * (1 - (SafetyMargin / 100)):
             raise NameError(
                 "the resultant value of adding "
-                + str(Ammount)
+                + str(amount)
                 + "ul  to "
                 + str(self.VolumeUsed)
                 + "ul would be "
@@ -301,7 +305,7 @@ class Well:
         elif WorkingVolumeused < 0:
             raise NameError(
                 "the resultant value of adding "
-                + str(Ammount)
+                + str(amount)
                 + "ul to "
                 + str(self.VolumeUsed)
                 + "ul would be "
@@ -310,11 +314,13 @@ class Well:
             )
             self.VolumeUsed = False
         else:
+            self.mculeid = mculeid
+            self.concentration = concentration
             self.VolumeUsed = WorkingVolumeused
             if smiles != "":
                 self.changesmiles(start_smiles=smiles)
                 self.changesolvent(start_solvent=solvent)
-                self.changename(name=MaterialName)
+                self.changename(name=materialname)
         return self.VolumeUsed
 
     def isempty(self):
