@@ -53,7 +53,6 @@ class CreateEncodedActionModels(object):
     def __init__(
         self,
         actions: list,
-        project_id: int,
         target_id: int,
         reaction_id: int,
         reactant_pair_smiles: list,
@@ -67,13 +66,12 @@ class CreateEncodedActionModels(object):
             target_id (int): Target model id for reaction
             reactant_pair_smiles (list): List of reactant smiles
         """
+        self.mculeapi = MCuleAPI()
         self.actions = actions
-        self.project_obj = Project.objects.get(id=project_id)
         self.reaction_id = reaction_id
         self.reaction_obj = Reaction.objects.get(id=reaction_id)
         self.reactant_pair_smiles = reactant_pair_smiles
         self.target_mols = Target.objects.get(id=target_id).targetmols
-        self.mculeapi = MCuleAPI()
         self.mculeidlist = []
 
         for action in self.actions:
@@ -193,6 +191,29 @@ class CreateEncodedActionModels(object):
             print(error)
             print(action)
 
+
+class CreateMculeQuoteModel(object):
+    """
+    Creates a CreateMculeQuoteModel object for creating a Mcule quote
+    for a project
+    """
+
+    def __init__(
+        self,
+        mculeids: list,
+        project_id: int,
+    ):
+        """
+        ValidateFile constructor
+        Args:
+            mculeids (list): List of mcule ids
+            project_id (int): Project model id
+        """
+        self.mculeidlist = [item for sublist in mculeids for item in sublist]
+        self.project_obj = Project.objects.get(id=project_id)
+        self.mculeapi = MCuleAPI()
+        self.createMculeQuoteModel()
+
     def createMculeQuoteModel(self):
         quote_info = self.mculeapi.getTotalQuote(mculeids=self.mculeidlist)
 
@@ -208,97 +229,3 @@ class CreateEncodedActionModels(object):
 
             except Exception as error:
                 print(error)
-
-
-{
-    "response": {
-        "id": 36301,
-        "state_display": "Done",
-        "api_url": "https://mcule.com/api/v1/iquote-queries/36301/",
-        "site_url": "https://mcule.com/quote/query/36301/",
-        "group": {
-            "id": 28234,
-            "quotes": [
-                {
-                    "id": 42992,
-                    "reference_id_full": "I-42992",
-                    "valid_until": "2021-08-20T16:32:40.336",
-                    "po_number": None,
-                    "is_saved": False,
-                    "is_expired": False,
-                    "payment_due_days": 30,
-                    "avg_product_price": 50.830000000000005,
-                    "total_cost": 218.9,
-                    "total_cost_without_discount": 218.9,
-                    "type_display": "Best price",
-                    "state_display": "Displayed",
-                    "api_url": "https://mcule.com/api/v1/iquotes/42992/",
-                    "site_url": "https://mcule.com/quote/I-42992/",
-                    "created": "2021-07-21T16:32:40.336440",
-                    "updated": "2021-07-21T16:32:40.336456",
-                    "name": "",
-                    "description": "",
-                    "type": 10,
-                    "coverage_percent": 100,
-                    "price": "218.90",
-                    "products_price": "152.49",
-                    "delivery_price": "39.00",
-                    "shipping_price": "27.41",
-                    "reformatting_price": "0.00",
-                    "special_formatting_price": None,
-                    "analytical_services_price": "0.00",
-                    "total_discount_price": "0.00",
-                    "product_discount_price": "0.00",
-                    "extra_handling_price": "0.00",
-                    "discount": 0,
-                    "delivery_days": 9,
-                    "suppliers_count": 1,
-                    "state": 10,
-                    "stock_with_amount_ratio": 0,
-                    "duplicate_count": 0,
-                    "additional_document_notes": "",
-                    "group": 28234,
-                    "order_data": None,
-                }
-            ],
-            "site_url": "https://mcule.com/quote/group/28234/",
-            "created": "2021-07-21T16:32:40.330731",
-            "updated": "2021-07-21T16:32:40.330750",
-            "query": 36301,
-        },
-        "item_filters": {},
-        "customer_email": "warren.thompson@diamond.ac.uk",
-        "amount": 1,
-        "min_amount": 1,
-        "target_volume": None,
-        "target_cc": None,
-        "extra_amount": None,
-        "min_extra_amount": None,
-        "purity": None,
-        "delivery_time": 21,
-        "higher_amounts": False,
-        "keep_original_salt_form": False,
-        "keep_original_tautomer_form": False,
-        "keep_original_stereo_form": False,
-        "deliver_multiple_salt_forms": False,
-        "additional_document_notes": "",
-        "notes": "",
-        "thoroughness": 10,
-        "customer_first_name": "Warren",
-        "customer_last_name": "Thompson",
-        "delivery_country": "GB",
-        "delivery_contact_person_name": "",
-        "delivery_contact_person_email": "",
-        "delivery_contact_person_phone": "",
-        "delivery_post_code": "",
-        "delivery_city": "",
-        "delivery_address": "",
-        "created": "2021-07-21T16:32:36.549086",
-        "promo_code": "",
-        "state": 30,
-        "start_date": "2021-07-21T16:32:36.615390",
-        "end_date": "2021-07-21T16:32:40.346162",
-        "user": 20829,
-        "scheme": None,
-    }
-}

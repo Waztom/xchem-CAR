@@ -12,7 +12,7 @@ from .IBM.createmodels import (
 )
 from .IBM.apicalls import IBMAPI
 from .manifold.apicalls import getManifoldretrosynthesis
-from .recipebuilder.createmodels import CreateEncodedActionModels
+from .recipebuilder.createmodels import CreateEncodedActionModels, CreateMculeQuoteModel
 from .recipebuilder.encodedrecipes import encoded_recipes
 from rdkit.Chem import AllChem
 
@@ -181,6 +181,7 @@ def uploadManifoldReaction(validate_output):
         return (validate_dict, validated, project_info)
 
     if validated:
+        mculeids = []
         project_id, project_name = createProjectModel(project_info)
         project_info["project_name"] = project_name
 
@@ -246,13 +247,14 @@ def uploadManifoldReaction(validate_output):
                                     product_smiles=product_smiles,
                                 )
 
-                                CreateEncodedActionModels(
+                                create_models = CreateEncodedActionModels(
                                     actions=actions,
-                                    project_id=project_id,
                                     target_id=target_id,
                                     reaction_id=reaction_id,
                                     reactant_pair_smiles=reactant_pair_smiles,
                                 )
+
+                                mculeids.append(create_models.mculeidlist)
 
                                 product_no += 1
 
@@ -260,6 +262,8 @@ def uploadManifoldReaction(validate_output):
                                 pass
 
                 pathway_no += 1
+
+    CreateMculeQuoteModel(mculeids=mculeids, project_id=project_id)
 
     default_storage.delete(csv_fp)
 
@@ -276,6 +280,7 @@ def uploadCustomReaction(validate_output):
         return (validate_dict, validated, project_info)
 
     if validated:
+        mculeids = []
         project_id, project_name = createProjectModel(project_info)
         project_info["project_name"] = project_name
 
@@ -324,13 +329,16 @@ def uploadCustomReaction(validate_output):
 
             actions = encoded_recipes[reaction_name]["recipe"]
 
-            CreateEncodedActionModels(
+            create_models = CreateEncodedActionModels(
                 actions=actions,
-                project_id=project_id,
                 target_id=target_id,
                 reaction_id=reaction_id,
                 reactant_pair_smiles=reactant_pair_smiles,
             )
+
+            mculeids.append(create_models.mculeidlist)
+
+    CreateMculeQuoteModel(mculeids=mculeids, project_id=project_id)
 
     default_storage.delete(csv_fp)
 

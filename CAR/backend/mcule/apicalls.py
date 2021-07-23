@@ -65,8 +65,8 @@ class MCuleAPI(object):
         self,
         mculeids: list,
         delivery_country: str = "GB",
-        target_volume: float = None,
-        target_cc: float = None,
+        target_volume: float = 0.5,
+        target_cc: float = 500,
     ):
         """
         Get quote from MCule for list of mcule ids
