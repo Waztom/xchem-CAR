@@ -119,24 +119,18 @@ encoded_recipes = {
         ],
     },
     "Reductive amination": {
-        "reactionSMARTS": [
-            "[#7:1].[#6:2]=O>>[CH1:2]-[#7R0:1]",
-            "[#7:1].[#6:2]=O>>[CH2R0:2]-[#7:1]",
-            "[#7:1].[#6:2]=O>>[CH1R0:2]-[#7:1]",
-            "[#7:1].[#6:2]=O>>[CH2:2]-[#7R0:1]",
-            "[#7:1].[#6:2]=O>>[CH3:2]-[#7R0:1]",
-            # HRWT: Try this for reactionSMILES: '[NX3;H2].[CX3]=[OX1] >> [NX3;H1]'
-        ],
+        "reactionSMARTS": ["[#7;H2:1].[#6:2](=[#8:3])>>[#7:1]-[#6:2]"],
         "recipe": [
             {
                 "name": "add",
                 "content": {
                     "action_no": 1,
                     "material": {
-                        "SMARTS": ["[#6][CX3](=O)[#6]", "[CX3H1](=O)[#6]"],  # check if works
+                        "SMARTS": ["[#6](=[#8])"], #This now searches for any carbonyl group (low specificty)
+                         #[#6][CX3](=O)[#6]", "[CX3H1](=O)[#6] OLD code for reference
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "ACN",
+                        "solvent": "DMA",
                         "concentration": 0.5,
                     },
                 },
@@ -146,10 +140,11 @@ encoded_recipes = {
                 "content": {
                     "action_no": 2,
                     "material": {
-                        "SMARTS": ["[NX3;H1,H2;!$(NC=O)]"],
+                        "SMARTS": ["[#6]-[NX3]"],
+                        #[#6]-[#7;H2]
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "ACN",
+                        "solvent": "DMA",
                         "concentration": 0.5,
                     },
                 },
@@ -175,7 +170,7 @@ encoded_recipes = {
                         "SMARTS": None,
                         "SMILES": "CC(=O)O",
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "ACN",
+                        "solvent": "DMA",
                         "concentration": 0.5,
                     },
                 },
@@ -191,10 +186,7 @@ encoded_recipes = {
         ],
     },
     "N-nucleophilic aromatic substitution": {
-        "reactionSMARTS": [
-            "[#6:3]-[#7:1].[c:2][F,Cl,Br,I]>>[c:2][N:1][#6:3]"
-        ],  # HR: added more halogens
-        # HRWT: Try this for reactionSMARTS: "[c][F,Cl,Br,I].[NX3;H2,H1]>>[c:2][N:1][#6:3]"" if above does not work
+        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[c:3]-[N:2]>>[c:1]-[N:2]-[c:3]"], #HR 15/07/21: Changed Reaction SMARTS
         "recipe": [
             {
                 "name": "add",
@@ -203,7 +195,7 @@ encoded_recipes = {
                     "material": {
                         # What about looking for other nucelophiles? Check with Harry -> SMARTS above also not very general -> only
                         # looking for amines
-                        "SMARTS": ["[c][F,Cl,Br,I]", "[$([NX3](=O)=O),$([NX3+](=O)[O-])][!#8]"],
+                        "SMARTS": ["[c:1]-[F,Cl,Br,I]"], #HR 15/07/21 removing nitro group as identifier
                         # includes halides & NO2 not specifically attached to aromatic c as unlikely a Nu has NO2 attached
                         "SMILES": None,  # leaving group question eg OTs
                         "quantity": {"value": 1, "unit": "moleq"},
@@ -217,9 +209,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 2,
                     "material": {
-                        "SMARTS": [
-                            "[NX3;H2,H1;!$(NC=O)]"
-                        ],  # allowing both 1' & 2' amine to be Nu but not 3' due to sterics
+                        "SMARTS": ["[c:3]-[N:2]"],  # allowing amines 
                         "SMILES": None,
                         "quantity": {"value": 1.2, "unit": "moleq"},
                         "solvent": "MeOH",
@@ -237,4 +227,82 @@ encoded_recipes = {
             },
         ],
     },
+    "sp2-sp2 suzuki coupling": {
+        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:2]-[B]>>[c:1]-[#6:2]"],
+        "recipe": [
+            {
+                "name": "add",
+                "content":{
+                    "action_no": 1,
+                    "material":{
+                        "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
+                        "SMILES": None,
+                        "quantity": {"value": 1, "unit": "moleq"},
+                        "solvent": "EtOH",
+                        "concentration": "Whatever this is",
+                    },
+                },
+            },
+            {
+                "name": "add",
+                "content":{
+                    "action_no": 2,
+                    "material":{
+                        "SMARTS": ["[#6:2]-[B]"],
+                        "SMILES": None,
+                        "quantity": {"value": 2, "unit": "moleq"},
+                        "solvent": "EtOH",
+                        "concentration": "Whatever this is",
+                    },
+                },
+            },
+            {
+                "name": "add",
+                "content":{
+                    "action_no": 3,
+                    "material":{
+                        "SMARTS": None,
+                        "SMILES": "[Fe].Cl[Pd]Cl.[CH]1[CH][CH][C]([CH]1)P(c2ccccc2)c3ccccc3.[CH]4[CH][CH][C]([CH]4)P(c5ccccc5)c6ccccc6",
+                        #Smiles for the Pd-Ferrocene catalyst we have, change to Smiles for XPhosPdG3 
+                        "quantity": {"value": 10, "unit": "mol%"},
+                        "solvent": "EtOH",
+                        "concentration": "Whatever this is",
+                    },
+                },
+            },
+            {
+                "name": "add",
+                "content":{
+                    "action_no": 4,
+                    "material":{
+                        "SMARTS": None,
+                        "SMILES": "C1CCN2CCCN=C2CC1",#DBU used in Thompson paper
+                        "quantity": {"value": "Unsure yet", "unit": "moleq"},
+                        "solvent": "EtOH",
+                        "concentration": "Whatever this is",
+                    },
+                },
+            },
+            {
+                "name": "stir",
+                "content":{
+                    "action_no": 5,
+                    "temperature": {"value": 100, "unit": "degC"},  # high temp required
+                    "duration": {"value": 12, "unit": "hours"}, # in hours
+                },
+            },
+        ],
+    },
 }
+
+
+
+                
+            
+           
+                   
+
+                    
+          
+  
+
