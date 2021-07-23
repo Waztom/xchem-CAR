@@ -1,5 +1,6 @@
 from celery import shared_task
 from django.core.files.storage import default_storage
+from .models import Project
 from .validate import ValidateFile
 from .IBM.createibmmodels import (
     createProjectModel,
@@ -11,6 +12,7 @@ from .IBM.createibmmodels import (
 )
 from .IBM.apicalls import IBMAPI
 from .manifold.apicalls import getManifoldretrosynthesis
+from .mcule.apicalls import MCuleAPI
 from .recipebuilder.createencodedmodels import CreateEncodedActionModels
 from .recipebuilder.encodedrecipes import encoded_recipes
 from rdkit.Chem import AllChem
@@ -321,12 +323,22 @@ def uploadCustomReaction(validate_output):
 
             actions = encoded_recipes[reaction_name]["recipe"]
 
-            CreateEncodedActionModels(
+            encodedmodels = CreateEncodedActionModels(
                 reaction_id=reaction_id,
                 actions=actions,
                 reactant_pair_smiles=reactant_pair_smiles,
                 target_id=target_id,
             )
+
+            mculeids = encodedmodels.mculeidlist
+
+            quote_info = MCuleAPI.getTotalQuote(mculeids=mculeids)
+            if quote_info:
+                quoteurl, quotecost = quote_info
+                project = Project.objects.get(pk=project_id)
+                project.quotedcost = quotecost
+                project.quoteurl = quoteurl
+                project.save()
 
     default_storage.delete(csv_fp)
 

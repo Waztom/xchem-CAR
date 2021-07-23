@@ -15,6 +15,8 @@ class Project(models.Model):
     submitterorganisation = models.CharField(max_length=100)
     submittername = models.CharField(max_length=255)
     submitteremail = models.CharField(max_length=255)
+    quotedcost = models.FloatField(null=True)
+    quoteurl = models.CharField(max_length=255, null=True)
 
     def save(self, *args, **kwargs):
         if not self.name:
