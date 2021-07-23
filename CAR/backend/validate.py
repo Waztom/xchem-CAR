@@ -5,6 +5,7 @@ from rdkit import Chem
 from rdkit.Chem import rdChemReactions
 
 from .recipebuilder.encodedrecipes import encoded_recipes
+from .utils import canonSmiles
 
 
 class ValidateFile(object):
@@ -56,7 +57,7 @@ class ValidateFile(object):
             if self.validated:
                 self.checkColumnNames()
             if self.validated:
-                self.target_smiles = [smi.strip() for smi in self.df["Targets"]]
+                self.target_smiles = [canonSmiles(smi.strip()) for smi in self.df["Targets"]]
                 self.df["Targets"] = self.target_smiles
                 self.checkTargetSMILES()
                 if self.validated:
@@ -91,7 +92,6 @@ class ValidateFile(object):
     def checkTargetSMILES(self):
         for index, smi in zip(self.index_df_rows, self.target_smiles):
             mol = Chem.MolFromSmiles(smi)
-
             if mol is None:
                 self.add_warning(
                     field="check_smiles",

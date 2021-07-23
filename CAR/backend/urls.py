@@ -4,6 +4,7 @@ from rest_framework import routers
 # Import standard views
 from .api import (
     ProjectViewSet,
+    MculeQuoteViewSet,
     TargetViewSet,
     MethodViewSet,
     ReactionViewSet,
@@ -39,6 +40,7 @@ from .views import UploadProject, ValidateTaskView, UploadTaskView
 # Register standard routes
 router = routers.DefaultRouter()
 router.register("api/projects", ProjectViewSet, "projects")
+router.register("api/mculequotes", MculeQuoteViewSet, "mculequotes")
 router.register("api/targets", TargetViewSet, "targets")
 router.register("api/methods", MethodViewSet, "methods")
 router.register("api/reactions", ReactionViewSet, "reactions")
@@ -62,12 +64,16 @@ router.register(
 router.register("api/IBMpartitionactions", IBMPartitionActionViewSet, "IBMpartitionactions")
 router.register("api/IBMphactions", IBMpHActionViewSet, "IBMphactions")
 router.register(
-    "api/IBMphase-separationactions", IBMPhaseSeparationActionViewSet, "IBMphase-separationactions",
+    "api/IBMphase-separationactions",
+    IBMPhaseSeparationActionViewSet,
+    "IBMphase-separationactions",
 )
 router.register("api/IBMquenchactions", IBMQuenchActionViewSet, "IBMquenchactions")
 router.register("api/IBMrefluxactions", IBMRefluxActionViewSet, "IBMrefluxactions")
 router.register(
-    "api/IBMset-temperatureactions", IBMSetTemperatureActionViewSet, "IBMset-temperatureactions",
+    "api/IBMset-temperatureactions",
+    IBMSetTemperatureActionViewSet,
+    "IBMset-temperatureactions",
 )
 router.register("api/IBMstiractions", IBMStirActionViewSet, "IBMstiractions")
 router.register("api/IBMstoreactions", IBMStoreActionViewSet, "IBMstoreactions")
@@ -82,7 +88,11 @@ urlpatterns = [
         ValidateTaskView.as_view(),
         name="validate_task",
     ),
-    url(r"^upload_task/(?P<upload_task_id>.+)/$", UploadTaskView.as_view(), name="upload_task",),
+    url(
+        r"^upload_task/(?P<upload_task_id>.+)/$",
+        UploadTaskView.as_view(),
+        name="upload_task",
+    ),
 ]
 
 urlpatterns += router.urls

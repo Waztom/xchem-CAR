@@ -13,6 +13,12 @@ def calculateproductmols(target_mass, target_SMILES):
     return product_moles
 
 
+def canonSmiles(smiles):
+    mol = Chem.MolFromSmiles(smiles)
+    canon_smiles = Chem.MolToSmiles(mol)
+    return canon_smiles
+
+
 def convertIBMNameToSmiles(chemical_name):
     try:
         data = [chemical_name]

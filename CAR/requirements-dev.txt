@@ -6,4 +6,5 @@ pubchempy==1.0.4
 redis==3.5.3
 rxn4chemistry==0.4.0
 black==20.8b1
-flake8==3.9.1 
+flake8==3.9.1
+pycule

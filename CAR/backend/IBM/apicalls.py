@@ -14,6 +14,7 @@ import sys
 sys.path.append("..")
 
 from ..commonsolvents import common_solvents
+from ..utils import canonSmiles
 
 
 class IBMAPI(object):
@@ -35,11 +36,6 @@ class IBMAPI(object):
         rxn4chemistry_wrapper = RXN4ChemistryWrapper(api_key=self.api_key)
         rxn4chemistry_wrapper.create_project(self.project_name)
         self.rxn4chemistry_wrapper = rxn4chemistry_wrapper
-
-    def canonSmiles(self, smiles):
-        mol = Chem.MolFromSmiles(smiles)
-        canon_smiles = Chem.MolToSmiles(mol)
-        return canon_smiles
 
     def convertIBMNameToSmiles(self, chemical_name):
         try:
@@ -107,7 +103,7 @@ class IBMAPI(object):
     def collect_products(self, tree):
         products = []
         if "children" in tree and len(tree["children"]):
-            products.append(self.canonSmiles(tree["smiles"]))
+            products.append(canonSmiles(tree["smiles"]))
 
         for node in tree["children"]:
             products.extend(self.collect_products(node))
@@ -116,7 +112,7 @@ class IBMAPI(object):
     def collect_reactants(self, tree):
         reactants = []
         if "children" in tree and len(tree["children"]):
-            reactants.append([self.canonSmiles(node["smiles"]) for node in tree["children"]])
+            reactants.append([canonSmiles(node["smiles"]) for node in tree["children"]])
 
         for node in tree["children"]:
             reactants.extend(self.collect_reactants(node))
@@ -130,9 +126,9 @@ class IBMAPI(object):
                     "{}>>{}".format(
                         ".".join(
                             [
-                                self.canonSmiles(node["smiles"])
+                                canonSmiles(node["smiles"])
                                 for node in tree["children"]
-                                if self.canonSmiles(node["smiles"]) not in common_solvents
+                                if canonSmiles(node["smiles"]) not in common_solvents
                             ]
                         ),
                         tree["smiles"],

@@ -1,7 +1,8 @@
 from celery import shared_task
 from django.core.files.storage import default_storage
+from .models import Project
 from .validate import ValidateFile
-from .IBM.createibmmodels import (
+from .IBM.createmodels import (
     createProjectModel,
     createTargetModel,
     createMethodModel,
@@ -11,7 +12,7 @@ from .IBM.createibmmodels import (
 )
 from .IBM.apicalls import IBMAPI
 from .manifold.apicalls import getManifoldretrosynthesis
-from .recipebuilder.createencodedmodels import CreateEncodedActionModels
+from .recipebuilder.createmodels import CreateEncodedActionModels, CreateMculeQuoteModel
 from .recipebuilder.encodedrecipes import encoded_recipes
 from rdkit.Chem import AllChem
 
@@ -180,6 +181,7 @@ def uploadManifoldReaction(validate_output):
         return (validate_dict, validated, project_info)
 
     if validated:
+        mculeids = []
         project_id, project_name = createProjectModel(project_info)
         project_info["project_name"] = project_name
 
@@ -223,11 +225,11 @@ def uploadManifoldReaction(validate_output):
                             reaction_class = reaction["name"]
                             if reaction_class in encoded_recipes:
                                 actions = encoded_recipes[reaction_class]["recipe"]
-                                reactant_SMILES = reaction["reactantSmiles"]
+                                reactant_pair_smiles = reaction["reactantSmiles"]
                                 product_smiles = reaction["productSmiles"]
 
                                 reaction_smarts = AllChem.ReactionFromSmarts(
-                                    "{}>>{}".format(".".join(reactant_SMILES), product_smiles),
+                                    "{}>>{}".format(".".join(reactant_pair_smiles), product_smiles),
                                     useSmiles=True,
                                 )
                                 reaction_id = createReactionModel(
@@ -244,12 +246,15 @@ def uploadManifoldReaction(validate_output):
                                     product_no=product_no,
                                     product_smiles=product_smiles,
                                 )
-                                CreateEncodedActionModels(
-                                    reaction_id=reaction_id,
+
+                                create_models = CreateEncodedActionModels(
                                     actions=actions,
-                                    reactant_pair_smiles=reactant_SMILES,
                                     target_id=target_id,
+                                    reaction_id=reaction_id,
+                                    reactant_pair_smiles=reactant_pair_smiles,
                                 )
+
+                                mculeids.append(create_models.mculeidlist)
 
                                 product_no += 1
 
@@ -257,6 +262,8 @@ def uploadManifoldReaction(validate_output):
                                 pass
 
                 pathway_no += 1
+
+    CreateMculeQuoteModel(mculeids=mculeids, project_id=project_id)
 
     default_storage.delete(csv_fp)
 
@@ -273,6 +280,7 @@ def uploadCustomReaction(validate_output):
         return (validate_dict, validated, project_info)
 
     if validated:
+        mculeids = []
         project_id, project_name = createProjectModel(project_info)
         project_info["project_name"] = project_name
 
@@ -321,12 +329,16 @@ def uploadCustomReaction(validate_output):
 
             actions = encoded_recipes[reaction_name]["recipe"]
 
-            CreateEncodedActionModels(
-                reaction_id=reaction_id,
+            create_models = CreateEncodedActionModels(
                 actions=actions,
-                reactant_pair_smiles=reactant_pair_smiles,
                 target_id=target_id,
+                reaction_id=reaction_id,
+                reactant_pair_smiles=reactant_pair_smiles,
             )
+
+            mculeids.append(create_models.mculeidlist)
+
+    CreateMculeQuoteModel(mculeids=mculeids, project_id=project_id)
 
     default_storage.delete(csv_fp)
 
