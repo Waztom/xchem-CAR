@@ -40,9 +40,11 @@ all branches can be found: https://github.com/Waztom/xchem-CAR/branches
 
 ## <a name="InstallDocker"></a>Install Docker
 
-First you'll need Docker Desktop (or the relevant Docker Engine on Linux) you can find the appropriate download like this on https://www.docker.com/get-started
+First you'll need Docker Desktop (or the relevent Docker Engine on Linux) you can find the appropriate download like this on https://www.docker.com/get-started
 
 ## <a name="InstallDockerCompose"></a>Install Docker Compose
+
+once Docker is installed also install docker compose, instructions for Mac, Windows, Linux and other options are available: https://docs.docker.com/compose/install/
 
 once Docker is installed also install docker compose, instructions for Mac, Windows, Linux and other options are available: https://docs.docker.com/compose/install/
 
