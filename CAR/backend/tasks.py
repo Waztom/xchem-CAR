@@ -2,7 +2,7 @@ from celery import shared_task
 from django.core.files.storage import default_storage
 from .models import Project
 from .validate import ValidateFile
-from .IBM.createibmmodels import (
+from .IBM.createmodels import (
     createProjectModel,
     createTargetModel,
     createMethodModel,
@@ -12,8 +12,7 @@ from .IBM.createibmmodels import (
 )
 from .IBM.apicalls import IBMAPI
 from .manifold.apicalls import getManifoldretrosynthesis
-from .mcule.apicalls import MCuleAPI
-from .recipebuilder.createencodedmodels import CreateEncodedActionModels
+from .recipebuilder.createmodels import CreateEncodedActionModels
 from .recipebuilder.encodedrecipes import encoded_recipes
 from rdkit.Chem import AllChem
 
@@ -225,11 +224,11 @@ def uploadManifoldReaction(validate_output):
                             reaction_class = reaction["name"]
                             if reaction_class in encoded_recipes:
                                 actions = encoded_recipes[reaction_class]["recipe"]
-                                reactant_SMILES = reaction["reactantSmiles"]
+                                reactant_pair_smiles = reaction["reactantSmiles"]
                                 product_smiles = reaction["productSmiles"]
 
                                 reaction_smarts = AllChem.ReactionFromSmarts(
-                                    "{}>>{}".format(".".join(reactant_SMILES), product_smiles),
+                                    "{}>>{}".format(".".join(reactant_pair_smiles), product_smiles),
                                     useSmiles=True,
                                 )
                                 reaction_id = createReactionModel(
@@ -246,11 +245,13 @@ def uploadManifoldReaction(validate_output):
                                     product_no=product_no,
                                     product_smiles=product_smiles,
                                 )
+
                                 CreateEncodedActionModels(
-                                    reaction_id=reaction_id,
                                     actions=actions,
-                                    reactant_pair_smiles=reactant_SMILES,
+                                    project_id=project_id,
                                     target_id=target_id,
+                                    reaction_id=reaction_id,
+                                    reactant_pair_smiles=reactant_pair_smiles,
                                 )
 
                                 product_no += 1
@@ -323,22 +324,13 @@ def uploadCustomReaction(validate_output):
 
             actions = encoded_recipes[reaction_name]["recipe"]
 
-            encodedmodels = CreateEncodedActionModels(
-                reaction_id=reaction_id,
+            CreateEncodedActionModels(
                 actions=actions,
-                reactant_pair_smiles=reactant_pair_smiles,
+                project_id=project_id,
                 target_id=target_id,
+                reaction_id=reaction_id,
+                reactant_pair_smiles=reactant_pair_smiles,
             )
-
-            mculeids = encodedmodels.mculeidlist
-
-            quote_info = MCuleAPI.getTotalQuote(mculeids=mculeids)
-            if quote_info:
-                quoteurl, quotecost = quote_info
-                project = Project.objects.get(pk=project_id)
-                project.quotedcost = quotecost
-                project.quoteurl = quoteurl
-                project.save()
 
     default_storage.delete(csv_fp)
 

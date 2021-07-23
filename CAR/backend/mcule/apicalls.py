@@ -77,8 +77,10 @@ class MCuleAPI(object):
             target_volume (float): Total volume in ml requested. Default None
             target_cc (float): Target concentration in mM. Default None
         Returns:
-            quote: MCule quote
+            quote (dict): MCule quote info as a dictionary
         """
+        quote_info = {}
+
         try:
             response_dict = self.mculewrapper.quoterequest(
                 mcule_ids=mculeids,
@@ -97,10 +99,18 @@ class MCuleAPI(object):
                     quote_state_response = self.mculewrapper.quoterequeststatus(quote_id=quote_id)
                     quote_state = quote_state_response["response"]["state"]
 
-            quote_url = quote_state_response["response"]["site_url"]
-            quote_cost = quote_state_response["response"]["group"]["quotes"][0]["total_cost"]
+            quote_info["quoteid"] = quote_state_response["response"]["group"]["quotes"][0]["id"]
+            quote_info["quoteurl"] = quote_state_response["response"]["group"]["quotes"][0][
+                "site_url"
+            ]
+            quote_info["quotecost"] = quote_state_response["response"]["group"]["quotes"][0][
+                "total_cost"
+            ]
+            quote_info["quotevaliduntil"] = quote_state_response["response"]["group"]["quotes"][0][
+                "valid_until"
+            ]
 
-            return quote_url, quote_cost
+            return quote_info
 
         except Exception as e:
             print(e)

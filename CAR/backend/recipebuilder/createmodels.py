@@ -10,7 +10,7 @@ sys.path.append("..")
 
 
 # Import standard models
-from ..models import Project, Target, Method, Reaction, Product, AnalyseAction
+from ..models import Project, MculeQuote, Target, Method, Reaction, Product, AnalyseAction
 
 # Import IBM models
 from ..models import (
@@ -50,16 +50,25 @@ class CreateEncodedActionModels(object):
     for a reaction
     """
 
-    def __init__(self, actions: list, target_id: int, reaction_id: int, reactant_pair_smiles: list):
+    def __init__(
+        self,
+        actions: list,
+        project_id: int,
+        target_id: int,
+        reaction_id: int,
+        reactant_pair_smiles: list,
+    ):
         """
         ValidateFile constructor
         Args:
             actions (list): List of actions
+            project_id (int): Project model id
             reaction_id (int): Reaction model id for actions
             target_id (int): Target model id for reaction
             reactant_pair_smiles (list): List of reactant smiles
         """
         self.actions = actions
+        self.project_obj = Project.objects.get(id=project_id)
         self.reaction_id = reaction_id
         self.reaction_obj = Reaction.objects.get(id=reaction_id)
         self.reactant_pair_smiles = reactant_pair_smiles
@@ -72,8 +81,8 @@ class CreateEncodedActionModels(object):
 
     def createEncodedActionModel(self, action):
         actionMethods = {
-            "add": self.createEncodedAddAction,
-            "stir": self.createEncodedStirAction,
+            "add": self.createEncodedAddActionModel,
+            "stir": self.createEncodedStirActionModel,
         }
 
         action_type = action["name"]
@@ -96,7 +105,7 @@ class CreateEncodedActionModels(object):
             vol_material = (mol_material / conc_reagents) * 1e6  # in uL
         return vol_material
 
-    def createEncodedAddAction(self, action_type, action):
+    def createEncodedAddActionModel(self, action_type, action):
         try:
             if action["content"]["material"]["SMARTS"]:
                 SMARTS_pattern = action["content"]["material"]["SMARTS"]
@@ -161,7 +170,7 @@ class CreateEncodedActionModels(object):
             print(error)
             print(action)
 
-    def createEncodedStirAction(self, action_type, action):
+    def createEncodedStirActionModel(self, action_type, action):
         try:
             action_no = action["content"]["action_no"]
             duration = action["content"]["duration"]["value"]
@@ -183,6 +192,22 @@ class CreateEncodedActionModels(object):
             print(action_type)
             print(error)
             print(action)
+
+    def createMculeQuoteModel(self):
+        quote_info = self.mculeapi.getTotalQuote(mculeids=self.mculeidlist)
+
+        if quote_info:
+            try:
+                quote = MculeQuote()
+                quote.project_id = self.project_obj
+                quote.quoteid = quote_info["quoteid"]
+                quote.quoteurl = quote_info["quoteurl"]
+                quote.quotecost = quote_info["quotecost"]
+                quote.quotevaliduntil = quote_info["quotevaliduntil"]
+                quote.save()
+
+            except Exception as error:
+                print(error)
 
 
 {
