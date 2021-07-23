@@ -4,11 +4,17 @@ from django.shortcuts import render
 from django.views import View
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.conf import settings
 from celery.result import AsyncResult
-from .forms import UploadForm
-from .tasks import validateFileUpload, uploadIBMReaction
+from .forms import API_CHOICES, UploadForm
+from .tasks import (
+    validateFileUpload,
+    uploadIBMReaction,
+    uploadManifoldReaction,
+    uploadCustomReaction,
+)
 import pandas as pd
 
 
@@ -25,64 +31,99 @@ class UploadProject(View):
         return render(request, "backend/upload.html", {"form": form})
 
     def post(self, request):
-        # check_services - from Fragalysis to check Celery stuff. May need it
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
-            # Create dictionary of project info
             project_info = {}
-
-            # Get info from form submitted
             csvfile = request.FILES["csv_file"]
             project_info["submittername"] = request.POST["submitter_name"]
             project_info["submitterorganisation"] = request.POST["submitter_organisation"]
             project_info["submitteremail"] = request.POST["submitter_email"]
-            choice = request.POST["submit_choice"]
-
-            # Save csv to temp storage
+            validate_choice = request.POST["validate_choice"]
+            API_choice = request.POST["API_choice"]
             tmp_file = save_tmp_file(csvfile)
 
-            # Settings for if validate option selected
-            if str(choice) == "0":
-                #### Got up to here - need to look at validate task and implement first
-                # Start celery task # Code getting stuck in celery task!!!!
-                task_validate = validateFileUpload.delay(tmp_file)
-                context = {}
-                context["validate_task_id"] = task_validate.id
-                context["validate_task_status"] = task_validate.status
+            if str(validate_choice) == "0":
 
-                # Update client side with task id and status
-                return render(request, "backend/upload.html", context)
-
-            # if it's an upload, run the compound set task
-            if str(choice) == "1":
-                # Start chained celery tasks. NB first function passes tuple
-                # to second function - see tasks.py
-                task_upload = (
-                    validateFileUpload.s(
-                        tmp_file, project_info=project_info, validate_only=False
+                if str(API_choice) == "2":
+                    task_validate = validateFileUpload.delay(
+                        csv_fp=tmp_file, validate_type="custom-chem"
                     )
-                    | uploadIBMReaction.s()
-                ).apply_async()
+                    context = {}
+                    context["validate_task_id"] = task_validate.id
+                    context["validate_task_status"] = task_validate.status
 
-                context = {}
-                context["upload_task_id"] = task_upload.id
-                context["upload_task_status"] = task_upload.status
+                    return render(request, "backend/upload.html", context)
 
-                # Update client side with task id and status
-                return render(request, "backend/upload.html", context)
+                else:
+                    task_validate = validateFileUpload.delay(
+                        csv_fp=tmp_file, validate_type="retro-API"
+                    )
+                    context = {}
+                    context["validate_task_id"] = task_validate.id
+                    context["validate_task_status"] = task_validate.status
+
+                    return render(request, "backend/upload.html", context)
+
+            if str(validate_choice) == "1":
+                if str(API_choice) == "0":
+                    task_upload = (
+                        validateFileUpload.s(
+                            csv_fp=tmp_file,
+                            validate_type="retro-API",
+                            project_info=project_info,
+                            validate_only=False,
+                        )
+                        | uploadManifoldReaction.s()
+                    ).apply_async()
+
+                    context = {}
+                    context["upload_task_id"] = task_upload.id
+                    context["upload_task_status"] = task_upload.status
+
+                    return render(request, "backend/upload.html", context)
+                    pass
+
+                if str(API_choice) == "1":
+                    task_upload = (
+                        validateFileUpload.s(
+                            csv_fp=tmp_file,
+                            validate_type="retro-API",
+                            project_info=project_info,
+                            validate_only=False,
+                        )
+                        | uploadIBMReaction.s()
+                    ).apply_async()
+
+                    context = {}
+                    context["upload_task_id"] = task_upload.id
+                    context["upload_task_status"] = task_upload.status
+
+                    return render(request, "backend/upload.html", context)
+
+                if str(API_choice) == "2":
+                    task_upload = (
+                        validateFileUpload.s(
+                            csv_fp=tmp_file,
+                            validate_type="custom-chem",
+                            project_info=project_info,
+                            validate_only=False,
+                        )
+                        | uploadCustomReaction.s()
+                    ).apply_async()
+
+                    context = {}
+                    context["upload_task_id"] = task_upload.id
+                    context["upload_task_status"] = task_upload.status
+
+                    return render(request, "backend/upload.html", context)
 
         else:
             form = UploadForm()
 
-        context["form"] = form
-        return render(request, "backend/upload.html", context)
 
-
-# Add upload and validate views here!!!!
-# Task functions common between Compound Sets and Target Set pages.
 class ValidateTaskView(View):
-    """ View to handle dynamic loading of validation results from `backend.tasks.validateFileUpload` - the validation of files
-    uploaded to backend/upload 
+    """View to handle dynamic loading of validation results from `backend.tasks.validateFileUpload` - the validation of files
+    uploaded to backend/upload
     Methods
     -------
     allowed requests:
@@ -94,7 +135,7 @@ class ValidateTaskView(View):
     """
 
     def get(self, request, validate_task_id):
-        """ Get method for `ValidateTaskView`. Takes a validate task id, checks it's status and returns the status,
+        """Get method for `ValidateTaskView`. Takes a validate task id, checks it's status and returns the status,
         and result if the task is complete
         Parameters
         ----------
@@ -128,10 +169,8 @@ class ValidateTaskView(View):
 
             return JsonResponse(response_data)
 
-        # Check if results ready
         if task.status == "SUCCESS":
             results = task.get()
-            # NB get tuple from validate task
             validate_dict = results[0]
             validated = results[1]
             if validated:
@@ -143,12 +182,13 @@ class ValidateTaskView(View):
                 return JsonResponse(response_data)
 
             if not validated:
-                # set pandas options to display all column data
                 pd.set_option("display.max_colwidth", None)
 
                 table = pd.DataFrame.from_dict(validate_dict)
                 html_table = table.to_html()
-                html_table += """<p> Your data was <b>not</b> validated. The table above shows errors</p>"""
+                html_table += (
+                    """<p> Your data was <b>not</b> validated. The table above shows errors</p>"""
+                )
 
                 response_data["html"] = html_table
                 response_data["validated"] = "Not validated"
@@ -159,7 +199,7 @@ class ValidateTaskView(View):
 
 
 class UploadTaskView(View):
-    """ View to handle dynamic loading of upload results from `backend.tasks.UploadIBMReaction` - the upload of files
+    """View to handle dynamic loading of upload results from `backend.tasks.UploadIBMReaction` - the upload of files
     for a computed set by a user at viewer/upload_cset or a target set by a user at viewer/upload_tset
     Methods
     -------
@@ -172,7 +212,7 @@ class UploadTaskView(View):
     """
 
     def get(self, request, upload_task_id):
-        """ Get method for `UploadTaskView`. Takes an upload task id, checks it's status and returns the status,
+        """Get method for `UploadTaskView`. Takes an upload task id, checks it's status and returns the status,
         and result if the task is complete
         Parameters
         ----------
@@ -222,24 +262,36 @@ class UploadTaskView(View):
         if task.status == "SUCCESS":
 
             results = task.get()
-            # NB get tuple from validate task
             validate_dict = results[0]
             validated = results[1]
+            project_info = results[2]
+
+            submitter_name = project_info["submittername"]
+            submitter_email = project_info["submitteremail"]
+            project_name = project_info["project_name"]
 
             if validated:
-                # Upload/Update output tasks send back a tuple
-                # First element defines the source of the upload task (cset, tset)
+                send_mail(
+                    "Project - {} - data uploaded to CAR".format(project_name),
+                    "Hi {} - Good news, your data has been successfully processed and is available at https://car.xchem.diamond.ac.uk/".format(
+                        submitter_name
+                    ),
+                    "waztom@gmail.com",
+                    [submitter_email],
+                    fail_silently=False,
+                )
+
                 response_data["validated"] = "Validated"
                 return JsonResponse(response_data)
 
             if not validated:
-
-                # set pandas options to display all column data
                 pd.set_option("display.max_colwidth", -1)
 
                 table = pd.DataFrame.from_dict(validate_dict)
                 html_table = table.to_html()
-                html_table += """<p> Your data was <b>not</b> validated. The table above shows errors</p>"""
+                html_table += (
+                    """<p> Your data was <b>not</b> validated. The table above shows errors</p>"""
+                )
 
                 response_data["validated"] = "Not validated"
                 response_data["html"] = html_table
@@ -247,11 +299,18 @@ class UploadTaskView(View):
                 return JsonResponse(response_data)
 
             else:
-                # Error output
+                send_mail(
+                    "Project - {} - data upload failed to CAR".format(project_name),
+                    "Hi {} - Hmmmm, not so good news, your data failed to be processed and uploaded to CAR. Please try again or contact Warren by responding to this email".format(
+                        submitter_name
+                    ),
+                    "waztom@gmail.com",
+                    [submitter_email],
+                    fail_silently=False,
+                )
                 html_table = """<p> Your data was <b>not</b> processed.</p>"""
                 response_data["processed"] = "None"
                 response_data["html"] = html_table
                 return JsonResponse(response_data)
 
         return JsonResponse(response_data)
-

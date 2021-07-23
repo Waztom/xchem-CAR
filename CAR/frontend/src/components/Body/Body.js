@@ -13,8 +13,8 @@ import MethodBody from "../MethodBody/MethodBody";
 
 // Start with main body and then add components
 const SetTargetMassInput = ({ targetmass, unit, targetid }) => {
-  const [TargetMass, setTargetMass] = useState({ targetmass });
-  const [Unit, setUnit] = useState({ unit });
+  const [TargetMass, setTargetMass] = useState(targetmass);
+  const [Unit, setUnit] = useState(unit);
 
   async function patchTargetMass(value) {
     try {
@@ -60,7 +60,7 @@ const SetTargetMassInput = ({ targetmass, unit, targetid }) => {
       <FormControl
         aria-label="Small"
         aria-describedby="inputGroup-sizing-sm"
-        placeholder={TargetMass.targetmass}
+        placeholder={TargetMass}
         onChange={(event) => handleTargetMassChange(event)}
       />
       <Form.Control
@@ -68,7 +68,7 @@ const SetTargetMassInput = ({ targetmass, unit, targetid }) => {
         onChange={(event) => handleUnitChange(event)}
         size="sm"
         type="text"
-        value={Unit.unit}
+        value={Unit}
       >
         <option>mg</option>
         <option>g</option>
@@ -84,7 +84,7 @@ const TargetCard = ({ target, handleDelete }) => {
   }
 
   return (
-    <Card text="dark" border="light" style={{ width: "18rem" }}>
+    <Card text="dark" border="light" style={{ width: "13rem" }}>
       <Card.Header>{target.name}</Card.Header>
       <SetTargetMassInput
         targetmass={target.targetmass}
@@ -92,7 +92,7 @@ const TargetCard = ({ target, handleDelete }) => {
         targetid={target.id}
       ></SetTargetMassInput>
       <Card.Body>
-        <Card.Img src={target.image} />
+        <Card.Img src={target.image} fluid />
       </Card.Body>
       <Button key={target.id} onClick={() => pressDelete(target.id)}>
         Delete Target
@@ -145,7 +145,7 @@ const Body = ({ ProjectID }) => {
       <ListGroup.Item key={target.id}>
         <TargetCard target={target} handleDelete={handleDelete} />
       </ListGroup.Item>
-      <ListGroup.Item>
+      <ListGroup.Item className="targetmethods">
         <MethodBody
           key={target.id}
           targetid={target.id}

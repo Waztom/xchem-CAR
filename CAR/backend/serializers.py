@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 # Import standard models
-from .models import Project, Target, Method, Reaction, Product, AnalyseAction
+from .models import Project, MculeQuote, Target, Method, Reaction, Product, AnalyseAction
 
 # Import IBM models
 from .models import (
@@ -30,6 +30,12 @@ from .models import (
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
+        fields = "__all__"
+
+
+class MculeQuoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MculeQuote
         fields = "__all__"
 
 
@@ -176,4 +182,3 @@ class IBMWashActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = IBMWashAction
         fields = "__all__"
-
