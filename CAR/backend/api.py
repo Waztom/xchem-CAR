@@ -1,5 +1,5 @@
 # Import standard models
-from .models import Project, Target, Method, Reaction, Product, AnalyseAction
+from .models import Project, MculeQuote, Target, Method, Reaction, Product, AnalyseAction
 
 # Import IBM models
 from .models import (
@@ -32,6 +32,7 @@ from django.core.files.base import ContentFile
 # Import standard serializers
 from .serializers import (
     ProjectSerializer,
+    MculeQuoteSerializer,
     TargetSerializer,
     MethodSerializer,
     ReactionSerializer,
@@ -76,6 +77,15 @@ class ProjectViewSet(viewsets.ModelViewSet):
         permissions.AllowAny
     ]
     serializer_class = ProjectSerializer
+
+
+class MculeQuoteViewSet(viewsets.ModelViewSet):
+    queryset = MculeQuote.objects.all()
+    permission_classes = [
+        # Allows all users to access this model - will change when users addded
+        permissions.AllowAny
+    ]
+    serializer_class = MculeQuoteSerializer
 
 
 class TargetViewSet(viewsets.ModelViewSet):

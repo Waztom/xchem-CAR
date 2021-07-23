@@ -15,6 +15,8 @@ class Project(models.Model):
     submitterorganisation = models.CharField(max_length=100)
     submittername = models.CharField(max_length=255)
     submitteremail = models.CharField(max_length=255)
+    quotedcost = models.FloatField(null=True)
+    quoteurl = models.CharField(max_length=255, null=True)
 
     def save(self, *args, **kwargs):
         if not self.name:
@@ -24,6 +26,14 @@ class Project(models.Model):
             )
 
         super(Project, self).save(*args, **kwargs)
+
+
+class MculeQuote(models.Model):
+    project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
+    quoteid = models.CharField(max_length=255)
+    quoteurl = models.CharField(max_length=255)
+    quotecost = models.FloatField()
+    quotevaliduntil = models.CharField(max_length=255)
 
 
 class Target(models.Model):

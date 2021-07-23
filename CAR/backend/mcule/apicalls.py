@@ -60,3 +60,57 @@ class MCuleAPI(object):
                 return None
         except Exception as e:
             print(e)
+
+    def getTotalQuote(
+        self,
+        mculeids: list,
+        delivery_country: str = "GB",
+        target_volume: float = 0.5,
+        target_cc: float = 500,
+    ):
+        """
+        Get quote from MCule for list of mcule ids
+
+        Args:
+            mculeids (list): List of MCule IDs
+            delivery_country (str): ISO 3166-1 alpha-2 code of the delivery country. Default GB
+            target_volume (float): Total volume in ml requested. Default None
+            target_cc (float): Target concentration in mM. Default None
+        Returns:
+            quote (dict): MCule quote info as a dictionary
+        """
+        quote_info = {}
+
+        try:
+            response_dict = self.mculewrapper.quoterequest(
+                mcule_ids=mculeids,
+                delivery_country=delivery_country,
+                target_volume=target_volume,
+                target_cc=target_cc,
+            )
+            quote_id = response_dict["response"]["id"]
+            quote_state_response = self.mculewrapper.quoterequeststatus(quote_id=quote_id)
+            quote_state = quote_state_response["response"]["state"]
+
+            while quote_state != 30:
+                if quote_state == 40:
+                    return None
+                else:
+                    quote_state_response = self.mculewrapper.quoterequeststatus(quote_id=quote_id)
+                    quote_state = quote_state_response["response"]["state"]
+
+            quote_info["quoteid"] = quote_state_response["response"]["group"]["quotes"][0]["id"]
+            quote_info["quoteurl"] = quote_state_response["response"]["group"]["quotes"][0][
+                "site_url"
+            ]
+            quote_info["quotecost"] = quote_state_response["response"]["group"]["quotes"][0][
+                "total_cost"
+            ]
+            quote_info["quotevaliduntil"] = quote_state_response["response"]["group"]["quotes"][0][
+                "valid_until"
+            ]
+
+            return quote_info
+
+        except Exception as e:
+            print(e)

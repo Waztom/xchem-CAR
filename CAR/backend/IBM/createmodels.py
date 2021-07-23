@@ -153,25 +153,25 @@ class CreateIBMActionModels(object):
 
     def createActionModel(self, action):
         actionMethods = {
-            "add": self.createIBMAddAction,
-            "collect-layer": self.createIBMCollectLayerAction,
-            "concentrate": self.createIBMConcentrateAction,
-            "degas": self.createIBMDegasAction,
-            "dry-solid": self.createIBMDrySolidAction,
-            "dry-solution": self.createIBMDrySolutionAction,
-            "extract": self.createIBMExtractAction,
-            "filter": self.createIBMFilterAction,
-            "make-solution": self.createIBMMakeSolutionAction,
-            "partition": self.createIBMPartitionAction,
-            "ph": self.createIBMpHAction,
-            "phase-separation": self.createIBMPhaseSeparationAction,
-            "quench": self.createIBMQuenchAction,
-            "reflux": self.createIBMRefluxAction,
-            "set-temperature": self.createIBMSetTemperatureAction,
-            "stir": self.createIBMStirAction,
-            "store": self.createIBMStoreAction,
-            "wait": self.createIBMWaitAction,
-            "wash": self.createIBMWashAction,
+            "add": self.createIBMAddActionModel,
+            "collect-layer": self.createIBMCollectLayerActionModel,
+            "concentrate": self.createIBMConcentrateActionModel,
+            "degas": self.createIBMDegasActionModel,
+            "dry-solid": self.createIBMDrySolidActionModel,
+            "dry-solution": self.createIBMDrySolutionActionModel,
+            "extract": self.createIBMExtractActionModel,
+            "filter": self.createIBMFilterActionModel,
+            "make-solution": self.createIBMMakeSolutionActionModel,
+            "partition": self.createIBMPartitionActionModel,
+            "ph": self.createIBMpHActionModel,
+            "phase-separation": self.createIBMPhaseSeparationActionModel,
+            "quench": self.createIBMQuenchActionModel,
+            "reflux": self.createIBMRefluxActionModel,
+            "set-temperature": self.createIBMSetTemperatureActionModel,
+            "stir": self.createIBMStirActionModel,
+            "store": self.createIBMStoreActionModel,
+            "wait": self.createIBMWaitActionModel,
+            "wash": self.createIBMWashActionModel,
         }
 
         action_type = action["name"]
@@ -196,7 +196,7 @@ class CreateIBMActionModels(object):
         analyse.actionno = self.action_no
         analyse.save()
 
-    def createIBMAddAction(self, action_type, action):
+    def createIBMAddActionModel(self, action_type, action):
         try:
             material = action["content"]["material"]["value"]
             materialquantity = action["content"]["material"]["quantity"]["value"]
@@ -244,7 +244,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMCollectLayerAction(self, action_type, action):
+    def createIBMCollectLayerActionModel(self, action_type, action):
         try:
             layer = action["content"]["layer"]["value"]
 
@@ -260,7 +260,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMConcentrateAction(self, action_type, action):
+    def createIBMConcentrateActionModel(self, action_type, action):
         try:
             concentrate = IBMConcentrateAction()
             concentrate.reaction_id = self.reaction_obj
@@ -273,7 +273,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMDegasAction(self, action_type, action):
+    def createIBMDegasActionModel(self, action_type, action):
         try:
             gas = action["content"]["gas"]["value"]
             duration = action["content"]["duration"]["value"]
@@ -293,7 +293,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMDrySolidAction(self, action_type, action):
+    def createIBMDrySolidActionModel(self, action_type, action):
         try:
             temperature = action["content"]["gas"]["value"]
             duration = action["content"]["duration"]["value"]
@@ -316,7 +316,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMDrySolutionAction(self, action_type, action):
+    def createIBMDrySolutionActionModel(self, action_type, action):
         try:
             dryingagent = action["content"]["material"]["value"]
 
@@ -332,7 +332,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMExtractAction(self, action_type, action):
+    def createIBMExtractActionModel(self, action_type, action):
         try:
             solvent = action["content"]["solvent"]["value"]
             quantity = action["content"]["solvent"]["quantity"]["value"]
@@ -354,7 +354,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMFilterAction(self, action_type, action):
+    def createIBMFilterActionModel(self, action_type, action):
         try:
             phasetokeep = action["content"]["phase_to_keep"]["value"]
             rinsingsolvent = action["content"]["rinsing_solvent"]["value"]
@@ -390,7 +390,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMMakeSolutionAction(self, action_type, action):
+    def createIBMMakeSolutionActionModel(self, action_type, action):
         try:
             materials = action["content"]["materials"]["value"]
             solute = materials[0]["value"]
@@ -440,7 +440,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMPartitionAction(self, action_type, action):
+    def createIBMPartitionActionModel(self, action_type, action):
         try:
             firstpartitionsolvent = action["content"]["material_1"]["value"]
             secondpartitionsolvent = action["content"]["material_2"]["value"]
@@ -466,7 +466,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMpHAction(self, action_type, action):
+    def createIBMpHActionModel(self, action_type, action):
         try:
             material = action["content"]["material"]["value"]
             materialquantity = action["content"]["material"]["quantity"]["value"]
@@ -490,7 +490,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMPhaseSeparationAction(self, action_type, action):
+    def createIBMPhaseSeparationActionModel(self, action_type, action):
         try:
             phase = IBMPhaseSeparationAction()
             phase.reaction_id = self.reaction_obj
@@ -503,7 +503,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMQuenchAction(self, action_type, action):
+    def createIBMQuenchActionModel(self, action_type, action):
         try:
             material = action["content"]["material"]["value"]
             materialquantity = action["content"]["material"]["quantity"]["value"]
@@ -528,7 +528,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMRefluxAction(self, action_type, action):
+    def createIBMRefluxActionModel(self, action_type, action):
         try:
             duration = action["content"]["duration"]["value"]
             durationunit = action["content"]["duration"]["unit"]
@@ -553,7 +553,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMSetTemperatureAction(self, action_type, action):
+    def createIBMSetTemperatureActionModel(self, action_type, action):
         try:
             temperature = action["content"]["temperature"]["value"]
 
@@ -569,7 +569,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMStirAction(self, action_type, action):
+    def createIBMStirActionModel(self, action_type, action):
         try:
             duration = action["content"]["duration"]["value"]
             durationunit = action["content"]["duration"]["unit"]
@@ -599,7 +599,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMStoreAction(self, action_type, action):
+    def createIBMStoreActionModel(self, action_type, action):
         try:
             material = action["content"]["sample_name"]["value"]
 
@@ -624,7 +624,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMWaitAction(self, action_type, action):
+    def createIBMWaitActionModel(self, action_type, action):
         try:
             duration = action["content"]["duration"]["value"]
             durationunit = action["content"]["duration"]["unit"]
@@ -644,7 +644,7 @@ class CreateIBMActionModels(object):
             print(error)
             print(action)
 
-    def createIBMWashAction(self, action_type, action):
+    def createIBMWashActionModel(self, action_type, action):
         try:
             material = action["content"]["material"]["value"]
             materialquantity = action["content"]["material"]["quantity"]["value"]
