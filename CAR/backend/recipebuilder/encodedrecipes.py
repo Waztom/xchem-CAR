@@ -130,7 +130,7 @@ encoded_recipes = {
                          #[#6][CX3](=O)[#6]", "[CX3H1](=O)[#6] OLD code for reference
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "ACN",
+                        "solvent": "DMA",
                         "concentration": 0.5,
                     },
                 },
@@ -144,7 +144,7 @@ encoded_recipes = {
                         #[#6]-[#7;H2]
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "ACN",
+                        "solvent": "DMA",
                         "concentration": 0.5,
                     },
                 },
@@ -170,7 +170,7 @@ encoded_recipes = {
                         "SMARTS": None,
                         "SMILES": "CC(=O)O",
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "ACN",
+                        "solvent": "DMA",
                         "concentration": 0.5,
                     },
                 },
@@ -227,4 +227,82 @@ encoded_recipes = {
             },
         ],
     },
+    "sp2-sp2 suzuki coupling": {
+        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:2]-[B]>>[c:1]-[#6:2]"],
+        "recipe": [
+            {
+                "name": "add",
+                "content":{
+                    "action_no": 1,
+                    "material":{
+                        "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
+                        "SMILES": None,
+                        "quantity": {"value": 1, "unit": "moleq"},
+                        "solvent": "EtOH",
+                        "concentration": "Whatever this is",
+                    },
+                },
+            },
+            {
+                "name": "add",
+                "content":{
+                    "action_no": 2,
+                    "material":{
+                        "SMARTS": ["[#6:2]-[B]"],
+                        "SMILES": None,
+                        "quantity": {"value": 2, "unit": "moleq"},
+                        "solvent": "EtOH",
+                        "concentration": "Whatever this is",
+                    },
+                },
+            },
+            {
+                "name": "add",
+                "content":{
+                    "action_no": 3,
+                    "material":{
+                        "SMARTS": None,
+                        "SMILES": "[Fe].Cl[Pd]Cl.[CH]1[CH][CH][C]([CH]1)P(c2ccccc2)c3ccccc3.[CH]4[CH][CH][C]([CH]4)P(c5ccccc5)c6ccccc6",
+                        #Smiles for the Pd-Ferrocene catalyst we have, change to Smiles for XPhosPdG3 
+                        "quantity": {"value": 10, "unit": "mol%"},
+                        "solvent": "EtOH",
+                        "concentration": "Whatever this is",
+                    },
+                },
+            },
+            {
+                "name": "add",
+                "content":{
+                    "action_no": 4,
+                    "material":{
+                        "SMARTS": None,
+                        "SMILES": "C1CCN2CCCN=C2CC1",#DBU used in Thompson paper
+                        "quantity": {"value": "Unsure yet", "unit": "moleq"},
+                        "solvent": "EtOH",
+                        "concentration": "Whatever this is",
+                    },
+                },
+            },
+            {
+                "name": "stir",
+                "content":{
+                    "action_no": 5,
+                    "temperature": {"value": 100, "unit": "degC"},  # high temp required
+                    "duration": {"value": 12, "unit": "hours"}, # in hours
+                },
+            },
+        ],
+    },
 }
+
+
+
+                
+            
+           
+                   
+
+                    
+          
+  
+
