@@ -47,9 +47,9 @@ First you'll need Docker Desktop (or the relevent Docker Engine on Linux) you ca
 
 ## <a name="InstallDockerCompose"></a>Install Docker Compose
 
-once Docker is installed also install docker compose, instructions for Mac, Windows, Linux and other options are available: https://docs.docker.com/compose/install/
+if you're using a Linux machine, once Docker is installed also install docker compose, instructions are available at: https://docs.docker.com/compose/install/
 
-once Docker is installed also install docker compose, instructions for Mac, Windows, Linux and other options are available: https://docs.docker.com/compose/install/
+for WSL (Winodows), you do not need to install Docker compose.
 
 Note with newer versions of Docker, Docker Compose is already preinstalled
 
