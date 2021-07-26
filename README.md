@@ -109,7 +109,8 @@ build the package in terminal by:
 
 once Git-Crypt is installed unlock the secrets using:
 
-> `cd <'file path to XChem-CARS on your device'>`<br> >`git-crypt unlock <'path to git-crypt crypt-key'>`
+> `cd <'file path to XChem-CARS on your device'>`<br> 
+> `git-crypt unlock <'path to git-crypt crypt-key'>`<br>
 
 # <a name="Startsystem"></a>Start system
 
@@ -132,7 +133,12 @@ once Git-Crypt is installed unlock the secrets using:
 - Open a new terminal that you can interact with. if the terminal is visible at the bottom of the screen click on the plus "create new integrated terminal" or use the keybord shortcut "**Ctrl+Shift+`**" button or use the adjacent "split terminal" (or "**Ctrl+Shift+5**") button to see the new terminal adjacent to the current terminal
 - you should now be in the container running Debian Linux
 - in the new terminal type:
-  > `cd CAR` <br> >`mkdir log && touch logsfile.log` <br> >`python3 manage.py makemigrations` <br> >`python3 manage.py migrate` <br> >`npm install --quiet --legacy-peer-deps`<br> >`python3 manage.py runserver`<br>
+  > `cd CAR` <br> 
+  >`mkdir log && touch logsfile.log` <br> 
+  >`python3 manage.py makemigrations` <br> 
+  >`python3 manage.py migrate` <br> 
+  >`npm install --quiet --legacy-peer-deps`<br> 
+  >`python3 manage.py runserver`<br>
 - to compile the main.js file, in a separate terminal inside your development container:
   > `npm run dev`<br>
 
@@ -145,7 +151,8 @@ to upload files in CAR, you need to start a Celery worker in a separate terminal
 
 - open a new terminal the same way as last time ([see Time to Launch](#TimeToLaunch))
 - in the new terminal type:
-  > `cd CAR`<br> >`celery -A CAR worker -l info`<br>
+  > `cd CAR`<br> 
+  >`celery -A CAR worker -l info`<br>
 
 if you make any changes to the Django models, you will need to run the the migrations again in the CAR directory:
 
