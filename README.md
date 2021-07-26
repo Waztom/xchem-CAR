@@ -145,7 +145,9 @@ once Git-Crypt is installed unlock the secrets using:
 If you are only interested in running the application or developing the backend code, you will only need to run the `npm run dev` command
 once. For frontend developers, the npm command above tracks any changes made to the frontend code and recompiles the main.js file.
 
-for future launches, you will not need to perform the migrations, install the node packages, compile the main.js and only need to launch the Django server by running: >`cd CAR` <br> >`python3 manage.py runserver`<br>
+for future launches, you will not need to perform the migrations, install the node packages, compile the main.js and only need to launch the Django server by running: 
+  >`cd CAR` <br> 
+  >`python3 manage.py runserver`<br>
 
 to upload files in CAR, you need to start a Celery worker in a separate terminal inside your development container:
 
@@ -157,7 +159,8 @@ to upload files in CAR, you need to start a Celery worker in a separate terminal
 if you make any changes to the Django models, you will need to run the the migrations again in the CAR directory:
 
 - makemigrations and migrate the Django models:
-  > `python3 manage.py makemigrations` <br> >`python3 manage.py migrate` <br>
+  > `python3 manage.py makemigrations` <br> 
+  >`python3 manage.py migrate` <br>
 
 # Opening the application
 
