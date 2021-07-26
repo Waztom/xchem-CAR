@@ -235,7 +235,7 @@ encoded_recipes = {
                 "content":{
                     "action_no": 1,
                     "material":{
-                        "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
+                        "SMARTS": ["[c:1]-[F,Cl,Br,I].[c]-[!B]"],
                         "SMILES": None,
                         "quantity": {"value": 1, "unit": "moleq"},
                         "solvent": "EtOH",
@@ -250,7 +250,7 @@ encoded_recipes = {
                     "material":{
                         "SMARTS": ["[#6:2]-[B]"],
                         "SMILES": None,
-                        "quantity": {"value": 2, "unit": "moleq"},
+                        "quantity": {"value": 2, "unit": "moleq"}, #Paddy said 2:1 boronic to aryl halide
                         "solvent": "EtOH",
                         "concentration": 0.5,
                     },
