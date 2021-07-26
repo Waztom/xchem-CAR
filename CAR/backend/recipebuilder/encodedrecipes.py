@@ -239,7 +239,7 @@ encoded_recipes = {
                         "SMILES": None,
                         "quantity": {"value": 1, "unit": "moleq"},
                         "solvent": "EtOH",
-                        "concentration": "Whatever this is",
+                        "concentration": 0.5,
                     },
                 },
             },
@@ -252,7 +252,7 @@ encoded_recipes = {
                         "SMILES": None,
                         "quantity": {"value": 2, "unit": "moleq"},
                         "solvent": "EtOH",
-                        "concentration": "Whatever this is",
+                        "concentration": 0.5,
                     },
                 },
             },
@@ -262,11 +262,11 @@ encoded_recipes = {
                     "action_no": 3,
                     "material":{
                         "SMARTS": None,
-                        "SMILES": "[Fe].Cl[Pd]Cl.[CH]1[CH][CH][C]([CH]1)P(c2ccccc2)c3ccccc3.[CH]4[CH][CH][C]([CH]4)P(c5ccccc5)c6ccccc6",
-                        #Smiles for the Pd-Ferrocene catalyst we have, change to Smiles for XPhosPdG3 
-                        "quantity": {"value": 10, "unit": "mol%"},
+                        "SMILES": "CC(C)C(C=C1C(C)C)=CC(C(C)C)=C1C2=CC=CC=C2P(C3CCCCC3)C4CCCCC4.NC5=C(C6=C([Pd]OS(C)(=O)=O)C=CC=C6)C=CC=C5",
+                        #Smiles for XPhosPdG3
+                        "quantity": {"value": 0.1, "unit": "moleq"}, #10mol% catalyst
                         "solvent": "EtOH",
-                        "concentration": "Whatever this is",
+                        "concentration": 0.5,
                     },
                 },
             },
@@ -277,9 +277,9 @@ encoded_recipes = {
                     "material":{
                         "SMARTS": None,
                         "SMILES": "C1CCN2CCCN=C2CC1",#DBU used in Thompson paper
-                        "quantity": {"value": "Unsure yet", "unit": "moleq"},
+                        "quantity": {"value": 2, "unit": "moleq"}, #2 moleq used in Thomson paper
                         "solvent": "EtOH",
-                        "concentration": "Whatever this is",
+                        "concentration": 0.5,
                     },
                 },
             },
