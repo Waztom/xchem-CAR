@@ -90,13 +90,16 @@ Incorporation of VSCode with WSL for further information: https://code.visualstu
 **Note: We have tested this using Ubuntu 18.04 and 20.04, compatibility of other Linux distributions have not been investigated.**
 
 ## <a name="InstallGitCrypt"></a>Install Git-Crypt
+if you are using Ubuntu or Debian, you can install git-crypt by:
+>`sudo apt-get update` <br>
+>`sudo apt-get install git-crypt` <br>
 
-download the compressed git-crypt package (https://www.agwa.name/projects/git-crypt/downloads/git-crypt-0.6.0.tar.gz)
+alternatively, you can install by downloading the the compressed git-crypt package from: https://www.agwa.name/projects/git-crypt/downloads/git-crypt-0.6.0.tar.gz
 
-Extract the package to create the directory **git-crypt-0.6.0**:
+extract the package to create the directory **git-crypt-0.6.0**:
 > `tar -xvzf git-crypt-0.6.0.tar.gz` <br>
 
-in terminal:
+build the package in terminal by:
 
 > `$ cd git-crypt-0.6.0`<br> 
 > `$ make`<br> 
@@ -106,7 +109,7 @@ in terminal:
 
 once Git-Crypt is installed unlock the secrets using:
 
-> `cd [file path to XChem-CARS on your device]`<br> >`git-crypt unlock [path to git-crypt crypt-key]`
+> `cd <'file path to XChem-CARS on your device'>`<br> >`git-crypt unlock <'path to git-crypt crypt-key'>`
 
 # <a name="Startsystem"></a>Start system
 
@@ -114,7 +117,7 @@ once Git-Crypt is installed unlock the secrets using:
 
 - in terminal change directory to your copy of the repo :
 
-  > `cd `<em>`[local file path to xchem-CAR repository]`
+  > `cd `<em>`<'local file path to xchem-CAR repository'>`
 
     </em>
     or open VS Code and go to File-> Open Folder and open the repository directory<br>
