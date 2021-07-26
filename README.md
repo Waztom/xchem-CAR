@@ -49,9 +49,7 @@ First you'll need Docker Desktop (or the relevent Docker Engine on Linux) you ca
 
 if you're using a Linux machine, once Docker is installed also install docker compose, instructions are available at: https://docs.docker.com/compose/install/
 
-for WSL (Winodows), you do not need to install Docker compose.
-
-Note with newer versions of Docker, Docker Compose is already preinstalled
+for WSL (Windows), you do not need to install Docker compose
 
 ## <a name="InstallVSCodeExtention"></a>Install VS Code Extensions
 
