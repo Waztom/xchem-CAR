@@ -98,7 +98,9 @@ Extract the package to create the directory **git-crypt-0.6.0**:
 
 in terminal:
 
-> `$ cd git-crypt-0.6.0`<br> >`$ make`<br> >`# make install`
+> `$ cd git-crypt-0.6.0`<br> 
+> `$ make`<br> 
+> `# make install` <br>
 
 ## <a name="UnlockingSecrets"></a>Unlocking Secrets
 
