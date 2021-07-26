@@ -22,6 +22,9 @@ these instructions are designed for Visual Studio Code which can be installed fo
 Secrets required for running CAR are encrypted, to unencrypt and run you will need the key from the XChem-CAR software maintainer<br><br>
 
 # <a name="RepositoryfromGitHub"></a>Clone the "xchem-car" repository from GitHub
+In you home directory eg `/home/<username>`, clone  xchem-car repo using:
+
+`git clone https://github.com/Waztom/xchem-CAR.git` <br>
 
 XChem-CAR uses GitHub for version control<br>
 to get started with working on CAR clone the <em>"xchem-CAR"</em> Repository from github to your device.<br><br>
