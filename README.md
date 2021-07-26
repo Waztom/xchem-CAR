@@ -29,7 +29,7 @@ In you home directory eg `/home/<username>`, clone  xchem-car repo using:
 XChem-CAR uses GitHub for version control<br>
 to get started with working on CAR clone the <em>"xchem-CAR"</em> Repository from github to your device.<br><br>
 
-### <a name="UsefulGitHubbranches"></a>Useful GitHub branches
+### <a name="UsefulGitHubbranches"></a>Useful GitHub branches - pass for setting up
 
 | Branch  | Description                                                | URL                                              |
 | ------- | ---------------------------------------------------------- | ------------------------------------------------ |
