@@ -93,7 +93,8 @@ Incorporation of VSCode with WSL for further information: https://code.visualstu
 
 download the compressed git-crypt package (https://www.agwa.name/projects/git-crypt/downloads/git-crypt-0.6.0.tar.gz)
 
-Extract the package to create the directory **git-crypt-0.6.0**
+Extract the package to create the directory **git-crypt-0.6.0**:
+`tar -xvzf git-crypt-0.6.0.tar.gz` <br>
 
 in terminal:
 
