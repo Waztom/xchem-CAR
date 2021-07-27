@@ -59,8 +59,8 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 5,
-                    "temperature": {"value": 25, "unit": "degC"},  # degrees celcius
-                    "duration": {"value": 12, "unit": "hours"},  # in hours
+                    "temperature": {"value": 25, "unit": "degC"},  
+                    "duration": {"value": 12, "unit": "hours"},  
                 },
             },
         ],
@@ -112,8 +112,8 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 4,
-                    "temperature": {"value": 25, "unit": "degC"},  # degrees celcius
-                    "duration": {"value": 12, "unit": "hours"},  # in hours
+                    "temperature": {"value": 25, "unit": "degC"},  
+                    "duration": {"value": 12, "unit": "hours"},  
                 },
             },
         ],
@@ -126,8 +126,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 1,
                     "material": {
-                        "SMARTS": ["[#6](=[#8])"], #This now searches for any carbonyl group (low specificty)
-                         #[#6][CX3](=O)[#6]", "[CX3H1](=O)[#6] OLD code for reference
+                        "SMARTS": ["[#6](=[#8])"], 
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "DMA",
@@ -141,7 +140,6 @@ encoded_recipes = {
                     "action_no": 2,
                     "material": {
                         "SMARTS": ["[#6]-[NX3]"],
-                        #[#6]-[#7;H2]
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "DMA",
@@ -179,14 +177,14 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 5,
-                    "temperature": {"value": 25, "unit": "degC"},  # degrees celcius
-                    "duration": {"value": 12, "unit": "hours"},  # in hours
+                    "temperature": {"value": 25, "unit": "degC"},  
+                    "duration": {"value": 12, "unit": "hours"},  
                 },
             },
         ],
     },
     "N-nucleophilic aromatic substitution": {
-        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[c:3]-[N:2]>>[c:1]-[N:2]-[c:3]"], #HR 15/07/21: Changed Reaction SMARTS
+        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[c:3]-[N:2]>>[c:1]-[N:2]-[c:3]"], 
         "recipe": [
             {
                 "name": "add",
@@ -194,10 +192,10 @@ encoded_recipes = {
                     "action_no": 1,
                     "material": {
                         # What about looking for other nucelophiles? Check with Harry -> SMARTS above also not very general -> only
-                        # looking for amines
-                        "SMARTS": ["[c:1]-[F,Cl,Br,I]"], #HR 15/07/21 removing nitro group as identifier
-                        # includes halides & NO2 not specifically attached to aromatic c as unlikely a Nu has NO2 attached
-                        "SMILES": None,  # leaving group question eg OTs
+                        # looking for amines HR: for the moment keeping with amines as nucleophile, alcohols can be used in a further
+                        #iteration as base will probably be required
+                        "SMARTS": ["[c:1]-[F,Cl,Br,I]"], 
+                        "SMILES": None,  
                         "quantity": {"value": 1, "unit": "moleq"},
                         "solvent": "MeOH",
                         "concentration": 0.5,
@@ -209,7 +207,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 2,
                     "material": {
-                        "SMARTS": ["[c:3]-[N:2]"],  # allowing amines 
+                        "SMARTS": ["[c:3]-[N:2]"],  
                         "SMILES": None,
                         "quantity": {"value": 1.2, "unit": "moleq"},
                         "solvent": "MeOH",
@@ -221,8 +219,8 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 3,
-                    "temperature": {"value": 50, "unit": "degC"},  # generic elevated temperature
-                    "duration": {"value": 12, "unit": "hours"},  # in hours
+                    "temperature": {"value": 50, "unit": "degC"},  
+                    "duration": {"value": 12, "unit": "hours"}, 
                 },
             },
         ],
@@ -235,7 +233,7 @@ encoded_recipes = {
                 "content":{
                     "action_no": 1,
                     "material":{
-                        "SMARTS": ["[c:1]-[F,Cl,Br,I].[c]-[!B]"],
+                        "SMARTS": ["[c:1]-[F,Cl,Br,I].[c]-[!B]"], 
                         "SMILES": None,
                         "quantity": {"value": 1, "unit": "moleq"},
                         "solvent": "EtOH",
@@ -250,7 +248,7 @@ encoded_recipes = {
                     "material":{
                         "SMARTS": ["[#6:2]-[B]"],
                         "SMILES": None,
-                        "quantity": {"value": 2, "unit": "moleq"}, #Paddy said 2:1 boronic to aryl halide
+                        "quantity": {"value": 2, "unit": "moleq"}, 
                         "solvent": "EtOH",
                         "concentration": 0.5,
                     },
@@ -276,8 +274,8 @@ encoded_recipes = {
                     "action_no": 4,
                     "material":{
                         "SMARTS": None,
-                        "SMILES": "C1CCN2CCCN=C2CC1",#DBU used in Thompson paper
-                        "quantity": {"value": 2, "unit": "moleq"}, #2 moleq used in Thomson paper
+                        "SMILES": "C1CCN2CCCN=C2CC1",
+                        "quantity": {"value": 2, "unit": "moleq"}, 
                         "solvent": "EtOH",
                         "concentration": 0.5,
                     },
@@ -287,8 +285,8 @@ encoded_recipes = {
                 "name": "stir",
                 "content":{
                     "action_no": 5,
-                    "temperature": {"value": 100, "unit": "degC"},  # high temp required
-                    "duration": {"value": 12, "unit": "hours"}, # in hours
+                    "temperature": {"value": 100, "unit": "degC"},  
+                    "duration": {"value": 12, "unit": "hours"}, 
                 },
             },
         ],
