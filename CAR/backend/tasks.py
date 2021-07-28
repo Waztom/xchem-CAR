@@ -77,7 +77,7 @@ def uploadIBMReaction(validate_output):
 
         target_no = 1
         for smiles, target_mass in zip(
-            uploaded_dict["Targets"], uploaded_dict["Ammount_required (mg)"]
+            uploaded_dict["targets"], uploaded_dict["amount-required-mg"]
         ):
 
             target_id = createTargetModel(
@@ -182,12 +182,13 @@ def uploadManifoldReaction(validate_output):
 
     if validated:
         mculeids = []
+        amounts = []
         project_id, project_name = createProjectModel(project_info)
         project_info["project_name"] = project_name
 
         target_no = 1
         for target_smiles, target_mass in zip(
-            uploaded_dict["Targets"], uploaded_dict["Ammount_required (mg)"]
+            uploaded_dict["targets"], uploaded_dict["amount-required-mg"]
         ):
 
             retrosynthesis_result = getManifoldretrosynthesis(target_smiles)
@@ -222,9 +223,9 @@ def uploadManifoldReaction(validate_output):
 
                         product_no = 1
                         for reaction in reactions:
-                            reaction_class = reaction["name"]
-                            if reaction_class in encoded_recipes:
-                                actions = encoded_recipes[reaction_class]["recipe"]
+                            reaction_name = reaction["name"]
+                            if reaction_name in encoded_recipes:
+                                actions = encoded_recipes[reaction_name]["recipe"]
                                 reactant_pair_smiles = reaction["reactantSmiles"]
                                 product_smiles = reaction["productSmiles"]
 
@@ -234,7 +235,7 @@ def uploadManifoldReaction(validate_output):
                                 )
                                 reaction_id = createReactionModel(
                                     method_id=method_id,
-                                    reaction_class=reaction_class,
+                                    reaction_class=reaction_name,
                                     reaction_smarts=reaction_smarts,
                                 )
 
@@ -252,9 +253,11 @@ def uploadManifoldReaction(validate_output):
                                     target_id=target_id,
                                     reaction_id=reaction_id,
                                     reactant_pair_smiles=reactant_pair_smiles,
+                                    reaction_name=reaction_name,
                                 )
 
                                 mculeids.append(create_models.mculeidlist)
+                                amounts.append(create_models.amountslist)
 
                                 product_no += 1
 
@@ -263,7 +266,7 @@ def uploadManifoldReaction(validate_output):
 
                 pathway_no += 1
 
-    CreateMculeQuoteModel(mculeids=mculeids, project_id=project_id)
+    CreateMculeQuoteModel(mculeids=mculeids, amounts=amounts, project_id=project_id)
 
     default_storage.delete(csv_fp)
 
@@ -281,6 +284,7 @@ def uploadCustomReaction(validate_output):
 
     if validated:
         mculeids = []
+        amounts = []
         project_id, project_name = createProjectModel(project_info)
         project_info["project_name"] = project_name
 
@@ -288,10 +292,10 @@ def uploadCustomReaction(validate_output):
         pathway_no = 1
         product_no = 1
         for reactant_pair_smiles, reaction_name, target_smiles, target_mass in zip(
-            uploaded_dict["reactant_pair_smiles"],
-            uploaded_dict["Reaction-name"],
+            uploaded_dict["reactant-pair-smiles"],
+            uploaded_dict["reaction-name"],
             uploaded_dict["target-smiles"],
-            uploaded_dict["Ammount_required (mg)"],
+            uploaded_dict["amount-required-mg"],
         ):
             target_id = createTargetModel(
                 project_id=project_id,
@@ -334,11 +338,13 @@ def uploadCustomReaction(validate_output):
                 target_id=target_id,
                 reaction_id=reaction_id,
                 reactant_pair_smiles=reactant_pair_smiles,
+                reaction_name=reaction_name,
             )
 
             mculeids.append(create_models.mculeidlist)
+            amounts.append(create_models.amountslist)
 
-    CreateMculeQuoteModel(mculeids=mculeids, project_id=project_id)
+    CreateMculeQuoteModel(mculeids=mculeids, amounts=amounts, project_id=project_id)
 
     default_storage.delete(csv_fp)
 

@@ -2,6 +2,7 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from statistics import mean
 
 import sys
 from ..mcule.apicalls import MCuleAPI
@@ -56,6 +57,7 @@ class CreateEncodedActionModels(object):
         target_id: int,
         reaction_id: int,
         reactant_pair_smiles: list,
+        reaction_name: str,
     ):
         """
         ValidateFile constructor
@@ -65,14 +67,17 @@ class CreateEncodedActionModels(object):
             reaction_id (int): Reaction model id for actions
             target_id (int): Target model id for reaction
             reactant_pair_smiles (list): List of reactant smiles
+            reaction_name (str): Reaction name
         """
         self.mculeapi = MCuleAPI()
         self.actions = actions
         self.reaction_id = reaction_id
         self.reaction_obj = Reaction.objects.get(id=reaction_id)
         self.reactant_pair_smiles = reactant_pair_smiles
+        self.reaction_name = reaction_name
         self.target_mols = Target.objects.get(id=target_id).targetmols
         self.mculeidlist = []
+        self.amountslist = []
 
         for action in self.actions:
             self.createEncodedActionModel(action)
@@ -97,11 +102,26 @@ class CreateEncodedActionModels(object):
     ):
         # NB need addition_order added to ncoded recipes - can we rather use SA score?
         mol_material = molar_eqv * self.target_mols
+
         if reactant_density:
             vol_material = ((mol_material * reactant_MW) / reactant_density) * 1e3
         else:
             vol_material = (mol_material / conc_reagents) * 1e6  # in uL
         return vol_material
+
+    def calculateAmount(self, molar_eqv: float, reactant_MW: float):
+        """ "
+        Calculates amount of compound needed in mg
+
+        Args:
+            molar_eq (float): Molar equivalents required
+            reactant_MW (float): Molecular weight of compound
+        Returns:
+            amount (float): Amount required in mg
+        """
+        mol_material = molar_eqv * self.target_mols
+        mass_material = (mol_material / reactant_MW) * 1e6
+        return mass_material
 
     def createEncodedAddActionModel(self, action_type, action):
         try:
@@ -119,6 +139,9 @@ class CreateEncodedActionModels(object):
             molar_eqv = action["content"]["material"]["quantity"]["value"]
             concentration = action["content"]["material"]["concentration"]
             solvent = action["content"]["material"]["solvent"]
+            mol = Chem.MolFromSmiles(reactant_SMILES)
+            reactant_MW = Descriptors.ExactMolWt(mol)
+            amount = self.calculateAmount(molar_eqv=molar_eqv, reactant_MW=reactant_MW)
 
             add = IBMAddAction()
             add.reaction_id = self.reaction_obj
@@ -133,9 +156,10 @@ class CreateEncodedActionModels(object):
             if mculeinfo:
                 mculeid = mculeinfo[0]
                 self.mculeidlist.append(mculeid)
+                self.amountslist.append(amount)
                 add.mculeid = mculeid
                 add.mculeurl = mculeinfo[1]
-                priceinfo = self.mculeapi.getMCulePrice(mculeid=mculeid, amount=10)
+                priceinfo = self.mculeapi.getMCulePrice(mculeid=mculeid, amount=amount)
                 if priceinfo:
                     add.mculeprice = priceinfo[0]
                     add.mculedeliverytime = priceinfo[1]
@@ -150,15 +174,14 @@ class CreateEncodedActionModels(object):
 
             if solvent is None:
                 reactant_density = action["content"]["material"]["density"]
-                mol = Chem.MolFromSmiles(reactant_SMILES)
-                reactant_MW = Descriptors.ExactMolWt(mol)
                 add.materialquantity = self.calculateVolume(
                     molar_eqv=molar_eqv, reactant_density=reactant_density, reactant_MW=reactant_MW
                 )
 
             if solvent:
                 add.materialquantity = self.calculateVolume(
-                    molar_eqv=molar_eqv, conc_reagents=concentration
+                    molar_eqv=molar_eqv,
+                    conc_reagents=concentration,
                 )
                 add.solvent = solvent
             add.concentration = concentration
@@ -201,6 +224,7 @@ class CreateMculeQuoteModel(object):
     def __init__(
         self,
         mculeids: list,
+        amounts: list,
         project_id: int,
     ):
         """
@@ -210,12 +234,15 @@ class CreateMculeQuoteModel(object):
             project_id (int): Project model id
         """
         self.mculeidlist = [item for sublist in mculeids for item in sublist]
+        self.amountaverage = mean([item for sublist in amounts for item in sublist])
         self.project_obj = Project.objects.get(id=project_id)
         self.mculeapi = MCuleAPI()
         self.createMculeQuoteModel()
 
     def createMculeQuoteModel(self):
-        quote_info = self.mculeapi.getTotalQuote(mculeids=self.mculeidlist)
+        quote_info = self.mculeapi.getTotalQuote(
+            mculeids=self.mculeidlist, amount=self.amountaverage
+        )
 
         if quote_info:
             try:
