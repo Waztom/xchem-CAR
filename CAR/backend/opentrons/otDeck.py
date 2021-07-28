@@ -359,6 +359,3 @@ class Pipette:
         self.mount = mount
         self.volume = volume
         self.tipRacks = self.deck.findTipRacks(self.volume)
-
-
-mculeids = ["MCULE-4785409568", "MCULE-9468698491", "MCULE-3627399529", "MCULE-3627399529"]

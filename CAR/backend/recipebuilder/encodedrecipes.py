@@ -1,13 +1,13 @@
 encoded_recipes = {
     "Amidation": {
-        "reactionSMARTS": ["[#6:1](=[#8:2])-[#8].[A#7:3]>>[#6:1](=[#8:2])-[A#7:3]"],
+        "reactionSMARTS": ["[#6:1](=[#8:2])-[#8].[#7;H2:3]>>[#6:1](=[#8:2])-[#7:3]"],
         "recipe": [
             {
                 "name": "add",
                 "content": {
                     "action_no": 1,
                     "material": {
-                        "SMARTS": ["[CX3](=O)[OX2H1]"],
+                        "SMARTS": ["[#6](=[#8])-[#8]"],
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "DMA",
@@ -47,7 +47,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 4,
                     "material": {
-                        "SMARTS": ["[NX3;H1,H2;!$(NC=O)]"],
+                        "SMARTS": ["[#7;H2]"],
                         "SMILES": None,
                         "quantity": {"value": 1.1, "unit": "moleq"},
                         "solvent": "DMA",
@@ -59,8 +59,8 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 5,
-                    "temperature": {"value": 25, "unit": "degC"},  
-                    "duration": {"value": 12, "unit": "hours"},  
+                    "temperature": {"value": 25, "unit": "degC"},
+                    "duration": {"value": 12, "unit": "hours"},
                 },
             },
         ],
@@ -112,21 +112,21 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 4,
-                    "temperature": {"value": 25, "unit": "degC"},  
-                    "duration": {"value": 12, "unit": "hours"},  
+                    "temperature": {"value": 25, "unit": "degC"},
+                    "duration": {"value": 12, "unit": "hours"},
                 },
             },
         ],
     },
     "Reductive amination": {
-        "reactionSMARTS": ["[#7;H2:1].[#6:2](=[#8:3])>>[#7:1]-[#6:2]"],
+        "reactionSMARTS": ["[#7;H2,H1:1].[#6:2](=[#8])>>[#7:1]-[#6:2]"],
         "recipe": [
             {
                 "name": "add",
                 "content": {
                     "action_no": 1,
                     "material": {
-                        "SMARTS": ["[#6](=[#8])"], 
+                        "SMARTS": ["[#6](=[#8])"],
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "DMA",
@@ -139,7 +139,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 2,
                     "material": {
-                        "SMARTS": ["[#6]-[NX3]"],
+                        "SMARTS": ["[#6]-[#7;H2,H1]"],
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "DMA",
@@ -177,25 +177,22 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 5,
-                    "temperature": {"value": 25, "unit": "degC"},  
-                    "duration": {"value": 12, "unit": "hours"},  
+                    "temperature": {"value": 25, "unit": "degC"},
+                    "duration": {"value": 12, "unit": "hours"},
                 },
             },
         ],
     },
     "N-nucleophilic aromatic substitution": {
-        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[c:3]-[N:2]>>[c:1]-[N:2]-[c:3]"], 
+        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:3]-[#7:2]>>[c:1]-[#7:2]-[#6:3]"],
         "recipe": [
             {
                 "name": "add",
                 "content": {
                     "action_no": 1,
                     "material": {
-                        # What about looking for other nucelophiles? Check with Harry -> SMARTS above also not very general -> only
-                        # looking for amines HR: for the moment keeping with amines as nucleophile, alcohols can be used in a further
-                        #iteration as base will probably be required
-                        "SMARTS": ["[c:1]-[F,Cl,Br,I]"], 
-                        "SMILES": None,  
+                        "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
+                        "SMILES": None,
                         "quantity": {"value": 1, "unit": "moleq"},
                         "solvent": "MeOH",
                         "concentration": 0.5,
@@ -207,7 +204,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 2,
                     "material": {
-                        "SMARTS": ["[c:3]-[N:2]"],  
+                        "SMARTS": ["[#6:3]-[#7:2]"],
                         "SMILES": None,
                         "quantity": {"value": 1.2, "unit": "moleq"},
                         "solvent": "MeOH",
@@ -219,8 +216,8 @@ encoded_recipes = {
                 "name": "stir",
                 "content": {
                     "action_no": 3,
-                    "temperature": {"value": 50, "unit": "degC"},  
-                    "duration": {"value": 12, "unit": "hours"}, 
+                    "temperature": {"value": 50, "unit": "degC"},
+                    "duration": {"value": 12, "unit": "hours"},
                 },
             },
         ],
@@ -282,10 +279,10 @@ encoded_recipes = {
         "recipe": [
             {
                 "name": "add",
-                "content":{
+                "content": {
                     "action_no": 1,
-                    "material":{
-                        "SMARTS": ["[c:1]-[F,Cl,Br,I].[c]-[!B]"], 
+                    "material": {
+                        "SMARTS": ["[c:1]-[F,Cl,Br,I].[c]-[!B]"],
                         "SMILES": None,
                         "quantity": {"value": 1, "unit": "moleq"},
                         "solvent": "EtOH",
@@ -295,12 +292,12 @@ encoded_recipes = {
             },
             {
                 "name": "add",
-                "content":{
+                "content": {
                     "action_no": 2,
-                    "material":{
+                    "material": {
                         "SMARTS": ["[#6:2]-[B]"],
                         "SMILES": None,
-                        "quantity": {"value": 2, "unit": "moleq"}, 
+                        "quantity": {"value": 2, "unit": "moleq"},
                         "solvent": "EtOH",
                         "concentration": 0.5,
                     },
@@ -308,13 +305,13 @@ encoded_recipes = {
             },
             {
                 "name": "add",
-                "content":{
+                "content": {
                     "action_no": 3,
-                    "material":{
+                    "material": {
                         "SMARTS": None,
                         "SMILES": "CC(C)C(C=C1C(C)C)=CC(C(C)C)=C1C2=CC=CC=C2P(C3CCCCC3)C4CCCCC4.NC5=C(C6=C([Pd]OS(C)(=O)=O)C=CC=C6)C=CC=C5",
-                        #Smiles for XPhosPdG3
-                        "quantity": {"value": 0.1, "unit": "moleq"}, #10mol% catalyst
+                        # Smiles for XPhosPdG3
+                        "quantity": {"value": 0.1, "unit": "moleq"},  # 10mol% catalyst
                         "solvent": "EtOH",
                         "concentration": 0.5,
                     },
@@ -322,12 +319,12 @@ encoded_recipes = {
             },
             {
                 "name": "add",
-                "content":{
+                "content": {
                     "action_no": 4,
-                    "material":{
+                    "material": {
                         "SMARTS": None,
                         "SMILES": "C1CCN2CCCN=C2CC1",
-                        "quantity": {"value": 2, "unit": "moleq"}, 
+                        "quantity": {"value": 2, "unit": "moleq"},
                         "solvent": "EtOH",
                         "concentration": 0.5,
                     },
@@ -335,10 +332,10 @@ encoded_recipes = {
             },
             {
                 "name": "stir",
-                "content":{
+                "content": {
                     "action_no": 5,
-                    "temperature": {"value": 100, "unit": "degC"},  
-                    "duration": {"value": 12, "unit": "hours"}, 
+                    "temperature": {"value": 100, "unit": "degC"},
+                    "duration": {"value": 12, "unit": "hours"},
                 },
             },
         ],

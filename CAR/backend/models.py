@@ -19,7 +19,7 @@ class Project(models.Model):
     quoteurl = models.CharField(max_length=255, null=True)
 
     def save(self, *args, **kwargs):
-        if not self.name:
+        if self.pk is None:
             # Newly created object, so set slug
             self.name = slugify(
                 self.submittername[0:3] + " " + self.submitterorganisation[0:3] + " " + rand_slug()
