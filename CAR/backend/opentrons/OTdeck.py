@@ -301,7 +301,6 @@ class Well:
                 + str(SafetyMargin)
                 + "%)"
             )
-            self.VolumeUsed = False
         elif WorkingVolumeused < 0:
             raise NameError(
                 "the resultant value of adding "
@@ -312,7 +311,6 @@ class Well:
                 + str(WorkingVolumeused)
                 + "ul"
             )
-            self.VolumeUsed = False
         else:
             self.mculeid = mculeid
             self.concentration = concentration

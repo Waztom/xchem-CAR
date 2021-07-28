@@ -5,15 +5,15 @@ from rxn4chemistry import RXN4ChemistryWrapper
 import os
 import time
 from rdkit.Chem import AllChem
-from rdkit import Chem
 import requests
 import json
 
 import sys
+from .commonsolvents import common_solvents
 
 sys.path.append("..")
 
-from ..commonsolvents import common_solvents
+
 from ..utils import canonSmiles
 
 

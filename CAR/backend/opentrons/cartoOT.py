@@ -4,8 +4,10 @@ import pandas as pd
 import math
 import re
 
-import opentrons.otWrite as otWrite
-import opentrons.otDeck as otDeck
+from OTwrite import otScript
+from OTdeck import Deck
+from platesavailable import labware_plates
+
 import mcule.outputplatetxt as OutputPlateTxt
 
 import backend.models
@@ -215,14 +217,14 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
             self.definedpipettes = None
 
         # Instantiate Deck to model physical constraints and locations involved in protocol
-        self.deck = otDeck.Deck()
+        self.deck = Deck()
 
         # setup name for robot py file
         self.outputpath = "None"  # WTOSCR: create and save script in DJango model
         self.pathnamecheck()  # generate unique name
 
         # Create and setup main robotic .py script to write output to
-        self.output = otWrite.otScript(
+        self.output = otScript(
             filepath=self.outputpath,
             protocolName=self.name,
             author=self.author,
@@ -236,7 +238,12 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         self.tipRackList = []
         self.pipettesneeded = []
 
+        # Lists of plates
+        self.orderplates = []
+        self.reactionplates = []
+
         # create list of plates to place plates to use in reactions
+        self.groupMaterials()
         self.setupPlate()
 
         # Generate idea of what tips will be used in protocol
@@ -253,6 +260,59 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         self.ittrActions()
 
         # WTOSCR: add qc.text file at end of session once output plates are filled
+
+    def groupMaterials(
+        self,
+        incAddMaterials=True,
+    ):
+        """ "
+        Groups materials for easier sorting into orderplates
+        """
+        allmaterials = pd.DataFrame(
+            columns=[
+                "mculeid",
+                "concentration",
+                "material",
+                "materialsmiles",
+                "materialquantity",
+                "solvent",
+                "materialKey",
+            ]
+        )
+
+        if incAddMaterials == True:
+            addingSteps = self.actions.loc[(self.actions["actiontype"]) == "add"]
+            materials = addingSteps[
+                [
+                    "mculeid",
+                    "concentration",
+                    "material",
+                    "materialsmiles",
+                    "materialquantity",
+                    "solvent",
+                ]
+            ]
+            key = addingSteps[["materialsmiles"]]
+            key = key.rename(columns={"materialsmiles": "materialKey"})  # material key is smiles
+            materials = pd.concat([materials, key], axis=1)
+            allmaterials = pd.concat([allmaterials, materials], ignore_index=True)
+
+        allmaterials["matAndSolv"] = allmaterials.apply(
+            lambda row: self.combinestrings(row), axis=1
+        )
+        allmaterials = allmaterials.groupby(["matAndSolv"]).aggregate(
+            {
+                "materialquantity": "sum",
+                "material": "first",
+                "solvent": "first",
+                "materialsmiles": "first",
+                "mculeid": "first",
+                "concentration": "first",
+            }
+        )
+        self.allmaterials = allmaterials.sort_values(
+            ["solvent", "materialquantity"], ascending=False
+        )
 
     def namecheck(self):
         """checks if self.name is file name safe
@@ -301,117 +361,69 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         print(f"{row['materialsmiles']}\t{row['solvent']})")
         return str(str(row["materialsmiles"]) + str(row["solvent"]))
 
-    def setupPlate(
-        self,
-        inputnumwells=24,
-        inputwellvolume=2500,
-        incAddMaterials=True,
-        incWashMaterials=False,
-    ):
-        # WTOSCR: currently relying on user input of number of wells and input well volume, a function should be created along the line of the pipette selection process to automaticaly choose which plate should be used
-        # WTOSCR: do we need autogenrated plate size selection - proberbly more for output plate but the same funciton should work for both
-        # print(self.actions)
+    def addPlate(self, platetype: str):
+        if platetype == "Order":
+            name = "OrderPlate"
+            plate_list = self.orderplates
+        if platetype == "Reaction":
+            name = "ReactionPlate"
+            plate_list = self.reactionplates
 
-        allmaterials = pd.DataFrame(
-            columns=[
-                "mculeid",
-                "concentration",
-                "material",
-                "materialsmiles",
-                "materialquantity",
-                "solvent",
-                "materialKey",
-            ]
-        )  # WTOSCR: should proberbly check about a Django model
+        next_free_plate_index = self.deck.nextfreeplate()
+        plate_name = "{}-{}".format(name, next_free_plate_index)
 
-        # each block getting a list of materials associated with that action type and concatinating them to the pandas Dataframe, All materials
-        if incAddMaterials == True:
-            addingSteps = self.actions.loc[(self.actions["actiontype"]) == "add"]
-            materials = addingSteps[
-                [
-                    "mculeid",
-                    "concentration",
-                    "material",
-                    "materialsmiles",
-                    "materialquantity",
-                    "solvent",
-                ]
-            ]
-            key = addingSteps[["materialsmiles"]]
-            key = key.rename(columns={"materialsmiles": "materialKey"})  # material key is smiles
-            materials = pd.concat([materials, key], axis=1)
-            allmaterials = pd.concat([allmaterials, materials], ignore_index=True)
-
-        if (
-            incWashMaterials == True
-        ):  # WTOSCR: review if properly implemented and bring inline with add
-            solventSteps = self.actions.loc[(self.actions["actiontype"]) == "wash"]
-            washmaterials = solventSteps[
-                "material", "materialquantitcombinestringsquantity", "materialquantity"
-            ]
-            allmaterials = pd.concat([allmaterials, extractsolvents], ignore_index=True)
-
-        allmaterials["matAndSolv"] = allmaterials.apply(
-            lambda row: self.combinestrings(row), axis=1
-        )
-        allmaterials = allmaterials.groupby(["matAndSolv"]).aggregate(
-            {
-                "materialquantity": "sum",
-                "material": "first",
-                "solvent": "first",
-                "materialsmiles": "first",
-                "mculeid": "first",
-                "concentration": "first",
-            }
-        )
-        allmaterials = allmaterials.sort_values(["solvent", "materialquantity"], ascending=False)
-        # experement with adding a working materials+sovlent collum to group by then drop that col
-        self.maxvolume = allmaterials["materialquantity"].max()  # not currently used
-        self.totalvolume = allmaterials["materialquantity"].sum()  # not currently used
-
-        # Plate objects are stored in Deck object as a list in PlateList
-        # Create and add order plate to deck
         self.deck.add(
             Type="Plate",
-            numwells=inputnumwells,
-            platewellVolume=inputwellvolume,
-            platename="OrderPlate",
-        )  # WTOSCR: index is hard coded
+            numwells=24,
+            platewellVolume=2500,
+            platename=plate_name,
+        )
 
-        # Get the order plate form the PlateList
-        self.orderplate = [
-            plate for plate in self.deck.PlateList if plate.plateName == "OrderPlate"
-        ][0]
+        plate = [plate for plate in self.deck.PlateList if plate.plateName == plate_name][0]
+        plate_list.append(plate)
+        return plate
 
-        for i in allmaterials.index.values:
+    def setupPlate(
+        self,
+    ):
+        orderplate = self.setupOrderPlate()
+
+        for i in self.allmaterials.index.values:
             if (
-                allmaterials.at[i, "material"] == ""
-                or allmaterials.at[i, "material"] == None
-                or allmaterials.at[i, "material"] == "NaN"
+                self.allmaterials.at[i, "material"] == ""
+                or self.allmaterials.at[i, "material"] == None
+                or self.allmaterials.at[i, "material"] == "NaN"
             ):
-                matName = allmaterials.at[
+                matName = self.allmaterials.at[
                     i, "materialsmiles"
                 ]  # implement chemical name check for all reactants and reagents
             else:
-                matName = allmaterials.at[i, "material"]
+                matName = self.allmaterials.at[i, "material"]
 
-            # Check if free well
-            self.orderplate.nextfreewell()
+            orderplate.nextfreewell()
+
+            if orderplate.isplatefull:
+                orderplate = self.addPlate(platetype="Order")
 
             if not self.orderplate.isplatefull:
-                wellnumber = self.orderplate.nextfreewellindex
+                wellnumber = orderplate.nextfreewellindex
 
                 self.orderplate.WellList[wellnumber].add(
-                    amount=allmaterials.at[i, "materialquantity"],
-                    smiles=allmaterials.at[i, "materialsmiles"],
-                    solvent=allmaterials.at[i, "solvent"],
+                    amount=self.allmaterials.at[i, "materialquantity"],
+                    smiles=self.allmaterials.at[i, "materialsmiles"],
+                    solvent=self.allmaterials.at[i, "solvent"],
                     materialname=matName,
-                    mculeid=allmaterials.at[i, "mculeid"],
-                    concentration=allmaterials.at[i, "concentration"],
+                    mculeid=self.allmaterials.at[i, "mculeid"],
+                    concentration=self.allmaterials.at[i, "concentration"],
                 )
 
         currentblocknum = self.actions["blocknum"].values[0]
-        OutputPlateCSV.PlateCSV(self.orderplate, self.name, self.author, currentblocknum)
+        OutputPlateCSV.PlateCSV(
+            platelist=self.orderplates,
+            protocolname=self.name,
+            author=self.author,
+            block=currentblocknum,
+        )
         # OutputPlateTxt.PlateTxt(self.orderplate, self.name, self.author, currentblocknum)
         # WTOSCR: add qc.text file at end of session once output plates are filled
         # if well overvlows (outcome == False) needs to move to next weel
@@ -421,6 +433,9 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
 
         # Add reaction plate
         # Harcoded plate values!!!! Must fix
+
+        # How is this used?????
+        self.addPlate(platetype="Reaction")
         self.deck.add(
             Type="Plate",
             numwells=96,
