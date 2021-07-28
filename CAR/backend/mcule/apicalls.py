@@ -1,6 +1,7 @@
 from pycule import MCuleWrapper
-
 import os
+
+from ..utils import canonSmiles
 
 
 class MCuleAPI(object):
@@ -32,47 +33,67 @@ class MCuleAPI(object):
                 mculeid = results[0]["mcule_id"]
                 mculeurl = results[0]["url"]
                 return mculeid, mculeurl
-            else:
-                return None
-        except Exception as e:
-            print(e)
 
-    def getMCulePrice(self, mculeid: str, amount: int = 10):
+        except Exception as e:
+            try:
+                response_dict = self.mculewrapper.similaritysearch(
+                    query=smiles, limit=1, threshold=0.7
+                )
+                print(smiles)
+                print(response_dict)
+                results = response_dict["response"]["results"]
+                if results:
+                    smiles_test = canonSmiles(results[0]["smiles"])
+                    print(smiles_test)
+                    if smiles_test == smiles:
+                        mculeid = results[0]["mcule_id"]
+                        mculeurl = results[0]["url"]
+                        return mculeid, mculeurl
+                    else:
+                        return None
+            except Exception as e:
+                print(e)
+                return None
+
+    def getMCulePrice(self, mculeid: str, amount: float):
         """
         Get compound pricing info from Mcule for 1, 5 and 10 mg amounts
 
         Args:
             mculeid (str): MCule ID for compound
-            amount (int): 1, 5 or 10 mg for gettig price estimate for
+            amount (floatt): Amount required
         Returns:
             price: MCule price in USD for comppound and amount set in iput argument
         """
+        if amount < 1:
+            amount = 1
         try:
-            amount_dict = {1: 0, 5: 1, 10: 2}
-            response_dict = self.mculewrapper.compoundprices(mcule_id=mculeid)
-            bestprices = response_dict["response"]["best_prices"]
-            amountpriceinfo = bestprices[amount_dict[amount]]
-            if amountpriceinfo:
-                price = amountpriceinfo["price"]
-                deliverytime = amountpriceinfo["delivery_time_working_days"]
+            response_dict = self.mculewrapper.compoundpricesamount(mcule_id=mculeid, amount=amount)
+            price_info = response_dict["response"]["best_prices"][0]
+            if price_info:
+                price = price_info["price"]
+                deliverytime = price_info["delivery_time_working_days"]
                 return price, deliverytime
-            else:
-                return None
+
         except Exception as e:
             print(e)
+            print(response_dict)
+            return None
 
     def getTotalQuote(
         self,
         mculeids: list,
+        amount: float = 1,
         delivery_country: str = "GB",
-        target_volume: float = 0.5,
-        target_cc: float = 500,
+        target_volume: float = None,
+        target_cc: float = None,
     ):
         """
         Get quote from MCule for list of mcule ids
 
         Args:
             mculeids (list): List of MCule IDs
+            amount (float): Amount per compound for quote
             delivery_country (str): ISO 3166-1 alpha-2 code of the delivery country. Default GB
             target_volume (float): Total volume in ml requested. Default None
             target_cc (float): Target concentration in mM. Default None
@@ -85,8 +106,7 @@ class MCuleAPI(object):
             response_dict = self.mculewrapper.quoterequest(
                 mcule_ids=mculeids,
                 delivery_country=delivery_country,
-                target_volume=target_volume,
-                target_cc=target_cc,
+                amount=amount,
             )
             quote_id = response_dict["response"]["id"]
             quote_state_response = self.mculewrapper.quoterequeststatus(quote_id=quote_id)

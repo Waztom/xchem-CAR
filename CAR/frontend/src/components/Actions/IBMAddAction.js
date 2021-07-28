@@ -83,8 +83,8 @@ const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
           </Button>
           {MCuleid !== null ? (
             <Button onClick={() => openInNewTab(Action.mculeurl)}>
-              ${Action.mculeprice} - 10 mg <br /> {Action.mculedeliverytime}{" "}
-              days delivery time
+              ${Action.mculeprice} <br /> {Action.mculedeliverytime} days
+              delivery time
             </Button>
           ) : (
             <Button disabled="true">

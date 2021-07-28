@@ -2,6 +2,7 @@ import json
 import requests
 from rdkit.Chem import Descriptors
 from rdkit import Chem
+from rdkit.Chem import rdChemReactions
 from rdkit.Chem import Draw
 import pubchempy as pcp
 
@@ -106,6 +107,42 @@ def checkSMARTSPattern(SMILES, SMARTS_pattern):
         return True
     else:
         return False
+
+
+def checkReactantSMARTS(reactant_SMILES_pair: tuple, reaction_SMARTS: str):
+    """
+    Checks if reactant piar matches reaction_smarts and also
+    checks for reverse order of reactants
+
+    Args:
+        reactant_SMILES_pair (tuple): Tuple of reactant smiles
+        reaction_SMARTS (str): reaction SMARTS pattern
+
+    Returns:
+        reactant_SMILES_pair (list): List of reactant smiles in correct order
+        products (rdkit obj): Rdkit object of product of reaction
+        None: If no match is found between the reactants and the reaction smarts
+    """
+    reaction_info = {}
+
+    reaction = rdChemReactions.ReactionFromSmarts(reaction_SMARTS)
+    reacts = [Chem.MolFromSmiles(smi) for smi in reactant_SMILES_pair]
+    products = reaction.RunReactants(reacts)
+
+    if len(products) != 0:
+        reaction_info["reactant_SMILES_pair"] = reactant_SMILES_pair
+        reaction_info["products"] = products
+        return reaction_info
+
+    if len(products) == 0:
+        reacts.reverse()
+        products = reaction.RunReactants(reacts)
+        if len(products) != 0:
+            reaction_info["reactant_SMILES_pair"] = reactant_SMILES_pair[::-1]
+            reaction_info["products"] = products
+            return reaction_info
+        else:
+            return None
 
 
 def getChemicalName(smiles):
