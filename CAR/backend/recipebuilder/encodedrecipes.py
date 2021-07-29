@@ -1,6 +1,6 @@
 encoded_recipes = {
     "Amidation": {
-        "reactionSMARTS": ["[#6:1](=[#8:2])-[#8].[#7;H2:3]>>[#6:1](=[#8:2])-[#7:3]"],
+        "reactionSMARTS": ["[#6:1](=[#8:2])-[#8].[#7;H2,H1:3]>>[#6:1](=[#8:2])-[#7:3]"],
         "recipe": [
             {
                 "name": "add",
@@ -47,7 +47,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 4,
                     "material": {
-                        "SMARTS": ["[#7;H2]"],
+                        "SMARTS": ["[#7;H2,H1]"],
                         "SMILES": None,
                         "quantity": {"value": 1.1, "unit": "moleq"},
                         "solvent": "DMA",
@@ -66,14 +66,14 @@ encoded_recipes = {
         ],
     },
     "Amide schotten - baumann": {
-        "reactionSMARTS": ["[#6:1](=[#8:2])-[#17].[A#7:3]>>[#6:1](=[#8:2])-[A#7:3]"],
+        "reactionSMARTS": ["[#6:1](=[#8:2])-[#17].[#7;H2,H1:3]>>[#6:1](=[#8:2])-[#7;H2,H1:3]"],
         "recipe": [
             {
                 "name": "add",
                 "content": {
                     "action_no": 1,
                     "material": {
-                        "SMARTS": ["[NX3;H1,H2;!$(NC=O)]"],
+                        "SMARTS": ["[#7;H2,H1:3]"],
                         "SMILES": None,
                         "quantity": {"value": 1.1, "unit": "moleq"},
                         "solvent": "DMA",
@@ -86,7 +86,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 2,
                     "material": {
-                        "SMARTS": ["[CX3](=[OX1])[Cl]"],
+                        "SMARTS": ["[#6:1](=[#8:2])-[#17]"],
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "DMA",
@@ -119,14 +119,14 @@ encoded_recipes = {
         ],
     },
     "Reductive amination": {
-        "reactionSMARTS": ["[#7;H2,H1:1].[#6:2](=[#8])>>[#7:1]-[#6:2]"],
+        "reactionSMARTS": ["[#6:2](=[#8]).[#7;H2,H1:1]>>[#6:2]-[#7:1]"],
         "recipe": [
             {
                 "name": "add",
                 "content": {
                     "action_no": 1,
                     "material": {
-                        "SMARTS": ["[#6](=[#8])"],
+                        "SMARTS": ["[#6:2](=[#8])"],
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "DMA",
@@ -139,7 +139,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 2,
                     "material": {
-                        "SMARTS": ["[#6]-[#7;H2,H1]"],
+                        "SMARTS": ["[#7;H2,H1:1]"],
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "DMA",
@@ -153,7 +153,7 @@ encoded_recipes = {
                     "action_no": 3,
                     "material": {
                         "SMARTS": None,
-                        "SMILES": "[Na+].CC(=O)O[BH-](OC(C)=O)OC(C)=O",
+                        "SMILES": "[Na+].CC(=O)O[BH-](OC(C)=O)OC(C)=O", 
                         "quantity": {"value": 1.4, "unit": "moleq"},
                         "solvent": "MeOH",
                         "concentration": 0.25,
@@ -184,7 +184,7 @@ encoded_recipes = {
         ],
     },
     "N-nucleophilic aromatic substitution": {
-        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:3]-[#7:2]>>[c:1]-[#7:2]-[#6:3]"],
+        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:3]-[#7;H2,H1:2]>>[#6:3]-[#7:2]-[c:1]"],
         "recipe": [
             {
                 "name": "add",
@@ -204,7 +204,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 2,
                     "material": {
-                        "SMARTS": ["[#6:3]-[#7:2]"],
+                        "SMARTS": ["[#6:3]-[#7;H2,H1:2]"],
                         "SMILES": None,
                         "quantity": {"value": 1.2, "unit": "moleq"},
                         "solvent": "MeOH",
