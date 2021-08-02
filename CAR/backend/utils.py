@@ -5,6 +5,7 @@ from rdkit import Chem
 from rdkit.Chem import rdChemReactions
 from rdkit.Chem import Draw
 import pubchempy as pcp
+import itertools
 
 
 def calculateproductmols(target_mass, target_SMILES):
@@ -18,6 +19,23 @@ def canonSmiles(smiles):
     mol = Chem.MolFromSmiles(smiles)
     canon_smiles = Chem.MolToSmiles(mol)
     return canon_smiles
+
+
+def combichem(reactant_1_SMILES: list, reactant_2_SMILES: list):
+    """ "
+    Gets all possible combinations between two uneven lists of
+    reactants
+    Args:
+        reactant_1_SMILES (list): List of reactant one smiles
+        reactant_2_SMILES (list): List of reactant two smiles
+    Returns:
+        all_possible_combinations (list): All possible combinations possible
+                           between reactat 1 and reactant two lists
+                           as a list of tuples
+    """
+    all_possible_combinations = list(itertools.product(reactant_1_SMILES, reactant_2_SMILES))
+
+    return all_possible_combinations
 
 
 def convertIBMNameToSmiles(chemical_name):
