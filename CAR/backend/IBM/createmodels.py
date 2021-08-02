@@ -62,10 +62,8 @@ def createTargetModel(project_id, smiles, target_no, target_mass):
     if the csv file uploaded is validated and
     the user wants to upload the data
 
-    project_id: string
-        id of project created for upload
-    smiles: string
-        a valid smiles
+    project_id: string id of project created for upload
+    smiles: string a valid smiles
     """
     target = Target()
     project_obj = Project.objects.get(id=project_id)

@@ -55,7 +55,7 @@ class otScript:
 
         script.close()
 
-    def setupLabwear(self, platelist, tipOutput):
+    def setupLabware(self, platelist):
         script = open(self.filepath, "a")
         script.write("\n\t# labware")
         for plate in platelist:

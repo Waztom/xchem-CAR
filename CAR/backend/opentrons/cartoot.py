@@ -1,22 +1,217 @@
+"""Create OT session"""
+from __future__ import annotations
 from pathlib import Path
 from django.db.models.expressions import Col
 import pandas as pd
 import math
 import re
 
-from OTwrite import otScript
-from OTdeck import Deck
+from otwrite import otScript
+from otdeck import Deck
 from platesavailable import labware_plates
 
-import mcule.outputplatetxt as OutputPlateTxt
+from ..models import (
+    IBMAddAction,
+    Product,
+    Project,
+    Target,
+    Method,
+    Reaction,
+    OTSession,
+    Deck,
+    Plate,
+    Well,
+)
 
-import backend.models
-
-# can be used in ibmtoot by importing
 import mcule.outputplatecsv as OutputPlateCSV
 
-# and calling:
-# OutputPlateTxt.PlateCSV(self.orderplate, self.name, self.author, currentblocknum)
+# Create session
+# Create deck
+# create plate for order materials
+# fill wells in order plate
+# create order csv
+
+
+class SortSessions(object):
+    def __init__(self, projectid: int):
+        self.projectid = projectid
+        self.materialstoorder = []
+
+    def getMethods(self, targetid):
+        methodqueryset = Method.objects.filter(target_id=targetid)
+        return methodqueryset
+
+    def getReactions(self, methodid):
+        reactionqueryset = Reaction.objects.filter(method_id=methodid)
+        return reactionqueryset
+
+    def getAddActions(self, reactionid):
+        addactionqueryset = IBMAddAction.objects.filter(reaction_id=reactionid)
+        return addactionqueryset
+
+    def checkSessions(self):
+        targetqueryset = Target.objects.filter(project_id=self.projectid)
+
+        for target in targetqueryset:
+            methodqueryset = self.getMethods(targetid=target.id)
+            for method in methodqueryset:
+                reactionqueryset = self.getReactions(methodid=method.id)
+
+
+class CreateOTSession(object):
+    """
+    Creates a CreateOTSession object for generating a protocol
+    from actions
+    """
+
+    def __init__(self, projectid: int, reactionqueryset: DjangoModel, platequeryset: list = None):
+        self.projectid = projectid
+        self.reactionqueryset = reactionqueryset
+        self.otsessionid = self.createOTSessionModel()
+        self.deckobj = self.createDeckModel()
+        self.platequeryset = platequeryset
+        if not platequeryset:
+            self.createOrderPlate()
+
+    def createOTSessionModel(self):
+        otsessionobj = OTSession()
+        project_obj = Project.objects.get(id=self.projectid)
+        otsessionobj.project_id = project_obj
+        otsessionobj.save()
+        return otsessionobj.id
+
+    def createDeckModel(self):
+        deckobj = Deck()
+        otsession_obj = OTSession.objects.get(id=self.otsessionid)
+        deckobj.otsession_id = otsession_obj
+        deckobj.save()
+        return deckobj
+
+    def updateDeckSlotAvailable(self):
+        testslotavailable = self.deckobj.indexslotavailable + 1
+        if testslotavailable <= self.deckobj.numberslots:
+            self.deckobj.indexslotavailable = testslotavailable
+            self.deckobj.save()
+            return self.deckobj.indexslotavailable
+        else:
+            self.deckobj.slotavailable = False
+            self.deckobj.save()
+            return False
+
+    def createPlateModel(self, platename, platetype, numberwells):
+        testindexslot = self.updateDeckSlotAvailable()
+        if testindexslot:
+            plateindex = testindexslot
+            plateobj = Plate()
+            plateobj.deck_id = self.deck
+            plateobj.platename = "{}-{}".format(platename, testindexslot)
+            plateobj.plateindex = plateindex
+            plateobj.labware = platetype
+            plateobj.numberwells = numberwells
+            plateobj.save()
+            return plateobj
+        else:
+            print("No more deck slots available")
+
+    def updatePlateWellsAvailable(self, plateobj):
+        testwellavailable = plateobj.indexwellavailable + 1
+        if testwellavailable <= plateobj.numberwells:
+            plateobj.indexwellavailable = testwellavailable
+            plateobj.save()
+            return plateobj.indexwellavailable
+        else:
+            plateobj.wellavailable = False
+            plateobj.save()
+            return False
+
+    def createWellModel(self, plateobj, reactionobj, addactionobj, volume):
+        testwellslot = self.updatePlateWellsAvailable(plateobj=plateobj)
+        if testwellslot:
+            wellobj = Well()
+            wellobj.plate_id = plateobj
+            wellobj.reaction_id = reactionobj
+            wellobj.addaction_id = addactionobj
+            wellobj.wellindex = testwellslot
+            wellobj.volume = volume
+            wellobj.save()
+            return wellobj
+        else:
+            print("No more well slots available")
+            return False
+
+    def getAddActions(self, reactionobj):
+        addactionqueryset = IBMAddAction.objects.filter(reaction_id=reactionobj.id)
+        return addactionqueryset
+
+    def createOrderPlate(self):
+        allactionslistdf = []
+        firstreactionobjs = [reaction[0] for reaction in self.reactionqueryset]
+        alladdactionqueryset = [
+            self.getAddActions(reactionobj) for reactionobj in firstreactionobjs
+        ]
+        orderdf = pd.DataFrame(
+            columns=["mculeid", "platename", "well", "concentration", "solvent", "amount-ul"]
+        )
+
+        for addactionqueryset in alladdactionqueryset:
+            actions_to_add_df = pd.DataFrame(list(addactionqueryset.values()))
+            if not actions_to_add_df.empty:
+                allactionslistdf.append(actions_to_add_df)
+        allactionslistdf = pd.concat(allactionslistdf)
+
+        startingmaterialsdf = allactionslistdf.groupby(["id"]).aggregate(
+            {
+                "materialquantity": "sum",
+                "material": "first",
+                "solvent": "first",
+                "materialsmiles": "first",
+                "mculeid": "first",
+                "concentration": "first",
+            }
+        )
+        startingmaterialsdf = startingmaterialsdf.sort_values(
+            ["solvent", "materialquantity"], ascending=False
+        )
+
+        plateobj = self.createPlateModel(
+            platename="Orderplate", labware="24_reservoir_2500ul", numberwells=24
+        )
+
+        maxwellvolume = float(plateobj.platetype.split("_")[-1].strip("ul"))
+
+        for i in startingmaterialsdf.index.values:
+            totalvolume = startingmaterialsdf.at[i, "materialquantity"]
+            if totalvolume > maxwellvolume:
+                nowellsneeded = -(-totalvolume // maxwellvolume)
+                for index in range(nowellsneeded):
+                    if not plateobj.wellavailable:
+                        plateobj = self.createPlateModel(
+                            platename="Orderplate", platetype="24_reservoir_2500ul", numberwells=24
+                        )
+                    self.createWellModel(
+                        plateobj=plateobj, reactionobj=None, addactionobj=None, volume=maxwellvolume
+                    )
+                    orderdf.at[i, "mculeid"] = (startingmaterialsdf.at[i, "mculeid"],)
+                    orderdf.at[i, "platename"] = plateobj.platename
+                    orderdf.at[i, "well"] = wellobj.wellindex
+                    orderdf.at[i, "concentration"] = (startingmaterialsdf.at[i, "concentration"],)
+                    orderdf.at[i, "solvent"] = (startingmaterialsdf.at[i, "solvent"],)
+                    orderdf.at[i, "amount-ul"] = (startingmaterialsdf.at[i, "materialquantity"],)
+
+            else:
+                if not plateobj.wellavailable:
+                    plateobj = self.createPlateModel(
+                        platename="Orderplate", platetype="24_reservoir_2500ul", numberwells=24
+                    )
+                wellobj = self.createWellModel(
+                    plateobj=plateobj, reactionobj=None, addactionobj=None, volume=totalvolume
+                )
+                orderdf.at[i, "mculeid"] = (startingmaterialsdf.at[i, "mculeid"],)
+                orderdf.at[i, "platename"] = plateobj.platename
+                orderdf.at[i, "well"] = wellobj.wellindex
+                orderdf.at[i, "concentration"] = (startingmaterialsdf.at[i, "concentration"],)
+                orderdf.at[i, "solvent"] = (startingmaterialsdf.at[i, "solvent"],)
+                orderdf.at[i, "amount-ul"] = (startingmaterialsdf.at[i, "materialquantity"],)
 
 
 class CollectActions(object):
@@ -54,8 +249,12 @@ class CollectActions(object):
             backend.models.IBMWashAction,
         ]
 
+        self.allactions_df = self.getActions()
+        self.actionsfiltered = self.actionfilter()
+        self.blockdefine()
+        self.startingmaterials = self.getStartingMaterials()
+
     def getActions(self):
-        # THIS NEEDS TO BE FIXED!!!!!!
         allactions_list_df = []
         targets = backend.models.Target.objects.filter(project_id=self.projectid)
         methods = [backend.models.Method.objects.filter(target_id=target.id) for target in targets]
@@ -72,7 +271,7 @@ class CollectActions(object):
                     allactions_list_df.append(actions_to_add_df)
         allactions_list_df = pd.concat(allactions_list_df)
 
-        self.allactions_df = allactions_list_df.sort_values(["reaction_id_id", "actionno"])
+        return allactions_list_df.sort_values(["reaction_id_id", "actionno"])
 
     def docheck(self, row):
         if row["actiontype"] in ["add", "wash", "extract"]:
@@ -92,13 +291,13 @@ class CollectActions(object):
             subSetReactAct = self.allactions_df
 
         if actions != None:
-            self.actionsfiltered = subSetReactAct.loc[(subSetReactAct["actiontype"]).isin(actions)]
+            actionsfiltered = subSetReactAct.loc[(subSetReactAct["actiontype"]).isin(actions)]
         else:
-            self.actionsfiltered = subSetReactAct
+            actionsfiltered = subSetReactAct
 
-        self.actionsfiltered["doable"] = self.actionsfiltered.apply(
-            lambda row: self.docheck(row), axis=1
-        )
+        actionsfiltered["doable"] = actionsfiltered.apply(lambda row: self.docheck(row), axis=1)
+
+        return actionsfiltered
 
     def blockdefine(self):
         # WTOSCR: 1) add doable to action models,  2) retreive data from database
@@ -155,16 +354,60 @@ class CollectActions(object):
             actionswithblocks = actionswithblocks.append(actions, ignore_index=True)
         self.actionsfiltered = actionswithblocks
 
-    def startProtocol(self):
-        for blocknum in self.actionsfiltered["blocknum"].unique():
-            actionsblock = self.actionsfiltered[self.actionsfiltered["blocknum"] == blocknum]
-            if actionsblock["blockbool"].values[0] == True:
-                otSession(
-                    name=f"block_{blocknum}",
-                    actions=actionsblock,
-                    author="Example Author",
-                    description="example description",
-                )
+    def getStartingMaterials(
+        self,
+        incAddMaterials=True,
+    ):
+        """ "
+        Groups starting materials for easier sorting into orderplates
+        """
+        startingmaterials = pd.DataFrame(
+            columns=[
+                "mculeid",
+                "concentration",
+                "material",
+                "materialsmiles",
+                "materialquantity",
+                "solvent",
+                "materialKey",
+            ]
+        )
+
+        if incAddMaterials == True:
+            addingSteps = self.actionsfiltered.loc[(self.actionsfiltered["actiontype"]) == "add"]
+            materials = addingSteps[
+                [
+                    "mculeid",
+                    "concentration",
+                    "material",
+                    "materialsmiles",
+                    "materialquantity",
+                    "solvent",
+                ]
+            ]
+            key = addingSteps[["materialsmiles"]]
+            key = key.rename(columns={"materialsmiles": "materialKey"})  # material key is smiles
+            materials = pd.concat([materials, key], axis=1)
+            startingmaterials = pd.concat([startingmaterials, materials], ignore_index=True)
+
+        startingmaterials["matAndSolv"] = startingmaterials.apply(
+            lambda row: self.combinestrings(row), axis=1
+        )
+        startingmaterials = startingmaterials.groupby(["matAndSolv"]).aggregate(
+            {
+                "materialquantity": "sum",
+                "material": "first",
+                "solvent": "first",
+                "materialsmiles": "first",
+                "mculeid": "first",
+                "concentration": "first",
+            }
+        )
+        startingmaterials = startingmaterials.sort_values(
+            ["solvent", "materialquantity"], ascending=False
+        )
+
+        return startingmaterials
 
 
 class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or similar
@@ -189,6 +432,7 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         self,
         name,
         actions,
+        startingmaterials,
         author=None,
         description=None,
         currentpipettesetup=[
@@ -207,6 +451,7 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
 
         # create blank actions list
         self.actions = actions
+        self.startingmaterials = startingmaterials
         self.currentpipettesetup = currentpipettesetup
 
         # decalre defined pipettes if they exist
@@ -238,13 +483,8 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         self.tipRackList = []
         self.pipettesneeded = []
 
-        # Lists of plates
-        self.orderplates = []
-        self.reactionplates = []
-
         # create list of plates to place plates to use in reactions
-        self.groupMaterials()
-        self.setupPlate()
+        self.setupOrderPlate()
 
         # Generate idea of what tips will be used in protocol
         self.preselecttips()
@@ -253,7 +493,7 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         self.tipOutput()
 
         # write hardwear setup to robotics .py script
-        self.output.setupLabwear(self.deck.PlateList, self.tipRackList)
+        self.output.setupLabware(self.deck.PlateList, self.tipRackList)
 
         self.setupPipettes()
         self.output.setupPipettes(self.deck.PipetteList)
@@ -261,58 +501,17 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
 
         # WTOSCR: add qc.text file at end of session once output plates are filled
 
-    def groupMaterials(
-        self,
-        incAddMaterials=True,
-    ):
-        """ "
-        Groups materials for easier sorting into orderplates
-        """
-        allmaterials = pd.DataFrame(
-            columns=[
-                "mculeid",
-                "concentration",
-                "material",
-                "materialsmiles",
-                "materialquantity",
-                "solvent",
-                "materialKey",
-            ]
-        )
-
-        if incAddMaterials == True:
-            addingSteps = self.actions.loc[(self.actions["actiontype"]) == "add"]
-            materials = addingSteps[
-                [
-                    "mculeid",
-                    "concentration",
-                    "material",
-                    "materialsmiles",
-                    "materialquantity",
-                    "solvent",
-                ]
-            ]
-            key = addingSteps[["materialsmiles"]]
-            key = key.rename(columns={"materialsmiles": "materialKey"})  # material key is smiles
-            materials = pd.concat([materials, key], axis=1)
-            allmaterials = pd.concat([allmaterials, materials], ignore_index=True)
-
-        allmaterials["matAndSolv"] = allmaterials.apply(
-            lambda row: self.combinestrings(row), axis=1
-        )
-        allmaterials = allmaterials.groupby(["matAndSolv"]).aggregate(
-            {
-                "materialquantity": "sum",
-                "material": "first",
-                "solvent": "first",
-                "materialsmiles": "first",
-                "mculeid": "first",
-                "concentration": "first",
-            }
-        )
-        self.allmaterials = allmaterials.sort_values(
-            ["solvent", "materialquantity"], ascending=False
-        )
+    def startProtocol(self):
+        for blocknum in self.actions["blocknum"].unique():
+            actionsblock = self.actions[self.actions["blocknum"] == blocknum]
+            if actionsblock["blockbool"].values[0] == True:
+                otSession(
+                    name=f"block_{blocknum}",
+                    actions=actionsblock,
+                    startingmaterials=self.startingmaterials,
+                    author="Example Author",
+                    description="example description",
+                )
 
     def namecheck(self):
         """checks if self.name is file name safe
@@ -364,41 +563,42 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
     def addPlate(self, platetype: str):
         if platetype == "Order":
             name = "OrderPlate"
-            plate_list = self.orderplates
+            numwells = 24
+            platewellvolume = 2500
         if platetype == "Reaction":
             name = "ReactionPlate"
-            plate_list = self.reactionplates
+            numwells = 96
+            platewellvolume = 2500
 
         next_free_plate_index = self.deck.nextfreeplate()
         plate_name = "{}-{}".format(name, next_free_plate_index)
 
         self.deck.add(
             Type="Plate",
-            numwells=24,
-            platewellVolume=2500,
+            numwells=numwells,
+            platewellVolume=platewellvolume,
             platename=plate_name,
         )
 
         plate = [plate for plate in self.deck.PlateList if plate.plateName == plate_name][0]
-        plate_list.append(plate)
         return plate
 
-    def setupPlate(
+    def setupOrderPlate(
         self,
     ):
-        orderplate = self.setupOrderPlate()
+        orderplate = self.addPlate(platetype="Order")
 
-        for i in self.allmaterials.index.values:
+        for i in self.startingmaterials.index.values:
             if (
-                self.allmaterials.at[i, "material"] == ""
-                or self.allmaterials.at[i, "material"] == None
-                or self.allmaterials.at[i, "material"] == "NaN"
+                self.startingmaterials.at[i, "material"] == ""
+                or self.startingmaterials.at[i, "material"] == None
+                or self.startingmaterials.at[i, "material"] == "NaN"
             ):
-                matName = self.allmaterials.at[
+                matName = self.startingmaterials.at[
                     i, "materialsmiles"
                 ]  # implement chemical name check for all reactants and reagents
             else:
-                matName = self.allmaterials.at[i, "material"]
+                matName = self.startingmaterials.at[i, "material"]
 
             orderplate.nextfreewell()
 
@@ -409,44 +609,22 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
                 wellnumber = orderplate.nextfreewellindex
 
                 self.orderplate.WellList[wellnumber].add(
-                    amount=self.allmaterials.at[i, "materialquantity"],
-                    smiles=self.allmaterials.at[i, "materialsmiles"],
-                    solvent=self.allmaterials.at[i, "solvent"],
+                    amount=self.startingmaterials.at[i, "materialquantity"],
+                    smiles=self.startingmaterials.at[i, "materialsmiles"],
+                    solvent=self.startingmaterials.at[i, "solvent"],
                     materialname=matName,
-                    mculeid=self.allmaterials.at[i, "mculeid"],
-                    concentration=self.allmaterials.at[i, "concentration"],
+                    mculeid=self.startingmaterials.at[i, "mculeid"],
+                    concentration=self.startingmaterials.at[i, "concentration"],
                 )
 
         currentblocknum = self.actions["blocknum"].values[0]
+
         OutputPlateCSV.PlateCSV(
-            platelist=self.orderplates,
+            platelist=self.deck.PlateList,
             protocolname=self.name,
             author=self.author,
             block=currentblocknum,
         )
-        # OutputPlateTxt.PlateTxt(self.orderplate, self.name, self.author, currentblocknum)
-        # WTOSCR: add qc.text file at end of session once output plates are filled
-        # if well overvlows (outcome == False) needs to move to next weel
-        # if outcome != False:
-        #     plate[wellnumber] = [allmaterials.loc[i,'materialquantity'], allmaterials.loc[i,'material']]
-        # WTOSCR: add handleing materials spread across many wells in fluid handeling steps
-
-        # Add reaction plate
-        # Harcoded plate values!!!! Must fix
-
-        # How is this used?????
-        self.addPlate(platetype="Reaction")
-        self.deck.add(
-            Type="Plate",
-            numwells=96,
-            platewellVolume=2500,
-            platename="ReactionPlate",
-        )
-
-        self.reactionPlate = [
-            plate for plate in self.deck.PlateList if plate.plateName == "ReactionPlate"
-        ][0]
-        # WTOSCR: index is hard coded
 
     def preselecttips(self):
         for index, row in self.actions.iterrows():
@@ -577,54 +755,19 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
                 # WTOSCR: need to add handleing for multichannle pipettes
 
     def ittrActions(self):
-        reactionids = (
-            self.actions["reaction_id_id"].unique().tolist()
-        )  # WTOSCR: Django implementaiton
+        reactionids = self.actions["reaction_id_id"].unique().tolist()
+        reactionplate = self.addPlate(platetype="Reaction")
+
         for Index in range(len(self.actions.index.values)):
             columns = self.actions.columns.values
             currentaction = pd.DataFrame(index=[Index], columns=columns)
             for col in columns:
                 currentaction[col] = self.actions.iloc[Index][col]
             currentaction["outputwell"] = reactionids.index(currentaction["reaction_id_id"].values)
-
+            print()
+            if currentaction["outputwell"].values[0] > len(reactionids):
+                reactionplate = self.addPlate(platetype="Reaction")
             self.processAction(currentaction)
-
-    def splitittract(self, split):
-        if type(split) == "int":
-            subset = self.actions[split]
-            for actionindex in range(len(subset) + 1):
-                currentactionmask = subset["actionno"] == actionindex + 1
-                currentaction = subset[currentactionmask]
-                self.processAction(currentaction)
-
-        elif type(split) == "<class 'list'>":
-            print(type(split[0]))
-            if type(split[0]) == "int":
-                subset = self.actions[split[0] : split[1]]
-                print("intlistsplit")
-                for actionindex in range(len(subset) + 1):
-                    currentactionmask = subset["actionno"] == actionindex + 1
-                    currentaction = subset[currentactionmask]
-                    self.processAction(currentaction)
-
-            elif type(split[0]) == "str":
-                print("stirlistsplit")
-                subset = self.actions["actiontype" in split]
-                for actionindex in range(len(subset) + 1):
-                    currentactionmask = subset["actionno"] == actionindex + 1
-                    currentaction = subset[currentactionmask]
-                    self.processAction(currentaction)
-            else:
-                print(type(split[0]))
-
-        elif type(split) == "str":
-            subset = self.actions["actiontype" == split]
-            for actionindex in range(len(subset) + 1):
-                currentactionmask = subset["actionno"] == actionindex + 1
-                currentaction = subset[currentactionmask]
-                self.processAction(currentaction)
-        else:
-            print("debug1")
 
     def processAction(self, currentaction):
         currentactiontype = currentaction["actiontype"].to_string(index=False)
@@ -693,6 +836,7 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
                 repetitions += 1
 
     def actionAdd(self, currentaction):
+        # handle multiple input plates!!!!! How?????
         tipvolume = self.choosetip(currentaction["materialquantity"].values[0])
         print(f"tipvolume {tipvolume}")
         pipetteName = (self.deck.findPippets(tipvolume)).name
@@ -740,7 +884,3 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
 
 
 collected_actions = CollectActions(projectid=252)
-collected_actions.getActions()
-collected_actions.actionfilter()
-collected_actions.blockdefine()
-collected_actions.startProtocol()

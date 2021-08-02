@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.fields import BooleanField
 from django.utils.text import slugify
 import random
 import string
@@ -448,3 +449,43 @@ class IBMWashAction(models.Model):
     materialquantity = models.FloatField(null=True)
     materialquantityunit = models.CharField(choices=Unit.choices, default=Unit.ml, max_length=10)
     numberofrepetitions = models.IntegerField(null=True)
+
+
+class MCuleOrder(models.Model):
+    project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
+    orderplatecsv = models.FileField(upload_to="mculeorderplates/", max_length=255)
+
+
+class OTSession(models.Model):
+    project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
+    init_date = models.DateTimeField(auto_now_add=True)
+
+
+class Deck(models.Model):
+    otsession_id = models.ForeignKey(OTSession, on_delete=models.CASCADE)
+    numberslots = models.IntegerField(default=12)
+    slotavailable = models.BooleanField(default=True)
+    indexslotavailable = models.IntegerField(default=0)
+
+
+class Plate(models.Model):
+    class PlateType(models.TextChoices):
+        orderplate = "orderplate"
+        inplate = "inplate"
+        outplate = "outplate"
+
+    deck_id = models.ForeignKey(Deck, on_delete=models.CASCADE)
+    platename = models.CharField(max_length=255)
+    plateindex = models.IntegerField()
+    labware = models.CharField(choices=PlateType.choices, max_length=50)
+    numberwells = models.IntegerField()
+    wellavailable = models.BooleanField(default=True)
+    indexswellavailable = models.IntegerField(default=0)
+
+
+class Well(models.Model):
+    plate_id = models.ForeignKey(Plate, on_delete=models.CASCADE)
+    reaction_id = models.OneToOneField(Reaction, on_delete=models.CASCADE, null=True)
+    addaction_id = models.OneToOneField(IBMAddAction, on_delete=models.CASCADE, null=True)
+    wellindex = models.IntegerField()
+    volume = models.FloatField()
