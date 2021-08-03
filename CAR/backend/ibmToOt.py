@@ -421,10 +421,13 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
 
         # Add reaction plate
         # Harcoded plate values!!!! Must fix
+        #######################################
+        # Change reaction plate type
+        #######################################
         self.deck.add(
             Type="Plate",
-            numwells=96,
-            platewellVolume=2500,
+            numwells=384,
+            platewellVolume=100,
             platename="ReactionPlate",
         )
 
@@ -724,7 +727,7 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         self.output.unsuportedAction("Concentrate not yet supported ")
 
 
-collected_actions = CollectActions(projectid=252)
+collected_actions = CollectActions(projectid=79)
 collected_actions.getActions()
 collected_actions.actionfilter()
 collected_actions.blockdefine()

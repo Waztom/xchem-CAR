@@ -90,6 +90,10 @@ class Plate:
             elif platewellVolume == 500:
                 self.plateTypeName = "plateone_96_wellplate_500ul"
                 self.platewellVolume = 500
+        if numwells == 384:
+            if platewellVolume == 100:
+                self.plateTypeName = "labcyte_384_wellplate_100ul"
+                self.platewellVolume = 100
         print(self.plateTypeName)  # the name that the ot knows the labwear by
         self.plateName = platename  # such as "input plate 1"
         self.activeWell = (

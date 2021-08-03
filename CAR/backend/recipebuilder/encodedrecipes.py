@@ -119,17 +119,17 @@ encoded_recipes = {
         ],
     },
     "Reductive amination": {
-        "reactionSMARTS": ["[#6:2](=[#8])(-[#6:1]).[#7;H2,H1:3]>>[#6:2](-[#6:1])-[#7:3]"],
+        "reactionSMARTS": ["[#6:2](=[#8]).[#7;H2,H1:3]>>[#6:2]-[#7:3]"],
         "recipe": [
             {
                 "name": "add",
                 "content": {
                     "action_no": 1,
                     "material": {
-                        "SMARTS": ["[#6:2](=[#8])(-[#6:1])"],
+                        "SMARTS": ["[#6:2](=[#8])"],
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "DMA",
+                        "solvent": "MeOH",
                         "concentration": 0.5,
                     },
                 },
@@ -142,7 +142,7 @@ encoded_recipes = {
                         "SMARTS": ["[#7;H2,H1:3]"],
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "DMA",
+                        "solvent": "MeOH",
                         "concentration": 0.5,
                     },
                 },
@@ -168,7 +168,7 @@ encoded_recipes = {
                         "SMARTS": None,
                         "SMILES": "CC(=O)O",
                         "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "DMA",
+                        "solvent": "MeOH",
                         "concentration": 0.5,
                     },
                 },
@@ -251,24 +251,24 @@ encoded_recipes = {
                     },
                 },
             },
-            {
-                "name": "add",
-                "content": {
-                    "action_no": 3,
-                    "material": {
-                        "SMARTS": None,
-                        "SMILES": "CCN(C(C)C)C(C)C",
-                        "quantity": {"value": 2.5, "unit": "moleq"},
-                        "solvent": None,
-                        "density": 0.74,
-                        "concentration": None,
-                    },
-                },
-            },
+            #{
+               # "name": "add",
+                #"content": {
+                 #   "action_no": 3,
+                  #  "material": {
+                   #     "SMARTS": None,
+                    #    "SMILES": "CCN(C(C)C)C(C)C",
+                     #   "quantity": {"value": 2.5, "unit": "moleq"},
+                      #  "solvent": None,
+                       # "density": 0.74,
+                        #"concentration": None,
+                    #},
+                #},
+            #},
             {
                 "name": "stir",
                 "content": {
-                    "action_no": 4,
+                    "action_no": 3,
                     "temperature": {"value": 50, "unit": "degC"},
                     "duration": {"value": 12, "unit": "hours"},
                 },
