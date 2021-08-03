@@ -119,14 +119,14 @@ encoded_recipes = {
         ],
     },
     "Reductive amination": {
-        "reactionSMARTS": ["[#6:2](=[#8]).[#7;H2,H1:1]>>[#6:2]-[#7:1]"],
+        "reactionSMARTS": ["[#6:2](=[#8])(-[#6:1]).[#7;H2,H1:3]>>[#6:2](-[#6:1])-[#7:3]"],
         "recipe": [
             {
                 "name": "add",
                 "content": {
                     "action_no": 1,
                     "material": {
-                        "SMARTS": ["[#6:2](=[#8])"],
+                        "SMARTS": ["[#6:2](=[#8])(-[#6:1])"],
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "DMA",
@@ -139,7 +139,7 @@ encoded_recipes = {
                 "content": {
                     "action_no": 2,
                     "material": {
-                        "SMARTS": ["[#7;H2,H1:1]"],
+                        "SMARTS": ["[#7;H2,H1:3]"],
                         "SMILES": None,
                         "quantity": {"value": 1.0, "unit": "moleq"},
                         "solvent": "DMA",
@@ -277,14 +277,14 @@ encoded_recipes = {
         ],
     },
     "sulfonamide schotten-baumann": {
-        "reactionSMARTS": ["[#6:1]-[#16:5](=[#8])(=[#8:7])-[#17:3].[#7;H2,H1:2]>>[#6:1]-[#16:5](=[#8])(=[#8:7])-[#7;H2,H1:2]"],
+        "reactionSMARTS": ["[#16:5](=[#8])(=[#8:7])-[#17:3].[#7;H2,H1:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"],
         "recipe": [
             {
                 "name": "add",
                 "content":{
                     "action_no": 1,
                     "material":{
-                        "SMARTS":["[#6:1]-[#16:5](=[#8])(=[#8:7])-[#17:3]"],
+                        "SMARTS":["[#16:5](=[#8])(=[#8:7])-[#17:3]"],
                         "SMILES": None,
                         "quantity": {"value": 1, "unit": "moleq"},
                         "solvent": "MeOH", #solvent for all can be IPA, EtOAc or MeOH will need to test
@@ -297,9 +297,9 @@ encoded_recipes = {
                 "content":{
                     "action_no": 2,
                     "material":{
-                        "SMARTS":["[#7;H2,H1:2]"],
+                        "SMARTS":["[#6]-[#7;H2,H1:2]"],
                         "SMILES": None,
-                        "quanity": {"value": 1.2, "unit": "moleq"},
+                        "quantity": {"value": 1.2, "unit": "moleq"},
                         "solvent": "MeOH",
                         "concentration": 0.5,
                     },
