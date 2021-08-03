@@ -26,7 +26,7 @@ class ValidateFile(object):
         self.validate_dict = {"field": [], "warning_string": []}
         self.validated = True
 
-        if self.upload_type == "combi-chem":
+        if self.upload_type == "custom-chem":
             self.validatecustomchem()
         if self.upload_type == "combi-custom-chem":
             self.validatecustomcombichem()
