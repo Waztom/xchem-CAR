@@ -153,7 +153,7 @@ encoded_recipes = {
                     "action_no": 3,
                     "material": {
                         "SMARTS": None,
-                        "SMILES": "[Na+].CC(=O)O[BH-](OC(C)=O)OC(C)=O", 
+                        "SMILES": "[Na+].CC(=O)O[BH-](OC(C)=O)OC(C)=O",
                         "quantity": {"value": 1.4, "unit": "moleq"},
                         "solvent": "MeOH",
                         "concentration": 0.25,
@@ -183,46 +183,46 @@ encoded_recipes = {
             },
         ],
     },
-    #"N-nucleophilic aromatic substitution": {
-     #   "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:3]-[#7;H2,H1:2]>>[#6:3]-[#7:2]-[c:1]"],
-      #  "recipe": [
-       #     {
-        #        "name": "add",
-         #       "content": {
-          #          "action_no": 1,
-           #         "material": {
-            #            "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
-             #           "SMILES": None,
-              #          "quantity": {"value": 1, "unit": "moleq"},
-               #         "solvent": "NMP",
-                #        "concentration": 0.5,
-                 #   },
-                #},
-            #},
-            #{
-            #    "name": "add",
-             #   "content": {
-              #      "action_no": 2,
-               #     "material": {
-                #        "SMARTS": ["[#6:3]-[#7;H2,H1:2]"],
-                 #       "SMILES": None,
-                  #      "quantity": {"value": 1.2, "unit": "moleq"},
-                   #     "solvent": "NMP",
-                    #    "concentration": 0.5,
-                    #},
-               # },
-            #},
-            #{
-             #   "name": "stir",
-              #  "content": {
-               #     "action_no": 3,
-                #    "temperature": {"value": 50, "unit": "degC"},
-                 #   "duration": {"value": 12, "unit": "hours"},
-                #},
-           # },
-        #],
-    #},
-     "N-nucleophilic aromatic substitution": {
+    # "N-nucleophilic aromatic substitution": {
+    #   "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:3]-[#7;H2,H1:2]>>[#6:3]-[#7:2]-[c:1]"],
+    #  "recipe": [
+    #     {
+    #        "name": "add",
+    #       "content": {
+    #          "action_no": 1,
+    #         "material": {
+    #            "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
+    #           "SMILES": None,
+    #          "quantity": {"value": 1, "unit": "moleq"},
+    #         "solvent": "NMP",
+    #        "concentration": 0.5,
+    #   },
+    # },
+    # },
+    # {
+    #    "name": "add",
+    #   "content": {
+    #      "action_no": 2,
+    #     "material": {
+    #        "SMARTS": ["[#6:3]-[#7;H2,H1:2]"],
+    #       "SMILES": None,
+    #      "quantity": {"value": 1.2, "unit": "moleq"},
+    #     "solvent": "NMP",
+    #    "concentration": 0.5,
+    # },
+    # },
+    # },
+    # {
+    #   "name": "stir",
+    #  "content": {
+    #     "action_no": 3,
+    #    "temperature": {"value": 50, "unit": "degC"},
+    #   "duration": {"value": 12, "unit": "hours"},
+    # },
+    # },
+    # ],
+    # },
+    "N-nucleophilic aromatic substitution": {
         "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:3]-[#7;H2,H1:2]>>[#6:3]-[#7:2]-[c:1]"],
         "recipe": [
             {
@@ -261,10 +261,9 @@ encoded_recipes = {
                         "quantity": {"value": 2.5, "unit": "moleq"},
                         "solvent": None,
                         "density": 0.74,
-                        "concentration": None
-
-                    }
-                }
+                        "concentration": None,
+                    },
+                },
             },
             {
                 "name": "stir",
@@ -277,27 +276,29 @@ encoded_recipes = {
         ],
     },
     "sulfonamide schotten-baumann": {
-        "reactionSMARTS": ["[#16:5](=[#8])(=[#8:7])-[#17:3].[#7;H2,H1:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"],
+        "reactionSMARTS": [
+            "[#16:5](=[#8])(=[#8:7])-[#17].[#7;H2,H1:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"
+        ],
         "recipe": [
             {
                 "name": "add",
-                "content":{
+                "content": {
                     "action_no": 1,
-                    "material":{
-                        "SMARTS":["[#16:5](=[#8])(=[#8:7])-[#17:3]"],
+                    "material": {
+                        "SMARTS": ["[#16:5](=[#8])(=[#8:7])-[#17]"],
                         "SMILES": None,
                         "quantity": {"value": 1, "unit": "moleq"},
-                        "solvent": "MeOH", #solvent for all can be IPA, EtOAc or MeOH will need to test
+                        "solvent": "MeOH",  # solvent for all can be IPA, EtOAc or MeOH will need to test
                         "concentration": 0.5,
                     },
                 },
             },
             {
                 "name": "add",
-                "content":{
+                "content": {
                     "action_no": 2,
-                    "material":{
-                        "SMARTS":["[#6]-[#7;H2,H1:2]"],
+                    "material": {
+                        "SMARTS": ["[#6]-[#7;H2,H1:2]"],
                         "SMILES": None,
                         "quantity": {"value": 1.2, "unit": "moleq"},
                         "solvent": "MeOH",
@@ -307,10 +308,10 @@ encoded_recipes = {
             },
             {
                 "name": "stir",
-                "content":{
+                "content": {
                     "action_no": 3,
-                    "temperature": {"value": 100, "unit": "degC"},  
-                    "duration": {"value": 12, "unit": "hours"}, 
+                    "temperature": {"value": 100, "unit": "degC"},
+                    "duration": {"value": 12, "unit": "hours"},
                 },
             },
         ],
@@ -382,14 +383,18 @@ encoded_recipes = {
         ],
     },
     "Boc protection": {
-        "reactionSMARTS": ["[#7:2].[#8:3]-[#6:1](=[#8:4])-[#8:5]>>[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])"],
+        "reactionSMARTS": [
+            "[#7:2].[#8:3]-[#6:1](=[#8:4])-[#8:5]>>[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])"
+        ],
         "recipe": [
             {
                 "name": "add",
-                "content":{
+                "content": {
                     "action_no": 1,
-                    "material":{
-                        "SMARTS": ["[#8:3]-[#6:1](=[#8:4])-[#8:5]-[#6](-[#6])(-[#6])(-[#6])"],#BOC
+                    "material": {
+                        "SMARTS": [
+                            "[#8:3]-[#6:1](=[#8:4])-[#8:5]-[#6](-[#6])(-[#6])(-[#6])"
+                        ],  # BOC
                         "SMILES": None,
                         "quantity": {"value": 1.5, "unit": "moleq"},
                         "solvent": "ACN",
@@ -399,48 +404,50 @@ encoded_recipes = {
             },
             {
                 "name": "add",
-                "content":{
+                "content": {
                     "action_no": 2,
-                    "material":{
+                    "material": {
                         "SMARTS": None,
                         "SMILES": "n1ccc(N(C)C)cc1",
-                        "quantity": {"value": 1, "unit": "moleq"},#DMAP
-                        "solvent": "ACN",
-                        "concentration": 0.5,
-                    },
-                },
-            },
-            {   
-                "name": "add",
-                "content":{
-                    "action_no": 3,
-                    "material":{
-                        "SMARTS": ["[#7;H2]"],
-                        "SMILES": None,
-                        "quantity": {"value": 1, "unit": "moleq"},#primary amine
+                        "quantity": {"value": 1, "unit": "moleq"},  # DMAP
                         "solvent": "ACN",
                         "concentration": 0.5,
                     },
                 },
             },
             {
-                 "name": "stir",
-                 "content":{
+                "name": "add",
+                "content": {
+                    "action_no": 3,
+                    "material": {
+                        "SMARTS": ["[#7;H2]"],
+                        "SMILES": None,
+                        "quantity": {"value": 1, "unit": "moleq"},  # primary amine
+                        "solvent": "ACN",
+                        "concentration": 0.5,
+                    },
+                },
+            },
+            {
+                "name": "stir",
+                "content": {
                     "action_no": 4,
-                    "temperature": {"value": 100, "unit": "degC"},  
+                    "temperature": {"value": 100, "unit": "degC"},
                     "duration": {"value": 12, "unit": "hours"},
                 },
             },
         ],
     },
-    "Boc deprotection": {#this does not work yet, SMARTS needs rethinking
-        "reactionSMARTS":["[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]>>[#7:2].[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]"],
-        "recipe":[
+    "Boc deprotection": {  # this does not work yet, SMARTS needs rethinking
+        "reactionSMARTS": [
+            "[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]>>[#7:2].[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]"
+        ],
+        "recipe": [
             {
                 "name": "add",
-                "content":{
+                "content": {
                     "action_no": 1,
-                    "material":{
+                    "material": {
                         "SMARTS": ["[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]"],
                         "SMILES": None,
                         "quantity": {"value": 1, "unit": "moleq"},
@@ -451,36 +458,25 @@ encoded_recipes = {
             },
             {
                 "name": "add",
-                "content":{
+                "content": {
                     "action_no": 2,
-                    "material":{
+                    "material": {
                         "SMARTS": None,
                         "SMILES": "HCl",
                         "quantity": {"value": 1, "unit": "moleq"},
                         "solvent": "EtOAc",
-                        "concentration": 6
+                        "concentration": 6,
                     },
                 },
             },
             {
                 "name": "stir",
-                 "content":{
+                "content": {
                     "action_no": 3,
-                    "temperature": {"value": 25, "unit": "degC"},  
+                    "temperature": {"value": 25, "unit": "degC"},
                     "duration": {"value": 12, "unit": "hours"},
                 },
             },
         ],
     },
 }
-
-
-                
-            
-           
-                   
-
-                    
-          
-  
-
