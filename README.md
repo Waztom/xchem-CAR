@@ -134,7 +134,7 @@ once Git-Crypt is installed unlock the secrets using:
 - you should now be in the container running Debian Linux
 - in the new terminal type:
   > `cd CAR` <br> 
-  >`mkdir log && cd log && touch logsfile.log` <br> 
+  >`mkdir logs && cd logs && touch logsfile.log` <br> 
   >`python3 manage.py makemigrations` <br> 
   >`python3 manage.py migrate` <br> 
   >`npm install --quiet --legacy-peer-deps`<br> 
