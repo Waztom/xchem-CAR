@@ -129,69 +129,6 @@ encoded_recipes = {
         },
     },
     "Reductive amination": {
-<<<<<<< HEAD
-        "reactionSMARTS": ["[#6:2](=[#8]).[#7;H2,H1:3]>>[#6:2]-[#7:3]"],
-        "recipe": [
-            {
-                "name": "add",
-                "content": {
-                    "action_no": 1,
-                    "material": {
-                        "SMARTS": ["[#6:2](=[#8])"],
-                        "SMILES": None,
-                        "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "MeOH",
-                        "concentration": 0.5,
-                    },
-                },
-            },
-            {
-                "name": "add",
-                "content": {
-                    "action_no": 2,
-                    "material": {
-                        "SMARTS": ["[#7;H2,H1:3]"],
-                        "SMILES": None,
-                        "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "MeOH",
-                        "concentration": 0.5,
-                    },
-                },
-            },
-            {
-                "name": "add",
-                "content": {
-                    "action_no": 3,
-                    "material": {
-                        "SMARTS": None,
-                        "SMILES": "[Na+].CC(=O)O[BH-](OC(C)=O)OC(C)=O",
-                        "quantity": {"value": 1.4, "unit": "moleq"},
-                        "solvent": "MeOH",
-                        "concentration": 0.25,
-                    },
-                },
-            },
-            {
-                "name": "add",
-                "content": {
-                    "action_no": 4,
-                    "material": {
-                        "SMARTS": None,
-                        "SMILES": "CC(=O)O",
-                        "quantity": {"value": 1.0, "unit": "moleq"},
-                        "solvent": "MeOH",
-                        "concentration": 0.5,
-                    },
-                },
-            },
-            {
-                "name": "stir",
-                "content": {
-                    "action_no": 5,
-                    "temperature": {"value": 25, "unit": "degC"},
-                    "duration": {"value": 12, "unit": "hours"},
-                },
-=======
         "reactionSMARTS": ["[#6:2](=[#8])(-[#6:1]).[#7;H2,H1:3]>>[#6:2](-[#6:1])-[#7:3]"],
         "recipes": {
             "Standard": {
@@ -258,103 +195,13 @@ encoded_recipes = {
                         },
                     },
                 ],
->>>>>>> 43ddcd6fbccc282c21d5f15ef01d2dd85072888b
             },
         },
     },
-    # "N-nucleophilic aromatic substitution": {
-    #   "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:3]-[#7;H2,H1:2]>>[#6:3]-[#7:2]-[c:1]"],
-    #  "recipe": [
-    #     {
-    #        "name": "add",
-    #       "content": {
-    #          "action_no": 1,
-    #         "material": {
-    #            "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
-    #           "SMILES": None,
-    #          "quantity": {"value": 1, "unit": "moleq"},
-    #         "solvent": "NMP",
-    #        "concentration": 0.5,
-    #   },
-    # },
-    # },
-    # {
-    #    "name": "add",
-    #   "content": {
-    #      "action_no": 2,
-    #     "material": {
-    #        "SMARTS": ["[#6:3]-[#7;H2,H1:2]"],
-    #       "SMILES": None,
-    #      "quantity": {"value": 1.2, "unit": "moleq"},
-    #     "solvent": "NMP",
-    #    "concentration": 0.5,
-    # },
-    # },
-    # },
-    # {
-    #   "name": "stir",
-    #  "content": {
-    #     "action_no": 3,
-    #    "temperature": {"value": 50, "unit": "degC"},
-    #   "duration": {"value": 12, "unit": "hours"},
-    # },
-    # },
-    # ],
-    # },
-    "N-nucleophilic aromatic substitution": {
+        "N-nucleophilic aromatic substitution": {
         "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:3]-[#7;H2,H1:2]>>[#6:3]-[#7:2]-[c:1]"],
-<<<<<<< HEAD
-        "recipe": [
-            {
-                "name": "add",
-                "content": {
-                    "action_no": 1,
-                    "material": {
-                        "SMARTS": ["[#6:3]-[#7;H2,H1:2]"],
-                        "SMILES": None,
-                        "quantity": {"value": 1, "unit": "moleq"},
-                        "solvent": "NMP",
-                        "concentration": 0.5,
-                    },
-                },
-            },
-            {
-                "name": "add",
-                "content": {
-                    "action_no": 2,
-                    "material": {
-                        "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
-                        "SMILES": None,
-                        "quantity": {"value": 1.2, "unit": "moleq"},
-                        "solvent": "NMP",
-                        "concentration": 0.5,
-                    },
-                },
-            },
-            #{
-               # "name": "add",
-                #"content": {
-                 #   "action_no": 3,
-                  #  "material": {
-                   #     "SMARTS": None,
-                    #    "SMILES": "CCN(C(C)C)C(C)C",
-                     #   "quantity": {"value": 2.5, "unit": "moleq"},
-                      #  "solvent": None,
-                       # "density": 0.74,
-                        #"concentration": None,
-                    #},
-                #},
-            #},
-            {
-                "name": "stir",
-                "content": {
-                    "action_no": 3,
-                    "temperature": {"value": 50, "unit": "degC"},
-                    "duration": {"value": 12, "unit": "hours"},
-                },
-=======
         "recipes": {
-            "Standard": {
+            "Base": {
                 "reference": None,
                 "actions": [
                     {
@@ -406,14 +253,64 @@ encoded_recipes = {
                         },
                     },
                 ],
->>>>>>> 43ddcd6fbccc282c21d5f15ef01d2dd85072888b
             },
+            "No base": {
+            "reference": None,
+            "actions": [
+                {
+                    "name": "add",
+                    "content": {
+                        "action_no": 1,
+                        "material": {
+                            "SMARTS": ["[#6:3]-[#7;H2,H1:2]"],
+                            "SMILES": None,
+                            "quantity": {"value": 1, "unit": "moleq"},
+                            "solvent": "NMP",
+                            "concentration": 0.5,
+                        },
+                    },
+                },
+                {
+                    "name": "add",
+                    "content": {
+                        "action_no": 2,
+                        "material": {
+                            "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
+                            "SMILES": None,
+                            "quantity": {"value": 1.2, "unit": "moleq"},
+                            "solvent": "NMP",
+                            "concentration": 0.5,
+                        },
+                    },
+                },
+                #{
+                    # "name": "add",
+                    # "content": {
+                    #    "action_no": 3,
+                        #   "material": {
+                        #      "SMARTS": None,
+                        #     "SMILES": "CCN(C(C)C)C(C)C",
+                        #    "quantity": {"value": 2.5, "unit": "moleq"},
+                            #   "solvent": None,
+                            #  "density": 0.74,
+                            # "concentration": None,
+                        #},
+                    #},
+                # },
+                {
+                    "name": "stir",
+                    "content": {
+                        "action_no": 4,
+                        "temperature": {"value": 50, "unit": "degC"},
+                        "duration": {"value": 12, "unit": "hours"},
+                    },
+                },
+            ],
         },
     },
+},
     "sulfonamide schotten-baumann": {
-        "reactionSMARTS": [
-            "[#16:5](=[#8])(=[#8:7])-[#17].[#7;H2,H1:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"
-        ],
+        "reactionSMARTS": ["[#16:5](=[#8])(=[#8:7])-[#17].[#7;H2,H1:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"],
         "recipes": {
             "Standard": {
                 "reference": None,

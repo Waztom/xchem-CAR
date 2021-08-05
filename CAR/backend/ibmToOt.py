@@ -426,8 +426,8 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         #######################################
         self.deck.add(
             Type="Plate",
-            numwells=384,
-            platewellVolume=100,
+            numwells=96,
+            platewellVolume=2500,
             platename="ReactionPlate",
         )
 
@@ -727,7 +727,7 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         self.output.unsuportedAction("Concentrate not yet supported ")
 
 
-collected_actions = CollectActions(projectid=79)
+collected_actions = CollectActions(projectid=95)
 collected_actions.getActions()
 collected_actions.actionfilter()
 collected_actions.blockdefine()
