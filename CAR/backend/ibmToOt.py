@@ -56,9 +56,18 @@ class CollectActions(object):
         # THIS NEEDS TO BE FIXED!!!!!!
         allactions_list_df = []
         targets = backend.models.Target.objects.filter(project_id=self.projectid)
-        methods = [backend.models.Method.objects.filter(target_id=target.id) for target in targets]
+        target_ids = targets.values_list("pk", flat=True)
+        methods = [
+            backend.models.Method.objects.filter(target_id=target_id) for target_id in target_ids
+        ]
+        method_ids_queryset = [method.values_list("pk", flat=True) for method in methods]
+        method_ids = []
+        for method_id_queryset in method_ids_queryset:
+            ids_to_add = [query for query in method_id_queryset]
+            method_ids.append(ids_to_add)
+        method_ids = [item for sublist in method_ids for item in sublist]
         reactions = [
-            backend.models.Reaction.objects.filter(method_id=method[0].id) for method in methods
+            backend.models.Reaction.objects.filter(method_id=method_id) for method_id in method_ids
         ]
 
         for actionmodel in self.actionmodels:
@@ -727,7 +736,11 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         self.output.unsuportedAction("Concentrate not yet supported ")
 
 
+<<<<<<< HEAD
 collected_actions = CollectActions(projectid=95)
+=======
+collected_actions = CollectActions(projectid=335)
+>>>>>>> ffe3a4cacd4f118701006b6356210a92609c4765
 collected_actions.getActions()
 collected_actions.actionfilter()
 collected_actions.blockdefine()
