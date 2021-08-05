@@ -736,11 +736,7 @@ class otSession:  # WTOSCR: otsession could be renamed to otsessionblock or simi
         self.output.unsuportedAction("Concentrate not yet supported ")
 
 
-<<<<<<< HEAD
 collected_actions = CollectActions(projectid=95)
-=======
-collected_actions = CollectActions(projectid=335)
->>>>>>> ffe3a4cacd4f118701006b6356210a92609c4765
 collected_actions.getActions()
 collected_actions.actionfilter()
 collected_actions.blockdefine()
