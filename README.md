@@ -125,15 +125,21 @@ once Git-Crypt is installed unlock the secrets using:
 
 - Open a new terminal that you can interact with. if the terminal is visible at the bottom of the screen click on the plus "create new integrated terminal" or use the keybord shortcut "**Ctrl+Shift+`**" button or use the adjacent "split terminal" (or "**Ctrl+Shift+5**") button to see the new terminal adjacent to the current terminal
 - you should now be in the container running Debian Linux
-- in the new terminal type:
+- in the new terminal type (Terminal 1):
   > `cd CAR` <br> 
   >`mkdir logs && cd logs && touch logsfile.log` <br> 
+  >`cd ..`<br>
   >`python3 manage.py makemigrations` <br> 
   >`python3 manage.py migrate` <br> 
   >`npm install --quiet --legacy-peer-deps`<br> 
-  >`python3 manage.py runserver`<br>
+  
+- the first time you launch CAR, you will need to compile the main.js file. You do not need to recompile the main.js file for subsequent launches, unless there are changes made to the frontend. 
 - to compile the main.js file, in a separate terminal inside your development container:
-  > `npm run dev`<br>
+  >`cd CAR`<br>
+  >`npm run dev`<br>
+
+- launch the django server - in Terminal 1:
+  >`python3 manage.py runserver`<br>`
 
 If you are only interested in running the application or developing the backend code, you will only need to run the `npm run dev` command
 once. For frontend developers, the npm command above tracks any changes made to the frontend code and recompiles the main.js file.
@@ -152,7 +158,7 @@ to upload files in CAR, you need to start a Celery worker in a separate terminal
 if you make any changes to the Django models, you will need to run the the migrations again in the CAR directory:
 
 - makemigrations and migrate the Django models:
-  > `python3 manage.py makemigrations` <br> 
+  >`python3 manage.py makemigrations` <br> 
   >`python3 manage.py migrate` <br>
 
 # Opening the application
