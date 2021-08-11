@@ -22,6 +22,10 @@ these instructions are designed for Visual Studio Code which can be installed fo
 Secrets required for running CAR are encrypted, to unencrypt and run you will need the key from the XChem-CAR software maintainer<br><br>
 
 # <a name="RepositoryfromGitHub"></a>Clone the "xchem-car" repository from GitHub
+If you do not have git installed, inside a terminal:
+
+`sudo apt install git` <br>
+
 In you home directory eg `/home/<username>`, clone  xchem-car repo using:
 
 `git clone https://github.com/Waztom/xchem-CAR.git` <br>
@@ -43,7 +47,7 @@ all branches can be found: https://github.com/Waztom/xchem-CAR/branches
 
 ## <a name="InstallDocker"></a>Install Docker
 
-First you'll need Docker Desktop (or the relevent Docker Engine on Linux) you can find the appropriate download like this on https://www.docker.com/get-started
+First you'll need Docker Desktop (or the relevent Docker Engine on Linux) you can find the appropriate download at: https://www.docker.com/get-started and specifically for Ubuntu, instructions at: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04
 
 ## <a name="InstallDockerCompose"></a>Install Docker Compose
 
@@ -65,13 +69,14 @@ you should get a response similar to:
 
 > Docker version 18.09.2, build 6247962
 
-In Visual Studio Code open the extensions panel (left-hand panel or using Ctrl+Shift+X ) and search for "<em>Remote - Containers extension</em>" and click **Install**.
+In Visual Studio Code open the extensions panel (left-hand panel or using Ctrl+Shift+X ) and search for "<em>Remote - Containers</em>" and click **Install**.
 
 Once installed a box with two arrows pointing in opposite directions should appear in the bottom left corner of Visual studio code
 <br>
 <br>
 
-## <a name="InstallRemoteWSL"></a>Install RemoteWSL Extension
+## <a name="InstallRemoteWSL"></a>Install Remote - WSL Extension
+If you are running WSL - you need to install the Remote - WSL extension. Skip this step if you're running Ubuntu/Linux. 
 
 Ctrl + SHIFT + X and type in 'Remote - WSL' to install the extension.
 See (https://code.visualstudio.com/blogs/2020/07/01/containers-wsl) for more information about using dev containers in WSL2
@@ -94,34 +99,22 @@ if you are using Ubuntu or Debian, you can install git-crypt by:
 >`sudo apt-get update` <br>
 >`sudo apt-get install git-crypt` <br>
 
-alternatively, you can install by downloading the the compressed git-crypt package from: https://www.agwa.name/projects/git-crypt/downloads/git-crypt-0.6.0.tar.gz
-
-extract the package to create the directory **git-crypt-0.6.0**:
-> `tar -xvzf git-crypt-0.6.0.tar.gz` <br>
-
-build the package in terminal by:
-
-> `$ cd git-crypt-0.6.0`<br> 
-> `$ make`<br> 
-> `# make install` <br>
-
 ## <a name="UnlockingSecrets"></a>Unlocking Secrets
 
 once Git-Crypt is installed unlock the secrets using:
 
-> `cd <'file path to XChem-CARS on your device'>`<br> 
+> `cd xchem-car`<br> 
 > `git-crypt unlock <'path to git-crypt crypt-key'>`<br>
 
 # <a name="Startsystem"></a>Start system
 
-### <a name="LocateRepository"></a>Locate Repository
+### <a name="Start VSCode"></a>Start VS Code (WSL)
 
-- in terminal change directory to your copy of the repo :
+  > `code .'>` <br>
 
-  > `cd `<em>`<'local file path to xchem-CAR repository'>`
+### <a name="Start VS Code"></a>Start VS Code (Ubuntu)
 
-    </em>
-    or open VS Code and go to File-> Open Folder and open the repository directory<br>
+  Open VS Code and go to File-> Open Folder and open the repository directory<br>
 
 ### <a name="StartRemoteContainer"></a>Start Remote Container
 
