@@ -295,52 +295,6 @@ encoded_recipes = {
             },
         },
     },
-    "sulfonamide schotten-baumann": {
-        "reactionSMARTS": [
-            "[#16:5](=[#8])(=[#8:7])-[#17].[#7;H2,H1:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"
-        ],
-        "recipes": {
-            "Standard": {
-                "reference": None,
-                "actions": [
-                    {
-                        "name": "add",
-                        "content": {
-                            "action_no": 1,
-                            "material": {
-                                "SMARTS": ["[#16:5](=[#8])(=[#8:7])-[#17]"],
-                                "SMILES": None,
-                                "quantity": {"value": 1, "unit": "moleq"},
-                                "solvent": "MeOH",  # solvent for all can be IPA, EtOAc or MeOH will need to test
-                                "concentration": 0.5,
-                            },
-                        },
-                    },
-                    {
-                        "name": "add",
-                        "content": {
-                            "action_no": 2,
-                            "material": {
-                                "SMARTS": ["[#6]-[#7;H2,H1:2]"],
-                                "SMILES": None,
-                                "quantity": {"value": 1.2, "unit": "moleq"},
-                                "solvent": "MeOH",
-                                "concentration": 0.5,
-                            },
-                        },
-                    },
-                    {
-                        "name": "stir",
-                        "content": {
-                            "action_no": 3,
-                            "temperature": {"value": 100, "unit": "degC"},
-                            "duration": {"value": 12, "unit": "hours"},
-                        },
-                    },
-                ],
-            },
-        },
-    },
     "sp2-sp2 suzuki coupling": {
         "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:2]-[B]>>[c:1]-[#6:2]"],
         "recipes": {
@@ -412,6 +366,8 @@ encoded_recipes = {
             },
         },
     },
+    ##############################################################################################################
+    ################ Reactions we will not use for, are not working on and still have to test ###########################################################
     "Boc protection": {
         "reactionSMARTS": [
             "[#7:2].[#8:3]-[#6:1](=[#8:4])-[#8:5]>>[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])"
@@ -512,6 +468,52 @@ encoded_recipes = {
                         "content": {
                             "action_no": 3,
                             "temperature": {"value": 25, "unit": "degC"},
+                            "duration": {"value": 12, "unit": "hours"},
+                        },
+                    },
+                ],
+            },
+        },
+    },
+    "sulfonamide schotten-baumann": {
+        "reactionSMARTS": [
+            "[#16:5](=[#8])(=[#8:7])-[#17].[#7;H2,H1:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"
+        ],
+        "recipes": {
+            "Standard": {
+                "reference": None,
+                "actions": [
+                    {
+                        "name": "add",
+                        "content": {
+                            "action_no": 1,
+                            "material": {
+                                "SMARTS": ["[#16:5](=[#8])(=[#8:7])-[#17]"],
+                                "SMILES": None,
+                                "quantity": {"value": 1, "unit": "moleq"},
+                                "solvent": "MeOH",  # solvent for all can be IPA, EtOAc or MeOH will need to test
+                                "concentration": 0.5,
+                            },
+                        },
+                    },
+                    {
+                        "name": "add",
+                        "content": {
+                            "action_no": 2,
+                            "material": {
+                                "SMARTS": ["[#6]-[#7;H2,H1:2]"],
+                                "SMILES": None,
+                                "quantity": {"value": 1.2, "unit": "moleq"},
+                                "solvent": "MeOH",
+                                "concentration": 0.5,
+                            },
+                        },
+                    },
+                    {
+                        "name": "stir",
+                        "content": {
+                            "action_no": 3,
+                            "temperature": {"value": 100, "unit": "degC"},
                             "duration": {"value": 12, "unit": "hours"},
                         },
                     },
