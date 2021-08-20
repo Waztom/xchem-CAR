@@ -96,34 +96,34 @@ def uploadIBMReaction(validate_output):
                 max_attempts = 3
                 attempts_dict = {}
 
-                no_pathways_found = len(results["retrosynthetic_paths"])
+                no_methods_found = len(results["retrosynthetic_paths"])
 
-                if no_pathways_found <= 3:
-                    max_pathways = no_pathways_found
-                if no_pathways_found > 3:
-                    max_pathways = 3
+                if no_methods_found <= 3:
+                    max_methods = no_methods_found
+                if no_methods_found > 3:
+                    max_methods = 3
 
-                pathway_no = 1
+                method_no = 1
                 pathway_filter = []
                 for pathway in results["retrosynthetic_paths"]:
                     try:
-                        attempts_dict[pathway_no] += 1
+                        attempts_dict[method_no] += 1
                     except:
-                        attempts_dict[pathway_no] = 1
+                        attempts_dict[method_no] = 1
 
-                    no_attempts = attempts_dict[pathway_no]
+                    no_attempts = attempts_dict[method_no]
 
                     if no_attempts > max_attempts:
                         break
 
-                    if pathway_no <= max_pathways and pathway["confidence"] > 0.90:
+                    if method_no <= max_methods and pathway["confidence"] > 0.90:
                         reaction_info = IBM_API.collectIBMReactionInfo(pathway=pathway)
 
                         if reaction_info:
                             method_integer = IBM_API.filtermethod(reaction_info=reaction_info)
 
                             if method_integer not in pathway_filter:
-                                pathway_no += 1
+                                method_no += 1
                                 pathway_filter.append(method_integer)
 
                                 method_id = createMethodModel(
@@ -149,7 +149,7 @@ def uploadIBMReaction(validate_output):
                                         reaction_id=reaction_id,
                                         project_name=project_name,
                                         target_no=target_no,
-                                        pathway_no=pathway_no,
+                                        method_no=method_no,
                                         product_no=product_no,
                                         product_smiles=product_smiles,
                                     )
@@ -161,7 +161,7 @@ def uploadIBMReaction(validate_output):
 
                                     product_no += 1
 
-                    if pathway_no > max_pathways:
+                    if method_no > max_methods:
                         break
 
             target_no += 1
@@ -203,7 +203,7 @@ def uploadManifoldReaction(validate_output):
 
             target_no += 1
 
-            pathway_no = 1
+            method_no = 1
             for route in routes:
                 no_steps = len(route["reactions"])
 
@@ -222,49 +222,55 @@ def uploadManifoldReaction(validate_output):
                         )
 
                         product_no = 1
+                        # Fix upload using multiplerecipes!!!!
+                        # NEEDS WOOOOOOOOOORK - how do we deal with multiple recipes within different routes
                         for reaction in reactions:
                             reaction_name = reaction["name"]
                             if reaction_name in encoded_recipes:
-                                actions = encoded_recipes[reaction_name]["recipe"]
-                                reactant_pair_smiles = reaction["reactantSmiles"]
-                                product_smiles = reaction["productSmiles"]
+                                recipes = encoded_recipes[reaction_name]["recipes"]
+                                for key, value in recipes.items():
+                                    actions = value["actions"]
+                                    reactant_pair_smiles = reaction["reactantSmiles"]
+                                    product_smiles = reaction["productSmiles"]
 
-                                reaction_smarts = AllChem.ReactionFromSmarts(
-                                    "{}>>{}".format(".".join(reactant_pair_smiles), product_smiles),
-                                    useSmiles=True,
-                                )
-                                reaction_id = createReactionModel(
-                                    method_id=method_id,
-                                    reaction_class=reaction_name,
-                                    reaction_smarts=reaction_smarts,
-                                )
+                                    reaction_smarts = AllChem.ReactionFromSmarts(
+                                        "{}>>{}".format(
+                                            ".".join(reactant_pair_smiles), product_smiles
+                                        ),
+                                        useSmiles=True,
+                                    )
+                                    reaction_id = createReactionModel(
+                                        method_id=method_id,
+                                        reaction_class=reaction_name,
+                                        reaction_smarts=reaction_smarts,
+                                    )
 
-                                createProductModel(
-                                    reaction_id=reaction_id,
-                                    project_name=project_name,
-                                    target_no=target_no,
-                                    pathway_no=pathway_no,
-                                    product_no=product_no,
-                                    product_smiles=product_smiles,
-                                )
+                                    createProductModel(
+                                        reaction_id=reaction_id,
+                                        project_name=project_name,
+                                        target_no=target_no,
+                                        method_no=method_no,
+                                        product_no=product_no,
+                                        product_smiles=product_smiles,
+                                    )
 
-                                create_models = CreateEncodedActionModels(
-                                    actions=actions,
-                                    target_id=target_id,
-                                    reaction_id=reaction_id,
-                                    reactant_pair_smiles=reactant_pair_smiles,
-                                    reaction_name=reaction_name,
-                                )
+                                    create_models = CreateEncodedActionModels(
+                                        actions=actions,
+                                        target_id=target_id,
+                                        reaction_id=reaction_id,
+                                        reactant_pair_smiles=reactant_pair_smiles,
+                                        reaction_name=reaction_name,
+                                    )
 
-                                mculeids.append(create_models.mculeidlist)
-                                amounts.append(create_models.amountslist)
+                                    mculeids.append(create_models.mculeidlist)
+                                    amounts.append(create_models.amountslist)
 
                                 product_no += 1
 
                             else:
                                 pass
 
-                pathway_no += 1
+                method_no += 1
 
     CreateMculeQuoteModel(mculeids=mculeids, amounts=amounts, project_id=project_id)
 
@@ -289,7 +295,6 @@ def uploadCustomReaction(validate_output):
         project_info["project_name"] = project_name
 
         target_no = 1
-        pathway_no = 1
         product_no = 1
         for reactant_pair_smiles, reaction_name, target_smiles, target_mass in zip(
             uploaded_dict["reactant-pair-smiles"],
@@ -297,6 +302,11 @@ def uploadCustomReaction(validate_output):
             uploaded_dict["target-smiles"],
             uploaded_dict["amount-required-mg"],
         ):
+            reaction_smarts = AllChem.ReactionFromSmarts(
+                "{}>>{}".format(".".join(reactant_pair_smiles), target_smiles),
+                useSmiles=True,
+            )
+
             target_id = createTargetModel(
                 project_id=project_id,
                 smiles=target_smiles,
@@ -306,43 +316,43 @@ def uploadCustomReaction(validate_output):
 
             target_no += 1
 
-            method_id = createMethodModel(
-                target_id=target_id,
-                nosteps=1,
-            )
+            recipes = encoded_recipes[reaction_name]["recipes"]
 
-            reaction_smarts = AllChem.ReactionFromSmarts(
-                "{}>>{}".format(".".join(reactant_pair_smiles), target_smiles),
-                useSmiles=True,
-            )
+            method_no = 1
+            for key, value in recipes.items():
+                actions = value["actions"]
 
-            reaction_id = createReactionModel(
-                method_id=method_id,
-                reaction_class=reaction_name,
-                reaction_smarts=reaction_smarts,
-            )
+                method_id = createMethodModel(
+                    target_id=target_id,
+                    nosteps=1,
+                )
 
-            createProductModel(
-                reaction_id=reaction_id,
-                project_name=project_name,
-                target_no=target_no,
-                pathway_no=pathway_no,
-                product_no=product_no,
-                product_smiles=target_smiles,
-            )
+                reaction_id = createReactionModel(
+                    method_id=method_id,
+                    reaction_class="{}-{}".format(reaction_name, key),
+                    reaction_smarts=reaction_smarts,
+                )
 
-            actions = encoded_recipes[reaction_name]["recipe"]
+                createProductModel(
+                    reaction_id=reaction_id,
+                    project_name=project_name,
+                    target_no=target_no,
+                    method_no=method_no,
+                    product_no=product_no,
+                    product_smiles=target_smiles,
+                )
 
-            create_models = CreateEncodedActionModels(
-                actions=actions,
-                target_id=target_id,
-                reaction_id=reaction_id,
-                reactant_pair_smiles=reactant_pair_smiles,
-                reaction_name=reaction_name,
-            )
+                create_models = CreateEncodedActionModels(
+                    actions=actions,
+                    target_id=target_id,
+                    reaction_id=reaction_id,
+                    reactant_pair_smiles=reactant_pair_smiles,
+                    reaction_name=reaction_name,
+                )
 
-            mculeids.append(create_models.mculeidlist)
-            amounts.append(create_models.amountslist)
+                mculeids.append(create_models.mculeidlist)
+                amounts.append(create_models.amountslist)
+                method_no += 1
 
     CreateMculeQuoteModel(mculeids=mculeids, amounts=amounts, project_id=project_id)
 

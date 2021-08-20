@@ -456,6 +456,9 @@ class MCuleOrder(models.Model):
     orderplatecsv = models.FileField(upload_to="mculeorderplates/", max_length=255)
 
 
+# Models for capturing OT session, Deck, Plates and Wells
+
+
 class OTSession(models.Model):
     project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
     init_date = models.DateTimeField(auto_now_add=True)
@@ -489,3 +492,4 @@ class Well(models.Model):
     addaction_id = models.OneToOneField(IBMAddAction, on_delete=models.CASCADE, null=True)
     wellindex = models.IntegerField()
     volume = models.FloatField()
+    reactantfornextstep = models.BooleanField(default=False)

@@ -4,7 +4,7 @@ import pandas as pd
 from rdkit import Chem
 
 from .recipebuilder.encodedrecipes import encoded_recipes
-from .utils import canonSmiles, checkReactantSMARTS
+from .utils import canonSmiles, checkReactantSMARTS, combichem
 
 
 class ValidateFile(object):
@@ -27,33 +27,9 @@ class ValidateFile(object):
         self.validated = True
 
         if self.upload_type == "custom-chem":
-            self.expected_no_columns = 4
-            self.expected_column_names = [
-                "reactant-1",
-                "reactant-2",
-                "reaction-name",
-                "amount-required-mg",
-            ]
-            self.checkNumberColumns()
-            if self.validated:
-                self.checkColumnNames()
-            if self.validated:
-                self.reactant_pair_smiles = [
-                    reactants for reactants in zip(self.df["reactant-1"], self.df["reactant-2"])
-                ]
-                self.df["reactant-pair-smiles"] = self.reactant_pair_smiles
-                self.checkReactantSMILES()
-                if self.validated:
-                    self.reactant_pair_smiles = [
-                        (canonSmiles(smi[0]), canonSmiles(smi[1]))
-                        for smi in self.reactant_pair_smiles
-                    ]
-                    self.reaction_names = self.df["reaction-name"]
-                    self.checkReaction()
-                    if self.validated:
-                        self.df["reactant-pair-smiles"] = self.reactant_pair_smiles_ordered
-                        self.df["target-smiles"] = self.product_smiles
-                        self.checkIsNumber()
+            self.validatecustomchem()
+        if self.upload_type == "combi-custom-chem":
+            self.validatecustomcombichem()
 
         if self.upload_type == "retro-API":
             self.expected_no_columns = 2
@@ -66,6 +42,80 @@ class ValidateFile(object):
                 self.df["targets"] = self.target_smiles
                 self.checkTargetSMILES()
                 if self.validated:
+                    self.checkIsNumber()
+
+    def validatecustomchem(self):
+        self.expected_no_columns = 4
+        self.expected_column_names = [
+            "reactant-1",
+            "reactant-2",
+            "reaction-name",
+            "amount-required-mg",
+        ]
+        self.checkNumberColumns()
+        if self.validated:
+            self.checkColumnNames()
+        if self.validated:
+            self.reactant_pair_smiles = [
+                reactants for reactants in zip(self.df["reactant-1"], self.df["reactant-2"])
+            ]
+            self.df["reactant-pair-smiles"] = self.reactant_pair_smiles
+            self.checkReactantSMILES()
+            if self.validated:
+                self.reactant_pair_smiles = [
+                    (canonSmiles(smi[0]), canonSmiles(smi[1])) for smi in self.reactant_pair_smiles
+                ]
+                self.reaction_names = self.df["reaction-name"]
+                self.checkReaction()
+                if self.validated:
+                    self.df["reactant-pair-smiles"] = self.reactant_pair_smiles_ordered
+                    self.df["target-smiles"] = self.product_smiles
+                    self.checkIsNumber()
+
+    def validatecustomcombichem(self):
+        self.expected_no_columns = 4
+        self.expected_column_names = [
+            "reactant-1",
+            "reactant-2",
+            "reaction-name",
+            "amount-required-mg",
+        ]
+        self.checkNumberColumns()
+        if self.validated:
+            self.checkColumnNames()
+        if self.validated:
+            self.reactant_pair_smiles = []
+            self.reaction_names = []
+            grouped = self.df.groupby("reaction-name")
+            for name, group in grouped:
+                reactant_1_SMILES = set(
+                    [reactant for reactant in group["reactant-1"] if str(reactant) != "nan"]
+                )
+                reactant_2_SMILES = set(
+                    [reactant for reactant in group["reactant-2"] if str(reactant) != "nan"]
+                )
+                reactant_pair_smiles = combichem(
+                    reactant_1_SMILES=reactant_1_SMILES, reactant_2_SMILES=reactant_2_SMILES
+                )
+                reaction_names = [name] * len(reactant_pair_smiles)
+                self.reactant_pair_smiles = self.reactant_pair_smiles + reactant_pair_smiles
+                self.reaction_names = self.reaction_names + reaction_names
+
+            self.checkReactantSMILES()
+            if self.validated:
+                self.reactant_pair_smiles = [
+                    (canonSmiles(smi[0]), canonSmiles(smi[1])) for smi in self.reactant_pair_smiles
+                ]
+                self.checkReaction()
+                if self.validated:
+                    amount_required_mg = self.df.at[0, "amount-required-mg"]
+                    self.df = pd.DataFrame()
+                    self.df["reactant-pair-smiles"] = self.reactant_pair_smiles_ordered
+                    self.df["target-smiles"] = self.product_smiles
+                    self.df["reaction-name"] = self.reaction_names
+                    self.df["amount-required-mg"] = [amount_required_mg] * len(
+                        self.reactant_pair_smiles
+                    )
                     self.checkIsNumber()
 
     def add_warning(self, field, warning_string):
@@ -139,9 +189,10 @@ class ValidateFile(object):
     def checkReaction(self):
         self.product_smiles = []
         self.reactant_pair_smiles_ordered = []
+        no_reaction_tests = len(self.reaction_names)
 
         for index, reactant_pair, reaction_name in zip(
-            self.index_df_rows, self.reactant_pair_smiles, self.reaction_names
+            range(no_reaction_tests), self.reactant_pair_smiles, self.reaction_names
         ):
             smarts = encoded_recipes[reaction_name]["reactionSMARTS"][0]
             reaction_info = checkReactantSMARTS(reactant_pair, smarts)
