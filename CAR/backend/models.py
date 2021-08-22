@@ -1,8 +1,11 @@
 from django.db import models
+from django.db.models.deletion import CASCADE
 from django.db.models.fields import BooleanField
 from django.utils.text import slugify
 import random
 import string
+
+from numpy.lib.twodim_base import triu_indices
 
 
 def rand_slug():
@@ -471,6 +474,12 @@ class Deck(models.Model):
     indexslotavailable = models.IntegerField(default=0)
 
 
+class Pipette(models.Model):
+    otsession_id = models.ForeignKey(OTSession, on_delete=models.CASCADE)
+    type = models.CharField(max_length=255)
+    maxvolume = models.FloatField(default=300)
+
+
 class Plate(models.Model):
     class PlateType(models.TextChoices):
         orderplate = "orderplate"
@@ -480,7 +489,7 @@ class Plate(models.Model):
     deck_id = models.ForeignKey(Deck, on_delete=models.CASCADE)
     platename = models.CharField(max_length=255)
     plateindex = models.IntegerField()
-    labware = models.CharField(choices=PlateType.choices, max_length=50)
+    labware = models.CharField(max_length=255)
     numberwells = models.IntegerField()
     wellavailable = models.BooleanField(default=True)
     indexswellavailable = models.IntegerField(default=0)
@@ -492,4 +501,13 @@ class Well(models.Model):
     addaction_id = models.OneToOneField(IBMAddAction, on_delete=models.CASCADE, null=True)
     wellindex = models.IntegerField()
     volume = models.FloatField()
-    reactantfornextstep = models.BooleanField(default=False)
+    smiles = models.CharField(max_length=255)
+    concentration = models.FloatField(null=True)
+    solvent = models.CharField(max_length=255, null=True)
+    mculeid = models.CharField(max_length=255, null=True)
+    reactantfornextstep = models.BooleanField(default=True)
+
+
+class CompoundOrder(models.Model):
+    projectid = models.ForeignKey(Project, on_delete=models.CASCADE)
+    ordercsv = models.FileField(upload_to="mculeorders/", max_length=255)
