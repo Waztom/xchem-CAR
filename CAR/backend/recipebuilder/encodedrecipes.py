@@ -424,6 +424,8 @@ encoded_recipes = {
             },
         },
     },
+    ##############################################################################################################
+    ################ Reactions we will not use for, are not working on and still have to test ###########################################################
     "Boc protection": {
         "reactionSMARTS": [
             "[#7:2].[#8:3]-[#6:1](=[#8:4])-[#8:5]>>[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])"
@@ -834,7 +836,7 @@ encoded_recipes = {
         },
     },
     "Heck coupling":{
-       "reactionSMARTS": ["[c:2]-[F,Cl,Br,I].[CX3;H2:1]>>[c:2]-[CX3;H1:1]"],
+       "reactionSMARTS": ["[c:2]-[F,Cl,Br,I].[CX3;H2:1]>>[c:2]-[CX3;H1:1]"], #SMARTS for terminal alkenes only 
        "recipes": {
            "Standard": {
                "reference": ["Platinum Metals Rev., 1999, 43, (4), 138"],
