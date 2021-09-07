@@ -475,18 +475,29 @@ class Deck(models.Model):
 
 
 class Pipette(models.Model):
+    class Position(models.TextChoices):
+        right = "Right"
+        left = "Left"
+
     otsession_id = models.ForeignKey(OTSession, on_delete=models.CASCADE)
+    pipettename = models.CharField(max_length=255)
+    labware = models.CharField(max_length=100)
     type = models.CharField(max_length=255)
+    position = models.CharField(choices=Position.choices, max_length=10)
     maxvolume = models.FloatField(default=300)
 
 
-class Plate(models.Model):
-    class PlateType(models.TextChoices):
-        orderplate = "orderplate"
-        inplate = "inplate"
-        outplate = "outplate"
-
+class TipRack(models.Model):
     deck_id = models.ForeignKey(Deck, on_delete=models.CASCADE)
+    otsession_id = models.ForeignKey(OTSession, on_delete=models.CASCADE)
+    tiprackname = models.CharField(max_length=255)
+    tiprackindex = models.IntegerField()
+    labware = models.CharField(max_length=255)
+
+
+class Plate(models.Model):
+    deck_id = models.ForeignKey(Deck, on_delete=models.CASCADE)
+    otsession_id = models.ForeignKey(OTSession, on_delete=models.CASCADE)
     platename = models.CharField(max_length=255)
     plateindex = models.IntegerField()
     labware = models.CharField(max_length=255)
@@ -497,10 +508,10 @@ class Plate(models.Model):
 
 class Well(models.Model):
     plate_id = models.ForeignKey(Plate, on_delete=models.CASCADE)
-    reaction_id = models.OneToOneField(Reaction, on_delete=models.CASCADE, null=True)
-    addaction_id = models.OneToOneField(IBMAddAction, on_delete=models.CASCADE, null=True)
+    reaction_id = models.ForeignKey(Reaction, on_delete=models.CASCADE, null=True)
+    otsession_id = models.ForeignKey(OTSession, on_delete=models.CASCADE)
     wellindex = models.IntegerField()
-    volume = models.FloatField()
+    volume = models.FloatField(null=True)
     smiles = models.CharField(max_length=255)
     concentration = models.FloatField(null=True)
     solvent = models.CharField(max_length=255, null=True)
@@ -509,5 +520,10 @@ class Well(models.Model):
 
 
 class CompoundOrder(models.Model):
-    projectid = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
     ordercsv = models.FileField(upload_to="mculeorders/", max_length=255)
+
+
+class OTScript(models.Model):
+    otsession_id = models.ForeignKey(OTSession, on_delete=models.CASCADE)
+    otscript = models.FileField(upload_to="otscripts/", max_length=255)

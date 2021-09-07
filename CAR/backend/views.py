@@ -1,5 +1,4 @@
 import os
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
 from django.core.files.storage import default_storage

@@ -2,39 +2,116 @@
 # this opens and closes files frequently, could be improved by creating string to hold the file data before writing to file once
 
 #   NOTE: in this file "humanread" referes to the comments above each line/set of lines of ot code, human readable is a list of all the comments in format [oporator (human/ot), comment]
+"""Create otScript session"""
+from __future__ import annotations
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.conf import settings
+
+from django.forms.models import model_to_dict
 
 import os
 
+from backend.models import Project
 
-class otScript:
-    def __init__(self, filepath, protocolName=None, author=None, description=None, apiLevel="2.9"):
-        self.filepath = filepath
-        self.protocolName = protocolName
-        self.author = author
-        self.description = description
+from backend.models import (
+    IBMAddAction,
+    Pipette,
+    TipRack,
+    Plate,
+    Well,
+    OTScript,
+)
+
+
+class otWrite(object):
+    """ "
+    Creates a otScript object for generating an OT protocol
+    script
+    """
+
+    def __init__(
+        self,
+        otsessionobj: Django_object,
+        alladdactionsquerysetflat: list,
+        apiLevel="2.9",
+        reactionplatequeryset: list = None,
+    ):
+
+        self.otsessionobj = otsessionobj
+        self.otsessionid = otsessionobj.id
+        self.alladdactionsquerysetflat = alladdactionsquerysetflat
+        self.platequeryset = self.getPlates()
+        self.tiprackqueryset = self.getTipRacks()
+        self.pipetteobj = self.getPipette()
+        self.pipettename = self.pipetteobj.pipettename
+        self.projectobj = self.getProject()
+        self.protocolname = self.projectobj.name
+        self.author = self.projectobj.submittername
+        self.filepath = self.createFilePath()
         self.apiLevel = apiLevel
+        self.reactionplatequeryset = reactionplatequeryset
+        self.setupScript()
+        self.setupPlates()
+        self.setupTipRacks()
+        self.setupPipettes()
+        self.writeAddActions()
 
-        self.humanreadable = []
+    def getProject(self):
+        projectobj = Project.objects.filter(pk=self.otsessionobj.project_id.pk)[0]
+        return projectobj
+
+    def getPlates(self):
+        platequeryset = Plate.objects.filter(otsession_id=self.otsessionid).order_by("id")
+        return platequeryset
+
+    def getPlateObj(self, plateid):
+        plateobj = Plate.objects.filter(id=plateid)[0]
+        return plateobj
+
+    def getTipRacks(self):
+        tipracksqueryset = TipRack.objects.filter(otsession_id=self.otsessionid).order_by("id")
+        return tipracksqueryset
+
+    def getPipette(self):
+        pipetteobj = Pipette.objects.filter(otsession_id=self.otsessionid)[0]
+        return pipetteobj
+
+    def createFilePath(self):
+        filename = "ot-script-project-{}.py".format(self.projectobj.name)
+        path = "tmp/" + filename
+        filepath = str(os.path.join(settings.MEDIA_ROOT, path))
+        return filepath
+
+    def createOTScriptModel(self):
+        otscriptobj = OTScript()
+        otscriptobj.otsession_id = self.otsessionobj
+        otscriptobj.otscript = self.filepath
+        otscriptobj.save()
+
+    def findStartingPlateWellObj(self, smiles, solvent, concentration):
+        wellobj = Well.objects.filter(
+            otsession_id=self.otsessionid,
+            smiles=smiles,
+            solvent=solvent,
+            concentration=concentration,
+        )[0]
+        print(model_to_dict(wellobj))
+        return wellobj
+
+    def findReactionPlateWellObj(self, reactionid, smiles):
+        wellobj = Well.objects.filter(
+            otsession_id=self.otsessionid, reaction_id=reactionid, smiles=smiles
+        )[0]
+        return wellobj
 
     def setupScript(self):
-        self.dirsetup()
         """This is vunrable to injection atacks """
-
-        # asks user for metadata (should be removed at some point to avoid errors when intergrated with frontend)
-        if self.protocolName == None:
-            self.protocolName = input("Please name the Protocol Name: \t")
-        if self.author == None:
-            self.author = input("Please name the author Name: \t")
-        if self.description == None:
-            self.description = input("Please name the description: \t")
-        if self.apiLevel == None:
-            self.apiLevel = input("Please name the API Level: \t")
-
         script = open(self.filepath, "w")
         script.write("from opentrons import protocol_api\n")
         script.write(
             "# "
-            + str(self.protocolName)
+            + str(self.protocolname)
             + ' for "'
             + str(self.author)
             + str('" produced by XChem Car (https://car.xchem.diamond.ac.uk)')
@@ -42,11 +119,9 @@ class otScript:
         script.write("\n# metadata")
         script.write(
             "\nmetadata = {'protocolName': '"
-            + str(self.protocolName)
+            + str(self.protocolname)
             + "', 'author': '"
             + str(self.author)
-            + "','description': '"
-            + str(self.description[0])
             + "','apiLevel': '"
             + str(self.apiLevel)
             + "'}\n"
@@ -55,43 +130,46 @@ class otScript:
 
         script.close()
 
-    def setupLabware(self, platelist):
+    def setupPlates(self):
         script = open(self.filepath, "a")
         script.write("\n\t# labware")
-        for plate in platelist:
-            if plate.plateName == "":
-                uniquename = (str("plate_" + str(plate.plateIndex))).replace(" ", "")
-            else:
-                if plate.platetype == "Plate":
-                    uniquename = str(str(plate.plateName) + "_" + str(plate.plateIndex)).replace(
-                        " ", ""
-                    )
-
-                    uniquename = plate.plateName  # debug line
-                else:
-                    uniquename = plate.plateName
-            script.write(
-                f"\n\t{uniquename} = protocol.load_labware('{plate.plateTypeName}', '{plate.plateIndex}')"
-            )  # WTOSCR: may want to cast plate index to int type, but seems to work with str
+        for plateobj in self.platequeryset:
+            platename = plateobj.platename
+            labware = plateobj.labware
+            plateindex = plateobj.plateindex
+            script.write(f"\n\t{platename} = protocol.load_labware('{labware}', '{plateindex}')")
 
         script.close()
 
-    def setupPipettes(self, pipettelist):
+    def setupTipRacks(self):
+        script = open(self.filepath, "a")
+        for tiprackobj in self.tiprackqueryset:
+            tiprackname = tiprackobj.tiprackname
+            labware = tiprackobj.labware
+            tiprackindex = tiprackobj.tiprackindex
+            script.write(
+                f"\n\t{tiprackname} = protocol.load_labware('{labware}', '{tiprackindex}')"
+            )
+
+        script.close()
+
+    def setupPipettes(self):
         script = open(self.filepath, "a")
         script.write("\n\n\t# pipettes\n")
-        mountnumber = 0
-        for pipette in pipettelist:
-            script.write(
-                "\t"
-                + str(pipette.name)
-                + " = protocol.load_instrument('"
-                + str(pipette.model)
-                + "', '"
-                + str(pipette.mount)
-                + "', tip_racks="
-                + str(pipette.tipRacks).replace("'", "")
-                + ")\n"
-            )
+        script.write(
+            "\t"
+            + str(self.pipetteobj.position)
+            + "_"
+            + str(self.pipetteobj.pipettename)
+            + " = protocol.load_instrument('"
+            + str(self.pipetteobj.labware)
+            + "', '"
+            + str(self.pipetteobj.position)
+            + "', tip_racks=["
+            + ",".join([tiprackobj.tiprackname for tiprackobj in self.tiprackqueryset])
+            + "])\n"
+        )
+
         script.close()
 
     def writeCommand(self, comandString):
@@ -104,114 +182,76 @@ class otScript:
 
         script.close()
 
-    def dirsetup(self, path="../output/Opentrons"):
-        # WTOSCR: remove after django implementation
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-    def movefluids(
+    def transferFluid(
         self,
-        pipetteName,
-        fromAdress,
-        toAdress,
+        fromplatename,
+        toplatename,
+        fromwellindex,
+        towellindex,
         volume,
-        dispenseVolume=None,
-        writetoscript=True,
+        takeheight=2,
+        dispenseheight=-5,
     ):
-        if dispenseVolume == None:
-            dispenseVolume = volume
-            humanread = (
-                "move - " + str(volume) + "ul from " + str(fromAdress) + " to " + str(toAdress)
-            )
-        else:
-            humanread = (
-                "move - remove "
-                + str(volume)
-                + "ul from "
-                + str(fromAdress)
-                + " and add "
-                + str(dispenseVolume)
-                + "ul to "
-                + str(toAdress)
-            )
-
-        self.humanreadable.append(["OT", humanread])
+        humanread = f"transfer - {volume:.1f}ul from {fromwellindex} to {towellindex}"
 
         moveCommands = [
             "\n\t# " + str(humanread),
-            str(pipetteName) + ".pick_up_tip()",
-            str(pipetteName) + ".aspirate(" + str(volume) + ", " + str(fromAdress) + ")",
-            str(pipetteName) + ".dispense(" + str(dispenseVolume) + ", " + str(toAdress) + ")",
-            str(pipetteName) + ".drop_tip()",
+            self.pipettename
+            + f".transfer({volume}, {fromplatename}.wells()[{fromwellindex}].bottom({takeheight}), {toplatename}.wells()[{towellindex}].top({dispenseheight}), air_gap = 15)",
         ]
-        if writetoscript is True:
-            self.writeCommand(moveCommands)
-        return moveCommands
 
-    def transferfluids(
-        self,
-        pipetteName,
-        fromAdress,
-        toAdress,
-        volume,
-        writetoscript=True,
-        takedistance=2,
-        dispensedistance=-5,
-        fromalphanumeric=None,
-        toalphanumeric=None,
-    ):
-        if fromalphanumeric != None and toalphanumeric != None:
-            humanread = f"transfer - {volume:.1f}ul from {fromalphanumeric[0]}{fromalphanumeric[1]} to {toalphanumeric[0]}{toalphanumeric[1]}"
-        else:
-            humanread = f"transfer - {volume:.1f}ul from {fromAdress} to {toAdress}"
+        self.writeCommand(moveCommands)
 
-        self.humanreadable.append(["OT", humanread])
+    def writeAddActions(self):
+        for addaction in self.alladdactionsquerysetflat:
+            # try:
+            fromwellobj = self.findStartingPlateWellObj(
+                smiles=addaction.materialsmiles,
+                solvent=addaction.solvent,
+                concentration=addaction.concentration,
+            )
+            towellobj = self.findReactionPlateWellObj(
+                smiles=addaction.materialsmiles, reactionid=addaction.reaction_id.id
+            )
 
-        moveCommands = [
-            "\n\t# " + str(humanread),
-            str(pipetteName)
-            + f".transfer({volume}, {fromAdress}.bottom({takedistance}), {toAdress}.top({dispensedistance}), air_gap = 15)",
-        ]
-        if writetoscript is True:
-            self.writeCommand(moveCommands)
-        return moveCommands
+            if fromwellobj:
+                fromplateobj = self.getPlateObj(plateid=fromwellobj.plate_id.id)
+                toplateobj = self.getPlateObj(plateid=towellobj.plate_id.id)
 
-    def readScript(self):
-        script = open(self.filepath, "a")
-        scriptContent = script.read()
-        print(scriptContent)
-        return scriptContent
+                fromplatename = fromplateobj.platename
+                toplatename = toplateobj.platename
+                fromwellindex = fromwellobj.wellindex
+                towellindex = towellobj.wellindex
+                volume = addaction.materialquantity
 
-    def unsuportedAction(self, actionDetails):
-        script = open(self.filepath, "a")
-        script.write("\n\t# pause for " + str(actionDetails) + "\n")
-        script.write("\tprotocol.pause('" + str(actionDetails) + "')\n")
+                self.transferFluid(
+                    fromplatename=fromplatename,
+                    toplatename=toplatename,
+                    fromwellindex=fromwellindex,
+                    towellindex=towellindex,
+                    volume=volume,
+                )
+            # except:
+            #     fromwellobj = self.findReactionPlateWellObj(
+            #         smiles=addaction.materialsmiles,
+            #         reactionid=addaction.reaction_id.id,
+            #     )
+            #     towellobj = self.findReactionPlateWellObj()
 
-        humanread = actionDetails
+            #     if fromwellobj:
+            #         fromplateobj = self.getPlateObj(plateid=fromwellobj.plate_id.id)
+            #         toplateobj = self.getPlateObj(plateid=towellobj.plate_id.id)
 
-        self.humanreadable.append(["User", humanread])
-        script.close()
+            #         fromplatename = fromplateobj.platename
+            #         toplatename = toplateobj.platename
+            #         fromwellindex = fromwellobj.wellindex
+            #         towellindex = towellobj.wellindex
+            #         volume = addaction.materialquantity
 
-    def quickSetup(self):
-        self.setupScript()
-        self.setupLabwear()
-        self.setupPipettes()
-
-    def example(self):
-        self.quickSetup()
-        self.movefluids("left", "plate['A1']", "plate['B2']", 100)
-
-    def convertReactionToActions(self, reaction):
-        for step in reaction:
-            if step == "add":
-                self.movefluids("pipetteName", "fromAdress", "toAdress", "10")
-            else:
-                self.unsuportedAction(step)
-
-    def convertReactionsToScript(self, list):
-        for reaction in list:
-            script = open(self.filepath, "a")
-            script.write("\n\n\t# Reaction no: " + str(reaction[0]) + "\n")
-            script.close()
-
-            self.convertReactionToActions(reaction[1])
+            #         self.transferFluid(
+            #             fromplatename=fromplatename,
+            #             toplatename=toplatename,
+            #             fromwellindex=fromwellindex,
+            #             towellindex=towellindex,
+            #             volume=volume,
+            #         )
