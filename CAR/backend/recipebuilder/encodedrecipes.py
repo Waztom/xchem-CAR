@@ -132,7 +132,7 @@ encoded_recipes = {
         "reactionSMARTS": ["[#6:2](=[#8])(-[#6:1]).[#7;H2,H1:3]>>[#6:2](-[#6:1])-[#7:3]"],
         "recipes": {
             "Standard": {
-                "reference": None,
+                "reference": ["https://pubs.acs.org/doi/10.1021/acs.oprd.0c00230"],
                 "actions": [
                     {
                         "name": "add",
@@ -201,8 +201,8 @@ encoded_recipes = {
         "N-nucleophilic aromatic substitution": {
         "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:3]-[#7;H2,H1:2]>>[#6:3]-[#7:2]-[c:1]"],
         "recipes": {
-            "Base": {
-                "reference": None,
+            "SNAr Base": {
+                "reference": ["https://pubs.acs.org/doi/10.1021/acscombsci.9b00212","https://chemistry-europe.onlinelibrary.wiley.com/doi/10.1002/cmtd.202000051"],
                 "actions": [
                     {
                         "name": "add",
@@ -211,7 +211,7 @@ encoded_recipes = {
                             "material": {
                                 "SMARTS": ["[#6:3]-[#7;H2,H1:2]"],
                                 "SMILES": None,
-                                "quantity": {"value": 1, "unit": "moleq"},
+                                "quantity": {"value": 4, "unit": "moleq"},#based off of virtual optimisation 
                                 "solvent": "NMP",
                                 "concentration": 0.5,
                             },
@@ -254,7 +254,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "No base": {
+            "SNAr No base": {
             "reference": None,
             "actions": [
                 {
@@ -283,24 +283,10 @@ encoded_recipes = {
                         },
                     },
                 },
-                #{
-                    # "name": "add",
-                    # "content": {
-                    #    "action_no": 3,
-                        #   "material": {
-                        #      "SMARTS": None,
-                        #     "SMILES": "CCN(C(C)C)C(C)C",
-                        #    "quantity": {"value": 2.5, "unit": "moleq"},
-                            #   "solvent": None,
-                            #  "density": 0.74,
-                            # "concentration": None,
-                        #},
-                    #},
-                # },
                 {
                     "name": "stir",
                     "content": {
-                        "action_no": 4,
+                        "action_no": 3,
                         "temperature": {"value": 50, "unit": "degC"},
                         "duration": {"value": 12, "unit": "hours"},
                     },
@@ -323,7 +309,7 @@ encoded_recipes = {
                                 "SMARTS": ["[#16:5](=[#8])(=[#8:7])-[#17]"],
                                 "SMILES": None,
                                 "quantity": {"value": 1, "unit": "moleq"},
-                                "solvent": "MeOH",  # solvent for all can be IPA, EtOAc or MeOH will need to test
+                                "solvent": "NMP",  # solvent for all can be IPA, EtOAc or MeOH will need to test
                                 "concentration": 0.5,
                             },
                         },
@@ -335,17 +321,31 @@ encoded_recipes = {
                             "material": {
                                 "SMARTS": ["[#6]-[#7;H2,H1:2]"],
                                 "SMILES": None,
-                                "quantity": {"value": 1.2, "unit": "moleq"},
-                                "solvent": "MeOH",
+                                "quantity": {"value": 1, "unit": "moleq"},
+                                "solvent": "NMP",
                                 "concentration": 0.5,
+                            },
+                        },
+                    },
+                    {
+                        "name": "add",
+                        "content": {
+                            "action_no": 3,
+                            "material": {
+                                "SMARTS": None,
+                                "SMILES": "CCN(C(C)C)C(C)C",
+                                "quantity": {"value": 2.4, "unit": "moleq"},
+                                "solvent": None,
+                                "density": 0.74,
+                                "concentration": None,
                             },
                         },
                     },
                     {
                         "name": "stir",
                         "content": {
-                            "action_no": 3,
-                            "temperature": {"value": 100, "unit": "degC"},
+                            "action_no": 4,
+                            "temperature": {"value": 25, "unit": "degC"},
                             "duration": {"value": 12, "unit": "hours"},
                         },
                     },
@@ -356,8 +356,8 @@ encoded_recipes = {
     "sp2-sp2 suzuki coupling": {
         "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:2]-[B]>>[c:1]-[#6:2]"],
         "recipes": {
-            "Standard": {
-                "reference": None,
+            "XphosPdG3-Suzuki": {
+                "reference": ["https://chemistry-europe.onlinelibrary.wiley.com/doi/full/10.1002/chem.201801165"],
                 "actions": [
                     {
                         "name": "add",
@@ -395,7 +395,7 @@ encoded_recipes = {
                                 # Smiles for XPhosPdG3
                                 "quantity": {"value": 0.1, "unit": "moleq"},  # 10mol% catalyst
                                 "solvent": "EtOH",
-                                "concentration": 0.5,
+                                "concentration": 0.1,
                             },
                         },
                     },
@@ -437,11 +437,9 @@ encoded_recipes = {
                         "content": {
                             "action_no": 1,
                             "material": {
-                                "SMARTS": [
-                                    "[#8:3]-[#6:1](=[#8:4])-[#8:5]-[#6](-[#6])(-[#6])(-[#6])"
-                                ],  # BOC
+                                "SMARTS": ["[#8:3]-[#6:1](=[#8:4])-[#8:5]-[#6](-[#6])(-[#6])(-[#6])"],  # BOC
                                 "SMILES": None,
-                                "quantity": {"value": 1.5, "unit": "moleq"},
+                                "quantity": {"value": 3, "unit": "moleq"},
                                 "solvent": "ACN",
                                 "concentration": 0.5,
                             },
@@ -465,7 +463,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 3,
                             "material": {
-                                "SMARTS": ["[#7;H2]"],
+                                "SMARTS": ["[#7;H2:2]"],
                                 "SMILES": None,
                                 "quantity": {"value": 1, "unit": "moleq"},  # primary amine
                                 "solvent": "ACN",
@@ -477,8 +475,8 @@ encoded_recipes = {
                         "name": "stir",
                         "content": {
                             "action_no": 4,
-                            "temperature": {"value": 100, "unit": "degC"},
-                            "duration": {"value": 12, "unit": "hours"},
+                            "temperature": {"value": 25, "unit": "degC"},
+                            "duration": {"value": 0.5, "unit": "hours"},
                         },
                     },
                 ],
@@ -487,8 +485,8 @@ encoded_recipes = {
     },
     "Boc deprotection": {  # this does not work yet, SMARTS needs rethinking
         "reactionSMARTS": [
-            "[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]>>[#7:2].[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]"
-        ],
+            "[#6:9]-[#6:8]-[#7:2]-[#6](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6]).[#1]-[#17]>>[#6:9]-[#6:8]-[#7:2]"
+        ],#[#7:2].[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]
         "recipes": {
             "Standard": {
                 "reference": None,
@@ -498,7 +496,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 1,
                             "material": {
-                                "SMARTS": ["[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]"],
+                                "SMARTS": ["[#6:9]-[#6:8]-[#7:2]-[#6](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])"],
                                 "SMILES": None,
                                 "quantity": {"value": 1, "unit": "moleq"},
                                 "solvent": "EtOAc",
@@ -511,8 +509,8 @@ encoded_recipes = {
                         "content": {
                             "action_no": 2,
                             "material": {
-                                "SMARTS": None,
-                                "SMILES": "HCl",
+                                "SMARTS": ["[#1]-[#17]"],
+                                "SMILES": None,
                                 "quantity": {"value": 1, "unit": "moleq"},
                                 "solvent": "EtOAc",
                                 "concentration": 6,
@@ -531,4 +529,374 @@ encoded_recipes = {
             },
         },
     },
+    #"Chan lam coupling":{
+    #    "reactionSMARTS": ["[c:2]-[F,Cl,Br,I].[#6:1]-[#7;H2,H1:3]>>[c:2]-[#7:3]-[#6:1]"],
+    #    "recipes": {
+      #      "Standard": {
+       #         "reference": "https://www.sciencedirect.com/science/article/pii/S0040403998005048",
+        #        "actions": [
+         #           {
+            #            "name": "add",
+             #           "content": {
+             #               "action_no": 1,
+              #              "material": {
+              #                  "SMARTS": "[c:2]-[F,Cl,Br,I]",
+              #                  "SMILES": None,
+              #                  "quantity": {"value": 1, "unit": "moleq"},
+              #                  "solvent": "NMP",
+              #                 "concentration": 0.5
+              #              }
+              #          }
+              #      }
+              #  ]
+
+          #  }
+       # }
+   # }
+   "Buchwald hartwig amination":{
+       "reactionSMARTS": ["[c:2]-[F,Cl,Br,I].[#6:1]-[#7;H2,H1]>>[c:2]-[#7:3]-[#6:1]"],
+       "recipes": {
+           "Standard": {
+               "reference": "https://pubs.acs.org/doi/pdf/10.1021/acscatal.9b00981",
+               "actions": [
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 1,
+                           "material": {
+                               "SMARTS": None,
+                               "SMILES": "CC(C)C(C=C1C(C)C)=CC(C(C)C)=C1C2=CC=CC=C2P(C3CCCCC3)C4CCCCC4.NC5=C(C6=C([Pd]OS(C)(=O)=O)C=CC=C6)C=CC=C5",
+                               "quantity": {"value": 0.1, "unit": "moleq"},
+                               "solvent": "NMP", 
+                               "concentration": 0.1,
+                                  
+                           },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 2,
+                           "material": {
+                               "SMARTS": ["[c:2]-[F,Cl,Br,I]"],
+                               "SMILES": None,
+                               "quantity": {"value": 1, "unit": "moleq"},
+                               "solvent": "NMP",
+                               "concentration": 0.5,
+                           },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 3,
+                           "material": {
+                               "SMARTS": ["[#6:1]-[#7;H2,H1:3]"],
+                               "SMILES": None,
+                               "quantity": {"value": 1.2, "unit": "moleq"},
+                               "solvent": "NMP",
+                               "concentration": 0.5,
+                           },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 4,
+                           "material":{
+                               "SMARTS": None,
+                               "SMILES": "C1CCN2CCCN=C2CC1",
+                               "quantity": {"value": 2, "unit": "moleq"},
+                               "solvent": None,
+                               "density": 1.02,
+                               "concentration": None,
+                           },
+                       },
+                   },
+                   {
+                        "name": "stir",
+                        "content": {
+                            "action_no": 5,
+                            "temperature": {"value": 80, "unit": "degC"},
+                            "duration": {"value": 12, "unit": "hours"},
+                        },
+                   },
+               ],
+           },
+       },
+   },
+      "Buchwald hartwig thiolation":{
+       "reactionSMARTS": ["[c:2]-[F,Cl,Br,I].[#6:1]-[#16;H1]>>[c:2]-[#16:3]-[#6:1]"],
+       "recipes": {
+           "Standard": {
+               "reference": "https://doi.org/10.1002/ejoc.201001393",
+               "actions": [
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 1,
+                           "material": {
+                               "SMARTS": None,
+                               "SMILES": "CC(C)C(C=C1C(C)C)=CC(C(C)C)=C1C2=CC=CC=C2P(C3CCCCC3)C4CCCCC4.NC5=C(C6=C([Pd]OS(C)(=O)=O)C=CC=C6)C=CC=C5",
+                               "quantity": {"value": 0.1, "unit": "moleq"},
+                               "solvent": "NMP", #try NMP but reference says to use 2-MeTHF
+                               "concentration": 0.1,
+                                 #try same as Suzuki - similar mechanism   
+                           },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 2,
+                           "material": {
+                               "SMARTS": ["[c:2]-[F,Cl,Br,I]"],
+                               "SMILES": None,
+                               "quantity": {"value": 1, "unit": "moleq"},
+                               "solvent": "NMP",
+                               "concentration": 0.5,
+                           },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 3,
+                           "material": {
+                               "SMARTS": ["[#6:1]-[#16;H1]"],
+                               "SMILES": None,
+                               "quantity": {"value": 1.2, "unit": "moleq"},
+                               "solvent": "NMP",
+                               "concentration": 0.5,
+                           },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 4,
+                           "material":{
+                               "SMARTS": None,
+                               "SMILES": "C1CCN2CCCN=C2CC1",
+                               "quantity": {"value": 2, "unit": "moleq"},
+                               "solvent": None,
+                               "density": 1.02,
+                               "concentration": None,
+                           },
+                       },
+                   },
+                   {
+                        "name": "stir",
+                        "content": {
+                            "action_no": 5,
+                            "temperature": {"value": 80, "unit": "degC"},
+                            "duration": {"value": 12, "unit": "hours"},
+                        },
+                   },
+               ],
+           },
+       },
+   },
+      "Buchwald hartwig etherification":{
+       "reactionSMARTS": ["[c:2]-[F,Cl,Br,I].[#6:1]-[#8;H1:3]>>[c:2]-[#8:3]-[#6:1]"],
+       "recipes": {
+           "Standard": {
+               "reference": "https://pubs.acs.org/doi/pdf/10.1021/ja984321a",
+               "actions": [
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 1,
+                           "material": {
+                               "SMARTS": None,
+                               "SMILES": "CC(C)C(C=C1C(C)C)=CC(C(C)C)=C1C2=CC=CC=C2P(C3CCCCC3)C4CCCCC4.NC5=C(C6=C([Pd]OS(C)(=O)=O)C=CC=C6)C=CC=C5",
+                               "quantity": {"value": 0.1, "unit": "moleq"},
+                               "solvent": "NMP", #try NMP but reference says to use 2-MeTHF
+                               "concentration": 0.1,
+                                 #try same as Suzuki - similar mechanism   
+                           },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 2,
+                           "material": {
+                               "SMARTS": ["[c:2]-[F,Cl,Br,I]"],
+                               "SMILES": None,
+                               "quantity": {"value": 1, "unit": "moleq"},
+                               "solvent": "NMP",
+                               "concentration": 0.5,
+                           },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 3,
+                           "material": {
+                               "SMARTS": ["[#6:1]-[#8;H1:3]"],
+                               "SMILES": None,
+                               "quantity": {"value": 1.2, "unit": "moleq"},
+                               "solvent": "NMP",
+                               "concentration": 0.5,
+                           },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 4,
+                           "material":{
+                               "SMARTS": None,
+                               "SMILES": "C1CCN2CCCN=C2CC1",
+                               "quantity": {"value": 2, "unit": "moleq"},
+                               "solvent": None,
+                               "density": 1.02,
+                               "concentration": None,
+                           },
+                       },
+                   },
+                   {
+                        "name": "stir",
+                        "content": {
+                            "action_no": 5,
+                            "temperature": {"value": 80, "unit": "degC"},
+                            "duration": {"value": 12, "unit": "hours"},
+                        },
+                   },
+               ],
+           },
+       },
+   },
+   "Sonogashira coupling":{
+       "reactionSMARTS": ["[CH:1].[c:2]-[Cl,Br,I]>>[C:1]-[c:2]"],
+       "recipes": {
+           "Standard": {
+               "reference": ["https://pubs.rsc.org/en/content/articlelanding/2008/cc/b810928a#!","https://pubs.acs.org/doi/pdf/10.1021/ol035632f"
+               "https://www.sciencedirect.com/science/article/abs/pii/S1381116908003257"],
+               "actions": [
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 1,
+                           "material": {
+                               "SMARTS": None,
+                               "SMILES": "CC(C)C(C=C1C(C)C)=CC(C(C)C)=C1C2=CC=CC=C2P(C3CCCCC3)C4CCCCC4.NC5=C(C6=C([Pd]OS(C)(=O)=O)C=CC=C6)C=CC=C5",
+                               "quantity": {"value": 0.1, "unit": "moleq"},
+                               "solvent": "NMP", 
+                               "concentration": 0.1,                        
+                            },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 2,
+                           "material": {
+                               "SMARTS": ["[c:2]-[Cl,Br,I]"],
+                               "SMILES": None,
+                               "quantity": {"value": 1, "unit": "moleq"},
+                               "solvent": "NMP",
+                               "concentration": 0.5,
+                           },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 3,
+                           "material": {
+                               "SMARTS": ["[CH:1]"],
+                               "SMILES": None,
+                               "quantity": {"value": 1.1, "unit": "moleq"},
+                               "solvent": "NMP",
+                               "concentration": 0.5,
+                            },
+                       },
+                   },
+                   {
+                        "name": "add",
+                        "content": {
+                            "action_no": 4,
+                            "material": {
+                                "SMARTS": None,
+                                "SMILES": "CCN(C(C)C)C(C)C",
+                                "quantity": {"value": 2, "unit": "moleq"},
+                                "solvent": None,
+                                "density": 0.74,
+                                "concentration": None,
+                            },
+                        },
+                    },
+                ],
+            },
+        },
+    },
+    "Heck coupling":{
+       "reactionSMARTS": ["[c:2]-[F,Cl,Br,I].[CX3;H2:1]>>[c:2]-[CX3;H1:1]"],
+       "recipes": {
+           "Standard": {
+               "reference": ["Platinum Metals Rev., 1999, 43, (4), 138"],
+               "actions": [
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 1,
+                           "material": {
+                               "SMARTS": ["[c:2]-[F,Cl,Br,I]"],
+                               "SMILES": None,
+                               "quantity": {"value": 1, "unit": "moleq"},
+                               "solvent": "NMP", 
+                               "concentration": 0.5,                        
+                            },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 2,
+                           "material": {
+                               "SMARTS": ["[CX3;H2:1]"],
+                               "SMILES": None,
+                               "quantity": {"value": 2, "unit": "moleq"},
+                               "solvent": "NMP",
+                               "concentration": 0.5,
+                           },
+                       },
+                   },
+                   {
+                       "name": "add",
+                       "content": {
+                           "action_no": 3,
+                           "material": {
+                               "SMARTS": None,
+                               "SMILES": "CC(C)C(C=C1C(C)C)=CC(C(C)C)=C1C2=CC=CC=C2P(C3CCCCC3)C4CCCCC4.NC5=C(C6=C([Pd]OS(C)(=O)=O)C=CC=C6)C=CC=C5",
+                               "quantity": {"value": 0.1, "unit": "moleq"},
+                               "solvent": "NMP",
+                               "concentration": 0.1,
+                            },
+                       },
+                   },
+                   {
+                        "name": "add",
+                        "content": {
+                            "action_no": 4,
+                            "material": {
+                                "SMARTS": None,
+                                "SMILES": "CCN(CC)CC",
+                                "quantity": {"value": 2, "unit": "moleq"},
+                                "solvent": None,
+                                "density": 0.73,
+                                "concentration": None,
+                            },
+                        },
+                    },
+                ],
+            },
+        },
+    },
 }
+
+
+
