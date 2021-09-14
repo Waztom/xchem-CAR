@@ -128,7 +128,7 @@ class IBMAddAction(models.Model):
         null=True,
     )
     solvent = models.CharField(max_length=255, null=True)
-    concentration = models.FloatField(null=True)
+    concentration = models.FloatField(null=True, blank=True)
     mculeid = models.CharField(max_length=255, null=True)
     mculeprice = models.FloatField(null=True)
     mculeurl = models.CharField(max_length=255, null=True)
@@ -460,8 +460,6 @@ class MCuleOrder(models.Model):
 
 
 # Models for capturing OT session, Deck, Plates and Wells
-
-
 class OTSession(models.Model):
     project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
     init_date = models.DateTimeField(auto_now_add=True)
@@ -513,7 +511,7 @@ class Well(models.Model):
     wellindex = models.IntegerField()
     volume = models.FloatField(null=True)
     smiles = models.CharField(max_length=255)
-    concentration = models.FloatField(null=True)
+    concentration = models.FloatField(null=True, blank=True)
     solvent = models.CharField(max_length=255, null=True)
     mculeid = models.CharField(max_length=255, null=True)
     reactantfornextstep = models.BooleanField(default=True)

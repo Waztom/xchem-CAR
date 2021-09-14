@@ -138,6 +138,8 @@ class CreateEncodedActionModels(object):
             action_no = action["content"]["action_no"]
             molar_eqv = action["content"]["material"]["quantity"]["value"]
             concentration = action["content"]["material"]["concentration"]
+            if not concentration:
+                concentration = 0
             solvent = action["content"]["material"]["solvent"]
             mol = Chem.MolFromSmiles(reactant_SMILES)
             reactant_MW = Descriptors.ExactMolWt(mol)
@@ -172,7 +174,7 @@ class CreateEncodedActionModels(object):
             add.materialimage = add_svg_fn  # need material (common name)
             add.atmosphere = "air"
 
-            if solvent is None:
+            if not solvent:
                 reactant_density = action["content"]["material"]["density"]
                 add.materialquantity = self.calculateVolume(
                     molar_eqv=molar_eqv, reactant_density=reactant_density, reactant_MW=reactant_MW
@@ -234,10 +236,20 @@ class CreateMculeQuoteModel(object):
             project_id (int): Project model id
         """
         self.mculeidlist = [item for sublist in mculeids for item in sublist]
-        self.amountaverage = mean([item for sublist in amounts for item in sublist])
+        self.amounts = amounts
+        self.amountaverage = self.getAmountAverage()
         self.project_obj = Project.objects.get(id=project_id)
         self.mculeapi = MCuleAPI()
         self.createMculeQuoteModel()
+
+    def getAmountAverage(self):
+        if len(self.amounts) == 0:
+            return 0
+        if len(self.amounts) == 1:
+            return self.amounts[0]
+        else:
+            mean([item for sublist in self.amounts for item in sublist])
+            return mean
 
     def createMculeQuoteModel(self):
         quote_info = self.mculeapi.getTotalQuote(

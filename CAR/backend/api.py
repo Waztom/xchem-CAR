@@ -24,6 +24,9 @@ from .models import (
     IBMWashAction,
 )
 
+# Import OT Session models
+from .models import OTSession, Deck, Pipette, TipRack, Plate, Well, CompoundOrder, OTScript
+
 from rest_framework import viewsets, permissions, filters
 from rest_framework.decorators import action
 from django.http import JsonResponse
@@ -61,6 +64,18 @@ from .serializers import (
     IBMStoreActionSerializer,
     IBMWaitActionSerializer,
     IBMWashActionSerializer,
+)
+
+# Import OT Session serializers
+from .serializers import (
+    OTSessionSerializer,
+    DeckSerializer,
+    PipetteSerializer,
+    TipRackSerializer,
+    PlateSerializer,
+    WellSerializer,
+    CompoundOrderSerializer,
+    OTScriptSerializer,
 )
 
 from rdkit import Chem
@@ -388,3 +403,68 @@ class IBMWashActionViewSet(viewsets.ModelViewSet):
     serializer_class = IBMWashActionSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["=reaction_id__id"]
+
+
+# OT Session viewsets
+class OTSessionViewSet(viewsets.ModelViewSet):
+    queryset = OTSession.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = OTSessionSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["=project_id__id"]
+
+
+class DeckViewSet(viewsets.ModelViewSet):
+    queryset = Deck.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = DeckSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["= otsession_id__id"]
+
+
+class PipetteViewSet(viewsets.ModelViewSet):
+    queryset = Pipette.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = PipetteSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["=otsession_id__id"]
+
+
+class TipRackViewSet(viewsets.ModelViewSet):
+    queryset = TipRack.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = TipRackSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["=otsession_id__id"]
+
+
+class PlateViewSet(viewsets.ModelViewSet):
+    queryset = Plate.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = PlateSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["=otsession_id__id"]
+
+
+class WellViewSet(viewsets.ModelViewSet):
+    queryset = Well.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = WellSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["=otsession_id__id"]
+
+
+class CompoundOrderViewSet(viewsets.ModelViewSet):
+    queryset = CompoundOrder.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = CompoundOrderSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["=project_id__id"]
+
+
+class OTScriptViewSet(viewsets.ModelViewSet):
+    queryset = OTScript.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = OTScriptSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["=otsession_id__id"]

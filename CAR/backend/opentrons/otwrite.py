@@ -12,10 +12,12 @@ from django.forms.models import model_to_dict
 
 import os
 
+from numpy.core.fromnumeric import product
+
 from backend.models import Project
 
 from backend.models import (
-    IBMAddAction,
+    Product,
     Pipette,
     TipRack,
     Plate,
@@ -48,7 +50,7 @@ class otWrite(object):
         self.projectobj = self.getProject()
         self.protocolname = self.projectobj.name
         self.author = self.projectobj.submittername
-        self.filepath = self.createFilePath()
+        self.filepath, self.filename = self.createFilePath()
         self.apiLevel = apiLevel
         self.reactionplatequeryset = reactionplatequeryset
         self.setupScript()
@@ -56,6 +58,7 @@ class otWrite(object):
         self.setupTipRacks()
         self.setupPipettes()
         self.writeAddActions()
+        self.createOTScriptModel()
 
     def getProject(self):
         projectobj = Project.objects.filter(pk=self.otsessionobj.project_id.pk)[0]
@@ -77,16 +80,26 @@ class otWrite(object):
         pipetteobj = Pipette.objects.filter(otsession_id=self.otsessionid)[0]
         return pipetteobj
 
+    def getProductSmiles(self, reactionid):
+        productobj = Product.objects.filter(reaction_id=reactionid)[0]
+        return productobj.smiles
+
     def createFilePath(self):
-        filename = "ot-script-project-{}.py".format(self.projectobj.name)
+        filename = "ot-script-project-{}-sessionid-{}.txt".format(
+            self.projectobj.name, self.otsessionid
+        )
         path = "tmp/" + filename
         filepath = str(os.path.join(settings.MEDIA_ROOT, path))
-        return filepath
+        return filepath, filename
 
     def createOTScriptModel(self):
         otscriptobj = OTScript()
         otscriptobj.otsession_id = self.otsessionobj
-        otscriptobj.otscript = self.filepath
+        otscriptfile = open(self.filepath, "rb")
+        otscriptfn = default_storage.save(
+            "otscripts/{}.py".format(self.filename), ContentFile(otscriptfile)
+        )
+        otscriptobj.otscript = otscriptfn
         otscriptobj.save()
 
     def findStartingPlateWellObj(self, smiles, solvent, concentration):
@@ -96,12 +109,12 @@ class otWrite(object):
             solvent=solvent,
             concentration=concentration,
         )[0]
-        print(model_to_dict(wellobj))
         return wellobj
 
-    def findReactionPlateWellObj(self, reactionid, smiles):
+    def findReactionPlateWellObj(self, reactionid):
+        productsmiles = self.getProductSmiles(reactionid=reactionid)
         wellobj = Well.objects.filter(
-            otsession_id=self.otsessionid, reaction_id=reactionid, smiles=smiles
+            otsession_id=self.otsessionid, reaction_id=reactionid, smiles=productsmiles
         )[0]
         return wellobj
 
@@ -158,8 +171,6 @@ class otWrite(object):
         script.write("\n\n\t# pipettes\n")
         script.write(
             "\t"
-            + str(self.pipetteobj.position)
-            + "_"
             + str(self.pipetteobj.pipettename)
             + " = protocol.load_instrument('"
             + str(self.pipetteobj.labware)
@@ -204,15 +215,13 @@ class otWrite(object):
 
     def writeAddActions(self):
         for addaction in self.alladdactionsquerysetflat:
-            # try:
             fromwellobj = self.findStartingPlateWellObj(
                 smiles=addaction.materialsmiles,
                 solvent=addaction.solvent,
                 concentration=addaction.concentration,
             )
-            towellobj = self.findReactionPlateWellObj(
-                smiles=addaction.materialsmiles, reactionid=addaction.reaction_id.id
-            )
+
+            towellobj = self.findReactionPlateWellObj(reactionid=addaction.reaction_id.id)
 
             if fromwellobj:
                 fromplateobj = self.getPlateObj(plateid=fromwellobj.plate_id.id)
@@ -231,27 +240,3 @@ class otWrite(object):
                     towellindex=towellindex,
                     volume=volume,
                 )
-            # except:
-            #     fromwellobj = self.findReactionPlateWellObj(
-            #         smiles=addaction.materialsmiles,
-            #         reactionid=addaction.reaction_id.id,
-            #     )
-            #     towellobj = self.findReactionPlateWellObj()
-
-            #     if fromwellobj:
-            #         fromplateobj = self.getPlateObj(plateid=fromwellobj.plate_id.id)
-            #         toplateobj = self.getPlateObj(plateid=towellobj.plate_id.id)
-
-            #         fromplatename = fromplateobj.platename
-            #         toplatename = toplateobj.platename
-            #         fromwellindex = fromwellobj.wellindex
-            #         towellindex = towellobj.wellindex
-            #         volume = addaction.materialquantity
-
-            #         self.transferFluid(
-            #             fromplatename=fromplatename,
-            #             toplatename=toplatename,
-            #             fromwellindex=fromwellindex,
-            #             towellindex=towellindex,
-            #             volume=volume,
-            #         )

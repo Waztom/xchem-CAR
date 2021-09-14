@@ -13,13 +13,13 @@ def getManifoldretrosynthesis(target_smiles):
     """
     data = {
         "smiles": target_smiles,
-        "catalogs": [
-            "mcule",
-            "mcule_ultimate",
-        ],
+        # "catalogs": [
+        #     "mcule",
+        #     "mcule_ultimate",
+        # ],
         "maxLeadTimeWeeks": 12,
         "maxSearchDepth": 3,
-        "maxNumRoutesToReturn": 30,
+        "maxNumRoutesToReturn": 3,
         "reactionTag": "diamond_robotic_synthesis",
     }
 
@@ -30,7 +30,6 @@ def getManifoldretrosynthesis(target_smiles):
         },
         json=data,
     )
-    print(response)
     return response.json()
 
 

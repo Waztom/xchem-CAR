@@ -170,7 +170,6 @@ class CreateOTSession(object):
         solvent=None,
         mculeid=None,
     ):
-
         wellobj = Well()
         wellobj.otsession_id = self.otsessionobj
         wellobj.plate_id = plateobj
@@ -225,7 +224,6 @@ class CreateOTSession(object):
         }
         pipettekey = min(pipettesavailable, key=lambda x: abs(x - self.modevolume))
         pipettetype = pipettesavailable[pipettekey]
-        print(pipettekey)
         return pipettetype
 
     def checkDeckSlotAvailable(self):
@@ -321,7 +319,6 @@ class CreateOTSession(object):
                             platename="Startingplate", labware=self.starterplatetype, numberwells=24
                         )
                         indexwellavailable = self.checkPlateWellsAvailable(plateobj=plateobj)
-
                     wellobj = self.createWellModel(
                         plateobj=plateobj,
                         reactionobj=self.getReaction(
@@ -449,27 +446,41 @@ def getProjectReactions(projectid):
     return allreactionquerysets
 
 
-def findmaxlist(list):
-    maxlength = max([len(i) for i in list])
+def findnoallreactionsteps(allreactionquerysets: list):
+    """ "
+    Function to get all possible number of reactions steps for
+    multiple methods
+    """
+    allnumberofsteps = set([len(x) for x in allreactionquerysets])
+    return allnumberofsteps
+
+
+def findmaxlist(allreactionquerysets: list):
+    maxlength = max([len(i) for i in allreactionquerysets])
     return maxlength
 
 
-def groupReactions(allreactionquerysets, maxlength):
+def groupReactions(allreactionquerysets: list, maxsteps: int):
+    """
+    Groups reactionqueries into first reactions, second reactions and so on
+    """
     groupedreactionquerysets = []
-    for index in range(maxlength):
-        reactiongroup = groupby(allreactionquerysets, lambda item: item[index])
-        groups = [group[0] for group in reactiongroup]
-        print(groups)
-        groupedreactionquerysets.append(groups)
+    for i in range(maxsteps):
+        reactiongroup = [
+            reactionqueryset[i]
+            for reactionqueryset in allreactionquerysets
+            if i <= len(reactionqueryset) - 1
+        ]
+        groupedreactionquerysets.append(reactiongroup)
     return groupedreactionquerysets
 
 
-projectid = 1
+projectid = 3
 
 allreactionquerysets = getProjectReactions(projectid=projectid)
-maxindex = findmaxlist(allreactionquerysets)
+maxsteps = findmaxlist(allreactionquerysets=allreactionquerysets)
 groupedreactionquerysets = groupReactions(
-    allreactionquerysets=allreactionquerysets, maxlength=maxindex
+    allreactionquerysets=allreactionquerysets, maxsteps=maxsteps
 )
 
 platequeryset = []
@@ -481,6 +492,23 @@ for index, reactiongroup in enumerate(groupedreactionquerysets):
             reactionplatetype="96_labcyte_2500ul",
             projectid=projectid,
             reactiongroupqueryset=reactiongroup,
+        )
+
+        otsessionobj = otsession.otsessionobj
+        alladdactionsquerysetflat = otsession.alladdactionquerysetflat
+        reactionplatequeryset = otsession.startingreactionplatequeryset
+
+        otWrite(
+            otsessionobj=otsessionobj,
+            alladdactionsquerysetflat=alladdactionsquerysetflat,
+        )
+    if index > 0:
+        otsession = CreateOTSession(
+            starterplatetype="24_resovoir_2500ul",
+            reactionplatetype="96_labcyte_2500ul",
+            projectid=projectid,
+            reactiongroupqueryset=reactiongroup,
+            inputplatequeryset=reactionplatequeryset,
         )
 
         otsessionobj = otsession.otsessionobj
