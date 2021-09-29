@@ -127,11 +127,10 @@ class CreateEncodedActionModels(object):
         try:
             if action["content"]["material"]["SMARTS"]:
                 SMARTS_pattern = action["content"]["material"]["SMARTS"]
-                for pattern in SMARTS_pattern:
-                    for reactant in self.reactant_pair_smiles:
-                        pattern_check = checkSMARTSPattern(reactant, pattern)
-                        if pattern_check:
-                            reactant_SMILES = reactant
+                for reactant in self.reactant_pair_smiles:
+                    pattern_check = checkSMARTSPattern(reactant, SMARTS_pattern)
+                    if pattern_check:
+                        reactant_SMILES = reactant
             if action["content"]["material"]["SMILES"]:
                 reactant_SMILES = action["content"]["material"]["SMILES"]
 
@@ -150,21 +149,24 @@ class CreateEncodedActionModels(object):
             add.actiontype = action_type
             add.actionno = action_no
             material = getChemicalName(reactant_SMILES)
-            add.material = material
+            if not material:
+                add.material = str(self.reaction_id) + str(action_no) + "-" + reactant_SMILES
+            else:
+                add.material = material
             mol = Chem.MolFromSmiles(reactant_SMILES)
             molecular_weight = Descriptors.ExactMolWt(mol)
             add.materialsmiles = reactant_SMILES
-            mculeinfo = self.mculeapi.getMCuleInfo(smiles=reactant_SMILES)
-            if mculeinfo:
-                mculeid = mculeinfo[0]
-                self.mculeidlist.append(mculeid)
-                self.amountslist.append(amount)
-                add.mculeid = mculeid
-                add.mculeurl = mculeinfo[1]
-                priceinfo = self.mculeapi.getMCulePrice(mculeid=mculeid, amount=amount)
-                if priceinfo:
-                    add.mculeprice = priceinfo[0]
-                    add.mculedeliverytime = priceinfo[1]
+            # mculeinfo = self.mculeapi.getMCuleInfo(smiles=reactant_SMILES)
+            # if mculeinfo:
+            #     mculeid = mculeinfo[0]
+            #     self.mculeidlist.append(mculeid)
+            #     self.amountslist.append(amount)
+            #     add.mculeid = mculeid
+            #     add.mculeurl = mculeinfo[1]
+            #     priceinfo = self.mculeapi.getMCulePrice(mculeid=mculeid, amount=amount)
+            #     if priceinfo:
+            #         add.mculeprice = priceinfo[0]
+            #         add.mculedeliverytime = priceinfo[1]
             add.molecularweight = molecular_weight
             add_svg_string = createSVGString(reactant_SMILES)
             add_svg_fn = default_storage.save(

@@ -1,6 +1,6 @@
 encoded_recipes = {
     "Amidation": {
-        "reactionSMARTS": ["[#6:1](=[#8:2])-[#8].[#7;H2,H1:3]>>[#6:1](=[#8:2])-[#7:3]"],
+        "reactionSMARTS": "[#6:1](=[#8:2])-[#8].[#7;H2,H1:3]>>[#6:1](=[#8:2])-[#7:3]",
         "recipes": {
             "Standard": {
                 "reference": None,
@@ -10,7 +10,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 1,
                             "material": {
-                                "SMARTS": ["[#6](=[#8])-[#8]"],
+                                "SMARTS": "[#6](=[#8])-[#8]",
                                 "SMILES": None,
                                 "quantity": {"value": 1.0, "unit": "moleq"},
                                 "solvent": "DMA",
@@ -50,7 +50,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 4,
                             "material": {
-                                "SMARTS": ["[#7;H2,H1]"],
+                                "SMARTS": "[#7;H2,H1]",
                                 "SMILES": None,
                                 "quantity": {"value": 1.1, "unit": "moleq"},
                                 "solvent": "DMA",
@@ -71,7 +71,7 @@ encoded_recipes = {
         },
     },
     "Amide schotten - baumann": {
-        "reactionSMARTS": ["[#6:1](=[#8:2])-[#17].[#7;H2,H1:3]>>[#6:1](=[#8:2])-[#7;H2,H1:3]"],
+        "reactionSMARTS": "[#7;H2,H1:3].[#6:1](=[#8:2])-[#17]>>[#6:1](=[#8:2])-[#7;H2,H1:3]",
         "recipes": {
             "Standard": {
                 "reference": None,
@@ -81,7 +81,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 1,
                             "material": {
-                                "SMARTS": ["[#7;H2,H1:3]"],
+                                "SMARTS": "[#7;H2,H1:3]",
                                 "SMILES": None,
                                 "quantity": {"value": 1.1, "unit": "moleq"},
                                 "solvent": "DMA",
@@ -94,7 +94,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 2,
                             "material": {
-                                "SMARTS": ["[#6:1](=[#8:2])-[#17]"],
+                                "SMARTS": "[#6:1](=[#8:2])-[#17]",
                                 "SMILES": None,
                                 "quantity": {"value": 1.0, "unit": "moleq"},
                                 "solvent": "DMA",
@@ -129,7 +129,7 @@ encoded_recipes = {
         },
     },
     "Reductive amination": {
-        "reactionSMARTS": ["[#6:2](=[#8])(-[#6:1]).[#7;H2,H1:3]>>[#6:2](-[#6:1])-[#7:3]"],
+        "reactionSMARTS": "[#6:2](=[#8])(-[#6:1]).[#7;H2,H1:3]>>[#6:2](-[#6:1])-[#7:3]",
         "recipes": {
             "Standard": {
                 "reference": None,
@@ -139,7 +139,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 1,
                             "material": {
-                                "SMARTS": ["[#6:2](=[#8])(-[#6:1])"],
+                                "SMARTS": "[#6:2](=[#8])(-[#6:1])",
                                 "SMILES": None,
                                 "quantity": {"value": 1.0, "unit": "moleq"},
                                 "solvent": "DMA",
@@ -152,7 +152,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 2,
                             "material": {
-                                "SMARTS": ["[#7;H2,H1:3]"],
+                                "SMARTS": "[#7;H2,H1:3]",
                                 "SMILES": None,
                                 "quantity": {"value": 1.0, "unit": "moleq"},
                                 "solvent": "DMA",
@@ -238,7 +238,7 @@ encoded_recipes = {
     # ],
     # },
     "N-nucleophilic aromatic substitution": {
-        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:3]-[#7;H2,H1:2]>>[#6:3]-[#7:2]-[c:1]"],
+        "reactionSMARTS": "[#6:3]-[#7;H2,H1:2].[c:1]-[F,Cl,Br,I]>>[#6:3]-[#7:2]-[c:1]",
         "recipes": {
             "Standard": {
                 "reference": None,
@@ -248,7 +248,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 1,
                             "material": {
-                                "SMARTS": ["[#6:3]-[#7;H2,H1:2]"],
+                                "SMARTS": "[#6:3]-[#7;H2,H1:2]",
                                 "SMILES": None,
                                 "quantity": {"value": 1, "unit": "moleq"},
                                 "solvent": "NMP",
@@ -261,7 +261,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 2,
                             "material": {
-                                "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
+                                "SMARTS": "[c:1]-[F,Cl,Br,I]",
                                 "SMILES": None,
                                 "quantity": {"value": 1.2, "unit": "moleq"},
                                 "solvent": "NMP",
@@ -295,8 +295,8 @@ encoded_recipes = {
             },
         },
     },
-    "sp2-sp2 suzuki coupling": {
-        "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:2]-[B]>>[c:1]-[#6:2]"],
+    "Sp2-sp2 Suzuki coupling": {
+        "reactionSMARTS": "[c:1]-[F,Cl,Br,I].[c]-[!B].[#6:2]-[B]>>[c:1]-[#6:2]",
         "recipes": {
             "Standard": {
                 "reference": None,
@@ -306,7 +306,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 1,
                             "material": {
-                                "SMARTS": ["[c:1]-[F,Cl,Br,I].[c]-[!B]"],
+                                "SMARTS": "[c:1]-[F,Cl,Br,I].[c]-[!B]",
                                 "SMILES": None,
                                 "quantity": {"value": 1, "unit": "moleq"},
                                 "solvent": "EtOH",
@@ -369,9 +369,7 @@ encoded_recipes = {
     ##############################################################################################################
     ################ Reactions we will not use for, are not working on and still have to test ###########################################################
     "Boc protection": {
-        "reactionSMARTS": [
-            "[#7:2].[#8:3]-[#6:1](=[#8:4])-[#8:5]>>[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])"
-        ],
+        "reactionSMARTS": "[#8:3]-[#6:1](=[#8:4])-[#8:5]-[#6](-[#6])(-[#6])(-[#6]).[#7;H2:2]>>[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])",
         "recipes": {
             "Standard": {
                 "reference": None,
@@ -381,9 +379,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 1,
                             "material": {
-                                "SMARTS": [
-                                    "[#8:3]-[#6:1](=[#8:4])-[#8:5]-[#6](-[#6])(-[#6])(-[#6])"
-                                ],  # BOC
+                                "SMARTS": "[#8:3]-[#6:1](=[#8:4])-[#8:5]-[#6](-[#6])(-[#6])(-[#6])",  # BOC
                                 "SMILES": None,
                                 "quantity": {"value": 1.5, "unit": "moleq"},
                                 "solvent": "ACN",
@@ -409,7 +405,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 3,
                             "material": {
-                                "SMARTS": ["[#7;H2]"],
+                                "SMARTS": "[#7;H2]",
                                 "SMILES": None,
                                 "quantity": {"value": 1, "unit": "moleq"},  # primary amine
                                 "solvent": "ACN",
@@ -430,9 +426,7 @@ encoded_recipes = {
         },
     },
     "Boc deprotection": {  # this does not work yet, SMARTS needs rethinking
-        "reactionSMARTS": [
-            "[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]>>[#7:2].[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]"
-        ],
+        "reactionSMARTS": "[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]>>[#7:2].[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]",
         "recipes": {
             "Standard": {
                 "reference": None,
@@ -442,7 +436,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 1,
                             "material": {
-                                "SMARTS": ["[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]"],
+                                "SMARTS": "[#7:2]-[#6:1](=[#8])-[#8]-[#6](-[#6])(-[#6])(-[#6])]",
                                 "SMILES": None,
                                 "quantity": {"value": 1, "unit": "moleq"},
                                 "solvent": "EtOAc",
@@ -476,9 +470,7 @@ encoded_recipes = {
         },
     },
     "sulfonamide schotten-baumann": {
-        "reactionSMARTS": [
-            "[#16:5](=[#8])(=[#8:7])-[#17].[#7;H2,H1:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"
-        ],
+        "reactionSMARTS": "[#16:5](=[#8])(=[#8:7])-[#17].[#6]-[#7;H2,H1:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]",
         "recipes": {
             "Standard": {
                 "reference": None,
@@ -488,7 +480,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 1,
                             "material": {
-                                "SMARTS": ["[#16:5](=[#8])(=[#8:7])-[#17]"],
+                                "SMARTS": "[#16:5](=[#8])(=[#8:7])-[#17]",
                                 "SMILES": None,
                                 "quantity": {"value": 1, "unit": "moleq"},
                                 "solvent": "MeOH",  # solvent for all can be IPA, EtOAc or MeOH will need to test
@@ -501,7 +493,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 2,
                             "material": {
-                                "SMARTS": ["[#6]-[#7;H2,H1:2]"],
+                                "SMARTS": "[#6]-[#7;H2,H1:2]",
                                 "SMILES": None,
                                 "quantity": {"value": 1.2, "unit": "moleq"},
                                 "solvent": "MeOH",

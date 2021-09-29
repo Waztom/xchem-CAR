@@ -1,10 +1,11 @@
 """Checks validation of file for uploading to CAR"""
 from __future__ import annotations
+from itertools import product
 import pandas as pd
 from rdkit import Chem
 
 from .recipebuilder.encodedrecipes import encoded_recipes
-from .utils import canonSmiles, checkReactantSMARTS, combichem
+from .utils import canonSmiles, getAddtionOrder, checkReactantSMARTS, combichem
 
 
 class ValidateFile(object):
@@ -194,10 +195,12 @@ class ValidateFile(object):
         for index, reactant_pair, reaction_name in zip(
             range(no_reaction_tests), self.reactant_pair_smiles, self.reaction_names
         ):
-            smarts = encoded_recipes[reaction_name]["reactionSMARTS"][0]
-            reaction_info = checkReactantSMARTS(reactant_pair, smarts)
+            smarts = encoded_recipes[reaction_name]["reactionSMARTS"]
+            product_mols = checkReactantSMARTS(
+                reactant_SMILES_pair=reactant_pair, reaction_SMARTS=smarts
+            )
 
-            if reaction_info == None:
+            if not product_mols:
                 print(smarts)
                 print(reactant_pair)
                 self.add_warning(
@@ -208,8 +211,15 @@ class ValidateFile(object):
                 )
                 self.validated = False
 
-            if reaction_info:
-                product_mol = reaction_info["products"][0][0]
-                reactant_SMILES_pair = reaction_info["reactant_SMILES_pair"]
-                self.product_smiles.append(Chem.MolToSmiles(product_mol))
-                self.reactant_pair_smiles_ordered.append(reactant_SMILES_pair)
+            if product_mols:
+                product_mol = product_mols[
+                    0
+                ]  # Need to build in something to show muttiple products and then let user choose product!
+                product_smi = Chem.MolToSmiles(product_mol)
+                reactant_smis = getAddtionOrder(
+                    product_smi=product_smi,
+                    reactant_SMILES_pair=reactant_pair,
+                    reaction_SMARTS=smarts,
+                )
+                self.product_smiles.append(product_smi)
+                self.reactant_pair_smiles_ordered.append(reactant_smis)

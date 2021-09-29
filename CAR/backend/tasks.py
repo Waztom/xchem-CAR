@@ -16,6 +16,8 @@ from .recipebuilder.createmodels import CreateEncodedActionModels, CreateMculeQu
 from .recipebuilder.encodedrecipes import encoded_recipes
 from rdkit.Chem import AllChem
 
+from .utils import getAddtionOrder
+
 
 def delete_tmp_file(filepath):
     default_storage.delete(filepath)
@@ -224,18 +226,28 @@ def uploadManifoldReaction(validate_output):
                         product_no = 1
                         # Fix upload using multiplerecipes!!!!
                         # NEEDS WOOOOOOOOOORK - how do we deal with multiple recipes within different routes
-                        for reaction in reactions:
+                        for reaction in reversed(reactions):
                             reaction_name = reaction["name"]
                             if reaction_name in encoded_recipes:
                                 recipes = encoded_recipes[reaction_name]["recipes"]
+                                recipe_rxn_smarts = encoded_recipes[reaction_name]["reactionSMARTS"]
                                 for key, value in recipes.items():
                                     actions = value["actions"]
                                     reactant_pair_smiles = reaction["reactantSmiles"]
+                                    # Sort out addtion order
                                     product_smiles = reaction["productSmiles"]
+                                    reactant_pair_smiles_ordered = getAddtionOrder(
+                                        product_smi=product_smiles,
+                                        reactant_SMILES_pair=reactant_pair_smiles,
+                                        reaction_SMARTS=recipe_rxn_smarts,
+                                    )
+
+                                    if not reactant_pair_smiles_ordered:
+                                        continue
 
                                     reaction_smarts = AllChem.ReactionFromSmarts(
                                         "{}>>{}".format(
-                                            ".".join(reactant_pair_smiles), product_smiles
+                                            ".".join(reactant_pair_smiles_ordered), product_smiles
                                         ),
                                         useSmiles=True,
                                     )
@@ -258,7 +270,7 @@ def uploadManifoldReaction(validate_output):
                                         actions=actions,
                                         target_id=target_id,
                                         reaction_id=reaction_id,
-                                        reactant_pair_smiles=reactant_pair_smiles,
+                                        reactant_pair_smiles=reactant_pair_smiles_ordered,
                                         reaction_name=reaction_name,
                                     )
 
@@ -272,7 +284,7 @@ def uploadManifoldReaction(validate_output):
 
                 method_no += 1
 
-    CreateMculeQuoteModel(mculeids=mculeids, amounts=amounts, project_id=project_id)
+    # CreateMculeQuoteModel(mculeids=mculeids, amounts=amounts, project_id=project_id)
 
     default_storage.delete(csv_fp)
 
@@ -354,7 +366,7 @@ def uploadCustomReaction(validate_output):
                 amounts.append(create_models.amountslist)
                 method_no += 1
 
-    CreateMculeQuoteModel(mculeids=mculeids, amounts=amounts, project_id=project_id)
+    # CreateMculeQuoteModel(mculeids=mculeids, amounts=amounts, project_id=project_id)
 
     default_storage.delete(csv_fp)
 

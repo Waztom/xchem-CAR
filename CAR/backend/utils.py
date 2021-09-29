@@ -2,7 +2,7 @@ import json
 import requests
 from rdkit.Chem import Descriptors
 from rdkit import Chem
-from rdkit.Chem import rdChemReactions
+from rdkit.Chem import AllChem, rdChemReactions
 from rdkit.Chem import Draw
 import pubchempy as pcp
 import itertools
@@ -127,46 +127,86 @@ def checkSMARTSPattern(SMILES, SMARTS_pattern):
         return False
 
 
+def getAddtionOrder(product_smi: str, reactant_SMILES_pair: tuple, reaction_SMARTS: str):
+    """
+    Gets reactant pair addition order from reaction_smarts
+
+    Args:
+        product_smi (str): product SMILES
+        reactant_SMILES_pair (tuple): Tuple of reactant smiles
+        reaction_SMARTS (str): reaction SMARTS pattern
+
+    Returns:
+        reactant_SMILES_pair (list): List of reactant smiles in correct order
+        None: If no match is found between the reactants and the reaction smarts
+    """
+    # Need to check if reaction works and then get corect order.
+    rxn = AllChem.ReactionFromSmarts(reaction_SMARTS)
+    reactant_mols = [Chem.MolFromSmiles(smi) for smi in reactant_SMILES_pair]
+
+    for reactant_permutation in list(itertools.permutations(reactant_mols)):
+        try:
+            products = rxn.RunReactants(reactant_permutation)
+            product_mols = [product[0] for product in products]
+            if not product_mols:
+                continue  # reactants were in wrong order so no product
+        except Exception as e:
+            print(e)
+            print(reactant_permutation)
+            continue
+        product_smis = [Chem.MolToSmiles(m) for m in product_mols if m is not None]
+        if product_smi in product_smis:
+            ordered_smis = [Chem.MolToSmiles(m) for m in reactant_permutation]
+    if "ordered_smis" in locals():
+        return ordered_smis
+    else:
+        print(reaction_SMARTS)
+        print(reactant_SMILES_pair)
+        return None
+
+
 def checkReactantSMARTS(reactant_SMILES_pair: tuple, reaction_SMARTS: str):
     """
-    Checks if reactant piar matches reaction_smarts and also
-    checks for reverse order of reactants
+    Checks if reactant pair can produce a product
 
     Args:
         reactant_SMILES_pair (tuple): Tuple of reactant smiles
         reaction_SMARTS (str): reaction SMARTS pattern
 
     Returns:
-        reactant_SMILES_pair (list): List of reactant smiles in correct order
-        products (rdkit obj): Rdkit object of product of reaction
-        None: If no match is found between the reactants and the reaction smarts
+        products (rdkit obj): Rdkit object of products of reaction
+        None: If no product mols formed
     """
-    reaction_info = {}
+    rxn = AllChem.ReactionFromSmarts(reaction_SMARTS)
+    reactant_mols = [Chem.MolFromSmiles(smi) for smi in reactant_SMILES_pair]
 
-    reaction = rdChemReactions.ReactionFromSmarts(reaction_SMARTS)
-    reacts = [Chem.MolFromSmiles(smi) for smi in reactant_SMILES_pair]
-    products = reaction.RunReactants(reacts)
-
-    if len(products) != 0:
-        reaction_info["reactant_SMILES_pair"] = reactant_SMILES_pair
-        reaction_info["products"] = products
-        return reaction_info
-
-    if len(products) == 0:
-        reacts.reverse()
-        products = reaction.RunReactants(reacts)
-        if len(products) != 0:
-            reaction_info["reactant_SMILES_pair"] = reactant_SMILES_pair[::-1]
-            reaction_info["products"] = products
-            return reaction_info
-        else:
-            return None
+    for reactant_permutation in list(itertools.permutations(reactant_mols)):
+        try:
+            products = rxn.RunReactants(reactant_permutation)
+            product_mols = [product[0] for product in products]
+            if product_mols:
+                break
+            if not product_mols:
+                continue  # reactants were in wrong order so no product
+        except Exception as e:
+            print(e)
+            print(reactant_permutation)
+            continue
+    if "product_mols" in locals():
+        return product_mols
+    else:
+        print(reaction_SMARTS)
+        print(reactant_SMILES_pair)
+        return None
 
 
 def getChemicalName(smiles):
     try:
         name = pcp.get_compounds(smiles, "smiles")[0].iupac_name
-        return name
+        if not name:
+            return None
+        else:
+            return name
     except:
         print("Pubchempy could not convert SMILES to a IUPAC name")
-        return smiles
+        return None

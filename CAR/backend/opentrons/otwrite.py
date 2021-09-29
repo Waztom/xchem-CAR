@@ -12,7 +12,7 @@ from django.forms.models import model_to_dict
 
 import os
 
-from numpy.core.fromnumeric import product
+from numpy.core.fromnumeric import prod, product
 
 from backend.models import Project
 
@@ -84,6 +84,13 @@ class otWrite(object):
         productobj = Product.objects.filter(reaction_id=reactionid)[0]
         return productobj.smiles
 
+    def isProduct(self, smiles):
+        try:
+            Product.objects.filter(smiles=smiles)[0]
+            return True
+        except:
+            return False
+
     def createFilePath(self):
         filename = "ot-script-project-{}-sessionid-{}.txt".format(
             self.projectobj.name, self.otsessionid
@@ -97,19 +104,27 @@ class otWrite(object):
         otscriptobj.otsession_id = self.otsessionobj
         otscriptfile = open(self.filepath, "rb")
         otscriptfn = default_storage.save(
-            "otscripts/{}.py".format(self.filename), ContentFile(otscriptfile)
+            "otscripts/{}.py".format(self.filename.strip(".txt")), otscriptfile
         )
         otscriptobj.otscript = otscriptfn
         otscriptobj.save()
 
-    def findStartingPlateWellObj(self, smiles, solvent, concentration):
-        wellobj = Well.objects.filter(
-            otsession_id=self.otsessionid,
-            smiles=smiles,
-            solvent=solvent,
-            concentration=concentration,
-        )[0]
-        return wellobj
+    def findStartingPlateWellObj(self, reactionid, smiles, solvent, concentration):
+        isproduct = self.isProduct(smiles=smiles)
+        if isproduct:
+            wellobj = self.findReactionPlateWellObj(reactionid=reactionid)
+            return wellobj
+        else:
+            try:
+                wellobj = Well.objects.filter(
+                    otsession_id=self.otsessionid,
+                    smiles=smiles,
+                    solvent=solvent,
+                    concentration=concentration,
+                )[0]
+                return wellobj
+            except:
+                print(smiles, solvent, concentration)
 
     def findReactionPlateWellObj(self, reactionid):
         productsmiles = self.getProductSmiles(reactionid=reactionid)
@@ -216,6 +231,7 @@ class otWrite(object):
     def writeAddActions(self):
         for addaction in self.alladdactionsquerysetflat:
             fromwellobj = self.findStartingPlateWellObj(
+                reactionid=addaction.reaction_id.id,
                 smiles=addaction.materialsmiles,
                 solvent=addaction.solvent,
                 concentration=addaction.concentration,
@@ -223,20 +239,19 @@ class otWrite(object):
 
             towellobj = self.findReactionPlateWellObj(reactionid=addaction.reaction_id.id)
 
-            if fromwellobj:
-                fromplateobj = self.getPlateObj(plateid=fromwellobj.plate_id.id)
-                toplateobj = self.getPlateObj(plateid=towellobj.plate_id.id)
+            fromplateobj = self.getPlateObj(plateid=fromwellobj.plate_id.id)
+            toplateobj = self.getPlateObj(plateid=towellobj.plate_id.id)
 
-                fromplatename = fromplateobj.platename
-                toplatename = toplateobj.platename
-                fromwellindex = fromwellobj.wellindex
-                towellindex = towellobj.wellindex
-                volume = addaction.materialquantity
+            fromplatename = fromplateobj.platename
+            toplatename = toplateobj.platename
+            fromwellindex = fromwellobj.wellindex
+            towellindex = towellobj.wellindex
+            volume = addaction.materialquantity
 
-                self.transferFluid(
-                    fromplatename=fromplatename,
-                    toplatename=toplatename,
-                    fromwellindex=fromwellindex,
-                    towellindex=towellindex,
-                    volume=volume,
-                )
+            self.transferFluid(
+                fromplatename=fromplatename,
+                toplatename=toplatename,
+                fromwellindex=fromwellindex,
+                towellindex=towellindex,
+                volume=volume,
+            )
