@@ -2,6 +2,7 @@ secrets.py
 
 __pycache__/
 /.vscode/
+wget-log
 
 /static/*
 CAR/media/*

@@ -198,45 +198,6 @@ encoded_recipes = {
             },
         },
     },
-    # "N-nucleophilic aromatic substitution": {
-    #   "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:3]-[#7;H2,H1:2]>>[#6:3]-[#7:2]-[c:1]"],
-    #  "recipe": [
-    #     {
-    #        "name": "add",
-    #       "content": {
-    #          "action_no": 1,
-    #         "material": {
-    #            "SMARTS": ["[c:1]-[F,Cl,Br,I]"],
-    #           "SMILES": None,
-    #          "quantity": {"value": 1, "unit": "moleq"},
-    #         "solvent": "NMP",
-    #        "concentration": 0.5,
-    #   },
-    # },
-    # },
-    # {
-    #    "name": "add",
-    #   "content": {
-    #      "action_no": 2,
-    #     "material": {
-    #        "SMARTS": ["[#6:3]-[#7;H2,H1:2]"],
-    #       "SMILES": None,
-    #      "quantity": {"value": 1.2, "unit": "moleq"},
-    #     "solvent": "NMP",
-    #    "concentration": 0.5,
-    # },
-    # },
-    # },
-    # {
-    #   "name": "stir",
-    #  "content": {
-    #     "action_no": 3,
-    #    "temperature": {"value": 50, "unit": "degC"},
-    #   "duration": {"value": 12, "unit": "hours"},
-    # },
-    # },
-    # ],
-    # },
     "N-nucleophilic aromatic substitution": {
         "reactionSMARTS": "[#6:3]-[#7;H2,H1:2].[c:1]-[F,Cl,Br,I]>>[#6:3]-[#7:2]-[c:1]",
         "recipes": {
@@ -295,8 +256,8 @@ encoded_recipes = {
             },
         },
     },
-    "Sp2-sp2 Suzuki coupling": {
-        "reactionSMARTS": "[c:1]-[F,Cl,Br,I].[c]-[!B].[#6:2]-[B]>>[c:1]-[#6:2]",
+    "Sp2-sp2 suzuki coupling": {
+        "reactionSMARTS": "[c:1]-[F,Cl,Br,I].[#6:2]-[B]>>[c:1]-[#6:2]",
         "recipes": {
             "Standard": {
                 "reference": None,
@@ -306,7 +267,7 @@ encoded_recipes = {
                         "content": {
                             "action_no": 1,
                             "material": {
-                                "SMARTS": "[c:1]-[F,Cl,Br,I].[c]-[!B]",
+                                "SMARTS": "[c:1]-[F,Cl,Br,I]",
                                 "SMILES": None,
                                 "quantity": {"value": 1, "unit": "moleq"},
                                 "solvent": "EtOH",
@@ -469,7 +430,7 @@ encoded_recipes = {
             },
         },
     },
-    "sulfonamide schotten-baumann": {
+    "Sulfonamide schotten-baumann": {
         "reactionSMARTS": "[#16:5](=[#8])(=[#8:7])-[#17].[#6]-[#7;H2,H1:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]",
         "recipes": {
             "Standard": {
