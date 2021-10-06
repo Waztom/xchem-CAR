@@ -126,14 +126,11 @@ class CreateEncodedActionModels(object):
     def createEncodedAddActionModel(self, action_type, action):
         try:
             if action["content"]["material"]["SMARTS"]:
-                SMARTS_pattern = action["content"]["material"]["SMARTS"]
-                for reactant in self.reactant_pair_smiles:
-                    pattern_check = checkSMARTSPattern(reactant, SMARTS_pattern)
-                    if pattern_check:
-                        reactant_SMILES = reactant
+                reactant_SMILES = self.reactant_pair_smiles[0]
+                del self.reactant_pair_smiles[0]
+                print(self.reactant_pair_smiles)
             if action["content"]["material"]["SMILES"]:
                 reactant_SMILES = action["content"]["material"]["SMILES"]
-
             action_no = action["content"]["action_no"]
             molar_eqv = action["content"]["material"]["quantity"]["value"]
             concentration = action["content"]["material"]["concentration"]
@@ -148,11 +145,13 @@ class CreateEncodedActionModels(object):
             add.reaction_id = self.reaction_obj
             add.actiontype = action_type
             add.actionno = action_no
-            material = getChemicalName(reactant_SMILES)
-            if not material:
-                add.material = str(self.reaction_id) + str(action_no) + "-" + reactant_SMILES
-            else:
-                add.material = material
+            # material = getChemicalName(reactant_SMILES)
+            material = reactant_SMILES
+            add.material = material
+            # if not material:
+            #     add.material = str(self.reaction_id) + str(action_no) + "-" + reactant_SMILES
+            # else:
+            #     add.material = material
             mol = Chem.MolFromSmiles(reactant_SMILES)
             molecular_weight = Descriptors.ExactMolWt(mol)
             add.materialsmiles = reactant_SMILES

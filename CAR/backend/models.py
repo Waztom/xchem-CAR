@@ -13,7 +13,6 @@ def rand_slug():
 
 
 class Project(models.Model):
-    # The date it was made
     init_date = models.DateTimeField(auto_now_add=True)
     name = models.SlugField(max_length=100, db_index=True, unique=True)
     submitterorganisation = models.CharField(max_length=100)
@@ -24,7 +23,6 @@ class Project(models.Model):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            # Newly created object, so set slug
             self.name = slugify(
                 self.submittername[0:3] + " " + self.submitterorganisation[0:3] + " " + rand_slug()
             )
@@ -108,7 +106,7 @@ class IBMAddAction(models.Model):
     actiontype = models.CharField(max_length=100)
     actionno = models.IntegerField()
     additionorder = models.IntegerField(null=True)
-    material = models.CharField(max_length=255)
+    material = models.CharField(max_length=255, null=True)
     materialsmiles = models.CharField(max_length=255, null=True)
     materialquantity = models.FloatField()
     materialquantityunit = models.CharField(

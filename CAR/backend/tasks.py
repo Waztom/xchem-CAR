@@ -224,63 +224,61 @@ def uploadManifoldReaction(validate_output):
                         )
 
                         product_no = 1
-                        # Fix upload using multiplerecipes!!!!
-                        # NEEDS WOOOOOOOOOORK - how do we deal with multiple recipes within different routes
                         for reaction in reversed(reactions):
                             reaction_name = reaction["name"]
                             if reaction_name in encoded_recipes:
                                 recipes = encoded_recipes[reaction_name]["recipes"]
                                 recipe_rxn_smarts = encoded_recipes[reaction_name]["reactionSMARTS"]
-                                for key, value in recipes.items():
-                                    actions = value["actions"]
-                                    reactant_pair_smiles = reaction["reactantSmiles"]
-                                    # Sort out addtion order
-                                    product_smiles = reaction["productSmiles"]
-                                    reactant_pair_smiles_ordered = getAddtionOrder(
+                                reactant_smiles = reaction["reactantSmiles"]
+                                product_smiles = reaction["productSmiles"]
+
+                                if len(reactant_smiles) == 1:
+                                    actions = recipes["Intramolecular"]["actions"]
+                                    reactant_smiles_ordered = reactant_smiles
+                                else:
+                                    actions = recipes["Standard"]["actions"]
+                                    reactant_smiles_ordered = getAddtionOrder(
                                         product_smi=product_smiles,
-                                        reactant_SMILES_pair=reactant_pair_smiles,
+                                        reactant_SMILES=reactant_smiles,
                                         reaction_SMARTS=recipe_rxn_smarts,
                                     )
-
-                                    if not reactant_pair_smiles_ordered:
+                                    if not reactant_smiles_ordered:
                                         continue
 
-                                    reaction_smarts = AllChem.ReactionFromSmarts(
-                                        "{}>>{}".format(
-                                            ".".join(reactant_pair_smiles_ordered), product_smiles
-                                        ),
-                                        useSmiles=True,
-                                    )
-                                    reaction_id = createReactionModel(
-                                        method_id=method_id,
-                                        reaction_class=reaction_name,
-                                        reaction_smarts=reaction_smarts,
-                                    )
+                                reaction_smarts = AllChem.ReactionFromSmarts(
+                                    "{}>>{}".format(
+                                        ".".join(reactant_smiles_ordered), product_smiles
+                                    ),
+                                    useSmiles=True,
+                                )
 
-                                    createProductModel(
-                                        reaction_id=reaction_id,
-                                        project_name=project_name,
-                                        target_no=target_no,
-                                        method_no=method_no,
-                                        product_no=product_no,
-                                        product_smiles=product_smiles,
-                                    )
+                                reaction_id = createReactionModel(
+                                    method_id=method_id,
+                                    reaction_class=reaction_name,
+                                    reaction_smarts=reaction_smarts,
+                                )
 
-                                    create_models = CreateEncodedActionModels(
-                                        actions=actions,
-                                        target_id=target_id,
-                                        reaction_id=reaction_id,
-                                        reactant_pair_smiles=reactant_pair_smiles_ordered,
-                                        reaction_name=reaction_name,
-                                    )
+                                createProductModel(
+                                    reaction_id=reaction_id,
+                                    project_name=project_name,
+                                    target_no=target_no,
+                                    method_no=method_no,
+                                    product_no=product_no,
+                                    product_smiles=product_smiles,
+                                )
 
-                                    mculeids.append(create_models.mculeidlist)
-                                    amounts.append(create_models.amountslist)
+                                create_models = CreateEncodedActionModels(
+                                    actions=actions,
+                                    target_id=target_id,
+                                    reaction_id=reaction_id,
+                                    reactant_pair_smiles=reactant_smiles_ordered,
+                                    reaction_name=reaction_name,
+                                )
 
-                                product_no += 1
+                                mculeids.append(create_models.mculeidlist)
+                                amounts.append(create_models.amountslist)
 
-                            else:
-                                pass
+                            product_no += 1
 
                 method_no += 1
 

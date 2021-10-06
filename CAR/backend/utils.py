@@ -2,7 +2,7 @@ import json
 import requests
 from rdkit.Chem import Descriptors
 from rdkit import Chem
-from rdkit.Chem import AllChem, rdChemReactions
+from rdkit.Chem import AllChem
 from rdkit.Chem import Draw
 import pubchempy as pcp
 import itertools
@@ -127,7 +127,7 @@ def checkSMARTSPattern(SMILES, SMARTS_pattern):
         return False
 
 
-def getAddtionOrder(product_smi: str, reactant_SMILES_pair: tuple, reaction_SMARTS: str):
+def getAddtionOrder(product_smi: str, reactant_SMILES: tuple, reaction_SMARTS: str):
     """
     Gets reactant pair addition order from reaction_smarts
 
@@ -142,7 +142,7 @@ def getAddtionOrder(product_smi: str, reactant_SMILES_pair: tuple, reaction_SMAR
     """
     # Need to check if reaction works and then get corect order.
     rxn = AllChem.ReactionFromSmarts(reaction_SMARTS)
-    reactant_mols = [Chem.MolFromSmiles(smi) for smi in reactant_SMILES_pair]
+    reactant_mols = [Chem.MolFromSmiles(smi) for smi in reactant_SMILES]
 
     for reactant_permutation in list(itertools.permutations(reactant_mols)):
         try:
@@ -161,11 +161,11 @@ def getAddtionOrder(product_smi: str, reactant_SMILES_pair: tuple, reaction_SMAR
         return ordered_smis
     else:
         print(reaction_SMARTS)
-        print(reactant_SMILES_pair)
+        print(reactant_SMILES)
         return None
 
 
-def checkReactantSMARTS(reactant_SMILES_pair: tuple, reaction_SMARTS: str):
+def checkReactantSMARTS(reactant_SMILES: tuple, reaction_SMARTS: str):
     """
     Checks if reactant pair can produce a product
 
@@ -178,7 +178,7 @@ def checkReactantSMARTS(reactant_SMILES_pair: tuple, reaction_SMARTS: str):
         None: If no product mols formed
     """
     rxn = AllChem.ReactionFromSmarts(reaction_SMARTS)
-    reactant_mols = [Chem.MolFromSmiles(smi) for smi in reactant_SMILES_pair]
+    reactant_mols = [Chem.MolFromSmiles(smi) for smi in reactant_SMILES]
 
     for reactant_permutation in list(itertools.permutations(reactant_mols)):
         try:
@@ -196,7 +196,7 @@ def checkReactantSMARTS(reactant_SMILES_pair: tuple, reaction_SMARTS: str):
         return product_mols
     else:
         print(reaction_SMARTS)
-        print(reactant_SMILES_pair)
+        print(reactant_SMILES)
         return None
 
 
