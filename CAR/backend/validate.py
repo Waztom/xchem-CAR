@@ -197,7 +197,7 @@ class ValidateFile(object):
         ):
             smarts = encoded_recipes[reaction_name]["reactionSMARTS"]
             product_mols = checkReactantSMARTS(
-                reactant_SMILES_pair=reactant_pair, reaction_SMARTS=smarts
+                reactant_SMILES=reactant_pair, reaction_SMARTS=smarts
             )
 
             if not product_mols:
@@ -218,7 +218,7 @@ class ValidateFile(object):
                 product_smi = Chem.MolToSmiles(product_mol)
                 reactant_smis = getAddtionOrder(
                     product_smi=product_smi,
-                    reactant_SMILES_pair=reactant_pair,
+                    reactant_SMILES=reactant_pair,
                     reaction_SMARTS=smarts,
                 )
                 self.product_smiles.append(product_smi)

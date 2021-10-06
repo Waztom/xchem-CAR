@@ -124,7 +124,7 @@ encoded_recipes = {
         },
     },
     "Amide schotten - baumann": {
-        "reactionSMARTS": "[#7;H2,H1:3].[#6:1](=[#8:2])-[#17]>>[#6:1](=[#8:2])-[#7;H2,H1:3]",
+        "reactionSMARTS": "[#7;H2,H1:3].[#6:1](=[#8:2])-[#17]>>[#6:1](=[#8:2])-[#7:3]",
         "recipes": {
             "Standard": {
                 "reference": None,

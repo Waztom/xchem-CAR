@@ -329,40 +329,39 @@ def uploadCustomReaction(validate_output):
             recipes = encoded_recipes[reaction_name]["recipes"]
 
             method_no = 1
-            for key, value in recipes.items():
-                actions = value["actions"]
+            actions = recipes["Standard"]["actions"]
 
-                method_id = createMethodModel(
-                    target_id=target_id,
-                    nosteps=1,
-                )
+            method_id = createMethodModel(
+                target_id=target_id,
+                nosteps=1,
+            )
 
-                reaction_id = createReactionModel(
-                    method_id=method_id,
-                    reaction_class="{}-{}".format(reaction_name, key),
-                    reaction_smarts=reaction_smarts,
-                )
+            reaction_id = createReactionModel(
+                method_id=method_id,
+                reaction_class=reaction_name,
+                reaction_smarts=reaction_smarts,
+            )
 
-                createProductModel(
-                    reaction_id=reaction_id,
-                    project_name=project_name,
-                    target_no=target_no,
-                    method_no=method_no,
-                    product_no=product_no,
-                    product_smiles=target_smiles,
-                )
+            createProductModel(
+                reaction_id=reaction_id,
+                project_name=project_name,
+                target_no=target_no,
+                method_no=method_no,
+                product_no=product_no,
+                product_smiles=target_smiles,
+            )
 
-                create_models = CreateEncodedActionModels(
-                    actions=actions,
-                    target_id=target_id,
-                    reaction_id=reaction_id,
-                    reactant_pair_smiles=reactant_pair_smiles,
-                    reaction_name=reaction_name,
-                )
+            create_models = CreateEncodedActionModels(
+                actions=actions,
+                target_id=target_id,
+                reaction_id=reaction_id,
+                reactant_pair_smiles=reactant_pair_smiles,
+                reaction_name=reaction_name,
+            )
 
-                mculeids.append(create_models.mculeidlist)
-                amounts.append(create_models.amountslist)
-                method_no += 1
+            mculeids.append(create_models.mculeidlist)
+            amounts.append(create_models.amountslist)
+            method_no += 1
 
     # CreateMculeQuoteModel(mculeids=mculeids, amounts=amounts, project_id=project_id)
 
