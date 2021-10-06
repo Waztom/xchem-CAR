@@ -108,9 +108,9 @@ once Git-Crypt is installed unlock the secrets using:
 
 # <a name="Startsystem"></a>Start system
 
-### <a name="Start VSCode"></a>Start VS Code (WSL)
+### <a name="Start VS Code"></a>Start VS Code (WSL)
 
-  > `code .'>` <br>
+  > `code .` <br>
 
 ### <a name="Start VS Code"></a>Start VS Code (Ubuntu)
 
@@ -121,15 +121,15 @@ once Git-Crypt is installed unlock the secrets using:
 - start Visual Studio remote container with **Ctrl + Shift + P** and type **"Remote-containers: Open folder in container"** then click on that option. <br> ensure you have the repository folder [your file path/xchem-CAR] selected and choose **"Ok"**/**"Open"**
 - Your container should start to build, click on the popup notification at the bottom right of visual studio to view the log/progress
 
-### <a name="TimetoLaunch"></a>Time to Launch
+### <a name="TimetoLaunch"></a>Time to Launch 
 
 - Open a new terminal that you can interact with. if the terminal is visible at the bottom of the screen click on the plus "create new integrated terminal" or use the keybord shortcut "**Ctrl+Shift+`**" button or use the adjacent "split terminal" (or "**Ctrl+Shift+5**") button to see the new terminal adjacent to the current terminal
 - you should now be in the container running Debian Linux
 - in the new terminal type (Terminal 1):
   > `cd CAR` <br> 
-  >`mkdir logs && cd logs && touch logsfile.log` <br> 
+  >`mkdir logs && cd logs && touch logfile.log` <br> 
   >`cd ..`<br>
-  >`python3 manage.py makemigrations` <br> 
+  >`python3 manage.py makemigrations backend` <br> 
   >`python3 manage.py migrate` <br> 
   >`npm install --quiet --legacy-peer-deps`<br> 
   
