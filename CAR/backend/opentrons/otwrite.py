@@ -8,11 +8,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 
-from django.forms.models import model_to_dict
-
 import os
-
-from numpy.core.fromnumeric import prod, product
 
 from backend.models import Project
 
