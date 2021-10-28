@@ -26,6 +26,9 @@ from backend.models import (
 )
 
 
+import math
+
+
 class otWrite(object):
     """ "
     Creates a otScript object for generating an OT protocol
@@ -109,22 +112,49 @@ class otWrite(object):
         otscriptobj.otscript = otscriptfn
         otscriptobj.save()
 
-    def findStartingPlateWellObj(self, reactionid, smiles, solvent, concentration):
+    def findStartingPlateWellObj(self, reactionid, smiles, solvent, concentration, transfervolume):
         isproduct = self.isProduct(smiles=smiles)
+        wellinfo = []
         if isproduct:
             wellobj = self.findReactionPlateWellObj(reactionid=reactionid)
-            return wellobj
+            wellinfo.append([wellobj, transfervolume])
         else:
             try:
-                wellobj = Well.objects.filter(
+                wellobjects = Well.objects.filter(
                     otsession_id=self.otsessionid,
                     smiles=smiles,
                     solvent=solvent,
                     concentration=concentration,
-                )[0]
-                return wellobj
-            except:
+                    available=True,
+                ).order_by("id")
+                for wellobj in wellobjects:
+                    areclose = self.checkVolumeClose(volume1=transfervolume, volume2=0.00)
+                    if areclose:
+                        break
+                    wellvolumeavailable = self.getWellVolumeAvailable(wellobj=wellobj)
+                    if wellvolumeavailable > 0:
+                        if wellvolumeavailable > transfervolume:
+                            self.updateWellVolume(wellobj=wellobj, transfervolume=transfervolume)
+                            wellinfo.append([wellobj, transfervolume])
+                            transfervolume = 0.00
+                        if wellvolumeavailable < transfervolume:
+                            self.updateWellVolume(
+                                wellobj=wellobj, transfervolume=wellvolumeavailable
+                            )
+                            wellinfo.append([wellobj, wellvolumeavailable])
+                            transfervolume = transfervolume - wellvolumeavailable
+            except Exception as e:
+                print(e)
                 print(smiles, solvent, concentration)
+
+        return wellinfo
+
+    def checkVolumeClose(self, volume1, volume2):
+        checkclose = math.isclose(volume1, volume2, rel_tol=0.001)
+        if checkclose:
+            return True
+        else:
+            return False
 
     def findReactionPlateWellObj(self, reactionid):
         productsmiles = self.getProductSmiles(reactionid=reactionid)
@@ -132,6 +162,33 @@ class otWrite(object):
             otsession_id=self.otsessionid, reaction_id=reactionid, smiles=productsmiles
         )[0]
         return wellobj
+
+    def getWellVolumeAvailable(self, wellobj):
+        plateid = wellobj.plate_id.id
+        maxwellvolume = self.getMaxWellVolume(plateid=plateid)
+        deadvolume = self.getDeadVolume(maxwellvolume=maxwellvolume)
+        wellvolume = wellobj.volume
+        wellvolumeavailable = wellvolume - deadvolume
+        self.updateWellAvailable(wellvolumeavailable=wellvolumeavailable, wellobj=wellobj)
+        return wellvolumeavailable
+
+    def updateWellAvailable(self, wellvolumeavailable, wellobj):
+        if wellvolumeavailable < 0:
+            wellobj.available = False
+            wellobj.save()
+
+    def updateWellVolume(self, wellobj, transfervolume):
+        wellobj.volume = wellobj.volume - transfervolume
+        wellobj.save()
+
+    def getMaxWellVolume(self, plateid):
+        plateobj = self.getPlateObj(plateid)
+        maxwellvolume = plateobj.maxwellvolume
+        return maxwellvolume
+
+    def getDeadVolume(self, maxwellvolume):
+        deadvolume = maxwellvolume * 0.05
+        return deadvolume
 
     def setupScript(self):
         """This is vunrable to injection atacks """
@@ -214,44 +271,49 @@ class otWrite(object):
         toplatename,
         fromwellindex,
         towellindex,
-        volume,
+        transvolume,
         takeheight=2,
         dispenseheight=-5,
     ):
-        humanread = f"transfer - {volume:.1f}ul from {fromwellindex} to {towellindex}"
+        humanread = f"transfer - {transvolume:.1f}ul from {fromwellindex} to {towellindex}"
 
         moveCommands = [
             "\n\t# " + str(humanread),
             self.pipettename
-            + f".transfer({volume}, {fromplatename}.wells()[{fromwellindex}].bottom({takeheight}), {toplatename}.wells()[{towellindex}].top({dispenseheight}), air_gap = 15)",
+            + f".transfer({transvolume}, {fromplatename}.wells()[{fromwellindex}].bottom({takeheight}), {toplatename}.wells()[{towellindex}].top({dispenseheight}), air_gap = 15)",
         ]
 
         self.writeCommand(moveCommands)
 
     def writeAddActions(self):
         for addaction in self.alladdactionsquerysetflat:
-            fromwellobj = self.findStartingPlateWellObj(
+            transfervolume = addaction.materialquantity
+
+            fromwellinfo = self.findStartingPlateWellObj(
                 reactionid=addaction.reaction_id.id,
                 smiles=addaction.materialsmiles,
                 solvent=addaction.solvent,
                 concentration=addaction.concentration,
+                transfervolume=transfervolume,
             )
 
-            towellobj = self.findReactionPlateWellObj(reactionid=addaction.reaction_id.id)
+            for wellinfo in fromwellinfo:
+                fromwellobj = wellinfo[0]
+                transvolume = wellinfo[1]
 
-            fromplateobj = self.getPlateObj(plateid=fromwellobj.plate_id.id)
-            toplateobj = self.getPlateObj(plateid=towellobj.plate_id.id)
+                towellobj = self.findReactionPlateWellObj(reactionid=addaction.reaction_id.id)
+                fromplateobj = self.getPlateObj(plateid=fromwellobj.plate_id.id)
+                toplateobj = self.getPlateObj(plateid=towellobj.plate_id.id)
 
-            fromplatename = fromplateobj.platename
-            toplatename = toplateobj.platename
-            fromwellindex = fromwellobj.wellindex
-            towellindex = towellobj.wellindex
-            volume = addaction.materialquantity
+                fromplatename = fromplateobj.platename
+                toplatename = toplateobj.platename
+                fromwellindex = fromwellobj.wellindex
+                towellindex = towellobj.wellindex
 
-            self.transferFluid(
-                fromplatename=fromplatename,
-                toplatename=toplatename,
-                fromwellindex=fromwellindex,
-                towellindex=towellindex,
-                volume=volume,
-            )
+                self.transferFluid(
+                    fromplatename=fromplatename,
+                    toplatename=toplatename,
+                    fromwellindex=fromwellindex,
+                    towellindex=towellindex,
+                    transvolume=transvolume,
+                )

@@ -4,7 +4,6 @@ from os import name
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-from itertools import groupby
 from statistics import mode
 
 import pandas as pd
@@ -25,6 +24,8 @@ from backend.models import (
     Plate,
     Well,
 )
+
+import math
 
 
 class CreateOTSession(object):
@@ -153,6 +154,7 @@ class CreateOTSession(object):
             plateobj.platename = "{}_{}".format(platename, indexslot)
             plateobj.plateindex = plateindex
             plateobj.labware = labware
+            plateobj.maxwellvolume = int(labware.split("_")[-1][:-2])
             plateobj.numberwells = numberwells
             plateobj.save()
             return plateobj
@@ -276,6 +278,14 @@ class CreateOTSession(object):
 
         return addactionsdf
 
+    def getMaxWellVolume(self, plateobj):
+        maxwellvolume = plateobj.maxwellvolume
+        return maxwellvolume
+
+    def getDeadVolume(self, maxwellvolume):
+        deadvolume = maxwellvolume * 0.05
+        return deadvolume
+
     def createStartingPlate(self):
         addactionsdf = self.getOrderAddActions()
 
@@ -305,19 +315,22 @@ class CreateOTSession(object):
             platename="Startingplate", labware=self.starterplatetype, numberwells=24
         )
 
-        maxwellvolume = float(plateobj.labware.split("_")[-1].strip("ul"))
+        maxwellvolume = self.getMaxWellVolume(plateobj=plateobj)
+        deadvolume = self.getDeadVolume(maxwellvolume=maxwellvolume)
 
         orderdictslist = []
 
         for i in startingmaterialsdf.index.values:
             totalvolume = startingmaterialsdf.at[i, "materialquantity"]
             if totalvolume > maxwellvolume:
-                nowellsneeded = int(-(-totalvolume // maxwellvolume))
-                volumetoadd = totalvolume / nowellsneeded
-                for index in range(nowellsneeded):
+                nowellsneededratio = totalvolume / (maxwellvolume - deadvolume)
+
+                frac, whole = math.modf(nowellsneededratio)
+                volumestoadd = [maxwellvolume for i in range(int(whole))]
+                volumestoadd.append(frac * maxwellvolume + deadvolume)
+
+                for volumetoadd in volumestoadd:
                     indexwellavailable = self.checkPlateWellsAvailable(plateobj=plateobj)
-                    print("Hello-1")
-                    print(indexwellavailable)
                     if not indexwellavailable:
                         plateobj = self.createPlateModel(
                             platename="Startingplate", labware=self.starterplatetype, numberwells=24
@@ -350,10 +363,8 @@ class CreateOTSession(object):
 
             else:
                 indexwellavailable = self.checkPlateWellsAvailable(plateobj=plateobj)
-                print("Hello-2")
-                print(indexwellavailable)
                 if not indexwellavailable:
-                    print("Hello")
+
                     plateobj = self.createPlateModel(
                         platename="Startingplate", labware=self.starterplatetype, numberwells=24
                     )
@@ -497,7 +508,7 @@ def groupReactions(allreactionquerysets: list, maxsteps: int):
     return groupedreactionquerysets
 
 
-projectid = 20
+projectid = 53
 
 allreactionquerysets = getProjectReactions(projectid=projectid)
 maxsteps = findmaxlist(allreactionquerysets=allreactionquerysets)

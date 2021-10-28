@@ -497,6 +497,7 @@ class Plate(models.Model):
     platename = models.CharField(max_length=255)
     plateindex = models.IntegerField()
     labware = models.CharField(max_length=255)
+    maxwellvolume = models.FloatField()
     numberwells = models.IntegerField()
     wellavailable = models.BooleanField(default=True)
     indexswellavailable = models.IntegerField(default=0)
@@ -513,6 +514,7 @@ class Well(models.Model):
     solvent = models.CharField(max_length=255, null=True)
     mculeid = models.CharField(max_length=255, null=True)
     reactantfornextstep = models.BooleanField(default=True)
+    available = models.BooleanField(default=True)
 
 
 class CompoundOrder(models.Model):
