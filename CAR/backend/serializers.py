@@ -26,6 +26,9 @@ from .models import (
     IBMWashAction,
 )
 
+# Import OT session models
+from .models import OTSession, Deck, Pipette, TipRack, Plate, Well, CompoundOrder, OTScript
+
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -181,4 +184,55 @@ class IBMWaitActionSerializer(serializers.ModelSerializer):
 class IBMWashActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = IBMWashAction
+        fields = "__all__"
+
+
+# OT Session serializers
+
+
+class OTSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OTSession
+        fields = "__all__"
+
+
+class DeckSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Deck
+        fields = "__all__"
+
+
+class PipetteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pipette
+        fields = "__all__"
+
+
+class TipRackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TipRack
+        fields = "__all__"
+
+
+class PlateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plate
+        fields = "__all__"
+
+
+class WellSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Well
+        fields = "__all__"
+
+
+class CompoundOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompoundOrder
+        fields = "__all__"
+
+
+class OTScriptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OTScript
         fields = "__all__"

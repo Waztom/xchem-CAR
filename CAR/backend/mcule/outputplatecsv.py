@@ -1,17 +1,12 @@
 import os
 import pandas as pd
 
-# can be used in ibmtoot by importing
-# import ordering.OutputPlateCSV as OutputPlateCSV
-# and calling:
-# OutputPlateTxt.PlateCSV(self.orderplate, self.name, self.author, currentblocknum)
-
 
 class PlateCSV:
     def __init__(
         self,
-        Plate,
-        protocolName=None,
+        platelist,
+        protocolname=None,
         author=None,
         block=None,
         indextype="2D",
@@ -31,15 +26,13 @@ class PlateCSV:
         :rtype: Pandas.DataFrame
 
         """
-        # WTOSCR: index type and volume multiplyer to be moved to _init_ arguments
-        # WTOSCR: move volume multiplyer to IBMTOT aggrigation of all materials
-        self.plate = Plate
-        self.protocolName = protocolName
+        self.platelist = platelist
+        self.protocolName = protocolname
         self.author = author
         self.block = block
         self.indextype = indextype
         self.volumeMultiplyer = volumeMultiplyer
-        self.filepath = f"../output/OrderPlates/{self.plate.plateName}_{protocolName}_{block}.CSV"
+        self.filepath = f"../output/OrderPlates/{self.plate.plateName}_{protocolname}_{block}.CSV"
         self.setupScript()
 
     def dirsetup(self, path="../output/OrderPlates"):
@@ -62,18 +55,18 @@ class PlateCSV:
         outputdf = pd.DataFrame(
             columns=["mculeid", "platename", "well", "concentration", "solvent", "amount-ul"]
         )
-
-        for well in self.plate.WellList:
-            if well.VolumeUsed > 0:
-                wellproperties = {
-                    "mculeid": well.mculeid,
-                    "platename": "placeholder plate name",
-                    "well": self.getindex(well),
-                    "concentration": well.concentration,
-                    "solvent": well.StartSolvent,
-                    "amount-ul": well.VolumeUsed * self.volumeMultiplyer,
-                }
-                outputdf = outputdf.append(wellproperties, ignore_index=True)
+        for plate in self.platelist:
+            for well in self.plate.WellList:
+                if well.VolumeUsed > 0:
+                    wellproperties = {
+                        "mculeid": well.mculeid,
+                        "platename": plate.plateName,
+                        "well": self.getindex(well),
+                        "concentration": well.concentration,
+                        "solvent": well.StartSolvent,
+                        "amount-ul": well.VolumeUsed * self.volumeMultiplyer,
+                    }
+                    outputdf = outputdf.append(wellproperties, ignore_index=True)
 
         outputdf.to_csv(self.filepath)
 

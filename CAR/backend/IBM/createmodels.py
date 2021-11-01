@@ -62,10 +62,8 @@ def createTargetModel(project_id, smiles, target_no, target_mass):
     if the csv file uploaded is validated and
     the user wants to upload the data
 
-    project_id: string
-        id of project created for upload
-    smiles: string
-        a valid smiles
+    project_id: string id of project created for upload
+    smiles: string a valid smiles
     """
     target = Target()
     project_obj = Project.objects.get(id=project_id)
@@ -111,11 +109,9 @@ def createReactionModel(method_id, reaction_class, reaction_smarts):
     return reaction.id
 
 
-def createProductModel(
-    reaction_id, project_name, target_no, pathway_no, product_no, product_smiles
-):
+def createProductModel(reaction_id, project_name, target_no, method_no, product_no, product_smiles):
     product = Product()
-    product.name = "{}-{}-{}-{}".format(project_name, target_no, pathway_no, product_no)
+    product.name = "{}-{}-{}-{}".format(project_name, target_no, method_no, product_no)
     reaction_obj = Reaction.objects.get(id=reaction_id)
     product.reaction_id = reaction_obj
     product.smiles = product_smiles

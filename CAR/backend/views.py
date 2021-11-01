@@ -1,5 +1,4 @@
 import os
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
 from django.core.files.storage import default_storage
@@ -47,6 +46,15 @@ class UploadProject(View):
                 if str(API_choice) == "2":
                     task_validate = validateFileUpload.delay(
                         csv_fp=tmp_file, validate_type="custom-chem"
+                    )
+                    context = {}
+                    context["validate_task_id"] = task_validate.id
+                    context["validate_task_status"] = task_validate.status
+
+                    return render(request, "backend/upload.html", context)
+                if str(API_choice) == "3":
+                    task_validate = validateFileUpload.delay(
+                        csv_fp=tmp_file, validate_type="combi-custom-chem"
                     )
                     context = {}
                     context["validate_task_id"] = task_validate.id
@@ -105,6 +113,23 @@ class UploadProject(View):
                         validateFileUpload.s(
                             csv_fp=tmp_file,
                             validate_type="custom-chem",
+                            project_info=project_info,
+                            validate_only=False,
+                        )
+                        | uploadCustomReaction.s()
+                    ).apply_async()
+
+                    context = {}
+                    context["upload_task_id"] = task_upload.id
+                    context["upload_task_status"] = task_upload.status
+
+                    return render(request, "backend/upload.html", context)
+
+                if str(API_choice) == "3":
+                    task_upload = (
+                        validateFileUpload.s(
+                            csv_fp=tmp_file,
+                            validate_type="combi-custom-chem",
                             project_info=project_info,
                             validate_only=False,
                         )

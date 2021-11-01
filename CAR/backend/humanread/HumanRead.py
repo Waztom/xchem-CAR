@@ -78,7 +78,7 @@ class HumanReadable:
             file.write("\n*To be compleated **manually***\n")
         file.close()
 
-    def setupLabwear(self, platelist, tipOutput):
+    def setupLabware(self, platelist, tipOutput):
         script = open(self.filepath, "a")
         script.write("\n\t# labware")
         for plate in platelist:
@@ -204,7 +204,7 @@ class HumanReadable:
 
     def quickSetup(self):
         self.setupScript()
-        self.setupLabwear()
+        self.setupLabware()
         self.setupPipettes()
 
     def example(self):

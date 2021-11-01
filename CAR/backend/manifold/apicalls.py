@@ -1,23 +1,25 @@
-import json
 import requests
+from ratelimit import limits, sleep_and_retry
 import os
 
 api_key = os.environ["MANIFOLD_API_KEY"]
 
 
+@sleep_and_retry
+@limits(calls=100, period=60)
 def getManifoldretrosynthesis(target_smiles):
     """
     Function to call the Manifold API to search for a retrosynthesis for a given smiles
     """
     data = {
         "smiles": target_smiles,
-        "catalogs": [
-            "mcule",
-            "mcule_ultimate",
-        ],
+        # "catalogs": [
+        #     "mcule",
+        #     "mcule_ultimate",
+        # ],
         "maxLeadTimeWeeks": 12,
         "maxSearchDepth": 3,
-        "maxNumRoutesToReturn": 30,
+        "maxNumRoutesToReturn": 3,
         "reactionTag": "diamond_robotic_synthesis",
     }
 
@@ -28,7 +30,6 @@ def getManifoldretrosynthesis(target_smiles):
         },
         json=data,
     )
-
     return response.json()
 
 
