@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 
 from django.forms.models import model_to_dict
 
-from statistics import mode
+from statistics import mean, mode
 
 import pandas as pd
 from otwrite import otWrite
@@ -55,8 +55,8 @@ class CreateOTSession(object):
         self.alladdactionquerysetflat = [
             item for sublist in self.alladdactionqueryset for item in sublist
         ]
-
-        self.modevolume = self.getModeVolumeAdded()
+        self.roundedvolumes = self.getRoundedVolumes()
+        self.meanvolumeadded = self.getMeanVolumeAdded()
         self.numbertips = self.getNumberTips()
         self.tipracktype = self.getTipRackType()
         self.pipettetype = self.getPipetteType()
@@ -93,19 +93,26 @@ class CreateOTSession(object):
         ).order_by("id")
         return reactionplatequeryset
 
-    def getModeVolumeAdded(self):
+    def getRoundedVolumes(self):
         roundedvolumes = [
             round(addactionobj.materialquantity) for addactionobj in self.alladdactionquerysetflat
         ]
-        modevolume = mode(roundedvolumes)
+        return roundedvolumes
+
+    def getModeVolumeAdded(self):
+        modevolume = mode(self.roundedvolumes)
         return modevolume
+
+    def getMeanVolumeAdded(self):
+        meanvolume = mean(self.roundedvolumes)
+        return meanvolume
 
     def getTipRackType(self):
         tipsavailable = {
             300: "opentrons_96_tiprack_300ul",
             10: "opentrons_96_tiprack_20ul",
         }
-        tipkey = min(tipsavailable, key=lambda x: abs(x - self.modevolume))
+        tipkey = min(tipsavailable, key=lambda x: self.getNumberTransfers(pipettevolume=x))
         tipracktype = tipsavailable[tipkey]
         return tipracktype
 
@@ -219,6 +226,13 @@ class CreateOTSession(object):
         for rack in range(numberacks):
             self.createTiprackModel(name=self.tipracktype)
 
+    def getNumberTransfers(self, pipettevolume):
+        if pipettevolume < self.meanvolumeadded:
+            notransfers = self.meanvolumeadded / pipettevolume
+        else:
+            notransfers = pipettevolume / self.meanvolumeadded
+        return notransfers
+
     def getPipetteType(self):
         pipettesavailable = {
             10: {"labware": "p10_single", "position": "right", "type": "single", "maxvolume": 10},
@@ -229,7 +243,7 @@ class CreateOTSession(object):
                 "maxvolume": 300,
             },
         }
-        pipettekey = min(pipettesavailable, key=lambda x: abs(x - self.modevolume))
+        pipettekey = min(pipettesavailable, key=lambda x: self.getNumberTransfers(pipettevolume=x))
         pipettetype = pipettesavailable[pipettekey]
         return pipettetype
 
