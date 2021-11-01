@@ -5,8 +5,8 @@
 """Create otScript session"""
 from __future__ import annotations
 from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 from django.conf import settings
+from django.forms.models import model_to_dict
 
 import os
 
@@ -38,7 +38,6 @@ class otWrite(object):
         apiLevel="2.9",
         reactionplatequeryset: list = None,
     ):
-
         self.otsessionobj = otsessionobj
         self.otsessionid = otsessionobj.id
         self.alladdactionsquerysetflat = alladdactionsquerysetflat
@@ -83,9 +82,10 @@ class otWrite(object):
         productobj = Product.objects.filter(reaction_id=reactionid)[0]
         return productobj.smiles
 
-    def isProduct(self, smiles):
+    def isPreviousReactionProduct(self, reactionid, smiles):
         try:
-            Product.objects.filter(smiles=smiles)[0]
+            previousreactionid = reactionid - 1
+            Product.objects.filter(reaction_id=previousreactionid, smiles=smiles)[0]
             return True
         except:
             return False
@@ -109,10 +109,13 @@ class otWrite(object):
         otscriptobj.save()
 
     def findStartingPlateWellObj(self, reactionid, smiles, solvent, concentration, transfervolume):
-        isproduct = self.isProduct(smiles=smiles)
+        isproduct = self.isPreviousReactionProduct(reactionid=reactionid, smiles=smiles)
         wellinfo = []
         if isproduct:
-            wellobj = self.findReactionPlateWellObj(reactionid=reactionid)
+            wellobj = Well.objects.filter(
+                otsession_id=self.otsessionid,
+                smiles=smiles,
+            )[0]
             wellinfo.append([wellobj, transfervolume])
         else:
             try:
@@ -273,13 +276,33 @@ class otWrite(object):
     ):
         humanread = f"transfer - {transvolume:.1f}ul from {fromwellindex} to {towellindex}"
 
-        moveCommands = [
+        instruction = [
             "\n\t# " + str(humanread),
             self.pipettename
             + f".transfer({transvolume}, {fromplatename}.wells()[{fromwellindex}].bottom({takeheight}), {toplatename}.wells()[{towellindex}].top({dispenseheight}), air_gap = 15)",
         ]
 
-        self.writeCommand(moveCommands)
+        self.writeCommand(instruction)
+
+    def pickUpTip(self):
+        humanread = "Pick up tip"
+
+        instruction = [
+            "\n\t# " + str(humanread),
+            self.pipettename + ".pick_up_tip()",
+        ]
+
+        self.writeCommand(instruction)
+
+    def disposeTip(self):
+        humanread = "Dispose tip"
+
+        instruction = [
+            "\n\t# " + str(humanread),
+            self.pipettename + ".drop_tip()",
+        ]
+
+        self.writeCommand(instruction)
 
     def writeAddActions(self):
         for addaction in self.alladdactionsquerysetflat:
@@ -293,6 +316,10 @@ class otWrite(object):
                 transfervolume=transfervolume,
             )
 
+            self.pickUpTip()
+            # Insert function for handling density - change aspirate speed.
+            # Need to add viscosity field to Addaction model
+            # print(fromwellinfo)
             for wellinfo in fromwellinfo:
                 fromwellobj = wellinfo[0]
                 transvolume = wellinfo[1]
@@ -313,3 +340,5 @@ class otWrite(object):
                     towellindex=towellindex,
                     transvolume=transvolume,
                 )
+
+            self.disposeTip()

@@ -4,6 +4,8 @@ from os import name
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
+from django.forms.models import model_to_dict
+
 from statistics import mode
 
 import pandas as pd
@@ -46,6 +48,7 @@ class CreateOTSession(object):
         self.reactionplatetype = reactionplatetype
         self.projectid = projectid
         self.reactiongroupqueryset = reactiongroupqueryset
+        self.inputplatequeryset = inputplatequeryset
         self.alladdactionqueryset = [
             self.getAddActions(reactionobj) for reactionobj in self.reactiongroupqueryset
         ]
@@ -85,7 +88,9 @@ class CreateOTSession(object):
         return addactionqueryset
 
     def getStartingReactionPlateQuerySet(self):
-        reactionplatequeryset = Plate.objects.filter(platename="Reactionplate").order_by("id")
+        reactionplatequeryset = Plate.objects.filter(
+            otsession_id=self.otsessionobj.id, platename__contains="Reactionplate"
+        ).order_by("id")
         return reactionplatequeryset
 
     def getModeVolumeAdded(self):
@@ -363,6 +368,8 @@ class CreateOTSession(object):
 
             else:
                 indexwellavailable = self.checkPlateWellsAvailable(plateobj=plateobj)
+                volumetoadd = totalvolume + deadvolume
+
                 if not indexwellavailable:
 
                     plateobj = self.createPlateModel(
@@ -376,7 +383,7 @@ class CreateOTSession(object):
                         reactionid=startingmaterialsdf.at[i, "reaction_id_id"]
                     ),
                     wellindex=indexwellavailable,
-                    volume=totalvolume,
+                    volume=volumetoadd,
                     smiles=startingmaterialsdf.at[i, "materialsmiles"],
                     concentration=startingmaterialsdf.at[i, "concentration"],
                     solvent=startingmaterialsdf.at[i, "solvent"],
@@ -391,7 +398,7 @@ class CreateOTSession(object):
                         "well": wellobj.wellindex,
                         "concentration": startingmaterialsdf.at[i, "concentration"],
                         "solvent": startingmaterialsdf.at[i, "solvent"],
-                        "amount-ul": startingmaterialsdf.at[i, "materialquantity"],
+                        "amount-ul": volumetoadd,
                     }
                 )
 
@@ -401,7 +408,7 @@ class CreateOTSession(object):
 
     def createReactionPlate(self):
         plateobj = self.createPlateModel(
-            platename="Reactionplate", labware=self.reactionplatetype, numberwells=384
+            platename="Reactionplate", labware=self.reactionplatetype, numberwells=96
         )
 
         for reactionobj in self.reactiongroupqueryset:
@@ -410,7 +417,7 @@ class CreateOTSession(object):
             indexwellavailable = self.checkPlateWellsAvailable(plateobj=plateobj)
             if not indexwellavailable:
                 plateobj = self.createPlateModel(
-                    platename="Reactionplate", labware=self.reactionplatetype, numberwells=384
+                    platename="Reactionplate", labware=self.reactionplatetype, numberwells=96
                 )
 
                 indexwellavailable = self.checkPlateWellsAvailable(plateobj=plateobj)
@@ -430,14 +437,16 @@ class CreateOTSession(object):
         for plateobj in self.inputplatequeryset:
             indexslot = self.checkDeckSlotAvailable()
             if indexslot:
+                clonewellqueryset = self.getCloneWells(plateobj=plateobj)
                 plateindex = indexslot
                 platename = "Startingplate"
+                plateobj.pk = None
                 plateobj.deck_id = self.deckobj
                 plateobj.otsession_id = self.otsessionobj
                 plateobj.plateindex = plateindex
                 plateobj.platename = "{}_{}".format(platename, indexslot)
                 plateobj.save()
-                self.cloneInputWells(plateobj)
+                self.cloneInputWells(clonewellqueryset, plateobj)
             else:
                 print("No more deck slots available")
 
@@ -445,9 +454,9 @@ class CreateOTSession(object):
         clonewellqueryset = Well.objects.filter(plate_id=plateobj.id)
         return clonewellqueryset
 
-    def cloneInputWells(self, plateobj):
-        clonewellqueryset = self.getCloneWells(plateobj=plateobj)
+    def cloneInputWells(self, clonewellqueryset, plateobj):
         for clonewellobj in clonewellqueryset:
+            clonewellobj.pk = None
             clonewellobj.plate_id = plateobj
             clonewellobj.otsession_id = self.otsessionobj
             clonewellobj.save()
@@ -508,7 +517,7 @@ def groupReactions(allreactionquerysets: list, maxsteps: int):
     return groupedreactionquerysets
 
 
-projectid = 53
+projectid = 1
 
 allreactionquerysets = getProjectReactions(projectid=projectid)
 maxsteps = findmaxlist(allreactionquerysets=allreactionquerysets)
