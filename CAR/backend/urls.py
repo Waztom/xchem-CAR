@@ -35,6 +35,18 @@ from .api import (
     IBMWashActionViewSet,
 )
 
+# Import OT Session views
+from .api import (
+    OTSessionViewSet,
+    DeckViewSet,
+    PipetteViewSet,
+    TipRackViewSet,
+    PlateViewSet,
+    WellViewSet,
+    CompoundOrderViewSet,
+    OTScriptViewSet,
+)
+
 from .views import UploadProject, ValidateTaskView, UploadTaskView
 
 # Register standard routes
@@ -80,6 +92,15 @@ router.register("api/IBMstoreactions", IBMStoreActionViewSet, "IBMstoreactions")
 router.register("api/IBMwaitactions", IBMWaitActionViewSet, "IBMwaitactions")
 router.register("api/IBMwashactions", IBMWashActionViewSet, "IBMwashactions")
 
+# Register Ot Session routes
+router.register("api/otsessions", OTSessionViewSet, "otsessions")
+router.register("api/decks", DeckViewSet, "decks")
+router.register("api/pipettes", PipetteViewSet, "pipettes")
+router.register("api/tipracks", TipRackViewSet, "tipracks")
+router.register("api/plates", PlateViewSet, "plates")
+router.register("api/wells", WellViewSet, "wells")
+router.register("api/compoundorders", CompoundOrderViewSet, "compoundorders")
+router.register("api/otscripts", OTScriptViewSet, "otscripts")
 
 urlpatterns = [
     url("upload/", UploadProject.as_view(), name="uploadproject"),

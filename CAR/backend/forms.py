@@ -5,7 +5,7 @@ validate_CHOICES = [
     (1, "upload"),
 ]
 
-API_CHOICES = [(0, "Postera"), (1, "IBM"), (2, "Custom chemistry")]
+API_CHOICES = [(0, "Postera"), (1, "IBM"), (2, "Custom chemistry"), (3, "Combi custom chemistry")]
 
 
 class UploadForm(forms.Form):

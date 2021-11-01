@@ -1,11 +1,11 @@
 """Checks validation of file for uploading to CAR"""
 from __future__ import annotations
+from itertools import product
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import rdChemReactions
 
 from .recipebuilder.encodedrecipes import encoded_recipes
-from .utils import canonSmiles
+from .utils import canonSmiles, getAddtionOrder, checkReactantSMARTS, combichem
 
 
 class ValidateFile(object):
@@ -23,44 +23,100 @@ class ValidateFile(object):
         self.df_columns = self.df.columns
         self.no_df_columns = len(self.df_columns)
         self.index_df_rows = range(0, len(self.df), 1)
-        self.target_amounts = [amount for amount in self.df["Ammount_required (mg)"]]
         self.upload_type = validate_type
         self.validate_dict = {"field": [], "warning_string": []}
         self.validated = True
 
         if self.upload_type == "custom-chem":
-            self.expected_no_columns = 4
-            self.expected_column_names = [
-                "Reactant-1",
-                "Reactant-2",
-                "Reaction-name",
-                "Ammount_required (mg)",
-            ]
-            self.checkNumberColumns()
-            if self.validated:
-                self.checkColumnNames()
-            if self.validated:
-                self.reactant_pair_smiles = [
-                    reactants for reactants in zip(self.df["Reactant-1"], self.df["Reactant-2"])
-                ]
-                self.df["reactant_pair_smiles"] = self.reactant_pair_smiles
-                self.reaction_names = [reaction_name for reaction_name in self.df["Reaction-name"]]
-                self.checkReaction()
-                if self.validated:
-                    self.df["target-smiles"] = self.product_smiles
-                    self.checkIsNumber()
+            self.validatecustomchem()
+        if self.upload_type == "combi-custom-chem":
+            self.validatecustomcombichem()
 
         if self.upload_type == "retro-API":
             self.expected_no_columns = 2
-            self.expected_column_names = ["Targets", "Ammount_required (mg)"]
+            self.expected_column_names = ["targets", "amount-required-mg"]
             self.checkNumberColumns()
             if self.validated:
                 self.checkColumnNames()
             if self.validated:
-                self.target_smiles = [canonSmiles(smi.strip()) for smi in self.df["Targets"]]
-                self.df["Targets"] = self.target_smiles
+                self.target_smiles = [canonSmiles(smi.strip()) for smi in self.df["targets"]]
+                self.df["targets"] = self.target_smiles
                 self.checkTargetSMILES()
                 if self.validated:
+                    self.checkIsNumber()
+
+    def validatecustomchem(self):
+        self.expected_no_columns = 4
+        self.expected_column_names = [
+            "reactant-1",
+            "reactant-2",
+            "reaction-name",
+            "amount-required-mg",
+        ]
+        self.checkNumberColumns()
+        if self.validated:
+            self.checkColumnNames()
+        if self.validated:
+            self.reactant_pair_smiles = [
+                reactants for reactants in zip(self.df["reactant-1"], self.df["reactant-2"])
+            ]
+            self.df["reactant-pair-smiles"] = self.reactant_pair_smiles
+            self.checkReactantSMILES()
+            if self.validated:
+                self.reactant_pair_smiles = [
+                    (canonSmiles(smi[0]), canonSmiles(smi[1])) for smi in self.reactant_pair_smiles
+                ]
+                self.reaction_names = self.df["reaction-name"]
+                self.checkReaction()
+                if self.validated:
+                    self.df["reactant-pair-smiles"] = self.reactant_pair_smiles_ordered
+                    self.df["target-smiles"] = self.product_smiles
+                    self.checkIsNumber()
+
+    def validatecustomcombichem(self):
+        self.expected_no_columns = 4
+        self.expected_column_names = [
+            "reactant-1",
+            "reactant-2",
+            "reaction-name",
+            "amount-required-mg",
+        ]
+        self.checkNumberColumns()
+        if self.validated:
+            self.checkColumnNames()
+        if self.validated:
+            self.reactant_pair_smiles = []
+            self.reaction_names = []
+            grouped = self.df.groupby("reaction-name")
+            for name, group in grouped:
+                reactant_1_SMILES = set(
+                    [reactant for reactant in group["reactant-1"] if str(reactant) != "nan"]
+                )
+                reactant_2_SMILES = set(
+                    [reactant for reactant in group["reactant-2"] if str(reactant) != "nan"]
+                )
+                reactant_pair_smiles = combichem(
+                    reactant_1_SMILES=reactant_1_SMILES, reactant_2_SMILES=reactant_2_SMILES
+                )
+                reaction_names = [name] * len(reactant_pair_smiles)
+                self.reactant_pair_smiles = self.reactant_pair_smiles + reactant_pair_smiles
+                self.reaction_names = self.reaction_names + reaction_names
+
+            self.checkReactantSMILES()
+            if self.validated:
+                self.reactant_pair_smiles = [
+                    (canonSmiles(smi[0]), canonSmiles(smi[1])) for smi in self.reactant_pair_smiles
+                ]
+                self.checkReaction()
+                if self.validated:
+                    amount_required_mg = self.df.at[0, "amount-required-mg"]
+                    self.df = pd.DataFrame()
+                    self.df["reactant-pair-smiles"] = self.reactant_pair_smiles_ordered
+                    self.df["target-smiles"] = self.product_smiles
+                    self.df["reaction-name"] = self.reaction_names
+                    self.df["amount-required-mg"] = [amount_required_mg] * len(
+                        self.reactant_pair_smiles
+                    )
                     self.checkIsNumber()
 
     def add_warning(self, field, warning_string):
@@ -102,7 +158,25 @@ class ValidateFile(object):
                 )
                 self.validated = False
 
+    def checkReactantSMILES(self):
+        for index, smi_pair in zip(self.index_df_rows, self.reactant_pair_smiles):
+            mols = [Chem.MolFromSmiles(smi) for smi in smi_pair]
+            if None in mols:
+                none_test_indices = [index for index, mol in enumerate(mols) if mol == None]
+                invalid_smiles = [smi_pair[index] for index in none_test_indices]
+                self.add_warning(
+                    field="check_smiles",
+                    warning_string="Input reactant smiles: ".join(
+                        "{} ".format(*smi) for smi in invalid_smiles
+                    )
+                    + "at index {} is not a valid smiles".format(
+                        index,
+                    ),
+                )
+                self.validated = False
+
     def checkIsNumber(self):
+        self.target_amounts = [amount for amount in self.df["amount-required-mg"]]
         for index, amount in zip(self.index_df_rows, self.target_amounts):
             if not isinstance(amount, (int, float)):
                 self.add_warning(
@@ -115,26 +189,20 @@ class ValidateFile(object):
 
     def checkReaction(self):
         self.product_smiles = []
+        self.reactant_pair_smiles_ordered = []
+        no_reaction_tests = len(self.reaction_names)
 
         for index, reactant_pair, reaction_name in zip(
-            self.index_df_rows, self.reactant_pair_smiles, self.reaction_names
+            range(no_reaction_tests), self.reactant_pair_smiles, self.reaction_names
         ):
-            reaction_smarts = encoded_recipes[reaction_name]["reactionSMARTS"]
-            # print output and check????
-            reacts = [Chem.MolFromSmiles(smi) for smi in reactant_pair]
-            # Do we need to still loop through SMARTS??????????
-            for smarts in reaction_smarts:
-                reaction = rdChemReactions.ReactionFromSmarts(smarts)
-                # Need to inlude check for reactants in correct order using paterns from reacttion SMARTS????
-                # Check if the reactant pair can be assigned????
+            smarts = encoded_recipes[reaction_name]["reactionSMARTS"]
+            product_mols = checkReactantSMARTS(
+                reactant_SMILES=reactant_pair, reaction_SMARTS=smarts
+            )
 
-                # This code assumes reaction order set correctly in upload csv - order should not matter and
-                # need to check reactant SMARTS and assign order if both check out
-                products = reaction.RunReactants(reacts)
-                if len(products) != 0:
-                    print(Chem.MolToSmiles(products[0][0]))
-
-            if len(products) == 0:
+            if not product_mols:
+                print(smarts)
+                print(reactant_pair)
                 self.add_warning(
                     field="check_reaction",
                     warning_string="Reaction for reactants at index {} is not a valid reaction".format(
@@ -143,6 +211,15 @@ class ValidateFile(object):
                 )
                 self.validated = False
 
-            if len(products) != 0:
-                product_mol = products[0][0]
-                self.product_smiles.append(Chem.MolToSmiles(product_mol))
+            if product_mols:
+                product_mol = product_mols[
+                    0
+                ]  # Need to build in something to show muttiple products and then let user choose product!
+                product_smi = Chem.MolToSmiles(product_mol)
+                reactant_smis = getAddtionOrder(
+                    product_smi=product_smi,
+                    reactant_SMILES=reactant_pair,
+                    reaction_SMARTS=smarts,
+                )
+                self.product_smiles.append(product_smi)
+                self.reactant_pair_smiles_ordered.append(reactant_smis)

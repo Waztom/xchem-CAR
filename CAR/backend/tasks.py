@@ -16,6 +16,8 @@ from .recipebuilder.createmodels import CreateEncodedActionModels, CreateMculeQu
 from .recipebuilder.encodedrecipes import encoded_recipes
 from rdkit.Chem import AllChem
 
+from .utils import getAddtionOrder
+
 
 def delete_tmp_file(filepath):
     default_storage.delete(filepath)
@@ -77,7 +79,7 @@ def uploadIBMReaction(validate_output):
 
         target_no = 1
         for smiles, target_mass in zip(
-            uploaded_dict["Targets"], uploaded_dict["Ammount_required (mg)"]
+            uploaded_dict["targets"], uploaded_dict["amount-required-mg"]
         ):
 
             target_id = createTargetModel(
@@ -96,34 +98,34 @@ def uploadIBMReaction(validate_output):
                 max_attempts = 3
                 attempts_dict = {}
 
-                no_pathways_found = len(results["retrosynthetic_paths"])
+                no_methods_found = len(results["retrosynthetic_paths"])
 
-                if no_pathways_found <= 3:
-                    max_pathways = no_pathways_found
-                if no_pathways_found > 3:
-                    max_pathways = 3
+                if no_methods_found <= 3:
+                    max_methods = no_methods_found
+                if no_methods_found > 3:
+                    max_methods = 3
 
-                pathway_no = 1
+                method_no = 1
                 pathway_filter = []
                 for pathway in results["retrosynthetic_paths"]:
                     try:
-                        attempts_dict[pathway_no] += 1
+                        attempts_dict[method_no] += 1
                     except:
-                        attempts_dict[pathway_no] = 1
+                        attempts_dict[method_no] = 1
 
-                    no_attempts = attempts_dict[pathway_no]
+                    no_attempts = attempts_dict[method_no]
 
                     if no_attempts > max_attempts:
                         break
 
-                    if pathway_no <= max_pathways and pathway["confidence"] > 0.90:
+                    if method_no <= max_methods and pathway["confidence"] > 0.90:
                         reaction_info = IBM_API.collectIBMReactionInfo(pathway=pathway)
 
                         if reaction_info:
                             method_integer = IBM_API.filtermethod(reaction_info=reaction_info)
 
                             if method_integer not in pathway_filter:
-                                pathway_no += 1
+                                method_no += 1
                                 pathway_filter.append(method_integer)
 
                                 method_id = createMethodModel(
@@ -149,7 +151,7 @@ def uploadIBMReaction(validate_output):
                                         reaction_id=reaction_id,
                                         project_name=project_name,
                                         target_no=target_no,
-                                        pathway_no=pathway_no,
+                                        method_no=method_no,
                                         product_no=product_no,
                                         product_smiles=product_smiles,
                                     )
@@ -161,7 +163,7 @@ def uploadIBMReaction(validate_output):
 
                                     product_no += 1
 
-                    if pathway_no > max_pathways:
+                    if method_no > max_methods:
                         break
 
             target_no += 1
@@ -182,12 +184,13 @@ def uploadManifoldReaction(validate_output):
 
     if validated:
         mculeids = []
+        amounts = []
         project_id, project_name = createProjectModel(project_info)
         project_info["project_name"] = project_name
 
         target_no = 1
         for target_smiles, target_mass in zip(
-            uploaded_dict["Targets"], uploaded_dict["Ammount_required (mg)"]
+            uploaded_dict["targets"], uploaded_dict["amount-required-mg"]
         ):
 
             retrosynthesis_result = getManifoldretrosynthesis(target_smiles)
@@ -202,7 +205,7 @@ def uploadManifoldReaction(validate_output):
 
             target_no += 1
 
-            pathway_no = 1
+            method_no = 1
             for route in routes:
                 no_steps = len(route["reactions"])
 
@@ -221,20 +224,37 @@ def uploadManifoldReaction(validate_output):
                         )
 
                         product_no = 1
-                        for reaction in reactions:
-                            reaction_class = reaction["name"]
-                            if reaction_class in encoded_recipes:
-                                actions = encoded_recipes[reaction_class]["recipe"]
-                                reactant_pair_smiles = reaction["reactantSmiles"]
+                        for reaction in reversed(reactions):
+                            reaction_name = reaction["name"]
+                            if reaction_name in encoded_recipes:
+                                recipes = encoded_recipes[reaction_name]["recipes"]
+                                recipe_rxn_smarts = encoded_recipes[reaction_name]["reactionSMARTS"]
+                                reactant_smiles = reaction["reactantSmiles"]
                                 product_smiles = reaction["productSmiles"]
 
+                                if len(reactant_smiles) == 1:
+                                    actions = recipes["Intramolecular"]["actions"]
+                                    reactant_smiles_ordered = reactant_smiles
+                                else:
+                                    actions = recipes["Standard"]["actions"]
+                                    reactant_smiles_ordered = getAddtionOrder(
+                                        product_smi=product_smiles,
+                                        reactant_SMILES=reactant_smiles,
+                                        reaction_SMARTS=recipe_rxn_smarts,
+                                    )
+                                    if not reactant_smiles_ordered:
+                                        continue
+
                                 reaction_smarts = AllChem.ReactionFromSmarts(
-                                    "{}>>{}".format(".".join(reactant_pair_smiles), product_smiles),
+                                    "{}>>{}".format(
+                                        ".".join(reactant_smiles_ordered), product_smiles
+                                    ),
                                     useSmiles=True,
                                 )
+
                                 reaction_id = createReactionModel(
                                     method_id=method_id,
-                                    reaction_class=reaction_class,
+                                    reaction_class=reaction_name,
                                     reaction_smarts=reaction_smarts,
                                 )
 
@@ -242,7 +262,7 @@ def uploadManifoldReaction(validate_output):
                                     reaction_id=reaction_id,
                                     project_name=project_name,
                                     target_no=target_no,
-                                    pathway_no=pathway_no,
+                                    method_no=method_no,
                                     product_no=product_no,
                                     product_smiles=product_smiles,
                                 )
@@ -251,19 +271,18 @@ def uploadManifoldReaction(validate_output):
                                     actions=actions,
                                     target_id=target_id,
                                     reaction_id=reaction_id,
-                                    reactant_pair_smiles=reactant_pair_smiles,
+                                    reactant_pair_smiles=reactant_smiles_ordered,
+                                    reaction_name=reaction_name,
                                 )
 
                                 mculeids.append(create_models.mculeidlist)
+                                amounts.append(create_models.amountslist)
 
-                                product_no += 1
+                            product_no += 1
 
-                            else:
-                                pass
+                method_no += 1
 
-                pathway_no += 1
-
-    CreateMculeQuoteModel(mculeids=mculeids, project_id=project_id)
+    # CreateMculeQuoteModel(mculeids=mculeids, amounts=amounts, project_id=project_id)
 
     default_storage.delete(csv_fp)
 
@@ -281,18 +300,23 @@ def uploadCustomReaction(validate_output):
 
     if validated:
         mculeids = []
+        amounts = []
         project_id, project_name = createProjectModel(project_info)
         project_info["project_name"] = project_name
 
         target_no = 1
-        pathway_no = 1
         product_no = 1
         for reactant_pair_smiles, reaction_name, target_smiles, target_mass in zip(
-            uploaded_dict["reactant_pair_smiles"],
-            uploaded_dict["Reaction-name"],
+            uploaded_dict["reactant-pair-smiles"],
+            uploaded_dict["reaction-name"],
             uploaded_dict["target-smiles"],
-            uploaded_dict["Ammount_required (mg)"],
+            uploaded_dict["amount-required-mg"],
         ):
+            reaction_smarts = AllChem.ReactionFromSmarts(
+                "{}>>{}".format(".".join(reactant_pair_smiles), target_smiles),
+                useSmiles=True,
+            )
+
             target_id = createTargetModel(
                 project_id=project_id,
                 smiles=target_smiles,
@@ -302,14 +326,14 @@ def uploadCustomReaction(validate_output):
 
             target_no += 1
 
+            recipes = encoded_recipes[reaction_name]["recipes"]
+
+            method_no = 1
+            actions = recipes["Standard"]["actions"]
+
             method_id = createMethodModel(
                 target_id=target_id,
                 nosteps=1,
-            )
-
-            reaction_smarts = AllChem.ReactionFromSmarts(
-                "{}>>{}".format(".".join(reactant_pair_smiles), target_smiles),
-                useSmiles=True,
             )
 
             reaction_id = createReactionModel(
@@ -322,23 +346,24 @@ def uploadCustomReaction(validate_output):
                 reaction_id=reaction_id,
                 project_name=project_name,
                 target_no=target_no,
-                pathway_no=pathway_no,
+                method_no=method_no,
                 product_no=product_no,
                 product_smiles=target_smiles,
             )
-
-            actions = encoded_recipes[reaction_name]["recipe"]
 
             create_models = CreateEncodedActionModels(
                 actions=actions,
                 target_id=target_id,
                 reaction_id=reaction_id,
                 reactant_pair_smiles=reactant_pair_smiles,
+                reaction_name=reaction_name,
             )
 
             mculeids.append(create_models.mculeidlist)
+            amounts.append(create_models.amountslist)
+            method_no += 1
 
-    CreateMculeQuoteModel(mculeids=mculeids, project_id=project_id)
+    # CreateMculeQuoteModel(mculeids=mculeids, amounts=amounts, project_id=project_id)
 
     default_storage.delete(csv_fp)
 
