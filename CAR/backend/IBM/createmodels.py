@@ -94,11 +94,13 @@ def createMethodModel(target_id, nosteps):
     return method.id
 
 
-def createReactionModel(method_id, reaction_class, reaction_smarts):
+def createReactionModel(method_id, reaction_class, reaction_temperature, reaction_smarts):
     reaction = Reaction()
     method_obj = Method.objects.get(id=method_id)
     reaction.method_id = method_obj
     reaction.reactionclass = reaction_class
+    if reaction_temperature:
+        reaction.reactiontemperature = reaction_temperature
     reaction_svg_string = createReactionSVGString(reaction_smarts)
     reaction_svg_fn = default_storage.save(
         "reactionimages/" + reaction_class + ".svg", ContentFile(reaction_svg_string)

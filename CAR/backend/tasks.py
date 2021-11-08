@@ -234,9 +234,21 @@ def uploadManifoldReaction(validate_output):
 
                                 if len(reactant_smiles) == 1:
                                     actions = recipes["Intramolecular"]["actions"]
+                                    stir_action = [
+                                        action for action in actions if action["name"] == "stir"
+                                    ][0]
+                                    reaction_temperature = stir_action["content"]["temperature"][
+                                        "value"
+                                    ]
                                     reactant_smiles_ordered = reactant_smiles
                                 else:
                                     actions = recipes["Standard"]["actions"]
+                                    stir_action = [
+                                        action for action in actions if action["name"] == "stir"
+                                    ][0]
+                                    reaction_temperature = stir_action["content"]["temperature"][
+                                        "value"
+                                    ]
                                     reactant_smiles_ordered = getAddtionOrder(
                                         product_smi=product_smiles,
                                         reactant_SMILES=reactant_smiles,
@@ -255,6 +267,7 @@ def uploadManifoldReaction(validate_output):
                                 reaction_id = createReactionModel(
                                     method_id=method_id,
                                     reaction_class=reaction_name,
+                                    reaction_temperature=reaction_temperature,
                                     reaction_smarts=reaction_smarts,
                                 )
 
@@ -330,6 +343,8 @@ def uploadCustomReaction(validate_output):
 
             method_no = 1
             actions = recipes["Standard"]["actions"]
+            stir_action = [action for action in actions if action["name"] == "stir"][0]
+            reaction_temperature = stir_action["content"]["temperature"]["value"]
 
             method_id = createMethodModel(
                 target_id=target_id,
@@ -339,6 +354,7 @@ def uploadCustomReaction(validate_output):
             reaction_id = createReactionModel(
                 method_id=method_id,
                 reaction_class=reaction_name,
+                reaction_temperature=reaction_temperature,
                 reaction_smarts=reaction_smarts,
             )
 

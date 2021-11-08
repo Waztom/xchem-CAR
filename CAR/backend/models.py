@@ -63,6 +63,7 @@ class Method(models.Model):
 class Reaction(models.Model):
     method_id = models.ForeignKey(Method, on_delete=models.CASCADE)
     reactionclass = models.CharField(max_length=255)
+    reactiontemperature = models.IntegerField(default=25)
     reactionimage = models.FileField(
         upload_to="reactionimages/",
         max_length=255,
