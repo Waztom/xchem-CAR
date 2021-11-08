@@ -27,13 +27,6 @@ labware_plates = {
         "reflux": False,
         "starting_plate": True,
     },
-    "96_reservoir_1000ul": {
-        "no_wells": 96,
-        "volume_well": 1000,
-        "max_temp": 110,
-        "reflux": False,
-        "starting_plate": True,
-    },
     "labcyte_384_wellplate_100ul": {
         "no_wells": 384,
         "volume_well": 100,
