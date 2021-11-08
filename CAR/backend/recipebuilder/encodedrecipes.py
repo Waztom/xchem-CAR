@@ -510,7 +510,7 @@ encoded_recipes = {
                         "name": "stir",
                         "content": {
                             "action_no": 3,
-                            "temperature": {"value": 100, "unit": "degC"},
+                            "temperature": {"value": 25, "unit": "degC"},
                             "duration": {"value": 12, "unit": "hours"},
                         },
                     },
@@ -536,7 +536,7 @@ encoded_recipes = {
                         "name": "stir",
                         "content": {
                             "action_no": 3,
-                            "temperature": {"value": 100, "unit": "degC"},
+                            "temperature": {"value": 25, "unit": "degC"},
                             "duration": {"value": 12, "unit": "hours"},
                         },
                     },
@@ -1233,6 +1233,14 @@ encoded_recipes = {
                                 "density": 0.73,
                                 "concentration": None,
                             },
+                        },
+                    },
+                    {
+                        "name": "stir",
+                        "content": {
+                            "action_no": 5,
+                            "temperature": {"value": 80, "unit": "degC"},
+                            "duration": {"value": 12, "unit": "hours"},
                         },
                     },
                 ],
