@@ -22,11 +22,18 @@ these instructions are designed for Visual Studio Code which can be installed fo
 Secrets required for running CAR are encrypted, to unencrypt and run you will need the key from the XChem-CAR software maintainer<br><br>
 
 # <a name="RepositoryfromGitHub"></a>Clone the "xchem-car" repository from GitHub
+If you do not have git installed, inside a terminal:
+
+`sudo apt install git` <br>
+
+In you home directory eg `/home/<username>`, clone  xchem-car repo using:
+
+`git clone https://github.com/Waztom/xchem-CAR.git` <br>
 
 XChem-CAR uses GitHub for version control<br>
 to get started with working on CAR clone the <em>"xchem-CAR"</em> Repository from github to your device.<br><br>
 
-### <a name="UsefulGitHubbranches"></a>Useful GitHub branches
+### <a name="UsefulGitHubbranches"></a>Useful GitHub branches - pass for setting up
 
 | Branch  | Description                                                | URL                                              |
 | ------- | ---------------------------------------------------------- | ------------------------------------------------ |
@@ -40,13 +47,13 @@ all branches can be found: https://github.com/Waztom/xchem-CAR/branches
 
 ## <a name="InstallDocker"></a>Install Docker
 
-First you'll need Docker Desktop (or the relevant Docker Engine on Linux) you can find the appropriate download like this on https://www.docker.com/get-started
+First you'll need Docker Desktop (or the relevent Docker Engine on Linux) you can find the appropriate download at: https://www.docker.com/get-started and specifically for Ubuntu, instructions at: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04
 
 ## <a name="InstallDockerCompose"></a>Install Docker Compose
 
-once Docker is installed also install docker compose, instructions for Mac, Windows, Linux and other options are available: https://docs.docker.com/compose/install/
+if you're using a Linux machine, once Docker is installed also install docker compose, instructions are available at: https://docs.docker.com/compose/install/
 
-Note with newer versions of Docker, Docker Compose is already preinstalled
+for WSL (Windows), you do not need to install Docker compose
 
 ## <a name="InstallVSCodeExtention"></a>Install VS Code Extensions
 
@@ -62,13 +69,14 @@ you should get a response similar to:
 
 > Docker version 18.09.2, build 6247962
 
-In Visual Studio Code open the extensions panel (left-hand panel or using Ctrl+Shift+X ) and search for "<em>Remote - Containers extension</em>" and click **Install**.
+In Visual Studio Code open the extensions panel (left-hand panel or using Ctrl+Shift+X ) and search for "<em>Remote - Containers</em>" and click **Install**.
 
 Once installed a box with two arrows pointing in opposite directions should appear in the bottom left corner of Visual studio code
 <br>
 <br>
 
-## <a name="InstallRemoteWSL"></a>Install RemoteWSL Extension
+## <a name="InstallRemoteWSL"></a>Install Remote - WSL Extension
+If you are running WSL - you need to install the Remote - WSL extension. Skip this step if you're running Ubuntu/Linux. 
 
 Ctrl + SHIFT + X and type in 'Remote - WSL' to install the extension.
 See (https://code.visualstudio.com/blogs/2020/07/01/containers-wsl) for more information about using dev containers in WSL2
@@ -87,61 +95,71 @@ Incorporation of VSCode with WSL for further information: https://code.visualstu
 **Note: We have tested this using Ubuntu 18.04 and 20.04, compatibility of other Linux distributions have not been investigated.**
 
 ## <a name="InstallGitCrypt"></a>Install Git-Crypt
-
-download the compressed git-crypt package (https://www.agwa.name/projects/git-crypt/downloads/git-crypt-0.6.0.tar.gz)
-
-Extract the package to create the directory **git-crypt-0.6.0**
-
-in terminal:
-
-> `$ cd git-crypt-0.6.0`<br> >`$ make`<br> >`# make install`
+if you are using Ubuntu or Debian, you can install git-crypt by:
+>`sudo apt-get update` <br>
+>`sudo apt-get install git-crypt` <br>
 
 ## <a name="UnlockingSecrets"></a>Unlocking Secrets
 
 once Git-Crypt is installed unlock the secrets using:
 
-> `cd [file path to XChem-CARS on your device]`<br> >`git-crypt unlock [path to git-crypt crypt-key]`
+> `cd xchem-car`<br> 
+> `git-crypt unlock <'path to git-crypt crypt-key'>`<br>
 
 # <a name="Startsystem"></a>Start system
 
-### <a name="LocateRepository"></a>Locate Repository
+### <a name="Start VS Code"></a>Start VS Code (WSL)
 
-- in terminal change directory to your copy of the repo :
+  > `code .` <br>
 
-  > `cd `<em>`[local file path to xchem-CAR repository]`
+### <a name="Start VS Code"></a>Start VS Code (Ubuntu)
 
-    </em>
-    or open VS Code and go to File-> Open Folder and open the repository directory<br>
+  Open VS Code and go to File-> Open Folder and open the repository directory<br>
 
 ### <a name="StartRemoteContainer"></a>Start Remote Container
 
 - start Visual Studio remote container with **Ctrl + Shift + P** and type **"Remote-containers: Open folder in container"** then click on that option. <br> ensure you have the repository folder [your file path/xchem-CAR] selected and choose **"Ok"**/**"Open"**
 - Your container should start to build, click on the popup notification at the bottom right of visual studio to view the log/progress
 
-### <a name="TimetoLaunch"></a>Time to Launch
+### <a name="TimetoLaunch"></a>Time to Launch 
 
 - Open a new terminal that you can interact with. if the terminal is visible at the bottom of the screen click on the plus "create new integrated terminal" or use the keybord shortcut "**Ctrl+Shift+`**" button or use the adjacent "split terminal" (or "**Ctrl+Shift+5**") button to see the new terminal adjacent to the current terminal
 - you should now be in the container running Debian Linux
-- in the new terminal type:
-  > `cd CAR` <br> >`mkdir log && touch logsfile.log` <br> >`python3 manage.py makemigrations` <br> >`python3 manage.py migrate` <br> >`npm install --quiet --legacy-peer-deps`<br> >`python3 manage.py runserver`<br>
+- in the new terminal type (Terminal 1):
+  > `cd CAR` <br> 
+  >`mkdir logs && cd logs && touch logfile.log` <br> 
+  >`cd ..`<br>
+  >`python3 manage.py makemigrations backend` <br> 
+  >`python3 manage.py migrate` <br> 
+  >`npm install --quiet --legacy-peer-deps`<br> 
+  
+- the first time you launch CAR, you will need to compile the main.js file. You do not need to recompile the main.js file for subsequent launches, unless there are changes made to the frontend. 
 - to compile the main.js file, in a separate terminal inside your development container:
-  > `npm run dev`<br>
+  >`cd CAR`<br>
+  >`npm run dev`<br>
+
+- launch the django server - in Terminal 1:
+  >`python3 manage.py runserver`<br>`
 
 If you are only interested in running the application or developing the backend code, you will only need to run the `npm run dev` command
 once. For frontend developers, the npm command above tracks any changes made to the frontend code and recompiles the main.js file.
 
-for future launches, you will not need to perform the migrations, install the node packages, compile the main.js and only need to launch the Django server by running: >`cd CAR` <br> >`python3 manage.py runserver`<br>
+for future launches, you will not need to perform the migrations, install the node packages, compile the main.js and only need to launch the Django server by running: 
+  >`cd CAR` <br> 
+  >`python3 manage.py runserver`<br>
 
 to upload files in CAR, you need to start a Celery worker in a separate terminal inside your development container:
 
 - open a new terminal the same way as last time ([see Time to Launch](#TimeToLaunch))
 - in the new terminal type:
-  > `cd CAR`<br> >`celery -A CAR worker -l info`<br>
+  > `cd CAR`<br> 
+  >`celery -A CAR worker -l info`<br>
 
 if you make any changes to the Django models, you will need to run the the migrations again in the CAR directory:
 
 - makemigrations and migrate the Django models:
-  > `python3 manage.py makemigrations` <br> >`python3 manage.py migrate` <br>
+  >`python3 manage.py makemigrations` <br> 
+  >`python3 manage.py migrate` <br>
 
 # Opening the application
 

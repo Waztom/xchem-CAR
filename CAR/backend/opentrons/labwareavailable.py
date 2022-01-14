@@ -48,9 +48,9 @@ labware_plates = {
         "reflux": False,
         "starting_plate": False,
     },
-    "qmx_96_aluminumblock_2625ul": {
+    "qmx_96_aluminumblock_962ul": {
         "no_wells": 96,
-        "volume_well": 2625,
+        "volume_well": 962,
         "max_temp": 250,
         "reflux": True,
         "starting_plate": False,
