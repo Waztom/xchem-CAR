@@ -394,11 +394,11 @@ class CreateOTSession(object):
             self.createTiprackModel(name=self.tipracktype)
 
     def checkDeckSlotAvailable(self):
-        testslotavailable = self.deckobj.indexslotavailable + 1
+        testslotavailable = self.deckobj.indexslotavailable
         if testslotavailable <= self.deckobj.numberslots:
-            self.deckobj.indexslotavailable = testslotavailable
+            self.deckobj.indexslotavailable = testslotavailable + 1
             self.deckobj.save()
-            return self.deckobj.indexslotavailable
+            return testslotavailable
         else:
             self.deckobj.slotavailable = False
             self.deckobj.save()
@@ -480,7 +480,7 @@ class CreateOTSession(object):
                         reactionobj=self.getReaction(
                             reactionid=startingmaterialsdf.at[i, "reaction_id_id"]
                         ),
-                        wellindex=indexwellavailable,
+                        wellindex=indexwellavailable - 1,
                         volume=volumetoadd,
                         smiles=startingmaterialsdf.at[i, "materialsmiles"],
                         concentration=startingmaterialsdf.at[i, "concentration"],
@@ -515,7 +515,7 @@ class CreateOTSession(object):
                     reactionobj=self.getReaction(
                         reactionid=startingmaterialsdf.at[i, "reaction_id_id"]
                     ),
-                    wellindex=indexwellavailable,
+                    wellindex=indexwellavailable - 1,
                     volume=volumetoadd,
                     smiles=startingmaterialsdf.at[i, "materialsmiles"],
                     concentration=startingmaterialsdf.at[i, "concentration"],
@@ -562,7 +562,7 @@ class CreateOTSession(object):
                 self.createWellModel(
                     plateobj=plateobj,
                     reactionobj=reactionobj,
-                    wellindex=indexwellavailable,
+                    wellindex=indexwellavailable - 1,
                     volume=None,
                     smiles=productobj.smiles,
                     concentration=None,
@@ -663,7 +663,7 @@ def groupReactions(allreactionquerysets: list, maxsteps: int):
     return groupedreactionquerysets
 
 
-projectid = 1
+projectid = 20
 
 allreactionquerysets = getProjectReactions(projectid=projectid)
 maxsteps = findmaxlist(allreactionquerysets=allreactionquerysets)
