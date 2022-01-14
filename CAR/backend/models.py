@@ -468,7 +468,7 @@ class Deck(models.Model):
     otsession_id = models.ForeignKey(OTSession, on_delete=models.CASCADE)
     numberslots = models.IntegerField(default=11)
     slotavailable = models.BooleanField(default=True)
-    indexslotavailable = models.IntegerField(default=0)
+    indexslotavailable = models.IntegerField(default=1)
 
 
 class Pipette(models.Model):

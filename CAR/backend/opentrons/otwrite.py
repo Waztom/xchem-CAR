@@ -316,7 +316,7 @@ class otWrite(object):
                 transfervolume=transfervolume,
             )
 
-            self.pickUpTip()
+            # self.pickUpTip()
             # Insert function for handling density - change aspirate speed.
             # Need to add viscosity field to Addaction model
             # print(fromwellinfo)
@@ -341,4 +341,4 @@ class otWrite(object):
                     transvolume=transvolume,
                 )
 
-            self.disposeTip()
+            # self.disposeTip()
