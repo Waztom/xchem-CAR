@@ -2,16 +2,8 @@ name: Release
 
 on:
   pull_request:
-    branches: [main]
-
-# env:
-#   RELEASE_REVISION: "pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"
-# DOCKER_UN: ${{ secrets.DOCKER_UN }}
-# DOCKER_PW: ${{ secrets.DOCKER_PW }}
-# KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-# KUBE_NAMESPACE: car
-# ECR_REPOSITORY: my-cool-application
-# SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    branches:
+      - master
 
 jobs:
   build:
