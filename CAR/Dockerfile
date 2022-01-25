@@ -3,7 +3,7 @@ FROM debian:bullseye-slim
 WORKDIR /app
 
 # Copy over all the files
-COPY . . 
+COPY requirements.txt /app/
 
 # Update and install
 RUN \
