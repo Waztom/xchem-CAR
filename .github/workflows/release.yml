@@ -26,8 +26,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: ./
-          file: ./CAR/Dockerfile
+          context: CAR
+          file: CAR/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: user/car:latest
