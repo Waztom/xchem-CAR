@@ -58,6 +58,8 @@ class Method(models.Model):
     target_id = models.ForeignKey(Target, on_delete=models.CASCADE)
     status = models.BooleanField(default=True)
     nosteps = models.IntegerField(null=True)
+    estimatecost = models.FloatField(default=100)
+    synthesise = models.BooleanField(default=True)
 
 
 class Reaction(models.Model):
@@ -69,6 +71,7 @@ class Reaction(models.Model):
         max_length=255,
         null=True,
     )
+    successrate = models.FloatField(default=0.5)
 
 
 class Product(models.Model):
