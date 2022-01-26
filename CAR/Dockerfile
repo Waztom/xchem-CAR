@@ -18,8 +18,8 @@ RUN \
  cd logs &&\
  touch logfile.log
 
-# Expose port
-EXPOSE 8000
+# # Expose port
+# EXPOSE 8000
 
-# Run on Entry - comment out if using docker-compose.yaml
-CMD cd /app/ ; npm run build ; python3 manage.py makemigrations backend ; python3 manage.py migrate ;  python3 manage.py runserver 0.0.0.0:8000
+# # Run on Entry - comment out if using docker-compose.yaml
+# CMD cd /app/ ; npm run build ; python3 manage.py makemigrations backend ; python3 manage.py migrate ;  python3 manage.py runserver 0.0.0.0:8000
