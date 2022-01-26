@@ -122,7 +122,7 @@ class MethodViewSet(viewsets.ModelViewSet):
     ]
     serializer_class = MethodSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ["=target_id__id"]
+    search_fields = ["=target_id__id", "nosteps"]
 
 
 class ReactionViewSet(viewsets.ModelViewSet):
@@ -134,6 +134,7 @@ class ReactionViewSet(viewsets.ModelViewSet):
     serializer_class = ReactionSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["=method_id__id"]
+    filter_fields = {"successrate": ["gte", "lte"]}
 
 
 class ProductViewSet(viewsets.ModelViewSet):
