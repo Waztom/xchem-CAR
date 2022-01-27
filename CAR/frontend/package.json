@@ -1,0 +1,25 @@
+{
+  "name": "car-django-react",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "@material-ui/icons": "^4.11.2",
+    "axios": "^0.21.1",
+    "jsme-editor": "^0.8.2",
+    "jsme-react": "^0.0.9",
+    "react": "^17.0.2",
+    "react-bootstrap": "^1.4.0",
+    "react-bootstrap-icons": "^1.2.3",
+    "react-dom": "^17.0.2",
+    "react-modal": "^3.13.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^1.0.7",
+    "vite": "^2.7.2"
+  }
+}
