@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { Form } from "react-bootstrap";
-import InputGroup from "react-bootstrap/InputGroup";
-import { patchChange } from "../Utils";
+import { Form } from 'react-bootstrap';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { patchChange } from '../Utils';
 
 const SetStirring = ({ action, updateAction }) => {
   const stirringspeed = action.stirringspeed;
@@ -14,8 +14,8 @@ const SetStirring = ({ action, updateAction }) => {
   const handleStirringSpeedChange = (e) => {
     const newspeed = e.target.value;
     setStirringSpeed(newspeed);
-    patchChange(actiontype, id, "stirringspeed", newspeed);
-    updateAction(id, "stirringspeed", newspeed);
+    patchChange(actiontype, id, 'stirringspeed', newspeed);
+    updateAction(id, 'stirringspeed', newspeed);
   };
 
   return (

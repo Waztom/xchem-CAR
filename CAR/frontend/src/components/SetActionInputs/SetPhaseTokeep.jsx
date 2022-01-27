@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { Form } from "react-bootstrap";
-import InputGroup from "react-bootstrap/InputGroup";
-import { patchChange } from "../Utils";
+import { Form } from 'react-bootstrap';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { patchChange } from '../Utils';
 
 const SetPhaseTokeep = ({ action, updateAction }) => {
   const phasetokeep = action.phasetokeep.capitalize();
@@ -14,8 +14,8 @@ const SetPhaseTokeep = ({ action, updateAction }) => {
   const handlePhaseToKeepChange = (e) => {
     const newphasetokeep = e.target.value.toLowerCase();
     setPhaseToKeep(newphasetokeep);
-    patchChange(actiontype, id, "phasetokeep", newphasetokeep);
-    updateAction(id, "phasetokeep", newphasetokeep);
+    patchChange(actiontype, id, 'phasetokeep', newphasetokeep);
+    updateAction(id, 'phasetokeep', newphasetokeep);
   };
 
   return (

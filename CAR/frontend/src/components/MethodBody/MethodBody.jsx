@@ -1,41 +1,41 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-import Card from "react-bootstrap/Card";
-import ListGroup from "react-bootstrap/ListGroup";
-import Button from "react-bootstrap/Button";
-import Accordion from "react-bootstrap/Accordion";
-import CardDeck from "react-bootstrap/CardDeck";
-import Spinner from "react-bootstrap/Spinner";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import Image from "react-bootstrap/Image";
+import Card from 'react-bootstrap/Card';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Button from 'react-bootstrap/Button';
+import Accordion from 'react-bootstrap/Accordion';
+import CardDeck from 'react-bootstrap/CardDeck';
+import Spinner from 'react-bootstrap/Spinner';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Image from 'react-bootstrap/Image';
 
-import IBMAddAction from "../Actions/IBMAddAction";
-import IBMConcentrateAction from "../Actions/IBMConcentrateAction";
-import IBMCollectLayerAction from "../Actions/IBMCollectLayerAction";
-import IBMDegasAction from "../Actions/IBMDegasAction";
-import IBMDrySolidAction from "../Actions/IBMDrySolidAction";
-import IBMDrySolutionAction from "../Actions/IBMDrySolutionAction";
-import IBMExtractAction from "../Actions/IBMExtractAction";
-import IBMFilterAction from "../Actions/IBMFilterAction";
-import IBMMakeSolutionAction from "../Actions/IBMMakeSolutionAction";
-import IBMPartitionAction from "../Actions/IBMPartitionAction";
-import IBMpHAction from "../Actions/IBMpHAction";
-import IBMPhaseSeparationAction from "../Actions/IBMPhaseSeparationAction";
-import IBMQuenchAction from "../Actions/IBMQuenchAction";
-import IBMRefluxAction from "../Actions/IBMRefluxAction";
-import IBMSetTemperatureAction from "../Actions/IBMSetTemperatureAction";
-import IBMStirAction from "../Actions/IBMStirAction";
-import IBMStoreAction from "../Actions/IBMStoreAction.jsx";
-import IBMWaitAction from "../Actions/IBMwaitAction";
-import IBMWashAction from "../Actions/IBMWashAction";
+import IBMAddAction from '../Actions/IBMAddAction';
+import IBMConcentrateAction from '../Actions/IBMConcentrateAction';
+import IBMCollectLayerAction from '../Actions/IBMCollectLayerAction';
+import IBMDegasAction from '../Actions/IBMDegasAction';
+import IBMDrySolidAction from '../Actions/IBMDrySolidAction';
+import IBMDrySolutionAction from '../Actions/IBMDrySolutionAction';
+import IBMExtractAction from '../Actions/IBMExtractAction';
+import IBMFilterAction from '../Actions/IBMFilterAction';
+import IBMMakeSolutionAction from '../Actions/IBMMakeSolutionAction';
+import IBMPartitionAction from '../Actions/IBMPartitionAction';
+import IBMpHAction from '../Actions/IBMpHAction';
+import IBMPhaseSeparationAction from '../Actions/IBMPhaseSeparationAction';
+import IBMQuenchAction from '../Actions/IBMQuenchAction';
+import IBMRefluxAction from '../Actions/IBMRefluxAction';
+import IBMSetTemperatureAction from '../Actions/IBMSetTemperatureAction';
+import IBMStirAction from '../Actions/IBMStirAction';
+import IBMStoreAction from '../Actions/IBMStoreAction.jsx';
+import IBMWaitAction from '../Actions/IBMwaitAction';
+import IBMWashAction from '../Actions/IBMWashAction';
 
-import ProductImage from "../Images/ProductImage";
-import ReactionImage from "../Images/ReactionImage";
+import ProductImage from '../Images/ProductImage';
+import ReactionImage from '../Images/ReactionImage';
 
 String.prototype.capitalize = function () {
   return this.charAt(0).toUpperCase() + this.slice(1);
@@ -171,7 +171,7 @@ const ActionsList = ({ reactionid }) => {
           handleDelete={handleDelete}
         ></IBMAddAction>
       ),
-      "collect-layer": (
+      'collect-layer': (
         <IBMCollectLayerAction
           action={action}
           actionno={actionno}
@@ -191,14 +191,14 @@ const ActionsList = ({ reactionid }) => {
           updateAction={updateAction}
         ></IBMDegasAction>
       ),
-      "dry-solid": (
+      'dry-solid': (
         <IBMDrySolidAction
           action={action}
           actionno={actionno}
           updateAction={updateAction}
         ></IBMDrySolidAction>
       ),
-      "dry-solution": (
+      'dry-solution': (
         <IBMDrySolutionAction
           action={action}
           actionno={actionno}
@@ -219,7 +219,7 @@ const ActionsList = ({ reactionid }) => {
           updateAction={updateAction}
         ></IBMFilterAction>
       ),
-      "make-solution": (
+      'make-solution': (
         <IBMMakeSolutionAction
           action={action}
           actionno={actionno}
@@ -240,7 +240,7 @@ const ActionsList = ({ reactionid }) => {
           updateAction={updateAction}
         ></IBMpHAction>
       ),
-      "phase-separation": (
+      'phase-separation': (
         <IBMPhaseSeparationAction
           action={action}
           actionno={actionno}
@@ -261,7 +261,7 @@ const ActionsList = ({ reactionid }) => {
           updateAction={updateAction}
         ></IBMRefluxAction>
       ),
-      "set-temperature": (
+      'set-temperature': (
         <IBMSetTemperatureAction
           action={action}
           actionno={actionno}
@@ -334,9 +334,9 @@ const ActionsList = ({ reactionid }) => {
             {Actions.map((action, index) => {
               const actionid =
                 action.actiontype +
-                "-" +
+                '-' +
                 action.id.toString() +
-                "-" +
+                '-' +
                 index.toString();
               const actionno = index + 1;
               return (

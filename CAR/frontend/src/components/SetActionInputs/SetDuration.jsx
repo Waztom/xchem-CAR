@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef } from 'react';
 
-import { Form } from "react-bootstrap";
-import InputGroup from "react-bootstrap/InputGroup";
-import IntegerWarning from "../TooltipsWarnings/IntegerWarning";
-import { isFloat, isInt, patchChange } from "../Utils";
+import { Form } from 'react-bootstrap';
+import InputGroup from 'react-bootstrap/InputGroup';
+import IntegerWarning from '../TooltipsWarnings/IntegerWarning';
+import { isFloat, isInt, patchChange } from '../Utils';
 
 const SetDuration = ({ action, updateAction }) => {
   const duration = action.duration;
@@ -25,8 +25,8 @@ const SetDuration = ({ action, updateAction }) => {
 
     if (isFloat(Number(inputDuration)) || isInt(Number(inputDuration))) {
       setDuration(inputDuration);
-      patchChange(actiontype, id, "duration", inputDuration);
-      updateAction(id, "duration", Number(inputDuration));
+      patchChange(actiontype, id, 'duration', inputDuration);
+      updateAction(id, 'duration', Number(inputDuration));
     } else {
       setDuration(Duration);
       setShow(true);
@@ -36,8 +36,8 @@ const SetDuration = ({ action, updateAction }) => {
   const handleUnitChange = (e) => {
     const newunit = e.target.value;
     setUnit(newunit);
-    patchChange(actiontype, id, "durationunit", newunit);
-    updateAction(id, "durationunit", newunit);
+    patchChange(actiontype, id, 'durationunit', newunit);
+    updateAction(id, 'durationunit', newunit);
   };
 
   return (

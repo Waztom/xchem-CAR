@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-import Navbar from "react-bootstrap/Navbar";
-import Nav from "react-bootstrap/Nav";
-import Form from "react-bootstrap/Form";
-import FormControl from "react-bootstrap/FormControl";
-import Button from "react-bootstrap/Button";
-import NavDropdown from "react-bootstrap/NavDropdown";
-import Modal from "react-bootstrap/Modal";
+import Navbar from 'react-bootstrap/Navbar';
+import Nav from 'react-bootstrap/Nav';
+import Form from 'react-bootstrap/Form';
+import FormControl from 'react-bootstrap/FormControl';
+import Button from 'react-bootstrap/Button';
+import NavDropdown from 'react-bootstrap/NavDropdown';
+import Modal from 'react-bootstrap/Modal';
 
-import { Trash } from "react-bootstrap-icons";
-import { HandThumbsUpFill } from "react-bootstrap-icons";
+import { Trash } from 'react-bootstrap-icons';
+import { HandThumbsUpFill } from 'react-bootstrap-icons';
 
 function DeleteModal({
   show,
@@ -63,7 +63,7 @@ function CreateModal({
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        Would you like to create auto-generate protocols for project:{" "}
+        Would you like to create auto-generate protocols for project:{' '}
         {projectName}?
       </Modal.Body>
       <Modal.Footer>
@@ -87,7 +87,7 @@ const Header = ({ changeProject, deleteProject, generateProtocol }) => {
 
   useEffect(() => {
     async function fetchData() {
-      const request = await axios.get("api/projects/");
+      const request = await axios.get('api/projects/');
       setProjects(request.data);
     }
     fetchData();

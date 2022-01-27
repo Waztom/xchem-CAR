@@ -1,9 +1,9 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import React from 'react';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-import SetLayer from "../SetActionInputs/SetLayer";
+import SetLayer from '../SetActionInputs/SetLayer';
 
 const IBMCollectLayerAction = ({ action, actionno, updateAction }) => {
   const actiontype = action.actiontype.capitalize();

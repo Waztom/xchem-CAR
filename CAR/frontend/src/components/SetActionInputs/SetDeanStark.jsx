@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { Form } from "react-bootstrap";
-import InputGroup from "react-bootstrap/InputGroup";
-import { patchChange } from "../Utils";
+import { Form } from 'react-bootstrap';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { patchChange } from '../Utils';
 
 const SetDeanStark = ({ action, updateAction }) => {
   const deanstark = action.deanstarkapparatus;
@@ -14,8 +14,8 @@ const SetDeanStark = ({ action, updateAction }) => {
   const handleDeanStarkChange = (e) => {
     const newdeanstark = e.target.value;
     setDeanStark(newdeanstark);
-    patchChange(actiontype, id, "deanstarkapparatus", newdeanstark);
-    updateAction(id, "deanstarkapparatus", newdeanstark);
+    patchChange(actiontype, id, 'deanstarkapparatus', newdeanstark);
+    updateAction(id, 'deanstarkapparatus', newdeanstark);
   };
 
   return (

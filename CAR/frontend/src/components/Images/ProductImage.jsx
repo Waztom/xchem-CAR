@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import Spinner from "react-bootstrap/Spinner";
-import Image from "react-bootstrap/Image";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Spinner from 'react-bootstrap/Spinner';
+import Image from 'react-bootstrap/Image';
 
 const ProductImage = ({ reactionid }) => {
   // Use hooks instead of classes

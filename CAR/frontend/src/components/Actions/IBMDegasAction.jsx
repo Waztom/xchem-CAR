@@ -1,8 +1,8 @@
-import React from "react";
-import Col from "react-bootstrap/Col";
+import React from 'react';
+import Col from 'react-bootstrap/Col';
 
-import SetGas from "../SetActionInputs/SetGas";
-import SetDuration from "../SetActionInputs/SetDuration";
+import SetGas from '../SetActionInputs/SetGas';
+import SetDuration from '../SetActionInputs/SetDuration';
 
 const IBMDegasAction = ({ action, actionno, updateAction }) => {
   const actiontype = action.actiontype.capitalize();

@@ -1,11 +1,11 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import React from 'react';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-import SetSolvent from "../SetActionInputs/SetSolvent";
-import SetQuantity from "../SetActionInputs/SetQuantity.jsx";
-import SetNumberRepetitions from "../SetActionInputs/SetNumberRepetitions";
+import SetSolvent from '../SetActionInputs/SetSolvent';
+import SetQuantity from '../SetActionInputs/SetQuantity.jsx';
+import SetNumberRepetitions from '../SetActionInputs/SetNumberRepetitions';
 
 const IBMExtractAction = ({ action, actionno, updateAction }) => {
   const actiontype = action.actiontype.capitalize();
@@ -20,12 +20,12 @@ const IBMExtractAction = ({ action, actionno, updateAction }) => {
           <SetSolvent
             action={action}
             updateAction={updateAction}
-            name={""}
+            name={''}
           ></SetSolvent>
           <SetQuantity
             action={action}
             updateAction={updateAction}
-            name={"solvent"}
+            name={'solvent'}
           ></SetQuantity>
           <SetNumberRepetitions
             action={action}

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { Form } from "react-bootstrap";
-import InputGroup from "react-bootstrap/InputGroup";
-import { patchChange } from "../Utils";
+import { Form } from 'react-bootstrap';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { patchChange } from '../Utils';
 
 const SetDropwise = ({ action, updateAction }) => {
   const dropwise = action.dropwise;
@@ -14,8 +14,8 @@ const SetDropwise = ({ action, updateAction }) => {
   const handleDropWiseChange = (e) => {
     const newdropwise = e.target.value;
     setDropwise(newdropwise);
-    patchChange(actiontype, id, "dropwise", newdropwise);
-    updateAction(id, "dropwise", newdropwise);
+    patchChange(actiontype, id, 'dropwise', newdropwise);
+    updateAction(id, 'dropwise', newdropwise);
   };
 
   return (

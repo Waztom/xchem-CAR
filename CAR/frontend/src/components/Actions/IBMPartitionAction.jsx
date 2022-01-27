@@ -1,10 +1,10 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import React from 'react';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-import SetSolvent from "../SetActionInputs/SetSolvent";
-import SetQuantity from "../SetActionInputs/SetQuantity.jsx";
+import SetSolvent from '../SetActionInputs/SetSolvent';
+import SetQuantity from '../SetActionInputs/SetQuantity.jsx';
 
 const IBMPartitionAction = ({ action, actionno, updateAction }) => {
   const actiontype = action.actiontype.capitalize();
@@ -19,22 +19,22 @@ const IBMPartitionAction = ({ action, actionno, updateAction }) => {
           <SetSolvent
             action={action}
             updateAction={updateAction}
-            name={"firstparition"}
+            name={'firstparition'}
           ></SetSolvent>
           <SetQuantity
             action={action}
             updateAction={updateAction}
-            name={"firstpartitionsolvent"}
+            name={'firstpartitionsolvent'}
           ></SetQuantity>
           <SetSolvent
             action={action}
             updateAction={updateAction}
-            name={"secondpartition"}
+            name={'secondpartition'}
           ></SetSolvent>
           <SetQuantity
             action={action}
             updateAction={updateAction}
-            name={"secondpartitionsolvent"}
+            name={'secondpartitionsolvent'}
           ></SetQuantity>
         </Col>
       </Row>

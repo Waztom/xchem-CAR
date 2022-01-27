@@ -1,10 +1,10 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Image from "react-bootstrap/Image";
+import React from 'react';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Image from 'react-bootstrap/Image';
 
-import SetQuantity from "../SetActionInputs/SetQuantity.jsx";
+import SetQuantity from '../SetActionInputs/SetQuantity.jsx';
 
 const IBMMakeSolutionAction = ({ action, actionno, updateAction }) => {
   const actiontype = action.actiontype.capitalize();
@@ -26,7 +26,7 @@ const IBMMakeSolutionAction = ({ action, actionno, updateAction }) => {
           <SetQuantity
             action={action}
             updateAction={updateAction}
-            name={"solute"}
+            name={'solute'}
           ></SetQuantity>
           <Image
             width={350}
@@ -38,7 +38,7 @@ const IBMMakeSolutionAction = ({ action, actionno, updateAction }) => {
           <SetQuantity
             action={action}
             updateAction={updateAction}
-            name={"solvent"}
+            name={'solvent'}
           ></SetQuantity>
         </Col>
       </Row>
