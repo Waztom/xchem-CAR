@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
-import { patchChange } from "../Utils";
+import InputGroup from 'react-bootstrap/InputGroup';
+import FormControl from 'react-bootstrap/FormControl';
+import { patchChange } from '../Utils';
 
 const SetGas = ({ action, updateAction }) => {
   const gas = action.gas;
@@ -14,8 +14,8 @@ const SetGas = ({ action, updateAction }) => {
   const handleGasChange = (e) => {
     const newgas = e.target.value;
     setGas(newgas);
-    patchChange(actiontype, id, "gas", newgas);
-    updateAction(id, "gas", newgas);
+    patchChange(actiontype, id, 'gas', newgas);
+    updateAction(id, 'gas', newgas);
   };
 
   return (

@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef } from 'react';
 
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
-import IntegerWarning from "../TooltipsWarnings/IntegerWarning";
-import { isInt, patchChange } from "../Utils";
+import InputGroup from 'react-bootstrap/InputGroup';
+import FormControl from 'react-bootstrap/FormControl';
+import IntegerWarning from '../TooltipsWarnings/IntegerWarning';
+import { isInt, patchChange } from '../Utils';
 
 const SetTemperature = ({ action, updateAction }) => {
   const temperature = action.temperature;
@@ -23,8 +23,8 @@ const SetTemperature = ({ action, updateAction }) => {
 
     if (isInt(inputTemperature)) {
       setTemperature(inputTemperature);
-      patchChange(actiontype, id, "temperature", inputTemperature);
-      updateAction(id, "temperature", inputTemperature);
+      patchChange(actiontype, id, 'temperature', inputTemperature);
+      updateAction(id, 'temperature', inputTemperature);
     } else {
       setTemperature(Temperature);
       setShow(true);

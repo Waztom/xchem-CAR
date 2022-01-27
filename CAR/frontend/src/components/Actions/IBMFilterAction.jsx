@@ -1,11 +1,11 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import React from 'react';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-import SetPhaseTokeep from "../SetActionInputs/SetPhaseTokeep";
-import SetSolvent from "../SetActionInputs/SetSolvent";
-import SetQuantity from "../SetActionInputs/SetQuantity.jsx";
+import SetPhaseTokeep from '../SetActionInputs/SetPhaseTokeep';
+import SetSolvent from '../SetActionInputs/SetSolvent';
+import SetQuantity from '../SetActionInputs/SetQuantity.jsx';
 
 const IBMFilterAction = ({ action, actionno, updateAction }) => {
   const actiontype = action.actiontype.capitalize();
@@ -24,22 +24,22 @@ const IBMFilterAction = ({ action, actionno, updateAction }) => {
           <SetSolvent
             action={action}
             updateAction={updateAction}
-            name={"rinsing"}
+            name={'rinsing'}
           ></SetSolvent>
           <SetQuantity
             action={action}
             updateAction={updateAction}
-            name={"rinsingsolvent"}
+            name={'rinsingsolvent'}
           ></SetQuantity>
           <SetSolvent
             action={action}
             updateAction={updateAction}
-            name={"extractionforprecipitate"}
+            name={'extractionforprecipitate'}
           ></SetSolvent>
           <SetQuantity
             action={action}
             updateAction={updateAction}
-            name={"extractionforprecipitatesolvent"}
+            name={'extractionforprecipitatesolvent'}
           ></SetQuantity>
         </Col>
       </Row>

@@ -1,10 +1,10 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import React from 'react';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-import SetDuration from "../SetActionInputs/SetDuration";
-import SetTemperature from "../SetActionInputs/SetTemperature";
+import SetDuration from '../SetActionInputs/SetDuration';
+import SetTemperature from '../SetActionInputs/SetTemperature';
 
 const IBMWaitAction = ({ action, actionno, updateAction }) => {
   const actiontype = action.actiontype.capitalize();

@@ -1,13 +1,13 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import React from 'react';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-import SetMaterial from "../SetActionInputs/SetMaterial";
-import SetQuantity from "../SetActionInputs/SetQuantity.jsx";
-import SetpH from "../SetActionInputs/SetpH";
-import SetDropwise from "../SetActionInputs/SetDropwise";
-import SetTemperature from "../SetActionInputs/SetTemperature";
+import SetMaterial from '../SetActionInputs/SetMaterial';
+import SetQuantity from '../SetActionInputs/SetQuantity.jsx';
+import SetpH from '../SetActionInputs/SetpH';
+import SetDropwise from '../SetActionInputs/SetDropwise';
+import SetTemperature from '../SetActionInputs/SetTemperature';
 
 const IBMpHAction = ({ action, actionno, updateAction }) => {
   const actiontype = action.actiontype.capitalize();
@@ -26,7 +26,7 @@ const IBMpHAction = ({ action, actionno, updateAction }) => {
           <SetQuantity
             action={action}
             updateAction={updateAction}
-            name={"material"}
+            name={'material'}
           ></SetQuantity>
           <SetpH action={action} updateAction={updateAction}></SetpH>
           <SetDropwise

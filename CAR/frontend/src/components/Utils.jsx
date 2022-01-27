@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 export function isInt(n) {
   return Number(n) === n && n % 1 === 0;
@@ -20,6 +20,6 @@ export async function patchChange(actiontype, id, variablename, value) {
 }
 
 export const openInNewTab = (url) => {
-  const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+  const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
   if (newWindow) newWindow.opener = null;
 };

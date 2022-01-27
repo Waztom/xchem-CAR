@@ -1,5 +1,5 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
+import React from 'react';
+import Container from 'react-bootstrap/Container';
 
 const IBMConcentrateAction = ({ action, actionno }) => {
   const actiontype = action.actiontype.capitalize();

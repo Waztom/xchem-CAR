@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-import Card from "react-bootstrap/Card";
-import ListGroup from "react-bootstrap/ListGroup";
-import Button from "react-bootstrap/Button";
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
-import Form from "react-bootstrap/Form";
-import Spinner from "react-bootstrap/Spinner";
+import Card from 'react-bootstrap/Card';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Button from 'react-bootstrap/Button';
+import InputGroup from 'react-bootstrap/InputGroup';
+import FormControl from 'react-bootstrap/FormControl';
+import Form from 'react-bootstrap/Form';
+import Spinner from 'react-bootstrap/Spinner';
 
-import MethodBody from "../MethodBody/MethodBody";
+import MethodBody from '../MethodBody/MethodBody';
 
 // Start with main body and then add components
 const SetTargetMassInput = ({ targetmass, unit, targetid }) => {
@@ -43,7 +43,7 @@ const SetTargetMassInput = ({ targetmass, unit, targetid }) => {
       setTargetMass(e.target.value);
       patchTargetMass(Number(e.target.value));
     } else {
-      alert("Please input an integer value");
+      alert('Please input an integer value');
     }
   };
 
@@ -84,7 +84,7 @@ const TargetCard = ({ target, handleDelete }) => {
   }
 
   return (
-    <Card text="dark" border="light" style={{ width: "13rem" }}>
+    <Card text="dark" border="light" style={{ width: '13rem' }}>
       <Card.Header>{target.name}</Card.Header>
       <SetTargetMassInput
         targetmass={target.targetmass}

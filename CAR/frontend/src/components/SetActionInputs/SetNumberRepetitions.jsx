@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef } from 'react';
 
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
-import IntegerWarning from "../TooltipsWarnings/IntegerWarning";
-import { isInt, patchChange } from "../Utils";
+import InputGroup from 'react-bootstrap/InputGroup';
+import FormControl from 'react-bootstrap/FormControl';
+import IntegerWarning from '../TooltipsWarnings/IntegerWarning';
+import { isInt, patchChange } from '../Utils';
 
 const SetNumberRepetitions = ({ action, updateAction }) => {
   const numberrepetitions = action.numberofrepetitions;
@@ -23,8 +23,8 @@ const SetNumberRepetitions = ({ action, updateAction }) => {
 
     if (isInt(inputQuantity)) {
       setNumberRepetitions(inputQuantity);
-      patchChange(actiontype, id, "numberofrepetitions", inputQuantity);
-      updateAction(id, "numberofrepetitions", inputQuantity);
+      patchChange(actiontype, id, 'numberofrepetitions', inputQuantity);
+      updateAction(id, 'numberofrepetitions', inputQuantity);
     } else {
       setNumberRepetitions(NumberRepetitions);
       setShow(true);

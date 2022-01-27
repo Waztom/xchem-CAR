@@ -1,12 +1,12 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import React from 'react';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-import SetDuration from "../SetActionInputs/SetDuration";
-import SetStirring from "../SetActionInputs/SetStirring";
-import SetDeanStark from "../SetActionInputs/SetDeanStark";
-import SetAtmosphere from "../SetActionInputs/SetAtmosphere";
+import SetDuration from '../SetActionInputs/SetDuration';
+import SetStirring from '../SetActionInputs/SetStirring';
+import SetDeanStark from '../SetActionInputs/SetDeanStark';
+import SetAtmosphere from '../SetActionInputs/SetAtmosphere';
 
 const IBMRefluxAction = ({ action, actionno, updateAction }) => {
   const actiontype = action.actiontype.capitalize();

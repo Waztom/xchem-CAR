@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Jsme } from "jsme-react";
-import Button from "react-bootstrap/Button";
-import Modal from "react-modal";
+import React, { useState } from 'react';
+import { Jsme } from 'jsme-react';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-modal';
 
-import "../styles.css";
+import '../styles.css';
 
 // Make sure to bind modal to your appElement (https://reactcommunity.org/react-modal/accessibility/)
 // Modal.setAppElement(document.getElementById("root"));

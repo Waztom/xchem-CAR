@@ -1,11 +1,11 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import React from 'react';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-import SetMaterial from "../SetActionInputs/SetMaterial";
-import SetQuantity from "../SetActionInputs/SetQuantity.jsx";
-import SetNumberRepetitions from "../SetActionInputs/SetNumberRepetitions";
+import SetMaterial from '../SetActionInputs/SetMaterial';
+import SetQuantity from '../SetActionInputs/SetQuantity.jsx';
+import SetNumberRepetitions from '../SetActionInputs/SetNumberRepetitions';
 
 const IBMWashAction = ({ action, actionno, updateAction }) => {
   const actiontype = action.actiontype.capitalize();
@@ -24,7 +24,7 @@ const IBMWashAction = ({ action, actionno, updateAction }) => {
           <SetQuantity
             action={action}
             updateAction={updateAction}
-            name={"material"}
+            name={'material'}
           ></SetQuantity>
           <SetNumberRepetitions
             action={action}

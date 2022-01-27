@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef } from 'react';
 
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
-import IntegerWarning from "../TooltipsWarnings/IntegerWarning";
-import { isFloat, isInt, patchChange } from "../Utils";
+import InputGroup from 'react-bootstrap/InputGroup';
+import FormControl from 'react-bootstrap/FormControl';
+import IntegerWarning from '../TooltipsWarnings/IntegerWarning';
+import { isFloat, isInt, patchChange } from '../Utils';
 
 const SetpH = ({ action, updateAction }) => {
   const ph = action.pH;
@@ -23,8 +23,8 @@ const SetpH = ({ action, updateAction }) => {
 
     if (isFloat(Number(inputQuantity)) || isInt(Number(inputQuantity))) {
       setpH(inputQuantity);
-      patchChange(actiontype, id, "pH", inputQuantity);
-      updateAction(id, "pH", inputQuantity);
+      patchChange(actiontype, id, 'pH', inputQuantity);
+      updateAction(id, 'pH', inputQuantity);
     } else {
       setpH(pH);
       setShow(true);

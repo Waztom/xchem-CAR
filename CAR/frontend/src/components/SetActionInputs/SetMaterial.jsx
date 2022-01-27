@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
-import { patchChange } from "../Utils";
+import InputGroup from 'react-bootstrap/InputGroup';
+import FormControl from 'react-bootstrap/FormControl';
+import { patchChange } from '../Utils';
 
 const SetMaterial = ({ action, updateAction }) => {
   const material = action.material;
@@ -14,8 +14,8 @@ const SetMaterial = ({ action, updateAction }) => {
   const handleMaterialChange = (e) => {
     const newmaterial = e.target.value;
     setMaterial(newmaterial);
-    patchChange(actiontype, id, "material", newmaterial);
-    updateAction(id, "material", newmaterial);
+    patchChange(actiontype, id, 'material', newmaterial);
+    updateAction(id, 'material', newmaterial);
   };
 
   return (

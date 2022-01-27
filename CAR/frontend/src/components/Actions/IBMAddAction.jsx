@@ -1,19 +1,19 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState } from 'react';
+import axios from 'axios';
 
-import Image from "react-bootstrap/Image";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Button from "react-bootstrap/Button";
-import Alert from "react-bootstrap/Alert";
-import { Trash } from "react-bootstrap-icons";
+import Image from 'react-bootstrap/Image';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Button from 'react-bootstrap/Button';
+import Alert from 'react-bootstrap/Alert';
+import { Trash } from 'react-bootstrap-icons';
 
-import SetQuantity from "../SetActionInputs/SetQuantity.jsx";
-import JSMEModal from "../MolDrawer/JSMEModal";
-import MolAlert from "../TooltipsWarnings/MolAlert";
+import SetQuantity from '../SetActionInputs/SetQuantity.jsx';
+import JSMEModal from '../MolDrawer/JSMEModal';
+import MolAlert from '../TooltipsWarnings/MolAlert';
 
-import { openInNewTab } from "../Utils";
+import { openInNewTab } from '../Utils';
 
 const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
   const [Action, setAction] = useState(action);
@@ -40,7 +40,7 @@ const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
       var canonsmiles = mol.get_smiles();
     } else {
       setShowAlert(true);
-      console.log("mol invalid");
+      console.log('mol invalid');
     }
     if (canonsmiles !== origsmiles) {
       patchSVG(canonsmiles);
@@ -95,7 +95,7 @@ const IBMAddAction = ({ action, actionno, updateAction, handleDelete }) => {
           <SetQuantity
             action={Action}
             updateAction={updateAction}
-            name={"material"}
+            name={'material'}
           ></SetQuantity>
         </Col>
       </Row>

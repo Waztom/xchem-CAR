@@ -1,13 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef } from 'react';
 
-import { Form } from "react-bootstrap";
-import InputGroup from "react-bootstrap/InputGroup";
-import IntegerWarning from "../TooltipsWarnings/IntegerWarning";
-import { isFloat, isInt, patchChange } from "../Utils";
+import { Form } from 'react-bootstrap';
+import InputGroup from 'react-bootstrap/InputGroup';
+import IntegerWarning from '../TooltipsWarnings/IntegerWarning';
+import { isFloat, isInt, patchChange } from '../Utils';
 
 const SetQuantity = ({ action, updateAction, name }) => {
-  const quantname = name + "quantity";
-  const unitname = name + "quantityunit";
+  const quantname = name + 'quantity';
+  const unitname = name + 'quantityunit';
   const target = useRef(null);
 
   const quantity = action[quantname];

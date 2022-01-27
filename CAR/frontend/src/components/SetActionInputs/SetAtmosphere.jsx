@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { Form } from "react-bootstrap";
-import InputGroup from "react-bootstrap/InputGroup";
-import { patchChange } from "../Utils";
+import { Form } from 'react-bootstrap';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { patchChange } from '../Utils';
 
 const SetAtmosphere = ({ action, updateAction }) => {
   const atmosphere = action.atmosphere.capitalize();
@@ -14,8 +14,8 @@ const SetAtmosphere = ({ action, updateAction }) => {
   const handleAtmosphereChange = (e) => {
     const newatmosphere = e.target.value.toLowerCase();
     setAtmosphere(e.target.value);
-    patchChange(actiontype, id, "atmosphere", newatmosphere);
-    updateAction(id, "atmosphere", newatmosphere);
+    patchChange(actiontype, id, 'atmosphere', newatmosphere);
+    updateAction(id, 'atmosphere', newatmosphere);
   };
 
   return (

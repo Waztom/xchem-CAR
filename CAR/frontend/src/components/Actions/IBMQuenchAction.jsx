@@ -1,12 +1,12 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import React from 'react';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-import SetMaterial from "../SetActionInputs/SetMaterial";
-import SetQuantity from "../SetActionInputs/SetQuantity.jsx";
-import SetDropwise from "../SetActionInputs/SetDropwise";
-import SetTemperature from "../SetActionInputs/SetTemperature";
+import SetMaterial from '../SetActionInputs/SetMaterial';
+import SetQuantity from '../SetActionInputs/SetQuantity.jsx';
+import SetDropwise from '../SetActionInputs/SetDropwise';
+import SetTemperature from '../SetActionInputs/SetTemperature';
 
 const IBMQuenchAction = ({ action, actionno, updateAction }) => {
   const actiontype = action.actiontype.capitalize();
@@ -25,7 +25,7 @@ const IBMQuenchAction = ({ action, actionno, updateAction }) => {
           <SetQuantity
             action={action}
             updateAction={updateAction}
-            name={"material"}
+            name={'material'}
           ></SetQuantity>
           <SetDropwise
             action={action}

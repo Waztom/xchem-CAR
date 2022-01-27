@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { Form } from "react-bootstrap";
-import InputGroup from "react-bootstrap/InputGroup";
-import { patchChange } from "../Utils";
+import { Form } from 'react-bootstrap';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { patchChange } from '../Utils';
 
 const SetLayer = ({ action, updateAction }) => {
   const layer = action.layer.capitalize();
@@ -14,8 +14,8 @@ const SetLayer = ({ action, updateAction }) => {
   const handleLayerChange = (e) => {
     const newlayer = e.target.value.toLowerCase();
     setLayer(e.target.value);
-    patchChange(actiontype, id, "layer", newlayer);
-    updateAction(id, "layer", newlayer);
+    patchChange(actiontype, id, 'layer', newlayer);
+    updateAction(id, 'layer', newlayer);
   };
 
   return (
