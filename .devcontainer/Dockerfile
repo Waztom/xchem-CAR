@@ -1,7 +1,7 @@
 FROM debian:bullseye-slim
 
 # Copy Python and Node reqs
-COPY ./CAR/package.json /workspace/package.json
+COPY ./CAR/frontend/package.json /workspace/package.json
 COPY ./CAR/requirements-dev.txt /workspace/requirements-dev.txt
 
 # Update args in docker-compose.yaml to set the UID/GID of the "vscode" user.
