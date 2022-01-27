@@ -28,7 +28,21 @@
       integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s"
       crossorigin="anonymous"
     ></script>
-    <script src="/RDKit/RDKit_minimal.js"></script>
-    <script src="/RDKit/RDKitFunctions.js"></script>
+    <script src="https://unpkg.com/@rdkit/rdkit/Code/MinimalLib/dist/RDKit_minimal.js"></script>
+    <script>
+      window
+        .initRDKitModule()
+        .then(function (RDKit) {
+          console.log("RDKit version: " + RDKit.version());
+          window.RDKit = RDKit;
+          /**
+           * The RDKit module is now loaded.
+           * You can use it anywhere.
+           */
+        })
+        .catch(() => {
+          // handle loading errors here...
+        });
+    </script>
   </body>
 </html>
