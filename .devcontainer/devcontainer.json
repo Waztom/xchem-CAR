@@ -45,10 +45,10 @@
     "mtxr.sqltools-driver-pg",
     "dsznajder.es7-react-js-snippets",
     "esbenp.prettier-vscode"
-  ]
+  ],
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [8000, 8000],
+  "forwardPorts": [8000, 3000]
 
   // Use 'postCreateCommand' to run commands after the container is created.
   // "postCreateCommand": "pip install --user -r requirements.txt",
@@ -56,4 +56,3 @@
   // Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
   // "remoteUser": "node"
 }
-

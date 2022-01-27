@@ -42,7 +42,6 @@ EMAIL_USE_TLS = True
 INSTALLED_APPS = [
     "backend",
     "rest_framework",
-    "frontend",
     "django_filters",
     "django.contrib.admin",
     "django.contrib.auth",
