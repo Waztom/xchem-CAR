@@ -42,7 +42,7 @@ EMAIL_USE_TLS = True
 INSTALLED_APPS = [
     "backend",
     "rest_framework",
-    "frontend",
+    "corsheaders",
     "django_filters",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -60,6 +60,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "CAR.urls"
@@ -172,3 +173,5 @@ CELERY = {
     "CELERY_RESULT_SERIALIZER": "json",
     "CELERY_TASK_SERIALIZER": "json",
 }
+
+CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]

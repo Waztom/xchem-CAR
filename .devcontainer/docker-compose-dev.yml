@@ -11,7 +11,7 @@ services:
         USER_GID: 1000
     volumes:
       - ..:/workspace:cached
-      - node_modules:/workspace/CAR/node_modules
+      - node_modules:/workspace/CAR/frontend/node_modules
     env_file:
       - ./.devcontainerenv
     # Overrides default command so things don't shut down after the process ends.

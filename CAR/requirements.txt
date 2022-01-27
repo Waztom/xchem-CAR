@@ -7,3 +7,4 @@ redis==3.5.3
 rxn4chemistry==0.4.0
 pycule==0.1.9b0 
 ratelimit==2.2.1
+django-cors-headers==3.11.0

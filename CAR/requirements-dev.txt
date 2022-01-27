@@ -9,3 +9,4 @@ black==20.8b1
 flake8==3.9.1
 pycule==0.1.9b0 
 ratelimit==2.2.1
+django-cors-headers==3.11.0
