@@ -30,6 +30,6 @@ jobs:
           file: CAR/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: user/car:latest
-          # cache-from: type=registry,ref=user/car:buildcache
-          # cache-to: type=registry,ref=user/car:buildcache,mode=max
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/car:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/car:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/car:buildcache,mode=max
