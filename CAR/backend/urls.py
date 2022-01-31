@@ -9,6 +9,7 @@ from .api import (
     MculeQuoteViewSet,
     TargetViewSet,
     MethodViewSet,
+    GroupByStepsViewSet,
     ReactionViewSet,
     ProductViewSet,
     AnalyseActionViewSet,
@@ -57,6 +58,7 @@ router.register("api/projects", ProjectViewSet, "projects")
 router.register("api/mculequotes", MculeQuoteViewSet, "mculequotes")
 router.register("api/targets", TargetViewSet, "targets")
 router.register("api/methods", MethodViewSet, "methods")
+router.register("api/groupnosteps", GroupByStepsViewSet, "groupnosteps")
 router.register("api/reactions", ReactionViewSet, "reactions")
 router.register("api/products", ProductViewSet, "products")
 router.register("api/analyseactions", ProductViewSet, "analyseactions")

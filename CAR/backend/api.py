@@ -31,6 +31,7 @@ from rest_framework import viewsets, permissions, filters
 from rest_framework.decorators import action
 from django.http import JsonResponse
 from django.core.files.base import ContentFile
+from django.db.models import Q
 
 # Import standard serializers
 from .serializers import (
@@ -123,6 +124,22 @@ class MethodViewSet(viewsets.ModelViewSet):
     serializer_class = MethodSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["=target_id__id", "nosteps"]
+
+
+class GroupByStepsViewSet(viewsets.ModelViewSet):
+    """ "
+    Viewset to filter methods that have a given no of steps in a particular project
+    """
+
+    serializer_class = MethodSerializer
+
+    def get_queryset(self):
+        projectid = self.request.GET.get("projectid")
+        nosteps = self.request.GET.get("nosteps")
+        targetqueryset = Target.objects.filter(project_id=projectid).order_by("id")
+        targetids = [target.id for target in targetqueryset]
+        methodsqueryset = Method.objects.filter(Q(target_id__in=targetids) & Q(nosteps=nosteps))
+        return methodsqueryset
 
 
 class ReactionViewSet(viewsets.ModelViewSet):
