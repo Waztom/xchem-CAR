@@ -21,9 +21,14 @@ const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     boxShadow: 'none',
-    backgroundColor: 'transparent', // Might be removed
   },
-  accordionSummary: {
+  summary: {
+    backgroundColor: colors.grey[300], // Might be removed
+    position: 'sticky',
+    top: 64,
+    zIndex: 2,
+  },
+  content: {
     display: 'grid',
     gridTemplateColumns: 'minmax(max-content, 45%) minmax(max-content, 1fr)',
     '& > div': {
@@ -31,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
       gap: theme.spacing(),
     },
   },
-  accordionDetails: {
+  details: {
     padding: 0,
   },
   categoryInfo: {
@@ -46,7 +51,6 @@ const useStyles = makeStyles((theme) => ({
   list: {
     width: '100%',
     '& > li': {
-      backgroundColor: colors.grey[100], // Might be removed
       padding: 0,
     },
   },
@@ -76,18 +80,23 @@ export const MethodSuccessAccordion = ({ successArray }) => {
       TransitionProps={{ unmountOnExit: true }} // Performance
     >
       <AccordionSummary
+        className={classes.summary}
         classes={{
-          content: classes.accordionSummary,
+          content: classes.content,
         }}
         expandIcon={<ExpandMore />}
       >
         <div>
-          <IoFootsteps className={classes.icon} />
           {successArray.map((success, index) => {
-            return success ? (
-              <ImSmile key={index} className={classes.icon} />
-            ) : (
-              <ImSad key={index} className={classes.icon} />
+            return (
+              <>
+                <IoFootsteps className={classes.icon} />
+                {success ? (
+                  <ImSmile key={index} className={classes.icon} />
+                ) : (
+                  <ImSad key={index} className={classes.icon} />
+                )}
+              </>
             );
           })}
         </div>
@@ -102,7 +111,7 @@ export const MethodSuccessAccordion = ({ successArray }) => {
           })}
         </div>
       </AccordionSummary>
-      <AccordionDetails className={classes.accordionDetails}>
+      <AccordionDetails className={classes.details}>
         <List className={classes.list} disablePadding>
           {temporaryData.map(({ CategoryIcon }, index) => {
             return (

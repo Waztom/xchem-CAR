@@ -12,12 +12,14 @@ import axios from 'axios';
 import { Fragment, useEffect, useLayoutEffect, useState } from 'react';
 import { IoFootsteps } from 'react-icons/io5';
 import { MethodSuccessAccordion } from '../MethodSuccessAccordion';
-import { colors } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   summary: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.white,
+    position: 'sticky',
+    top: 0,
+    zIndex: 3,
   },
   collapseIcon: {
     color: theme.palette.white,
@@ -26,13 +28,12 @@ const useStyles = makeStyles((theme) => ({
     width: 24,
     height: 24,
   },
-  accordionDetails: {
+  details: {
     padding: 0,
   },
   list: {
     width: '100%',
     '& > li': {
-      backgroundColor: colors.grey[300], // Might be removed
       padding: 0,
     },
   },
@@ -92,7 +93,7 @@ export const MethodAccordion = ({ noSteps, open }) => {
           <IoFootsteps key={index} className={classes.icon} />
         ))}
       </AccordionSummary>
-      <AccordionDetails className={classes.accordionDetails}>
+      <AccordionDetails className={classes.details}>
         <List className={classes.list} disablePadding>
           {successPermutation.map((successArray, index) => {
             return (
