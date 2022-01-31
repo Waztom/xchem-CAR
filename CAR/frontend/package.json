@@ -10,12 +10,15 @@
     "@material-ui/core": "^4.12.3",
     "@material-ui/icons": "^4.11.2",
     "axios": "^0.21.1",
+    "classnames": "^2.3.1",
     "jsme-editor": "^0.8.2",
     "jsme-react": "^0.0.9",
     "react": "^17.0.2",
+    "react-beautiful-dnd": "^13.1.0",
     "react-bootstrap": "^1.4.0",
     "react-bootstrap-icons": "^1.2.3",
     "react-dom": "^17.0.2",
+    "react-icons": "^4.3.1",
     "react-modal": "^3.13.1"
   },
   "devDependencies": {
