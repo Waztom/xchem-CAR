@@ -12,6 +12,7 @@ import axios from 'axios';
 import { Fragment, useEffect, useLayoutEffect, useState } from 'react';
 import { IoFootsteps } from 'react-icons/io5';
 import { MethodSuccessAccordion } from '../MethodSuccessAccordion';
+import { colors } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   summary: {
@@ -30,6 +31,10 @@ const useStyles = makeStyles((theme) => ({
   },
   list: {
     width: '100%',
+    '& > li': {
+      backgroundColor: colors.grey[300], // Might be removed
+      padding: 0,
+    },
   },
 }));
 
@@ -82,8 +87,6 @@ export const MethodAccordion = ({ noSteps, open }) => {
       <AccordionSummary
         className={classes.summary}
         expandIcon={<ExpandMore className={classes.collapseIcon} />}
-        aria-controls={`method${noSteps}-content`}
-        id={`method${noSteps}-header`}
       >
         {new Array(noSteps).fill(0).map((_, index) => (
           <IoFootsteps key={index} className={classes.icon} />
