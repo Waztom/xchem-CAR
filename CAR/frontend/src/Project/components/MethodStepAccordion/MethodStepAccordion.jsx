@@ -40,40 +40,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-/**
- * Creates a permutation of success rates of steps in a triangular pattern, e.g.:
- * [
- *   [true,   true,   true],
- *   [true,   true,   false],
- *   [true,   false,  false],
- *   [false,  false,  false],
- * ]
- * @param {number} noSteps Number of steps
- * @returns Permutation of true / false values.
- */
-const getSuccessRatePermutation = (noSteps) => {
-  const successPermutation = [];
-  for (let i = 0; i <= noSteps; i++) {
-    successPermutation[i] = [];
-    for (let j = 0; j < noSteps; j++) {
-      successPermutation[i][j] = j < noSteps - i;
-    }
-  }
-  return successPermutation;
-};
-
 export const MethodStepAccordion = ({ noSteps, open, methods }) => {
   const classes = useStyles();
 
   const [expanded, setExpanded] = useState(open);
 
-  const successPermutation = getSuccessRatePermutation(noSteps);
-
   const methodReactions = useGetMethodReactions(methods);
   const categorizedMethodReactions =
     useCategorizeMethodReactionsBySuccess(methodReactions);
-
-  console.log(categorizedMethodReactions);
 
   useLayoutEffect(() => {
     setExpanded(expanded);
@@ -94,16 +68,22 @@ export const MethodStepAccordion = ({ noSteps, open, methods }) => {
       </AccordionSummary>
       <AccordionDetails className={classes.details}>
         <List className={classes.list} disablePadding>
-          {successPermutation.map((successArray, index) => {
-            return (
-              <Fragment key={index}>
-                <ListItem disableGutters>
-                  <MethodSuccessAccordion successArray={successArray} />
-                </ListItem>
-                {!!(index < successPermutation.length - 1) && <Divider />}
-              </Fragment>
-            );
-          })}
+          {Object.entries(categorizedMethodReactions)
+            .reverse()
+            .map(([noSuccesses, methodReactions], index) => {
+              return (
+                <Fragment key={noSuccesses}>
+                  <ListItem disableGutters>
+                    <MethodSuccessAccordion
+                      noSteps={noSteps}
+                      noSuccesses={Number(noSuccesses)}
+                      methodReactions={methodReactions}
+                    />
+                  </ListItem>
+                  {!!(index < methodReactions.length - 1) && <Divider />}
+                </Fragment>
+              );
+            })}
         </List>
       </AccordionDetails>
     </Accordion>

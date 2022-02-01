@@ -13,8 +13,7 @@ import { Cancel, ExpandMore, FindInPage } from '@material-ui/icons';
 import { ImSad, ImSmile } from 'react-icons/im';
 import { IoFootsteps } from 'react-icons/io5';
 import { FaRegEdit, FaFlask } from 'react-icons/fa';
-import { Fragment, useEffect } from 'react';
-import axios from 'axios';
+import { Fragment } from 'react';
 import { MethodCategoryAccordion } from '../MethodCategoryAccordion/MethodCategoryAccordion';
 
 const useStyles = makeStyles((theme) => ({
@@ -63,16 +62,12 @@ const temporaryData = [
   { CategoryIcon: Cancel, value: 10 },
 ];
 
-export const MethodSuccessAccordion = ({ successArray }) => {
+export const MethodSuccessAccordion = ({
+  noSteps,
+  noSuccesses,
+  methodReactions,
+}) => {
   const classes = useStyles();
-
-  useEffect(() => {
-    async function fetchData() {
-      const response = await axios.get(`/api/reactions/`);
-      console.log(response);
-    }
-    //fetchData();
-  }, []);
 
   return (
     <Accordion
@@ -87,16 +82,20 @@ export const MethodSuccessAccordion = ({ successArray }) => {
         expandIcon={<ExpandMore />}
       >
         <div>
-          {successArray.map((success, index) => {
+          {new Array(noSuccesses).fill(0).map((_, index) => {
             return (
-              <>
+              <Fragment key={index}>
                 <IoFootsteps className={classes.icon} />
-                {success ? (
-                  <ImSmile key={index} className={classes.icon} />
-                ) : (
-                  <ImSad key={index} className={classes.icon} />
-                )}
-              </>
+                <ImSmile key={index} className={classes.icon} />
+              </Fragment>
+            );
+          })}
+          {new Array(noSteps - noSuccesses).fill(0).map((_, index) => {
+            return (
+              <Fragment key={index}>
+                <IoFootsteps className={classes.icon} />
+                <ImSad key={index} className={classes.icon} />
+              </Fragment>
             );
           })}
         </div>
@@ -118,7 +117,9 @@ export const MethodSuccessAccordion = ({ successArray }) => {
               <Fragment key={index}>
                 <ListItem disableGutters>
                   <MethodCategoryAccordion
-                    successArray={successArray}
+                    noSteps={noSteps}
+                    noSuccesses={Number(noSuccesses)}
+                    methodReactions={methodReactions}
                     CategoryIcon={CategoryIcon}
                   />
                 </ListItem>
