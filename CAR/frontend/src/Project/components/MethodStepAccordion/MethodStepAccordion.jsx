@@ -8,10 +8,11 @@ import {
   makeStyles,
 } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
-import axios from 'axios';
-import { Fragment, useEffect, useLayoutEffect, useState } from 'react';
+import { Fragment, useLayoutEffect, useState } from 'react';
 import { IoFootsteps } from 'react-icons/io5';
 import { MethodSuccessAccordion } from '../MethodSuccessAccordion';
+import { useCategorizeMethodReactionsBySuccess } from './hooks/useCategorizeMethodReactionsBySuccess';
+import { useGetMethodReactions } from './hooks/useGetReactions';
 
 const useStyles = makeStyles((theme) => ({
   summary: {
@@ -61,24 +62,22 @@ const getSuccessRatePermutation = (noSteps) => {
   return successPermutation;
 };
 
-export const MethodAccordion = ({ noSteps, open }) => {
+export const MethodStepAccordion = ({ noSteps, open, methods }) => {
   const classes = useStyles();
 
   const [expanded, setExpanded] = useState(open);
 
   const successPermutation = getSuccessRatePermutation(noSteps);
 
+  const methodReactions = useGetMethodReactions(methods);
+  const categorizedMethodReactions =
+    useCategorizeMethodReactionsBySuccess(methodReactions);
+
+  console.log(categorizedMethodReactions);
+
   useLayoutEffect(() => {
     setExpanded(expanded);
   }, [open]);
-
-  useEffect(() => {
-    async function fetchData() {
-      const response = await axios.get(`/api/methods/?nosteps=${noSteps}`);
-      console.log(response);
-    }
-    fetchData();
-  }, []);
 
   return (
     <Accordion

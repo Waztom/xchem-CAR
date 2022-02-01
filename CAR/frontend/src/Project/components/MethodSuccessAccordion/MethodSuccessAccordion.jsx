@@ -71,7 +71,7 @@ export const MethodSuccessAccordion = ({ successArray }) => {
       const response = await axios.get(`/api/reactions/`);
       console.log(response);
     }
-    fetchData();
+    //fetchData();
   }, []);
 
   return (

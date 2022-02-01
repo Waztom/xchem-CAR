@@ -1,5 +1,6 @@
 import { makeStyles } from '@material-ui/core';
-import { MethodAccordion } from '../MethodAccordion';
+import { MethodStepAccordion } from '../MethodStepAccordion';
+import { useGetCategorizedMethodsBySteps } from './hooks/useGetCategorizedMethodsBySteps';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -7,14 +8,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const methodAccordions = [
-  { noSteps: 1, open: true },
-  { noSteps: 2, open: false },
-  { noSteps: 3, open: false },
-];
-
 export const ProjectView = ({ projectId }) => {
   const classes = useStyles();
+
+  const sortedMethods = useGetCategorizedMethodsBySteps(projectId);
 
   if (!projectId) {
     return null;
@@ -22,8 +19,15 @@ export const ProjectView = ({ projectId }) => {
 
   return (
     <main className={classes.root}>
-      {methodAccordions.map(({ noSteps, open }) => {
-        return <MethodAccordion key={noSteps} noSteps={noSteps} open={open} />;
+      {Object.entries(sortedMethods).map(([noSteps, methods], index) => {
+        return (
+          <MethodStepAccordion
+            key={noSteps}
+            noSteps={Number(noSteps)}
+            open={index === 0}
+            methods={methods}
+          />
+        );
       })}
     </main>
   );
