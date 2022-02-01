@@ -12,7 +12,7 @@ import { Fragment, useLayoutEffect, useState } from 'react';
 import { IoFootsteps } from 'react-icons/io5';
 import { MethodSuccessAccordion } from '../MethodSuccessAccordion';
 import { useCategorizeMethodReactionsBySuccess } from './hooks/useCategorizeMethodReactionsBySuccess';
-import { useGetMethodReactions } from './hooks/useGetReactions';
+import { useGetMethodReactions } from './hooks/useGetMethodReactions';
 
 const useStyles = makeStyles((theme) => ({
   summary: {

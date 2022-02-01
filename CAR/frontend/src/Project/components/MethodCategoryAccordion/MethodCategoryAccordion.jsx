@@ -1,5 +1,6 @@
 import {
   Accordion,
+  AccordionDetails,
   AccordionSummary,
   colors,
   makeStyles,
@@ -8,6 +9,8 @@ import { ExpandMore } from '@material-ui/icons';
 import { Fragment } from 'react';
 import { ImSad, ImSmile } from 'react-icons/im';
 import { IoFootsteps } from 'react-icons/io5';
+import { ReactionTable } from '../ReactionTable';
+import { useGetMethodTargets } from './hooks/useGetMethodTargets';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -37,6 +40,8 @@ export const MethodCategoryAccordion = ({
   CategoryIcon,
 }) => {
   const classes = useStyles();
+
+  const methodData = useGetMethodTargets(methodReactions);
 
   return (
     <Accordion
@@ -68,6 +73,9 @@ export const MethodCategoryAccordion = ({
         })}
         <CategoryIcon className={classes.icon} />
       </AccordionSummary>
+      <AccordionDetails>
+        <ReactionTable noSteps={noSteps} methodData={methodData} />
+      </AccordionDetails>
     </Accordion>
   );
 };
