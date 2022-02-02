@@ -11,7 +11,7 @@ import { ExpandMore } from '@material-ui/icons';
 import { Fragment, useLayoutEffect, useState } from 'react';
 import { IoFootsteps } from 'react-icons/io5';
 import { MethodSuccessAccordion } from '../MethodSuccessAccordion';
-import { useCategorizeMethodReactionsBySuccess } from './hooks/useCategorizeMethodReactionsBySuccess';
+import { useCategorizeMethodDataBySuccess } from './hooks/useCategorizeMethodDataBySuccess';
 import { useGetMethodReactions } from './hooks/useGetMethodReactions';
 
 const useStyles = makeStyles((theme) => ({
@@ -40,14 +40,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const MethodStepAccordion = ({ noSteps, open, methods }) => {
+export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
   const classes = useStyles();
 
   const [expanded, setExpanded] = useState(open);
 
-  const methodReactions = useGetMethodReactions(methods);
-  const categorizedMethodReactions =
-    useCategorizeMethodReactionsBySuccess(methodReactions);
+  const methodsData = useGetMethodReactions(methodsWithTarget);
+  const categorizedMethodsData =
+    useCategorizeMethodDataBySuccess(methodsData);
 
   useLayoutEffect(() => {
     setExpanded(expanded);
@@ -68,19 +68,19 @@ export const MethodStepAccordion = ({ noSteps, open, methods }) => {
       </AccordionSummary>
       <AccordionDetails className={classes.details}>
         <List className={classes.list} disablePadding>
-          {Object.entries(categorizedMethodReactions)
+          {Object.entries(categorizedMethodsData)
             .reverse()
-            .map(([noSuccesses, methodReactions], index) => {
+            .map(([noSuccesses, methodData], index) => {
               return (
                 <Fragment key={noSuccesses}>
                   <ListItem disableGutters>
                     <MethodSuccessAccordion
                       noSteps={noSteps}
                       noSuccesses={Number(noSuccesses)}
-                      methodReactions={methodReactions}
+                      methodData={methodData}
                     />
                   </ListItem>
-                  {!!(index < methodReactions.length - 1) && <Divider />}
+                  {!!(index < methodData.length - 1) && <Divider />}
                 </Fragment>
               );
             })}

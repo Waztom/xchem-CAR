@@ -37,8 +37,6 @@ const useStyles = makeStyles((theme) => ({
 export const ReactionTable = ({ noSteps, methodData }) => {
   const classes = useStyles();
 
-  console.log(methodData);
-
   const columns = useMemo(() => {
     return [
       {

@@ -1,21 +1,23 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-export const useGetMethodReactions = (methods) => {
-  const [methodReactions, setMethodReactions] = useState([]);
+export const useGetMethodReactions = (methodsWithTarget) => {
+  const [methodsData, setMethodsData] = useState([]);
 
   useEffect(() => {
     const fetch = async () => {
-      const requests = methods.map(async (method) => {
-        const response = await axios.get(`/api/reactions?search=${method.id}`);
+      const requests = methodsWithTarget.map(async (methodWithTarget) => {
+        const response = await axios.get(
+          `/api/reactions?search=${methodWithTarget.method.id}`
+        );
         return {
-          method,
+          ...methodWithTarget,
           reactions: response.data,
         };
       });
       const responses = await Promise.allSettled(requests);
 
-      setMethodReactions(
+      setMethodsData(
         responses
           .filter((response) => response.status === 'fulfilled')
           .map((response) => response.value)
@@ -27,7 +29,7 @@ export const useGetMethodReactions = (methods) => {
     };
 
     fetch();
-  }, [methods]);
+  }, [methodsWithTarget]);
 
-  return methodReactions;
+  return methodsData;
 };

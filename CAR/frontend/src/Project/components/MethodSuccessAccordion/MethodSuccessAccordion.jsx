@@ -65,7 +65,7 @@ const temporaryData = [
 export const MethodSuccessAccordion = ({
   noSteps,
   noSuccesses,
-  methodReactions,
+  methodData,
 }) => {
   const classes = useStyles();
 
@@ -119,7 +119,7 @@ export const MethodSuccessAccordion = ({
                   <MethodCategoryAccordion
                     noSteps={noSteps}
                     noSuccesses={Number(noSuccesses)}
-                    methodReactions={methodReactions}
+                    methodData={methodData}
                     CategoryIcon={CategoryIcon}
                   />
                 </ListItem>

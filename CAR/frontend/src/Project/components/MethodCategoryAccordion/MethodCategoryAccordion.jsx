@@ -10,7 +10,6 @@ import { Fragment } from 'react';
 import { ImSad, ImSmile } from 'react-icons/im';
 import { IoFootsteps } from 'react-icons/io5';
 import { ReactionTable } from '../ReactionTable';
-import { useGetMethodTargets } from './hooks/useGetMethodTargets';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -39,12 +38,10 @@ const useStyles = makeStyles((theme) => ({
 export const MethodCategoryAccordion = ({
   noSteps,
   noSuccesses,
-  methodReactions,
+  methodData,
   CategoryIcon,
 }) => {
   const classes = useStyles();
-
-  const methodData = useGetMethodTargets(methodReactions);
 
   return (
     <Accordion

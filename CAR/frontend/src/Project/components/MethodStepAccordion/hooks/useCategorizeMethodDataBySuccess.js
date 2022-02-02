@@ -1,4 +1,4 @@
-export const useCategorizeMethodReactionsBySuccess = (methodReactions) => {
+export const useCategorizeMethodDataBySuccess = (methodReactions) => {
   const categorizedMethodReactions = {};
 
   methodReactions.forEach((methodReaction) => {
