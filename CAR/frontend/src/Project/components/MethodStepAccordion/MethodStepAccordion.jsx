@@ -8,10 +8,11 @@ import {
   makeStyles,
 } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
-import axios from 'axios';
-import { Fragment, useEffect, useLayoutEffect, useState } from 'react';
+import { Fragment, useLayoutEffect, useState } from 'react';
 import { IoFootsteps } from 'react-icons/io5';
 import { MethodSuccessAccordion } from '../MethodSuccessAccordion';
+import { useCategorizeMethodDataBySuccess } from './hooks/useCategorizeMethodDataBySuccess';
+import { useGetMethodReactions } from './hooks/useGetMethodReactions';
 
 const useStyles = makeStyles((theme) => ({
   summary: {
@@ -39,46 +40,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-/**
- * Creates a permutation of success rates of steps in a triangular pattern, e.g.:
- * [
- *   [true,   true,   true],
- *   [true,   true,   false],
- *   [true,   false,  false],
- *   [false,  false,  false],
- * ]
- * @param {number} noSteps Number of steps
- * @returns Permutation of true / false values.
- */
-const getSuccessRatePermutation = (noSteps) => {
-  const successPermutation = [];
-  for (let i = 0; i <= noSteps; i++) {
-    successPermutation[i] = [];
-    for (let j = 0; j < noSteps; j++) {
-      successPermutation[i][j] = j < noSteps - i;
-    }
-  }
-  return successPermutation;
-};
-
-export const MethodAccordion = ({ noSteps, open }) => {
+export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
   const classes = useStyles();
 
   const [expanded, setExpanded] = useState(open);
 
-  const successPermutation = getSuccessRatePermutation(noSteps);
+  const methodsData = useGetMethodReactions(methodsWithTarget);
+  const categorizedMethodsData =
+    useCategorizeMethodDataBySuccess(methodsData);
 
   useLayoutEffect(() => {
     setExpanded(expanded);
   }, [open]);
-
-  useEffect(() => {
-    async function fetchData() {
-      const response = await axios.get(`/api/methods/?nosteps=${noSteps}`);
-      console.log(response);
-    }
-    fetchData();
-  }, []);
 
   return (
     <Accordion
@@ -95,16 +68,22 @@ export const MethodAccordion = ({ noSteps, open }) => {
       </AccordionSummary>
       <AccordionDetails className={classes.details}>
         <List className={classes.list} disablePadding>
-          {successPermutation.map((successArray, index) => {
-            return (
-              <Fragment key={index}>
-                <ListItem disableGutters>
-                  <MethodSuccessAccordion successArray={successArray} />
-                </ListItem>
-                {!!(index < successPermutation.length - 1) && <Divider />}
-              </Fragment>
-            );
-          })}
+          {Object.entries(categorizedMethodsData)
+            .reverse()
+            .map(([noSuccesses, methodData], index) => {
+              return (
+                <Fragment key={noSuccesses}>
+                  <ListItem disableGutters>
+                    <MethodSuccessAccordion
+                      noSteps={noSteps}
+                      noSuccesses={Number(noSuccesses)}
+                      methodData={methodData}
+                    />
+                  </ListItem>
+                  {!!(index < methodData.length - 1) && <Divider />}
+                </Fragment>
+              );
+            })}
         </List>
       </AccordionDetails>
     </Accordion>

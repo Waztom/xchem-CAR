@@ -1,5 +1,8 @@
 import { makeStyles } from '@material-ui/core';
-import { MethodAccordion } from '../MethodAccordion';
+import { MethodStepAccordion } from '../MethodStepAccordion';
+import { useCategorizeMethodsByNoSteps } from './hooks/useCategorizeMethodsByNoSteps';
+import { useGetMethodsForTargets } from './hooks/useGetMethodsForTargets';
+import { useGetTargets } from './hooks/useGetTargets';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -7,14 +10,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const methodAccordions = [
-  { noSteps: 1, open: true },
-  { noSteps: 2, open: false },
-  { noSteps: 3, open: false },
-];
-
 export const ProjectView = ({ projectId }) => {
   const classes = useStyles();
+
+  const targets = useGetTargets(projectId);
+  const methodsWithTarget = useGetMethodsForTargets(targets);
+  const categorizedMethodsWithTarget =
+    useCategorizeMethodsByNoSteps(methodsWithTarget);
 
   if (!projectId) {
     return null;
@@ -22,9 +24,18 @@ export const ProjectView = ({ projectId }) => {
 
   return (
     <main className={classes.root}>
-      {methodAccordions.map(({ noSteps, open }) => {
-        return <MethodAccordion key={noSteps} noSteps={noSteps} open={open} />;
-      })}
+      {Object.entries(categorizedMethodsWithTarget).map(
+        ([noSteps, methodsWithTarget], index) => {
+          return (
+            <MethodStepAccordion
+              key={noSteps}
+              noSteps={Number(noSteps)}
+              open={index === 0}
+              methodsWithTarget={methodsWithTarget}
+            />
+          );
+        }
+      )}
     </main>
   );
 };
