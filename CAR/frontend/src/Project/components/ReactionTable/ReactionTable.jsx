@@ -18,6 +18,7 @@ import { FaFlask } from 'react-icons/fa';
 import { GiMoneyStack } from 'react-icons/gi';
 import { IoFootsteps } from 'react-icons/io5';
 import { ImSad, ImSmile } from 'react-icons/im';
+import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
   table: {
@@ -36,6 +37,26 @@ const useStyles = makeStyles((theme) => ({
 
 export const ReactionTable = ({ noSteps, methodData }) => {
   const classes = useStyles();
+
+  const synthesiseMethod = async (methodId, synthesise) => {
+    try {
+      await axios.patch(`/api/methods/${methodId}/`, {
+        synthesise,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const adjustReactionSuccess = async (reactionId, successful) => {
+    try {
+      await axios.patch(`/api/reactions/${reactionId}/`, {
+        successrate: successful ? 0.6 : 0.4,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const columns = useMemo(() => {
     return [
@@ -61,8 +82,15 @@ export const ReactionTable = ({ noSteps, methodData }) => {
         Header: () => {
           return <IconComponent Component={FaFlask} />;
         },
-        Cell: ({ value }) => {
-          return <Checkbox checked={value} />;
+        Cell: ({ value, row }) => {
+          return (
+            <Checkbox
+              checked={value}
+              onChange={(_, checked) =>
+                synthesiseMethod(row.original.method.id, checked)
+              }
+            />
+          );
         },
       },
       ...new Array(noSteps).fill(0).map((_, index) => {
@@ -77,14 +105,22 @@ export const ReactionTable = ({ noSteps, methodData }) => {
               </div>
             );
           },
-          Cell: ({ value }) => {
+          Cell: ({ value, row }) => {
+            const reactionId = row.original.reactions[index].id;
+
             return (
               <>
                 <img src={value} height={60} />
-                <IconButton size="small">
+                <IconButton
+                  size="small"
+                  onClick={() => adjustReactionSuccess(reactionId, true)}
+                >
                   <IconComponent Component={ImSmile} />
                 </IconButton>
-                <IconButton size="small">
+                <IconButton
+                  size="small"
+                  onClick={() => adjustReactionSuccess(reactionId, false)}
+                >
                   <IconComponent Component={ImSad} />
                 </IconButton>
               </>
