@@ -1,1 +1,1 @@
-export * from './components/ProjectView';
+export { ProjectProvider as default } from './components/ProjectProvider';

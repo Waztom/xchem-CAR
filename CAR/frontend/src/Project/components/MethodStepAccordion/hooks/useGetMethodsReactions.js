@@ -1,24 +1,22 @@
 import { useMemo } from 'react';
 import { useQueries } from 'react-query';
 import { axiosGet } from '../../../../common/utils/axiosFunctions';
-import { getMethodsQueryKey } from '../../../api/methodsQueryKeys';
+import { getReactionsQueryKey } from '../../../api/reactionsQueryKeys';
 
-export const useGetMethodsForTargets = (targets) => {
+export const useGetMethodsReactions = (methodsWithTarget) => {
   const results = useQueries(
-    targets.map((target) => {
-      const queryKey = getMethodsQueryKey(target.id);
+    methodsWithTarget.map((methodWithTarget) => {
+      const queryKey = getReactionsQueryKey(methodWithTarget.method.id);
 
       return {
         queryKey,
         queryFn: async () => {
-          const methods = await axiosGet(queryKey);
+          const reactions = await axiosGet(queryKey);
 
-          return methods
-            .filter((method) => method.target_id === target.id)
-            .map((method) => ({
-              target,
-              method,
-            }));
+          return {
+            ...methodWithTarget,
+            reactions,
+          };
         },
         onError: (err) => console.error(err),
       };
@@ -29,15 +27,14 @@ export const useGetMethodsForTargets = (targets) => {
 
   const isLoading = results.find((result) => result.isLoading);
 
-  const methodsWithTarget = useMemo(() => {
+  const methodsData = useMemo(() => {
     if (areAllNotFetched) {
       return [];
     }
     return results
       .filter((result) => result.isSuccess)
-      .map((result) => result.data)
-      .flat();
+      .map((result) => result.data);
   }, [results, areAllNotFetched]);
 
-  return { isLoading, methodsWithTarget };
+  return { isLoading, methodsData };
 };

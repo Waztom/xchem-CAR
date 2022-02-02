@@ -1,24 +1,15 @@
-import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useProjectId } from '../../../hooks/useProjectId';
+import { useQuery } from 'react-query';
+import { getTargetsQueryKey } from '../../../api/targetsQueryKeys';
+import { axiosGet } from '../../../../common/utils/axiosFunctions';
 
-export const useGetTargets = (projectId) => {
-  const [targets, setTargets] = useState([]);
+export const useGetTargets = () => {
+  const projectId = useProjectId();
 
-  useEffect(() => {
-    if (!projectId) {
-      return;
-    }
+  const queryKey = getTargetsQueryKey(projectId);
 
-    async function fetchData() {
-      try {
-        const response = await axios.get(`/api/targets?search=${projectId}`);
-        setTargets(response.data);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    fetchData();
-  }, [projectId]);
-
-  return targets;
+  return useQuery(queryKey, () => axiosGet(queryKey), {
+    initialData: [],
+    onError: (err) => console.error(err),
+  });
 };

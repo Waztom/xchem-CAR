@@ -10,17 +10,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const ProjectView = ({ projectId }) => {
+export const ProjectView = () => {
   const classes = useStyles();
 
-  const targets = useGetTargets(projectId);
-  const methodsWithTarget = useGetMethodsForTargets(targets);
+  const { data: targets } = useGetTargets();
+  const { methodsWithTarget } = useGetMethodsForTargets(targets);
   const categorizedMethodsWithTarget =
     useCategorizeMethodsByNoSteps(methodsWithTarget);
-
-  if (!projectId) {
-    return null;
-  }
 
   return (
     <main className={classes.root}>

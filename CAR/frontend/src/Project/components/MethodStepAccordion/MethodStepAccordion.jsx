@@ -13,7 +13,7 @@ import { IoFootsteps } from 'react-icons/io5';
 import { IconComponent } from '../../../common/components/IconComponent';
 import { MethodSuccessAccordion } from '../MethodSuccessAccordion';
 import { useCategorizeMethodDataBySuccess } from './hooks/useCategorizeMethodDataBySuccess';
-import { useGetMethodReactions } from './hooks/useGetMethodReactions';
+import { useGetMethodsReactions } from './hooks/useGetMethodsReactions';
 
 const useStyles = makeStyles((theme) => ({
   summary: {
@@ -42,7 +42,7 @@ export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
 
   const [expanded, setExpanded] = useState(open);
 
-  const methodsData = useGetMethodReactions(methodsWithTarget);
+  const { methodsData } = useGetMethodsReactions(methodsWithTarget);
   const categorizedMethodsData = useCategorizeMethodDataBySuccess(methodsData);
 
   useLayoutEffect(() => {
@@ -59,7 +59,7 @@ export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
         expandIcon={<ExpandMore className={classes.collapseIcon} />}
       >
         {new Array(noSteps).fill(0).map((_, index) => (
-          <IconComponent Component={IoFootsteps} />
+          <IconComponent key={index} Component={IoFootsteps} />
         ))}
       </AccordionSummary>
       <AccordionDetails className={classes.details}>
