@@ -10,6 +10,7 @@ import {
 import { ExpandMore } from '@material-ui/icons';
 import { Fragment, useLayoutEffect, useState } from 'react';
 import { IoFootsteps } from 'react-icons/io5';
+import { IconComponent } from '../../../common/components/IconComponent';
 import { MethodSuccessAccordion } from '../MethodSuccessAccordion';
 import { useCategorizeMethodDataBySuccess } from './hooks/useCategorizeMethodDataBySuccess';
 import { useGetMethodReactions } from './hooks/useGetMethodReactions';
@@ -24,10 +25,6 @@ const useStyles = makeStyles((theme) => ({
   },
   collapseIcon: {
     color: theme.palette.white,
-  },
-  icon: {
-    width: 24,
-    height: 24,
   },
   details: {
     padding: 0,
@@ -46,8 +43,7 @@ export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
   const [expanded, setExpanded] = useState(open);
 
   const methodsData = useGetMethodReactions(methodsWithTarget);
-  const categorizedMethodsData =
-    useCategorizeMethodDataBySuccess(methodsData);
+  const categorizedMethodsData = useCategorizeMethodDataBySuccess(methodsData);
 
   useLayoutEffect(() => {
     setExpanded(expanded);
@@ -63,7 +59,7 @@ export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
         expandIcon={<ExpandMore className={classes.collapseIcon} />}
       >
         {new Array(noSteps).fill(0).map((_, index) => (
-          <IoFootsteps key={index} className={classes.icon} />
+          <IconComponent Component={IoFootsteps} />
         ))}
       </AccordionSummary>
       <AccordionDetails className={classes.details}>

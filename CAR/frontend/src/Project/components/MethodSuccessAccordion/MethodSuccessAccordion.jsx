@@ -15,6 +15,7 @@ import { IoFootsteps } from 'react-icons/io5';
 import { FaRegEdit, FaFlask } from 'react-icons/fa';
 import { Fragment } from 'react';
 import { MethodCategoryAccordion } from '../MethodCategoryAccordion/MethodCategoryAccordion';
+import { IconComponent } from '../../../common/components/IconComponent';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -42,10 +43,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(1 / 2),
-  },
-  icon: {
-    width: 24,
-    height: 24,
   },
   list: {
     width: '100%',
@@ -85,16 +82,16 @@ export const MethodSuccessAccordion = ({
           {new Array(noSuccesses).fill(0).map((_, index) => {
             return (
               <Fragment key={index}>
-                <IoFootsteps className={classes.icon} />
-                <ImSmile key={index} className={classes.icon} />
+                <IconComponent Component={IoFootsteps} />
+                <IconComponent Component={ImSmile} />
               </Fragment>
             );
           })}
           {new Array(noSteps - noSuccesses).fill(0).map((_, index) => {
             return (
               <Fragment key={index}>
-                <IoFootsteps className={classes.icon} />
-                <ImSad key={index} className={classes.icon} />
+                <IconComponent Component={IoFootsteps} />
+                <IconComponent Component={ImSad} />
               </Fragment>
             );
           })}
@@ -104,7 +101,7 @@ export const MethodSuccessAccordion = ({
             return (
               <div key={index} className={classes.categoryInfo}>
                 <Typography>{value}</Typography>
-                <CategoryIcon className={classes.icon} />
+                <IconComponent Component={CategoryIcon} />
               </div>
             );
           })}

@@ -9,6 +9,7 @@ import { ExpandMore } from '@material-ui/icons';
 import { Fragment } from 'react';
 import { ImSad, ImSmile } from 'react-icons/im';
 import { IoFootsteps } from 'react-icons/io5';
+import { IconComponent } from '../../../common/components/IconComponent';
 import { ReactionTable } from '../ReactionTable';
 
 const useStyles = makeStyles((theme) => ({
@@ -28,10 +29,6 @@ const useStyles = makeStyles((theme) => ({
   },
   details: {
     padding: 0,
-  },
-  icon: {
-    width: 24,
-    height: 24,
   },
 }));
 
@@ -58,20 +55,20 @@ export const MethodCategoryAccordion = ({
         {new Array(noSuccesses).fill(0).map((_, index) => {
           return (
             <Fragment key={index}>
-              <IoFootsteps className={classes.icon} />
-              <ImSmile key={index} className={classes.icon} />
+              <IconComponent Component={IoFootsteps} />
+              <IconComponent Component={ImSmile} />
             </Fragment>
           );
         })}
         {new Array(noSteps - noSuccesses).fill(0).map((_, index) => {
           return (
             <Fragment key={index}>
-              <IoFootsteps className={classes.icon} />
-              <ImSad key={index} className={classes.icon} />
+              <IconComponent Component={IoFootsteps} />
+              <IconComponent Component={ImSad} />
             </Fragment>
           );
         })}
-        <CategoryIcon className={classes.icon} />
+        <IconComponent Component={CategoryIcon} />
       </AccordionSummary>
       <AccordionDetails className={classes.details}>
         <ReactionTable noSteps={noSteps} methodData={methodData} />
