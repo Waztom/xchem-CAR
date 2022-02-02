@@ -22,10 +22,14 @@ import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
   table: {
-    width: 'auto',
+    '& td:last-child': {
+      width: '100%',
+    },
   },
   cell: {
     textAlign: 'center',
+    whiteSpace: 'nowrap',
+    borderColor: theme.palette.divider,
   },
   sortCell: {
     display: 'flex',
@@ -128,6 +132,9 @@ export const ReactionTable = ({ noSteps, methodData }) => {
           },
         };
       }),
+      {
+        id: 'hidden',
+      },
     ];
   }, [noSteps]);
 
@@ -151,14 +158,19 @@ export const ReactionTable = ({ noSteps, methodData }) => {
                 {...column.getHeaderProps(
                   column.canSort ? column.getSortByToggleProps() : undefined
                 )}
+                aria-hidden={column.id === 'hidden' ? 'true' : undefined}
               >
-                {column.render('Header')}
-                {column.canSort && (
-                  <TableSortLabel
-                    active={column.isSorted}
-                    // react-table has a unsorted state which is not treated here
-                    direction={column.isSortedDesc ? 'desc' : 'asc'}
-                  />
+                {column.canSort ? (
+                  <div className={classes.sortCell}>
+                    {column.render('Header')}
+                    <TableSortLabel
+                      active={column.isSorted}
+                      // react-table has a unsorted state which is not treated here
+                      direction={column.isSortedDesc ? 'desc' : 'asc'}
+                    />
+                  </div>
+                ) : (
+                  column.render('Header')
                 )}
               </TableCell>
             ))}
