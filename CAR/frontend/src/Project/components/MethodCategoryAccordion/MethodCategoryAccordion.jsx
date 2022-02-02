@@ -27,6 +27,9 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     gap: theme.spacing(),
   },
+  details: {
+    padding: 0,
+  },
   icon: {
     width: 24,
     height: 24,
@@ -73,7 +76,7 @@ export const MethodCategoryAccordion = ({
         })}
         <CategoryIcon className={classes.icon} />
       </AccordionSummary>
-      <AccordionDetails>
+      <AccordionDetails className={classes.details}>
         <ReactionTable noSteps={noSteps} methodData={methodData} />
       </AccordionDetails>
     </Accordion>
