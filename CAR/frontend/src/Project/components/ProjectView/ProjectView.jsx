@@ -13,10 +13,14 @@ const useStyles = makeStyles((theme) => ({
 export const ProjectView = () => {
   const classes = useStyles();
 
-  const { data: targets } = useGetTargets();
+  const { targets, isLoading } = useGetTargets();
   const { methodsWithTarget } = useGetMethodsForTargets(targets);
   const categorizedMethodsWithTarget =
     useCategorizeMethodsByNoSteps(methodsWithTarget);
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <main className={classes.root}>

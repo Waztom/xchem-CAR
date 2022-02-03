@@ -8,7 +8,13 @@ import Project from '../../../Project';
 import { theme } from './theme';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity,
+    },
+  },
+});
 
 export const App = () => {
   const [projectId, setProjectId] = useState(0);

@@ -10,14 +10,7 @@ export const useGetMethodsReactions = (methodsWithTarget) => {
 
       return {
         queryKey,
-        queryFn: async () => {
-          const reactions = await axiosGet(queryKey);
-
-          return {
-            ...methodWithTarget,
-            reactions,
-          };
-        },
+        queryFn: () => axiosGet(queryKey),
         onError: (err) => console.error(err),
       };
     })
@@ -31,10 +24,18 @@ export const useGetMethodsReactions = (methodsWithTarget) => {
     if (areAllNotFetched) {
       return [];
     }
+
     return results
-      .filter((result) => result.isSuccess)
-      .map((result) => result.data);
-  }, [results, areAllNotFetched]);
+      .map((result, index) => ({
+        result,
+        methodWithTarget: methodsWithTarget[index],
+      }))
+      .filter(({ result }) => result.isSuccess)
+      .map(({ result, methodWithTarget }) => ({
+        ...methodWithTarget,
+        reactions: result.data,
+      }));
+  }, [methodsWithTarget, results, areAllNotFetched]);
 
   return { isLoading, methodsData };
 };

@@ -19,6 +19,8 @@ import { GiMoneyStack } from 'react-icons/gi';
 import { IoFootsteps } from 'react-icons/io5';
 import { ImSad, ImSmile } from 'react-icons/im';
 import axios from 'axios';
+import { useSynthesiseMethod } from './hooks/useSynthesiseMethod';
+import { useAdjustReactionSuccessRate } from './hooks/useAdjustReactionSuccessRate';
 
 const useStyles = makeStyles((theme) => ({
   table: {
@@ -42,25 +44,9 @@ const useStyles = makeStyles((theme) => ({
 export const ReactionTable = ({ noSteps, methodData }) => {
   const classes = useStyles();
 
-  const synthesiseMethod = async (methodId, synthesise) => {
-    try {
-      await axios.patch(`/api/methods/${methodId}/`, {
-        synthesise,
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const { mutate: synthesiseMethod } = useSynthesiseMethod();
 
-  const adjustReactionSuccess = async (reactionId, successful) => {
-    try {
-      await axios.patch(`/api/reactions/${reactionId}/`, {
-        successrate: successful ? 0.6 : 0.4,
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const { mutate: adjustReactionSuccessRate } = useAdjustReactionSuccessRate();
 
   const columns = useMemo(() => {
     return [
@@ -91,7 +77,10 @@ export const ReactionTable = ({ noSteps, methodData }) => {
             <Checkbox
               checked={value}
               onChange={(_, checked) =>
-                synthesiseMethod(row.original.method.id, checked)
+                synthesiseMethod({
+                  method: row.original.method,
+                  synthesise: checked,
+                })
               }
             />
           );
@@ -110,20 +99,24 @@ export const ReactionTable = ({ noSteps, methodData }) => {
             );
           },
           Cell: ({ value, row }) => {
-            const reactionId = row.original.reactions[index].id;
+            const reaction = row.original.reactions[index];
 
             return (
               <>
                 <img src={value} height={60} />
                 <IconButton
                   size="small"
-                  onClick={() => adjustReactionSuccess(reactionId, true)}
+                  onClick={() =>
+                    adjustReactionSuccessRate({ reaction, successrate: 0.6 })
+                  }
                 >
                   <IconComponent Component={ImSmile} />
                 </IconButton>
                 <IconButton
                   size="small"
-                  onClick={() => adjustReactionSuccess(reactionId, false)}
+                  onClick={() =>
+                    adjustReactionSuccessRate({ reaction, successrate: 0.4 })
+                  }
                 >
                   <IconComponent Component={ImSad} />
                 </IconButton>

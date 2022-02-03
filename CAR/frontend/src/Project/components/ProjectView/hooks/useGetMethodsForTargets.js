@@ -13,12 +13,7 @@ export const useGetMethodsForTargets = (targets) => {
         queryFn: async () => {
           const methods = await axiosGet(queryKey);
 
-          return methods
-            .filter((method) => method.target_id === target.id)
-            .map((method) => ({
-              target,
-              method,
-            }));
+          return methods.filter((method) => method.target_id === target.id);
         },
         onError: (err) => console.error(err),
       };
@@ -33,11 +28,21 @@ export const useGetMethodsForTargets = (targets) => {
     if (areAllNotFetched) {
       return [];
     }
+
     return results
-      .filter((result) => result.isSuccess)
-      .map((result) => result.data)
+      .map((result, index) => ({
+        result,
+        target: targets[index],
+      }))
+      .filter(({ result }) => result.isSuccess)
+      .map(({ result, target }) =>
+        result.data.map((method) => ({
+          target,
+          method,
+        }))
+      )
       .flat();
-  }, [results, areAllNotFetched]);
+  }, [targets, results, areAllNotFetched]);
 
   return { isLoading, methodsWithTarget };
 };
