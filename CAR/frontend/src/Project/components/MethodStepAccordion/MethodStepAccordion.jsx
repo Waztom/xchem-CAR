@@ -11,6 +11,7 @@ import { ExpandMore } from '@material-ui/icons';
 import { Fragment, useLayoutEffect, useState } from 'react';
 import { IoFootsteps } from 'react-icons/io5';
 import { IconComponent } from '../../../common/components/IconComponent';
+import { LoadingSpinner } from '../../../common/components/LoadingSpinner/LoadingSpinner';
 import { MethodSuccessAccordion } from '../MethodSuccessAccordion';
 import { useCategorizeMethodsDataBySuccessRate } from './hooks/useCategorizeMethodsDataBySuccessRate';
 import { useGetMethodsReactions } from './hooks/useGetMethodsReactions';
@@ -42,7 +43,7 @@ export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
 
   const [expanded, setExpanded] = useState(open);
 
-  const { methodsData } = useGetMethodsReactions(methodsWithTarget);
+  const { methodsData, isLoading } = useGetMethodsReactions(methodsWithTarget);
   const categorizedMethodsData =
     useCategorizeMethodsDataBySuccessRate(methodsData);
 
@@ -64,24 +65,28 @@ export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
         ))}
       </AccordionSummary>
       <AccordionDetails className={classes.details}>
-        <List className={classes.list} disablePadding>
-          {Object.entries(categorizedMethodsData)
-            .sort(([keyA], [keyB]) => keyB.localeCompare(keyA))
-            .map(([successString, methodData], index) => {
-              return (
-                <Fragment key={successString}>
-                  <ListItem disableGutters>
-                    <MethodSuccessAccordion
-                      noSteps={noSteps}
-                      successString={successString}
-                      methodData={methodData}
-                    />
-                  </ListItem>
-                  {!!(index < methodData.length - 1) && <Divider />}
-                </Fragment>
-              );
-            })}
-        </List>
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <List className={classes.list} disablePadding>
+            {Object.entries(categorizedMethodsData)
+              .sort(([keyA], [keyB]) => keyB.localeCompare(keyA))
+              .map(([successString, methodData], index) => {
+                return (
+                  <Fragment key={successString}>
+                    <ListItem disableGutters>
+                      <MethodSuccessAccordion
+                        noSteps={noSteps}
+                        successString={successString}
+                        methodData={methodData}
+                      />
+                    </ListItem>
+                    {!!(index < methodData.length - 1) && <Divider />}
+                  </Fragment>
+                );
+              })}
+          </List>
+        )}
       </AccordionDetails>
     </Accordion>
   );

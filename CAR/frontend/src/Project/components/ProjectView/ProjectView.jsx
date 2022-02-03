@@ -1,4 +1,5 @@
 import { makeStyles } from '@material-ui/core';
+import { LoadingSpinner } from '../../../common/components/LoadingSpinner/LoadingSpinner';
 import { MethodStepAccordion } from '../MethodStepAccordion';
 import { useCategorizeMethodsByNoSteps } from './hooks/useCategorizeMethodsByNoSteps';
 import { useGetMethodsForTargets } from './hooks/useGetMethodsForTargets';
@@ -13,13 +14,14 @@ const useStyles = makeStyles((theme) => ({
 export const ProjectView = () => {
   const classes = useStyles();
 
-  const { targets, isLoading } = useGetTargets();
-  const { methodsWithTarget } = useGetMethodsForTargets(targets);
+  const { targets, isLoading: isLoadingTargets } = useGetTargets();
+  const { methodsWithTarget, isLoading: isLoadingMethodsWithTargets } =
+    useGetMethodsForTargets(targets);
   const categorizedMethodsWithTarget =
     useCategorizeMethodsByNoSteps(methodsWithTarget);
 
-  if (isLoading) {
-    return null;
+  if (isLoadingTargets || isLoadingMethodsWithTargets) {
+    return <LoadingSpinner />;
   }
 
   return (
