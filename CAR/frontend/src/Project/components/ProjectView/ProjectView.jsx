@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core';
 import { LoadingSpinner } from '../../../common/components/LoadingSpinner/LoadingSpinner';
-import { MethodStepAccordion } from '../MethodStepAccordion';
+import { StepAccordion } from '../StepAccordion';
 import { useCategorizeMethodsByNoSteps } from './hooks/useCategorizeMethodsByNoSteps';
 import { useGetMethodsForTargets } from './hooks/useGetMethodsForTargets';
 import { useGetTargets } from './hooks/useGetTargets';
@@ -29,7 +29,7 @@ export const ProjectView = () => {
       {Object.entries(categorizedMethodsWithTarget).map(
         ([noSteps, methodsWithTarget], index) => {
           return (
-            <MethodStepAccordion
+            <StepAccordion
               key={noSteps}
               noSteps={Number(noSteps)}
               open={index === 0}

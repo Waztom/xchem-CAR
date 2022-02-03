@@ -18,7 +18,6 @@ import { FaFlask } from 'react-icons/fa';
 import { GiMoneyStack } from 'react-icons/gi';
 import { IoFootsteps } from 'react-icons/io5';
 import { ImSad, ImSmile } from 'react-icons/im';
-import axios from 'axios';
 import { useSynthesiseMethod } from './hooks/useSynthesiseMethod';
 import { useAdjustReactionSuccessRate } from './hooks/useAdjustReactionSuccessRate';
 

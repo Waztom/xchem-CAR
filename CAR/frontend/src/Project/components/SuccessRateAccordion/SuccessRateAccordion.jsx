@@ -14,7 +14,7 @@ import { ImSad, ImSmile } from 'react-icons/im';
 import { IoFootsteps } from 'react-icons/io5';
 import { FaRegEdit, FaFlask } from 'react-icons/fa';
 import { Fragment } from 'react';
-import { MethodCategoryAccordion } from '../MethodCategoryAccordion/MethodCategoryAccordion';
+import { CategoryAccordion } from '../CategoryAccordion';
 import { IconComponent } from '../../../common/components/IconComponent';
 
 const useStyles = makeStyles((theme) => ({
@@ -59,7 +59,7 @@ const temporaryData = [
   { CategoryIcon: Cancel, value: 10 },
 ];
 
-export const MethodSuccessAccordion = ({
+export const SuccessRateAccordion = ({
   noSteps,
   successString,
   methodData,
@@ -107,7 +107,7 @@ export const MethodSuccessAccordion = ({
             return (
               <Fragment key={index}>
                 <ListItem disableGutters>
-                  <MethodCategoryAccordion
+                  <CategoryAccordion
                     noSteps={noSteps}
                     successString={successString}
                     methodData={methodData}

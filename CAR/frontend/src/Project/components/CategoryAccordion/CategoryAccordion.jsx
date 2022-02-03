@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const MethodCategoryAccordion = ({
+export const CategoryAccordion = ({
   noSteps,
   successString,
   methodData,

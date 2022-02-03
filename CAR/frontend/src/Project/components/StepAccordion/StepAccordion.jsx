@@ -12,7 +12,7 @@ import { Fragment, useLayoutEffect, useState } from 'react';
 import { IoFootsteps } from 'react-icons/io5';
 import { IconComponent } from '../../../common/components/IconComponent';
 import { LoadingSpinner } from '../../../common/components/LoadingSpinner/LoadingSpinner';
-import { MethodSuccessAccordion } from '../MethodSuccessAccordion';
+import { SuccessRateAccordion } from '../SuccessRateAccordion';
 import { useCategorizeMethodsDataBySuccessRate } from './hooks/useCategorizeMethodsDataBySuccessRate';
 import { useGetMethodsReactions } from './hooks/useGetMethodsReactions';
 
@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
+export const StepAccordion = ({ noSteps, open, methodsWithTarget }) => {
   const classes = useStyles();
 
   const [expanded, setExpanded] = useState(open);
@@ -75,7 +75,7 @@ export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
                 return (
                   <Fragment key={successString}>
                     <ListItem disableGutters>
-                      <MethodSuccessAccordion
+                      <SuccessRateAccordion
                         noSteps={noSteps}
                         successString={successString}
                         methodData={methodData}
