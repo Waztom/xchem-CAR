@@ -12,7 +12,7 @@ import { Fragment, useLayoutEffect, useState } from 'react';
 import { IoFootsteps } from 'react-icons/io5';
 import { IconComponent } from '../../../common/components/IconComponent';
 import { MethodSuccessAccordion } from '../MethodSuccessAccordion';
-import { useCategorizeMethodDataBySuccess } from './hooks/useCategorizeMethodDataBySuccess';
+import { useCategorizeMethodsDataBySuccessRate } from './hooks/useCategorizeMethodsDataBySuccessRate';
 import { useGetMethodsReactions } from './hooks/useGetMethodsReactions';
 
 const useStyles = makeStyles((theme) => ({
@@ -43,7 +43,8 @@ export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
   const [expanded, setExpanded] = useState(open);
 
   const { methodsData } = useGetMethodsReactions(methodsWithTarget);
-  const categorizedMethodsData = useCategorizeMethodDataBySuccess(methodsData);
+  const categorizedMethodsData =
+    useCategorizeMethodsDataBySuccessRate(methodsData);
 
   useLayoutEffect(() => {
     setExpanded(expanded);
@@ -65,14 +66,14 @@ export const MethodStepAccordion = ({ noSteps, open, methodsWithTarget }) => {
       <AccordionDetails className={classes.details}>
         <List className={classes.list} disablePadding>
           {Object.entries(categorizedMethodsData)
-            .reverse()
-            .map(([noSuccesses, methodData], index) => {
+            .sort(([keyA], [keyB]) => keyB.localeCompare(keyA))
+            .map(([successString, methodData], index) => {
               return (
-                <Fragment key={noSuccesses}>
+                <Fragment key={successString}>
                   <ListItem disableGutters>
                     <MethodSuccessAccordion
                       noSteps={noSteps}
-                      noSuccesses={Number(noSuccesses)}
+                      successString={successString}
                       methodData={methodData}
                     />
                   </ListItem>

@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 
 export const MethodCategoryAccordion = ({
   noSteps,
-  noSuccesses,
+  successString,
   methodData,
   CategoryIcon,
 }) => {
@@ -52,19 +52,13 @@ export const MethodCategoryAccordion = ({
         }}
         expandIcon={<ExpandMore />}
       >
-        {new Array(noSuccesses).fill(0).map((_, index) => {
+        {[...successString].map((successChar, index) => {
           return (
             <Fragment key={index}>
               <IconComponent Component={IoFootsteps} />
-              <IconComponent Component={ImSmile} />
-            </Fragment>
-          );
-        })}
-        {new Array(noSteps - noSuccesses).fill(0).map((_, index) => {
-          return (
-            <Fragment key={index}>
-              <IconComponent Component={IoFootsteps} />
-              <IconComponent Component={ImSad} />
+              <IconComponent
+                Component={successChar === '1' ? ImSmile : ImSad}
+              />
             </Fragment>
           );
         })}

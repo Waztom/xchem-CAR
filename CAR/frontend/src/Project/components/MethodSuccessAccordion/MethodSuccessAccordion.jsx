@@ -61,7 +61,7 @@ const temporaryData = [
 
 export const MethodSuccessAccordion = ({
   noSteps,
-  noSuccesses,
+  successString,
   methodData,
 }) => {
   const classes = useStyles();
@@ -79,19 +79,13 @@ export const MethodSuccessAccordion = ({
         expandIcon={<ExpandMore />}
       >
         <div>
-          {new Array(noSuccesses).fill(0).map((_, index) => {
+          {[...successString].map((successChar, index) => {
             return (
               <Fragment key={index}>
                 <IconComponent Component={IoFootsteps} />
-                <IconComponent Component={ImSmile} />
-              </Fragment>
-            );
-          })}
-          {new Array(noSteps - noSuccesses).fill(0).map((_, index) => {
-            return (
-              <Fragment key={index}>
-                <IconComponent Component={IoFootsteps} />
-                <IconComponent Component={ImSad} />
+                <IconComponent
+                  Component={successChar === '1' ? ImSmile : ImSad}
+                />
               </Fragment>
             );
           })}
@@ -115,7 +109,7 @@ export const MethodSuccessAccordion = ({
                 <ListItem disableGutters>
                   <MethodCategoryAccordion
                     noSteps={noSteps}
-                    noSuccesses={Number(noSuccesses)}
+                    successString={successString}
                     methodData={methodData}
                     CategoryIcon={CategoryIcon}
                   />

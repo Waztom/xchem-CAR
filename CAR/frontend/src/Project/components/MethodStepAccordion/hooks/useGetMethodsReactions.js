@@ -10,7 +10,12 @@ export const useGetMethodsReactions = (methodsWithTarget) => {
 
       return {
         queryKey,
-        queryFn: () => axiosGet(queryKey),
+        queryFn: async () => {
+          const reactions = await axiosGet(queryKey);
+          return reactions.sort(
+            (reactionA, reactionB) => reactionA.id - reactionB.id
+          );
+        },
         onError: (err) => console.error(err),
       };
     })
