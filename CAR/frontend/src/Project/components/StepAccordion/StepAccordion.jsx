@@ -2,19 +2,13 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Divider,
-  List,
-  ListItem,
   makeStyles,
 } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
-import { Fragment, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { IoFootsteps } from 'react-icons/io5';
 import { IconComponent } from '../../../common/components/IconComponent';
-import { LoadingSpinner } from '../../../common/components/LoadingSpinner/LoadingSpinner';
-import { SuccessRateAccordion } from '../SuccessRateAccordion';
-import { useCategorizeMethodsDataBySuccessRate } from './hooks/useCategorizeMethodsDataBySuccessRate';
-import { useGetMethodsReactions } from './hooks/useGetMethodsReactions';
+import { SuccessRateAccordionList } from './components/SuccessRateAccordionList';
 
 const useStyles = makeStyles((theme) => ({
   summary: {
@@ -30,22 +24,12 @@ const useStyles = makeStyles((theme) => ({
   details: {
     padding: 0,
   },
-  list: {
-    width: '100%',
-    '& > li': {
-      padding: 0,
-    },
-  },
 }));
 
 export const StepAccordion = ({ noSteps, open, methodsWithTarget }) => {
   const classes = useStyles();
 
   const [expanded, setExpanded] = useState(open);
-
-  const { methodsData, isLoading } = useGetMethodsReactions(methodsWithTarget);
-  const categorizedMethodsData =
-    useCategorizeMethodsDataBySuccessRate(methodsData);
 
   useLayoutEffect(() => {
     setExpanded(expanded);
@@ -55,6 +39,7 @@ export const StepAccordion = ({ noSteps, open, methodsWithTarget }) => {
     <Accordion
       expanded={expanded}
       onChange={(_, expanded) => setExpanded(expanded)}
+      TransitionProps={{ unmountOnExit: true }} // Performance
     >
       <AccordionSummary
         className={classes.summary}
@@ -65,28 +50,10 @@ export const StepAccordion = ({ noSteps, open, methodsWithTarget }) => {
         ))}
       </AccordionSummary>
       <AccordionDetails className={classes.details}>
-        {isLoading ? (
-          <LoadingSpinner />
-        ) : (
-          <List className={classes.list} disablePadding>
-            {Object.entries(categorizedMethodsData)
-              .sort(([keyA], [keyB]) => keyB.localeCompare(keyA))
-              .map(([successString, methodData], index) => {
-                return (
-                  <Fragment key={successString}>
-                    <ListItem disableGutters>
-                      <SuccessRateAccordion
-                        noSteps={noSteps}
-                        successString={successString}
-                        methodData={methodData}
-                      />
-                    </ListItem>
-                    {!!(index < methodData.length - 1) && <Divider />}
-                  </Fragment>
-                );
-              })}
-          </List>
-        )}
+        <SuccessRateAccordionList
+          noSteps={noSteps}
+          methodsWithTarget={methodsWithTarget}
+        />
       </AccordionDetails>
     </Accordion>
   );
