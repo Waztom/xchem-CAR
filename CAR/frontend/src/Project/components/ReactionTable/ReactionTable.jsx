@@ -56,7 +56,7 @@ export const ReactionTable = ({ noSteps, methodData }) => {
           return <IconComponent Component={SiMoleculer} />;
         },
         Cell: ({ value }) => {
-          return <img src={value} height={60} />;
+          return <img src={value} width={120} height={60} />;
         },
       },
       {
@@ -102,7 +102,7 @@ export const ReactionTable = ({ noSteps, methodData }) => {
 
             return (
               <>
-                <img src={value} height={60} />
+                <img src={value} width={270} height={60} />
                 <IconButton
                   size="small"
                   onClick={() =>
