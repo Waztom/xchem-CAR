@@ -17,14 +17,14 @@ const queryClient = new QueryClient({
 });
 
 export const App = () => {
-  const [projectId, setProjectId] = useState(0);
+  const [projectId, setProjectId] = useState();
 
   function changeProject(projectid) {
     setProjectId(projectid);
   }
 
   function deleteProject() {
-    setProjectId(0);
+    setProjectId();
   }
 
   function generateProtocol() {
@@ -40,7 +40,7 @@ export const App = () => {
           deleteProject={deleteProject}
           generateProtocol={generateProtocol}
         />
-        <Project projectId={projectId} />
+        {projectId && <Project projectId={projectId} />}
         {/* <ProtocolBody ProjectID={ProjectID} key={ProjectID + 1} /> */}
       </ThemeProvider>
     </QueryClientProvider>

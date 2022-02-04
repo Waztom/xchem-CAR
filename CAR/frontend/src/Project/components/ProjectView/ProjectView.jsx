@@ -11,10 +11,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const ProjectView = () => {
+export const ProjectView = ({ projectId }) => {
   const classes = useStyles();
 
-  const { targets, isLoading: isLoadingTargets } = useGetTargets();
+  const { targets, isLoading: isLoadingTargets } = useGetTargets(projectId);
   const { methodsWithTarget, isLoading: isLoadingMethodsWithTargets } =
     useGetMethodsForTargets(targets);
   const categorizedMethodsWithTarget =

@@ -1,12 +1,9 @@
-import { useProjectId } from '../../../hooks/useProjectId';
 import { useQuery } from 'react-query';
 import { getTargetsQueryKey } from '../../../api/targetsQueryKeys';
 import { axiosGet } from '../../../../common/utils/axiosFunctions';
 import { useMemo } from 'react';
 
-export const useGetTargets = () => {
-  const projectId = useProjectId();
-
+export const useGetTargets = (projectId) => {
   const queryKey = getTargetsQueryKey(projectId);
 
   const { data, ...rest } = useQuery(queryKey, () => axiosGet(queryKey), {
