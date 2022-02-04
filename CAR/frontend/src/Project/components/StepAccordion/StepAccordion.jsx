@@ -44,6 +44,8 @@ export const StepAccordion = ({ noSteps, open, methodsWithTarget }) => {
       <AccordionSummary
         className={classes.summary}
         expandIcon={<ExpandMore className={classes.collapseIcon} />}
+        aria-controls={`step-accordion-${noSteps}-content`}
+        id={`step-accordion-${noSteps}-header`}
       >
         {new Array(noSteps).fill(0).map((_, index) => (
           <IconComponent key={index} Component={IoFootsteps} />

@@ -53,10 +53,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const temporaryData = [
-  { CategoryIcon: FindInPage, value: 300 },
-  { CategoryIcon: FaRegEdit, value: 10 },
-  { CategoryIcon: FaFlask, value: 400 },
-  { CategoryIcon: Cancel, value: 10 },
+  { type: 'review', CategoryIcon: FindInPage, value: 300 },
+  { type: 'edit', CategoryIcon: FaRegEdit, value: 10 },
+  { type: 'synthesise', CategoryIcon: FaFlask, value: 400 },
+  { type: 'ignore', CategoryIcon: Cancel, value: 10 },
 ];
 
 export const SuccessRateAccordion = ({
@@ -77,6 +77,8 @@ export const SuccessRateAccordion = ({
           content: classes.content,
         }}
         expandIcon={<ExpandMore />}
+        aria-controls={`successrate-accordion-${noSteps}-${successString}-content`}
+        id={`successrate-accordion-${noSteps}-${successString}-header`}
       >
         <div>
           {[...successString].map((successChar, index) => {
@@ -103,7 +105,7 @@ export const SuccessRateAccordion = ({
       </AccordionSummary>
       <AccordionDetails className={classes.details}>
         <List className={classes.list} disablePadding>
-          {temporaryData.map(({ CategoryIcon }, index) => {
+          {temporaryData.map((category, index) => {
             return (
               <Fragment key={index}>
                 <ListItem disableGutters>
@@ -111,7 +113,7 @@ export const SuccessRateAccordion = ({
                     noSteps={noSteps}
                     successString={successString}
                     methodData={methodData}
-                    CategoryIcon={CategoryIcon}
+                    category={category}
                   />
                 </ListItem>
                 {!!(index < temporaryData.length - 1) && <Divider />}
