@@ -81,6 +81,7 @@ export const SuccessRateAccordion = ({
         id={`successrate-accordion-${noSteps}-${successString}-header`}
       >
         <div>
+          {/** See the comment in useCategorizeMethodsDataBySuccessRate.js */}
           {[...successString].map((successChar, index) => {
             return (
               <Fragment key={index}>
