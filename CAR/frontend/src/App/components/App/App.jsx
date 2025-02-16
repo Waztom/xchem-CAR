@@ -1,37 +1,48 @@
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createTheme, ThemeProvider } from '@material-ui/core';
+import React from 'react';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { getTheme } from '../../../theme';
+import Layout from '../../../Layout';
+import { CeleryTasksChecker } from '../CeleryTasksChecker/CeleryTasksChecker';
+import { CustomSnackbarProvider } from '../CustomSnackbarProvider';
 
-import Header from '../../../Layout/Header';
-import Body from '../../../Body/Body';
-import { ThemeProvider } from '@material-ui/core';
-import { ProjectView } from '../../../Project';
-import { theme } from './theme';
+const theme = createTheme({
+  ...getTheme(),
+  overrides: {
+    MuiAccordionSummary: {
+      root: {
+        '&$expanded': {
+          minHeight: 48
+        }
+      },
+      content: {
+        margin: 0,
+        '&$expanded': {
+          margin: 0
+        }
+      }
+    }
+  }
+});
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity,
+      suspense: true
+    }
+  }
+});
 
 export const App = () => {
-  const [projectId, setProjectId] = useState(0);
-
-  function changeProject(projectid) {
-    setProjectId(projectid);
-  }
-
-  function deleteProject() {
-    setProjectId(0);
-  }
-
-  function generateProtocol() {
-    setProjectId(0);
-    // Need to figure out how to setshow Body vs Prot generator -> setShow in state did not work...
-  }
-
   return (
     <ThemeProvider theme={theme}>
-      <Header
-        changeProject={changeProject}
-        deleteProject={deleteProject}
-        generateProtocol={generateProtocol}
-      />
-      <ProjectView projectId={projectId} />
-      {/* <ProtocolBody ProjectID={ProjectID} key={ProjectID + 1} /> */}
+      <CustomSnackbarProvider>
+        <QueryClientProvider client={queryClient}>
+          <Layout />
+          <CeleryTasksChecker />
+        </QueryClientProvider>
+      </CustomSnackbarProvider>
     </ThemeProvider>
   );
 };

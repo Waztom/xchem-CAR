@@ -1,41 +1,31 @@
-import { makeStyles } from '@material-ui/core';
-import { MethodStepAccordion } from '../MethodStepAccordion';
-import { useCategorizeMethodsByNoSteps } from './hooks/useCategorizeMethodsByNoSteps';
-import { useGetMethodsForTargets } from './hooks/useGetMethodsForTargets';
-import { useGetTargets } from './hooks/useGetTargets';
+import React from 'react';
+import { BatchView } from '../BatchView';
+import { BatchContext } from '../../context/BatchContext';
+import { useBatchNavigationStore } from '../../../common/stores/batchNavigationStore';
+import { useCurrentProjectStore } from '../../../common/stores/currentProjectStore';
+import { useGetBatches } from '../../../common/hooks/useGetBatches';
+import { ReactionDetailsDialog } from '../ReactionDetailsDialog/ReactionDetailsDialog';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    padding: theme.spacing(2),
-  },
-}));
+export const ProjectView = () => {
+  const currentProject = useCurrentProjectStore.useCurrentProject();
 
-export const ProjectView = ({ projectId }) => {
-  const classes = useStyles();
+  const { data: batches } = useGetBatches({ project_id: currentProject.id });
 
-  const targets = useGetTargets(projectId);
-  const methodsWithTarget = useGetMethodsForTargets(targets);
-  const categorizedMethodsWithTarget =
-    useCategorizeMethodsByNoSteps(methodsWithTarget);
-
-  if (!projectId) {
-    return null;
-  }
+  const selected = useBatchNavigationStore.useSelected();
 
   return (
-    <main className={classes.root}>
-      {Object.entries(categorizedMethodsWithTarget).map(
-        ([noSteps, methodsWithTarget], index) => {
+    <>
+      {batches
+        ?.filter(batch => selected[batch.id])
+        .map(batch => {
           return (
-            <MethodStepAccordion
-              key={noSteps}
-              noSteps={Number(noSteps)}
-              open={index === 0}
-              methodsWithTarget={methodsWithTarget}
-            />
+            <BatchContext.Provider key={batch.id} value={batch}>
+              <BatchView />
+            </BatchContext.Provider>
           );
-        }
-      )}
-    </main>
+        })}
+
+      <ReactionDetailsDialog />
+    </>
   );
 };
