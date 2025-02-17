@@ -1,12 +1,12 @@
 FROM debian:bullseye-slim
 
 # Copy Python and Node reqs
-COPY ./CAR/frontend/package.json /workspace/CAR/frontend/package.json
-COPY ./CAR/requirements-dev.txt /workspace/requirements-dev.txt
+COPY ./CAR/frontend/package.json /code/CAR/frontend/package.json
+COPY ./CAR/requirements-dev.txt /code/requirements-dev.txt
 
 USER root
 
-WORKDIR /workspace
+WORKDIR /code
 
 # Update and install
 RUN \
@@ -17,10 +17,10 @@ RUN \
  pip install -r requirements-dev.txt  
 
 # Install frontend npm packages
-WORKDIR /workspace/CAR/frontend
+WORKDIR /code/CAR/frontend
 
 RUN \
  npm i npm@latest -g && \
- npm install --quiet --legacy-peer-deps
+ npm install
 
-CMD chown -R root /workspace/CAR/frontend
+CMD chown -R root /code/CAR/frontend
