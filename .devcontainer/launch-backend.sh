@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Running migrations..."
-cd /code
+cd /code/CAR/
 # initial migrations for existing stack
 python3 manage.py makemigrations
 python3 manage.py migrate
