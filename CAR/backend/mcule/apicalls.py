@@ -1,7 +1,12 @@
 from pycule import MCuleWrapper
 import os
+import inspect
 
 from ..utils import canonSmiles
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class MCuleAPI(object):
@@ -13,7 +18,9 @@ class MCuleAPI(object):
         """
         MCule API constructor
         """
-        self.mculewrapper = MCuleWrapper(authorisation_token=os.environ["MCULE_API_KEY"])
+        self.mculewrapper = MCuleWrapper(
+            authorisation_token=os.environ["MCULE_API_KEY"]
+        )
 
     def getMCuleInfo(self, smiles: str):
         """
@@ -35,16 +42,14 @@ class MCuleAPI(object):
                 return mculeid, mculeurl
 
         except Exception as e:
+            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
             try:
                 response_dict = self.mculewrapper.similaritysearch(
                     query=smiles, limit=1, threshold=0.7
                 )
-                print(smiles)
-                print(response_dict)
                 results = response_dict["response"]["results"]
                 if results:
                     smiles_test = canonSmiles(results[0]["smiles"])
-                    print(smiles_test)
                     if smiles_test == smiles:
                         mculeid = results[0]["mcule_id"]
                         mculeurl = results[0]["url"]
@@ -52,6 +57,7 @@ class MCuleAPI(object):
                     else:
                         return None
             except Exception as e:
+                logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
                 print(e)
                 return None
 
@@ -68,7 +74,9 @@ class MCuleAPI(object):
         if amount < 1:
             amount = 1
         try:
-            response_dict = self.mculewrapper.compoundpricesamount(mcule_id=mculeid, amount=amount)
+            response_dict = self.mculewrapper.compoundpricesamount(
+                mcule_id=mculeid, amount=amount
+            )
             price_info = response_dict["response"]["best_prices"][0]
             if price_info:
                 price = price_info["price"]
@@ -76,6 +84,7 @@ class MCuleAPI(object):
                 return price, deliverytime
 
         except Exception as e:
+            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
             print(e)
             print(response_dict)
             return None
@@ -85,8 +94,6 @@ class MCuleAPI(object):
         mculeids: list,
         amount: float = 1,
         delivery_country: str = "GB",
-        target_volume: float = None,
-        target_cc: float = None,
     ):
         """
         Get quote from MCule for list of mcule ids
@@ -109,28 +116,35 @@ class MCuleAPI(object):
                 amount=amount,
             )
             quote_id = response_dict["response"]["id"]
-            quote_state_response = self.mculewrapper.quoterequeststatus(quote_id=quote_id)
+            quote_state_response = self.mculewrapper.quoterequeststatus(
+                quote_id=quote_id
+            )
             quote_state = quote_state_response["response"]["state"]
 
             while quote_state != 30:
                 if quote_state == 40:
                     return None
                 else:
-                    quote_state_response = self.mculewrapper.quoterequeststatus(quote_id=quote_id)
+                    quote_state_response = self.mculewrapper.quoterequeststatus(
+                        quote_id=quote_id
+                    )
                     quote_state = quote_state_response["response"]["state"]
 
-            quote_info["quoteid"] = quote_state_response["response"]["group"]["quotes"][0]["id"]
-            quote_info["quoteurl"] = quote_state_response["response"]["group"]["quotes"][0][
-                "site_url"
-            ]
-            quote_info["quotecost"] = quote_state_response["response"]["group"]["quotes"][0][
-                "total_cost"
-            ]
-            quote_info["quotevaliduntil"] = quote_state_response["response"]["group"]["quotes"][0][
-                "valid_until"
-            ]
+            quote_info["quoteid"] = quote_state_response["response"]["group"]["quotes"][
+                0
+            ]["id"]
+            quote_info["quoteurl"] = quote_state_response["response"]["group"][
+                "quotes"
+            ][0]["site_url"]
+            quote_info["quotecost"] = quote_state_response["response"]["group"][
+                "quotes"
+            ][0]["total_cost"]
+            quote_info["quotevaliduntil"] = quote_state_response["response"]["group"][
+                "quotes"
+            ][0]["valid_until"]
 
             return quote_info
 
         except Exception as e:
+            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
             print(e)
