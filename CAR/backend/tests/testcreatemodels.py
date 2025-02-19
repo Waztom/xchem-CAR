@@ -1,5 +1,5 @@
 from django.test import TestCase
-from car.createmodels import (
+from .createmodels import (
     createProjectModel,
     createBatchModel,
     createReactionModel,

@@ -27,7 +27,7 @@ from .models import (
     Plate,
 )
 
-from car.recipebuilder.encodedrecipes import encoded_recipes
+from .recipebuilder.encodedrecipes import encoded_recipes
 
 logger = logging.getLogger(__name__)
 

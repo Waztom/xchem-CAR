@@ -2,7 +2,7 @@ from unittest import TestCase
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-from car.utils import (
+from .utils import (
     getMWs,
     getInchiKey,
     calculateMolsFromConc,

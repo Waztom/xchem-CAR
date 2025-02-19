@@ -7,8 +7,8 @@
 # from unittest.mock import patch
 
 # from .models import *
-# from car.createmodels import *
-# from car.validate import ValidateFile
+# from .createmodels import *
+# from .validate import ValidateFile
 
 # class validateFileUploadTestCase(TestCase):
 #     def setUp(self):

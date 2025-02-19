@@ -10,7 +10,7 @@
 
 # from rdkit.Chem import AllChem
 
-# from car.createmodels import (
+# from .createmodels import (
 #     CreateEncodedActionModels,
 #     createBatchModel,
 #     createCatalogEntryModel,
@@ -22,7 +22,7 @@
 #     createTargetModel,
 # )
 # from .tasks import validateFileUpload
-# from car.utils import getAddtionOrder
+# from .utils import getAddtionOrder
 
 # # from .testdata.indata.testcreateproject import grouped_targets, routes
 

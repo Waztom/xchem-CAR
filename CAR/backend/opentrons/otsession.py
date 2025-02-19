@@ -12,7 +12,7 @@ from rdkit.Chem import Descriptors
 import pandas as pd
 from pandas.core.frame import DataFrame
 
-from car.utils import (
+from ..utils import (
     getProductSmiles,
     checkPreviousReactionProducts,
     getReactionQuerySet,
@@ -23,7 +23,7 @@ from car.utils import (
     wellIndexToWellName,
 )
 
-from .models import (
+from ..models import (
     ActionSession,
     Batch,
     Column,

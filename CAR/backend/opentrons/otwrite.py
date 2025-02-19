@@ -10,14 +10,14 @@ from django.db.models import QuerySet, Q, Max, Min
 import os
 from graphene_django import DjangoObjectType
 
-from car.utils import (
+from ..utils import (
     getProductSmiles,
     getReaction,
     getPreviousReactionQuerySets,
     getReactionQuerySet,
 )
-from car.recipebuilder.encodedrecipes import encoded_recipes
-from .models import (
+from ..recipebuilder.encodedrecipes import encoded_recipes
+from ..models import (
     ActionSession,
     AddAction,
     Column,
@@ -25,9 +25,6 @@ from .models import (
     MixAction,
     OTSession,
     Reaction,
-)
-
-from .models import (
     Product,
     Pipette,
     TipRack,
@@ -35,6 +32,7 @@ from .models import (
     Well,
     OTScript,
 )
+
 import math
 import inspect
 import logging
@@ -916,7 +914,7 @@ class OTWrite(object):
         script.write(
             "# "
             + str(self.protocolname)
-            + str('" produced by XChem Car (https://car.xchem.diamond.ac.uk)')
+            + str('" produced by XChem Car (https://.xchem.diamond.ac.uk)')
         )
         script.write("\n# metadata")
         script.write(

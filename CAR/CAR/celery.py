@@ -16,8 +16,8 @@ app.autodiscover_tasks()
 # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "CAR.settings")
 
 # # Can use Redis - just need to install it
-# # app = Celery('CAR', backend='redis://localhost:6379/0', broker='pyamqp://')
-# # app = Celery("CAR", backend="db+sqlite:///results.db", broker="pyamqp://")
+# app = Celery('CAR', backend='redis://localhost:6379/0', broker='pyamqp://')
+# app = Celery("CAR", backend="db+sqlite:///results.db", broker="pyamqp://")
 
 # # Using a string here means the worker doesn't have to serialize
 # # the configuration object to child processes.

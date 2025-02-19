@@ -28,7 +28,7 @@ DEBUG = True
 # DEBBUG = False
 
 # NB Need to change this
-ALLOWED_HOSTS = ["car.diamond.ac.uk", "car.xchem.diamond.ac.uk", ".localhost", "127.0.0.1", "[::1]"]
+ALLOWED_HOSTS = [".diamond.ac.uk", ".xchem.diamond.ac.uk", ".localhost", "127.0.0.1", "[::1]"]
 
 # Sendgrid email settings
 EMAIL_HOST = "smtp.sendgrid.net"
@@ -41,6 +41,7 @@ EMAIL_USE_TLS = True
 # Application definition
 INSTALLED_APPS = [
     "backend",
+    'corsheaders',
     "rest_framework",
     "django_filters",
     "django.contrib.admin",
@@ -52,9 +53,10 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -171,3 +173,9 @@ CELERY = {
     "CELERY_RESULT_SERIALIZER": "json",
     "CELERY_TASK_SERIALIZER": "json",
 }
+
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
