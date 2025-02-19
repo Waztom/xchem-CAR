@@ -1,0 +1,1042 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>backend.models &#8212; XChem-CAR 0.0.1b documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for backend.models</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
+
+
+<div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../backend.html#backend.models.Project">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Project</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Project - a compound synthesis project.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    init_date: DateTimeField</span>
+<span class="sd">        The date the target was initiated (autofield)</span>
+<span class="sd">    name: SlugFieldField</span>
+<span class="sd">        The name of the project created as combination of the first three letters of the</span>
+<span class="sd">        submitter&#39;s name and submitter&#39;s organisation</span>
+<span class="sd">    submittername: Charfield</span>
+<span class="sd">        The name of the person creating the project</span>
+<span class="sd">    submitterorganisation: Charfield</span>
+<span class="sd">        The name of the person&#39;s organisation creating the project</span>
+<span class="sd">    proteintarget: Charfield</span>
+<span class="sd">        The target protein for the submitted compounds</span>
+<span class="sd">    quotecost: FloatField</span>
+<span class="sd">        Optional field for the total cost of the project using MCule as a supplier</span>
+<span class="sd">    quoteurl: CharField</span>
+<span class="sd">        Optional field for the MCule quote url</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">init_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">SlugField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">submitterorganisation</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">submittername</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">proteintarget</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">quotedcost</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">quoteurl</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Batch"><a class="viewcode-back" href="../../backend.html#backend.models.Batch">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Batch</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Batch - a batch of compounds.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    project_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a batch to it&#39;s project</span>
+<span class="sd">    batch_id: ForeignKey</span>
+<span class="sd">        Optional foreign key linking a sub-batch to it&#39;s parent-batch</span>
+<span class="sd">    batchtag: Charfield</span>
+<span class="sd">        The name of the batch</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">project_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Project</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;batches&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">batch_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s2">&quot;Batch&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">batchtag</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Target"><a class="viewcode-back" href="../../backend.html#backend.models.Target">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Target</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Target - a target compound for synthesis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    batch_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a target to it&#39;s batch</span>
+<span class="sd">    smiles: Charfield</span>
+<span class="sd">        The SMILES of the target compound</span>
+<span class="sd">    image: FileField</span>
+<span class="sd">        File link to a stored version of the image file of the target compound</span>
+<span class="sd">    name: Charfield</span>
+<span class="sd">        The name of the compound (Must complete how this is made)</span>
+<span class="sd">    concentration: FloatField</span>
+<span class="sd">        The target synthesis concnetration (mM) for a target compound</span>
+<span class="sd">    volume: FloatField</span>
+<span class="sd">        The target synthesis volume (uL) for a target compound</span>
+<span class="sd">    mols: FloatField</span>
+<span class="sd">        The target mols of the compound to be synthesised</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">batch_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Batch</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;targets&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">smiles</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span><span class="o">=</span><span class="s2">&quot;targetimages/&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">concentration</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">mass</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">mols</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Method"><a class="viewcode-back" href="../../backend.html#backend.models.Method">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Method</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Method - a retrosynthetic pathway of reactions</span>
+<span class="sd">    for a target compound.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    target_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a method to it&#39;s target compound</span>
+<span class="sd">    nosteps: IntegerField</span>
+<span class="sd">        The number of reaction steps for a method</span>
+<span class="sd">    otchem: BooleanField</span>
+<span class="sd">        Set to True if all the reactions in the method can be executed on the OpenTrons</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">target_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Target</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;methods&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">nosteps</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">otchem</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Reaction"><a class="viewcode-back" href="../../backend.html#backend.models.Reaction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Reaction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Reaction - the reaction to make a compound.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    method_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a reaction to it&#39;s method</span>
+<span class="sd">    reactionclass: Charfield</span>
+<span class="sd">        The name of the reaction</span>
+<span class="sd">    recipe: CharField</span>
+<span class="sd">        The encoded recipe type used for the reaction</span>
+<span class="sd">    nnumber: IntegerField</span>
+<span class="sd">        The number of the reaction eg. reaction 1 of 3</span>
+<span class="sd">    intramolecular: BooleanField</span>
+<span class="sd">        Set to True if the reaction is intermolecular</span>
+<span class="sd">    image: FileField</span>
+<span class="sd">        File link to a stored version of the image file of the reaction</span>
+<span class="sd">    success: BooleanField</span>
+<span class="sd">        The success of the reaction with default success set to True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">method_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Method</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;reactions&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">reactionclass</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">recipe</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;standard&quot;</span><span class="p">)</span>
+    <span class="n">groupbycolumn</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">intramolecular</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">temperature</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span>
+        <span class="n">upload_to</span><span class="o">=</span><span class="s2">&quot;reactionimages/&quot;</span><span class="p">,</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PubChemInfo"><a class="viewcode-back" href="../../backend.html#backend.models.PubChemInfo">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PubChemInfo</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define PubChemInfo - the PubChem info for a compound.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    compoundid: IntegerField</span>
+<span class="sd">        The PubChem compound id of a compound</span>
+<span class="sd">    summaryurl: Charfield</span>
+<span class="sd">        The PubChem compound url</span>
+<span class="sd">    lcssurl: Charfield</span>
+<span class="sd">        The PubChem Laboratory Chemical Safety Summary url</span>
+<span class="sd">    smiles: Charfield</span>
+<span class="sd">        The SMILES of the compound</span>
+<span class="sd">    cas: Charfield</span>
+<span class="sd">        Optional CAS number (if found) for a compound</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">compoundid</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">summaryurl</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">lcssurl</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">smiles</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">cas</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Reactant"><a class="viewcode-back" href="../../backend.html#backend.models.Reactant">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Reactant</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Reactant - the reactant compound of a reaction.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    reaction_id: ForeignKey</span>
+<span class="sd">        Optional foreign key linking a reactant to it&#39;s reaction</span>
+<span class="sd">    pubcheminfo_id: ForeignKey</span>
+<span class="sd">        Optional foreign key linking a reactant to it&#39;s pubchem info (if found)</span>
+<span class="sd">    smiles: Charfield</span>
+<span class="sd">        The SMILES of the reactant compound</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">reaction_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Reaction</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;reactants&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">pubcheminfo_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">PubChemInfo</span><span class="p">,</span>
+        <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;reactantpubcheminfo&quot;</span><span class="p">,</span>
+        <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">smiles</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">previousreactionproduct</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Product"><a class="viewcode-back" href="../../backend.html#backend.models.Product">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Product</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Product- the product compound of a reaction.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    reaction_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a product to it&#39;s reaction</span>
+<span class="sd">    pubcheminfo_id: ForeignKey</span>
+<span class="sd">        Optional foreign key linking a product to it&#39;s pubchem info (if found)</span>
+<span class="sd">    smiles: Charfield</span>
+<span class="sd">        The SMILES of the product compound</span>
+<span class="sd">    image: FileField</span>
+<span class="sd">        File link to a stored version of the image file of the product compound</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">reaction_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Reaction</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;products&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">pubcheminfo_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">PubChemInfo</span><span class="p">,</span>
+        <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;productpubcheminfo&quot;</span><span class="p">,</span>
+        <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">smiles</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span><span class="o">=</span><span class="s2">&quot;productimages/&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CatalogEntry"><a class="viewcode-back" href="../../backend.html#backend.models.CatalogEntry">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CatalogEntry</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a CatalogEntry- the catalog information for a compound.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    reactant_id: ForeignKey</span>
+<span class="sd">        Optional Foreign key linking a catalog entry to a reactant</span>
+<span class="sd">    target_id: ForeignKey</span>
+<span class="sd">        Optional Foreign key linking a catalog entry to a product</span>
+<span class="sd">    vendor: Charfield</span>
+<span class="sd">        The vendor/supplier of the compound</span>
+<span class="sd">    catalogid: Charfield</span>
+<span class="sd">        The catalog/vendor id of the compound</span>
+<span class="sd">    priceinfo: Charfield</span>
+<span class="sd">        The catalog price info ($) for a compound. This can be a range -&gt; &quot;$100 &lt; 1k/g&quot;</span>
+<span class="sd">    upperprice: IntegerField</span>
+<span class="sd">        Optional upper price ($) of a compound. Highest price if range given.</span>
+<span class="sd">    leadtime: IntegerField</span>
+<span class="sd">        Optional lead time (weeks) for a compound to be delivered</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">reactant_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Reactant</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;catalogentries&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">target_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Target</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;catalogentries&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+
+    <span class="n">vendor</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">catalogid</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">priceinfo</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">upperprice</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">leadtime</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ActionSession"><a class="viewcode-back" href="../../backend.html#backend.models.ActionSession">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ActionSession</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="ActionSession.Type"><a class="viewcode-back" href="../../backend.html#backend.models.ActionSession.Type">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
+        <span class="n">stir</span> <span class="o">=</span> <span class="s2">&quot;stir&quot;</span>
+        <span class="n">workup</span> <span class="o">=</span> <span class="s2">&quot;workup&quot;</span>
+        <span class="c1"># workup2 = &quot;workup2&quot;</span>
+        <span class="c1"># workup3 = &quot;workup3&quot;</span>
+        <span class="n">analyse</span> <span class="o">=</span> <span class="s2">&quot;analyse&quot;</span></div>
+
+<div class="viewcode-block" id="ActionSession.Driver"><a class="viewcode-back" href="../../backend.html#backend.models.ActionSession.Driver">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Driver</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">human</span> <span class="o">=</span> <span class="s2">&quot;human&quot;</span>
+        <span class="n">robot</span> <span class="o">=</span> <span class="s2">&quot;robot&quot;</span></div>
+
+    <span class="n">reaction_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Reaction</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;actionsessions&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">sessionnumber</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">Type</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">driver</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">Driver</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Driver</span><span class="o">.</span><span class="n">robot</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span>
+    <span class="p">)</span>
+    <span class="n">continuation</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AddAction"><a class="viewcode-back" href="../../backend.html#backend.models.AddAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">AddAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a AddAction - the add action details</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    actionsession_id: ForeignKey</span>
+<span class="sd">        Foreign key linking an add action to an action session. An</span>
+<span class="sd">        action session if a group of actions that represent a unit of</span>
+<span class="sd">        operation executed by a robot or human eg. perfrom a reaction</span>
+<span class="sd">        (liquid handling robot), stir (human)</span>
+<span class="sd">        on a hot plate, analyse (human)</span>
+<span class="sd">    reaction_id: ForeignKey</span>
+<span class="sd">        Foreign key linking an add action to a reaction</span>
+<span class="sd">    fromplatetype: CharField</span>
+<span class="sd">        The plate the add action is moving material from</span>
+<span class="sd">    toplatetype: CharField</span>
+<span class="sd">        The plate the add action is moviong material to</span>
+<span class="sd">    smiles: CharField</span>
+<span class="sd">        Optional SMILES of the material being added</span>
+<span class="sd">    calcunit: CharField</span>
+<span class="sd">        The unit used for calculating the amount to add eg. molar eq. (moleq)</span>
+<span class="sd">        and mass eq. (masseq)</span>
+<span class="sd">    volume: FloatField</span>
+<span class="sd">        The volume being added</span>
+<span class="sd">    volumeunit: CharField</span>
+<span class="sd">        The unit of the volume being added (default=ul)</span>
+<span class="sd">    molecularweight: FloatField</span>
+<span class="sd">        The molecular weight of the compound being added</span>
+<span class="sd">    solvent: CharField</span>
+<span class="sd">        Optional solvent used to dilute the material being added</span>
+<span class="sd">    concentration: FloatField</span>
+<span class="sd">        Optional concentration of the material solution prepared</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AddAction.CalcUnit"><a class="viewcode-back" href="../../backend.html#backend.models.AddAction.CalcUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">CalcUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">moleq</span> <span class="o">=</span> <span class="s2">&quot;moleq&quot;</span>
+        <span class="n">masseq</span> <span class="o">=</span> <span class="s2">&quot;masseq&quot;</span>
+        <span class="n">ul</span> <span class="o">=</span> <span class="s2">&quot;ul&quot;</span></div>
+
+<div class="viewcode-block" id="AddAction.VolumeUnit"><a class="viewcode-back" href="../../backend.html#backend.models.AddAction.VolumeUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">VolumeUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">ul</span> <span class="o">=</span> <span class="s2">&quot;ul&quot;</span>
+        <span class="n">ml</span> <span class="o">=</span> <span class="s2">&quot;ml&quot;</span></div>
+
+<div class="viewcode-block" id="AddAction.MassUnit"><a class="viewcode-back" href="../../backend.html#backend.models.AddAction.MassUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">MassUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">mg</span> <span class="o">=</span> <span class="s2">&quot;mg&quot;</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="s2">&quot;g&quot;</span></div>
+
+<div class="viewcode-block" id="AddAction.PlateType"><a class="viewcode-back" href="../../backend.html#backend.models.AddAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
+        <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
+        <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
+        <span class="n">workup3</span> <span class="o">=</span> <span class="s2">&quot;workup3&quot;</span>
+        <span class="n">spefilter</span> <span class="o">=</span> <span class="s2">&quot;spefilter&quot;</span>
+        <span class="n">lcms</span> <span class="o">=</span> <span class="s2">&quot;lcms&quot;</span>
+        <span class="n">xchem</span> <span class="o">=</span> <span class="s2">&quot;xchem&quot;</span>
+        <span class="n">nmr</span> <span class="o">=</span> <span class="s2">&quot;nmr&quot;</span>
+        <span class="n">startingmaterial</span> <span class="o">=</span> <span class="s2">&quot;startingmaterial&quot;</span>
+        <span class="n">solvent</span> <span class="o">=</span> <span class="s2">&quot;solvent&quot;</span></div>
+
+    <span class="n">actionsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">ActionSession</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">reaction_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Reaction</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;addactions&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">fromplatetype</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">PlateType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">toplatetype</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">PlateType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">smiles</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">calcunit</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">CalcUnit</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;moleq&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span>
+    <span class="p">)</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">volumeunit</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">VolumeUnit</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;ul&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">2</span>
+    <span class="p">)</span>
+    <span class="n">mass</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">massunit</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">MassUnit</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;mg&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">molecularweight</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">solvent</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">concentration</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExtractAction"><a class="viewcode-back" href="../../backend.html#backend.models.ExtractAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ExtractAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define an extract action</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    actionsession_id: ForeignKey</span>
+<span class="sd">        Foreign key linking an add action to an action session. An</span>
+<span class="sd">        action session if a group of actions that represent a unit of</span>
+<span class="sd">        operation executed by a robot or human eg. perfrom a reaction</span>
+<span class="sd">        (liquid handling robot), stir (human)</span>
+<span class="sd">        on a hot plate, analyse (human)</span>
+<span class="sd">    reaction_id: ForeignKey</span>
+<span class="sd">        Foreign key linking an add action to a reaction</span>
+<span class="sd">    fromplatetype: CharField</span>
+<span class="sd">        The plate the add action is moving material from</span>
+<span class="sd">    toplatetype: CharField</span>
+<span class="sd">        The plate the add action is moviong material to</span>
+<span class="sd">    layer: CharField</span>
+<span class="sd">        The layer to extract</span>
+<span class="sd">    volume: FloatField</span>
+<span class="sd">        The volume to extract</span>
+<span class="sd">    volumeunit: CharField</span>
+<span class="sd">        The unit of the volume being extracted (default=ul)</span>
+<span class="sd">    molecularweight: FloatField</span>
+<span class="sd">        The molecular weight of the compound being added</span>
+<span class="sd">    bottomlayervolume:</span>
+<span class="sd">        The volume of the bottom layer (ul)</span>
+<span class="sd">    bottomlayervolumeunit:</span>
+<span class="sd">        The otional unit used to calculate the volume of the bottom layer</span>
+<span class="sd">    solvent: CharField</span>
+<span class="sd">        Optional solvent used to dilute the material being added</span>
+<span class="sd">    concentration: FloatField</span>
+<span class="sd">        Optional concentration of the material solution prepared</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ExtractAction.Layer"><a class="viewcode-back" href="../../backend.html#backend.models.ExtractAction.Layer">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Layer</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="s2">&quot;top&quot;</span>
+        <span class="n">bottom</span> <span class="o">=</span> <span class="s2">&quot;bottom&quot;</span></div>
+
+<div class="viewcode-block" id="ExtractAction.PlateType"><a class="viewcode-back" href="../../backend.html#backend.models.ExtractAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
+        <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
+        <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
+        <span class="n">workup3</span> <span class="o">=</span> <span class="s2">&quot;workup3&quot;</span>
+        <span class="n">spefilter</span> <span class="o">=</span> <span class="s2">&quot;spefilter&quot;</span>
+        <span class="n">lcms</span> <span class="o">=</span> <span class="s2">&quot;lcms&quot;</span>
+        <span class="n">xchem</span> <span class="o">=</span> <span class="s2">&quot;xchem&quot;</span>
+        <span class="n">nmr</span> <span class="o">=</span> <span class="s2">&quot;nmr&quot;</span>
+        <span class="n">startingmaterial</span> <span class="o">=</span> <span class="s2">&quot;startingmaterial&quot;</span>
+        <span class="n">solvent</span> <span class="o">=</span> <span class="s2">&quot;solvent&quot;</span></div>
+
+    <span class="n">actionsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">ActionSession</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">reaction_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Reaction</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;extractactions&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">fromplatetype</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">PlateType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">toplatetype</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">PlateType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">layer</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">Layer</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">smiles</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">volumeunit</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">&quot;ul&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">molecularweight</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">bottomlayervolume</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">bottomlayervolumeunit</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">&quot;ul&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">solvent</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">concentration</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MixAction"><a class="viewcode-back" href="../../backend.html#backend.models.MixAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MixAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a mix action</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    actionsession_id: ForeignKey</span>
+<span class="sd">        Foreign key linking an add action to an action session. An</span>
+<span class="sd">        action session if a group of actions that represent a unit of</span>
+<span class="sd">        operation executed by a robot or human eg. perfrom a reaction</span>
+<span class="sd">        (liquid handling robot), stir (human)</span>
+<span class="sd">        on a hot plate, analyse (human)</span>
+<span class="sd">    reaction_id: ForeignKey</span>
+<span class="sd">        Foreign key linking an add action to a reaction</span>
+<span class="sd">    platetype: CharField</span>
+<span class="sd">        The plate being mixed</span>
+<span class="sd">    repetitions: IntField</span>
+<span class="sd">        The number of mixes</span>
+<span class="sd">    volume: FloatField</span>
+<span class="sd">        The volume to mix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MixAction.PlateType"><a class="viewcode-back" href="../../backend.html#backend.models.MixAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
+        <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
+        <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
+        <span class="n">workup3</span> <span class="o">=</span> <span class="s2">&quot;workup3&quot;</span>
+        <span class="n">spefilter</span> <span class="o">=</span> <span class="s2">&quot;spefilter&quot;</span>
+        <span class="n">lcms</span> <span class="o">=</span> <span class="s2">&quot;lcms&quot;</span>
+        <span class="n">xchem</span> <span class="o">=</span> <span class="s2">&quot;xchem&quot;</span>
+        <span class="n">nmr</span> <span class="o">=</span> <span class="s2">&quot;nmr&quot;</span>
+        <span class="n">startingmaterial</span> <span class="o">=</span> <span class="s2">&quot;startingmaterial&quot;</span>
+        <span class="n">solvent</span> <span class="o">=</span> <span class="s2">&quot;solvent&quot;</span></div>
+
+    <span class="n">actionsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">ActionSession</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">reaction_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Reaction</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;mixactions&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">platetype</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">PlateType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">repetitions</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="StirAction"><a class="viewcode-back" href="../../backend.html#backend.models.StirAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">StirAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a StirAction - the stir action details</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    actionsession_id: ForeignKey</span>
+<span class="sd">        Foreign key linking an add action to an action session. An</span>
+<span class="sd">        action session if a group of actions that represent a unit of</span>
+<span class="sd">        operation executed by a robot or human eg. perfrom a reaction</span>
+<span class="sd">        (liquid handling robot), stir (human)</span>
+<span class="sd">        on a hot plate, analyse (human)</span>
+<span class="sd">    reaction_id: ForeignKey</span>
+<span class="sd">        Foreign key linking an add action to a reaction</span>
+<span class="sd">    number: IntegerField</span>
+<span class="sd">        The number of the action to be executed in a list of action numbers</span>
+<span class="sd">    duration: FloatField</span>
+<span class="sd">        The duration of the stir action</span>
+<span class="sd">    durationunit: CharField</span>
+<span class="sd">        The duration unit of the stir action (default=hours)</span>
+<span class="sd">    temperature: IntegerField</span>
+<span class="sd">        The temperature of the stir action (default=25)</span>
+<span class="sd">    temperatureunit: CharField</span>
+<span class="sd">        The temperature unit of the stir action (default=degC)</span>
+<span class="sd">    stirringspeed: CharField</span>
+<span class="sd">        The speed of the stir action (default=normal)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="StirAction.PlateType"><a class="viewcode-back" href="../../backend.html#backend.models.StirAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
+        <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
+        <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
+        <span class="n">workup3</span> <span class="o">=</span> <span class="s2">&quot;workup3&quot;</span>
+        <span class="n">spefilter</span> <span class="o">=</span> <span class="s2">&quot;spefilter&quot;</span>
+        <span class="n">lcms</span> <span class="o">=</span> <span class="s2">&quot;lcms&quot;</span>
+        <span class="n">xchem</span> <span class="o">=</span> <span class="s2">&quot;xchem&quot;</span>
+        <span class="n">nmr</span> <span class="o">=</span> <span class="s2">&quot;nmr&quot;</span>
+        <span class="n">startingmaterial</span> <span class="o">=</span> <span class="s2">&quot;startingmaterial&quot;</span>
+        <span class="n">solvent</span> <span class="o">=</span> <span class="s2">&quot;solvent&quot;</span></div>
+
+<div class="viewcode-block" id="StirAction.TemperatureUnit"><a class="viewcode-back" href="../../backend.html#backend.models.StirAction.TemperatureUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">degcel</span> <span class="o">=</span> <span class="s2">&quot;degC&quot;</span>
+        <span class="n">kelvin</span> <span class="o">=</span> <span class="s2">&quot;K&quot;</span></div>
+
+<div class="viewcode-block" id="StirAction.Unit"><a class="viewcode-back" href="../../backend.html#backend.models.StirAction.Unit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Unit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">seconds</span> <span class="o">=</span> <span class="s2">&quot;seconds&quot;</span>
+        <span class="n">minutes</span> <span class="o">=</span> <span class="s2">&quot;minutes&quot;</span>
+        <span class="n">hours</span> <span class="o">=</span> <span class="s2">&quot;hours&quot;</span></div>
+
+<div class="viewcode-block" id="StirAction.Speed"><a class="viewcode-back" href="../../backend.html#backend.models.StirAction.Speed">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Speed</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">gentle</span> <span class="o">=</span> <span class="s2">&quot;gentle&quot;</span>
+        <span class="n">normal</span> <span class="o">=</span> <span class="s2">&quot;normal&quot;</span>
+        <span class="n">vigorous</span> <span class="o">=</span> <span class="s2">&quot;vigorous&quot;</span></div>
+
+    <span class="n">actionsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">ActionSession</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;stiractions&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">reaction_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Reaction</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;stiractions&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">platetype</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">PlateType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">durationunit</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">Unit</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Unit</span><span class="o">.</span><span class="n">hours</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span>
+    <span class="p">)</span>
+    <span class="n">temperature</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">temperatureunit</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">TemperatureUnit</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">TemperatureUnit</span><span class="o">.</span><span class="n">degcel</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span>
+    <span class="p">)</span>
+    <span class="n">stirringspeed</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">Speed</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Speed</span><span class="o">.</span><span class="n">normal</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span>
+    <span class="p">)</span></div>
+
+
+<span class="c1"># Models for capturing OT session, Deck, Plates and Wells</span>
+<div class="viewcode-block" id="OTProject"><a class="viewcode-back" href="../../backend.html#backend.models.OTProject">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTProject</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define an OTProject - an OT project will</span>
+<span class="sd">       have one or more batch protocols for a project</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    project_id: ForeignKey</span>
+<span class="sd">        Foreign key linking an OT protocol action to a reaction</span>
+<span class="sd">    init_date: DateTimeField</span>
+<span class="sd">        The date the OT project was created (autofield)</span>
+<span class="sd">    name: CharField</span>
+<span class="sd">        The name of the OT project</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">project_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Project</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">init_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OTBatchProtocol"><a class="viewcode-back" href="../../backend.html#backend.models.OTBatchProtocol">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTBatchProtocol</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define an OTBatchProtocol - OT protocols for a batch of</span>
+<span class="sd">       targets</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    otproject_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a batch OT protocol with a OT project</span>
+<span class="sd">    batch_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a batch OT protocol with batch of targets</span>
+<span class="sd">    celery_taskid: CharField</span>
+<span class="sd">        The Celery task id when a new OT batch protocol is created</span>
+<span class="sd">    zipfile: FileField</span>
+<span class="sd">        File link to a zip file of all the OT protocols required for executing the</span>
+<span class="sd">        synthesis of a batch of targets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">otproject_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">OTProject</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">batch_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Batch</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;otbatchprotocols&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">celery_taskid</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">zipfile</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span><span class="o">=</span><span class="s2">&quot;otbatchprotocols/&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OTSession"><a class="viewcode-back" href="../../backend.html#backend.models.OTSession">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTSession</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define an OT Session - a OT session is a session (Reaction, Analysis)</span>
+<span class="sd">       that needs to be executed on the OT</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    otbatchprotocol_id: ForeignKey</span>
+<span class="sd">        Foreign key linking an OT session to a OT batch protocol</span>
+<span class="sd">    reactionstep: IntegerField</span>
+<span class="sd">        The reaction step that the session is being executed for</span>
+<span class="sd">    sessiontype: CharField</span>
+<span class="sd">        The type of session ebing excecuted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="OTSession.SessionType"><a class="viewcode-back" href="../../backend.html#backend.models.OTSession.SessionType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">SessionType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
+        <span class="n">workup</span> <span class="o">=</span> <span class="s2">&quot;workup&quot;</span>
+        <span class="n">lcmsprep</span> <span class="o">=</span> <span class="s2">&quot;lcmsprep&quot;</span></div>
+
+    <span class="n">otbatchprotocol_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">OTBatchProtocol</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;otsessions&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">reactionstep</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">sessiontype</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">SessionType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">SessionType</span><span class="o">.</span><span class="n">reaction</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Deck"><a class="viewcode-back" href="../../backend.html#backend.models.Deck">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Deck</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Deck Session - an OT Deck</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    otsession_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a deck to an OT session</span>
+<span class="sd">    numberslots: IntegerField</span>
+<span class="sd">        The number of deck slots (default=11)</span>
+<span class="sd">    slotavailable: BooleanField</span>
+<span class="sd">        If a slot is still available on the deck (default=True)</span>
+<span class="sd">    indexslotavailable: IntegerField</span>
+<span class="sd">        The index (1-11) of the deck slot available</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">otsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">OTSession</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;otdecks&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">numberslots</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+    <span class="n">slotavailable</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">indexslotavailable</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Pipette"><a class="viewcode-back" href="../../backend.html#backend.models.Pipette">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Pipette</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Pipette - an OT Pipette</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    otsession_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a deck to an OT session</span>
+<span class="sd">    position: CharField</span>
+<span class="sd">        The position (right or left) of the pipette for the OT session</span>
+<span class="sd">    labware: CharField</span>
+<span class="sd">        The name of the OT labware eg. p300_single</span>
+<span class="sd">    type: CharField</span>
+<span class="sd">        The type of pipette could be single or multi channel</span>
+<span class="sd">    maxvolume: FloatField</span>
+<span class="sd">        The maximum volume (ul) of the pipette</span>
+<span class="sd">    name: CharField</span>
+<span class="sd">        The name of the pipette - this is a combination of the OT labware name (p300_single)</span>
+<span class="sd">        and the position of the pipette uses in the session (right) eg. right_p300_single</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Pipette.Position"><a class="viewcode-back" href="../../backend.html#backend.models.Pipette.Position">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Position</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="s2">&quot;Right&quot;</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="s2">&quot;Left&quot;</span></div>
+
+    <span class="n">otsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">OTSession</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;pipettes&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">Position</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">labware</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">maxvolume</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TipRack"><a class="viewcode-back" href="../../backend.html#backend.models.TipRack">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TipRack</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a TipRack - an OT tiprack</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    otsession_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a tiprack to an OT session</span>
+<span class="sd">    deck_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a tiprack to an OT deck</span>
+<span class="sd">    labware: CharField</span>
+<span class="sd">        The name of the OT labware eg. opentrons_96_tiprack_300ul</span>
+<span class="sd">    index: IntegerField</span>
+<span class="sd">        The deck index (1-11) of the tiprack</span>
+<span class="sd">    name: CharField</span>
+<span class="sd">        The name of the tiprack - this is a combination of the OT labware name (opentrons_96_tiprack_300ul)</span>
+<span class="sd">        and the deck index of the tiprack eg. opentrons_96_tiprack_300ul_2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">otsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">OTSession</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">deck_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Deck</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">labware</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Plate"><a class="viewcode-back" href="../../backend.html#backend.models.Plate">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Plate</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Plate - an OT plate</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    otbatchprotocol_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a plate to an OT batch protocol</span>
+<span class="sd">    deck_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a plate to an OT deck</span>
+<span class="sd">    labware: CharField</span>
+<span class="sd">        The name of the OT labware eg. labcyte_384_wellplate_100ul</span>
+<span class="sd">    index: IntegerField</span>
+<span class="sd">        The deck index (1-11) of the plate</span>
+<span class="sd">    name: CharField</span>
+<span class="sd">        The name of the plate</span>
+<span class="sd">    type: CharField</span>
+<span class="sd">        The type of plate eg. analyse and reaction plate</span>
+<span class="sd">    maxwellvolume: FloatField</span>
+<span class="sd">        The maximum plate well volume (ul)</span>
+<span class="sd">    numberwells: IntegerField</span>
+<span class="sd">        The number of plate wells</span>
+<span class="sd">    wellavailable: BooleanField</span>
+<span class="sd">        If a well is available on a plate</span>
+<span class="sd">    numberwellsincolumn: IntegerField</span>
+<span class="sd">        The number of wells in a column default is set to 8 for a 96 well plate</span>
+<span class="sd">    indexswellavailable: IntegerField</span>
+<span class="sd">        The index of the well available. Wells are occupied in increasing</span>
+<span class="sd">        index starting from indices: A1, B1, C1 or 1, 2, 3 etc.</span>
+<span class="sd">    columnavailable: BooleanField</span>
+<span class="sd">        Wether a column of a plate is available. Example 4 rows of column 1 taken up</span>
+<span class="sd">        by amidation reactions, column is then no longer avilable to any other reaction</span>
+<span class="sd">        classes.</span>
+<span class="sd">    indexscolumnavailable: IntegerField</span>
+<span class="sd">        The index of the column available. Columns are occupied in increasing</span>
+<span class="sd">        index starting from indices: A1, B1, C1 or 1, 2, 3 etc</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Plate.PlateType"><a class="viewcode-back" href="../../backend.html#backend.models.Plate.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
+        <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
+        <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
+        <span class="n">workup3</span> <span class="o">=</span> <span class="s2">&quot;workup3&quot;</span>
+        <span class="n">spefilter</span> <span class="o">=</span> <span class="s2">&quot;spefilter&quot;</span>
+        <span class="n">lcms</span> <span class="o">=</span> <span class="s2">&quot;lcms&quot;</span>
+        <span class="n">xchem</span> <span class="o">=</span> <span class="s2">&quot;xchem&quot;</span>
+        <span class="n">nmr</span> <span class="o">=</span> <span class="s2">&quot;nmr&quot;</span>
+        <span class="n">startingmaterial</span> <span class="o">=</span> <span class="s2">&quot;startingmaterial&quot;</span>
+        <span class="n">solvent</span> <span class="o">=</span> <span class="s2">&quot;solvent&quot;</span></div>
+
+    <span class="n">otbatchprotocol_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">OTBatchProtocol</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;otplates&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">otsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">OTSession</span><span class="p">,</span>
+        <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">deck_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Deck</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">labware</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">PlateType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">55</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">maxwellvolume</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">numberwells</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">wellavailable</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">numberwellsincolumn</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">indexswellavailable</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">numbercolumns</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">columnavailable</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">indexcolumnavailable</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Column"><a class="viewcode-back" href="../../backend.html#backend.models.Column">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Column</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a plate column</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    otbatchprotocol_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a plate to an OT batch protocol</span>
+<span class="sd">    plate_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a well to a plate</span>
+<span class="sd">    index: IntegerField</span>
+<span class="sd">        The column index (0-11) on the plate</span>
+<span class="sd">    reactionclass: CharField</span>
+<span class="sd">        The reaction class eg. amidation. Each column can only contain</span>
+<span class="sd">        one type of reaction class -&gt; for multi-pipette handling</span>
+<span class="sd">        and grouping reactions on plates</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Column.ColumnType"><a class="viewcode-back" href="../../backend.html#backend.models.Column.ColumnType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">ColumnType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
+        <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
+        <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
+        <span class="n">workup3</span> <span class="o">=</span> <span class="s2">&quot;workup3&quot;</span>
+        <span class="n">spefilter</span> <span class="o">=</span> <span class="s2">&quot;spefilter&quot;</span>
+        <span class="n">lcms</span> <span class="o">=</span> <span class="s2">&quot;lcms&quot;</span>
+        <span class="n">xchem</span> <span class="o">=</span> <span class="s2">&quot;xchem&quot;</span>
+        <span class="n">nmr</span> <span class="o">=</span> <span class="s2">&quot;nmr&quot;</span>
+        <span class="n">startingmaterial</span> <span class="o">=</span> <span class="s2">&quot;startingmaterial&quot;</span>
+        <span class="n">solvent</span> <span class="o">=</span> <span class="s2">&quot;solvent&quot;</span></div>
+
+    <span class="n">otsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">OTSession</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;otcolumns&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">plate_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Plate</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">ColumnType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">55</span><span class="p">)</span>
+    <span class="n">reactionclass</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Well"><a class="viewcode-back" href="../../backend.html#backend.models.Well">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Well</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Well - an OT plate well</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    otbatchprotocol_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a plate to an OT batch protocol</span>
+<span class="sd">    plate_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a well to a plate</span>
+<span class="sd">    method_id: ForeignKey</span>
+<span class="sd">        Optional foreign key linking a well to a method</span>
+<span class="sd">    reaction_id: ForeignKey</span>
+<span class="sd">        Optional foreign key linking a well to a reaction</span>
+<span class="sd">    index: IntegerField</span>
+<span class="sd">        The well index (0-95) on the plate</span>
+<span class="sd">    name: CharField</span>
+<span class="sd">        The name of the well eg. A1, B1, C1</span>
+<span class="sd">    type: CharField</span>
+<span class="sd">        The type of well eg. analyse and reaction well</span>
+<span class="sd">    volume: FloatField</span>
+<span class="sd">        The optional volume of the contents in the well (ul)</span>
+<span class="sd">    smiles: CharField</span>
+<span class="sd">        The optional SMILES of the well contents</span>
+<span class="sd">    concentration: FloatField</span>
+<span class="sd">        The optional concentration of the well contents</span>
+<span class="sd">    solvent: CharField</span>
+<span class="sd">        The optional solvent used for diluting the well contents</span>
+<span class="sd">    reactantfornextstep: BooleanField</span>
+<span class="sd">        Wether the contents are used for the next reaction step (default=False)</span>
+<span class="sd">    available: BooleanField</span>
+<span class="sd">        If the well is available w.r.t still containing it&#39;s contents</span>
+<span class="sd">        vs. being empty (default=True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Well.WellType"><a class="viewcode-back" href="../../backend.html#backend.models.Well.WellType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">WellType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
+        <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
+        <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
+        <span class="n">workup3</span> <span class="o">=</span> <span class="s2">&quot;workup3&quot;</span>
+        <span class="n">spefilter</span> <span class="o">=</span> <span class="s2">&quot;spefilter&quot;</span>
+        <span class="n">lcms</span> <span class="o">=</span> <span class="s2">&quot;lcms&quot;</span>
+        <span class="n">xchem</span> <span class="o">=</span> <span class="s2">&quot;xchem&quot;</span>
+        <span class="n">nmr</span> <span class="o">=</span> <span class="s2">&quot;nmr&quot;</span>
+        <span class="n">startingmaterial</span> <span class="o">=</span> <span class="s2">&quot;startingmaterial&quot;</span>
+        <span class="n">solvent</span> <span class="o">=</span> <span class="s2">&quot;solvent&quot;</span></div>
+
+    <span class="n">otsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">OTSession</span><span class="p">,</span>
+        <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;otwells&quot;</span><span class="p">,</span>
+        <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">plate_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Plate</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">method_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Method</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">reaction_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Reaction</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">column_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Column</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">WellType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">55</span><span class="p">)</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">smiles</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">concentration</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">solvent</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">reactantfornextstep</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">available</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompoundOrder"><a class="viewcode-back" href="../../backend.html#backend.models.CompoundOrder">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CompoundOrder</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a CompoundOrder - a csv</span>
+<span class="sd">       file of ordering information that includes SMILES,</span>
+<span class="sd">       plate name, well id, amount, solvent and concentration</span>
+<span class="sd">       required for the syhtesis of the reaction step</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    otsession_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a plate to an OT session</span>
+<span class="sd">    ordercsv: FileField</span>
+<span class="sd">        The csv file of the ordering information for executing</span>
+<span class="sd">        a reaction step on the OpenTrons</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">otsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">OTSession</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;compoundorders&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">ordercsv</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span><span class="o">=</span><span class="s2">&quot;compoundorders/&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OTScript"><a class="viewcode-back" href="../../backend.html#backend.models.OTScript">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTScript</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a OTScript - a Python script</span>
+<span class="sd">       for executing a reaction OpenTrons protocol</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    otsession_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a plate to an OT session</span>
+<span class="sd">    otscript: FileField</span>
+<span class="sd">        The Python OpenTrons protocol file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">otsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">OTSession</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;otscripts&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">otscript</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span><span class="o">=</span><span class="s2">&quot;otscripts/&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SolventPrep"><a class="viewcode-back" href="../../backend.html#backend.models.SolventPrep">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SolventPrep</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a SolventPrep - a csv</span>
+<span class="sd">       file detailing the prepreation required for diluting previous</span>
+<span class="sd">       reaction step products for use in the next reaction</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    otsession_id: ForeignKey</span>
+<span class="sd">        Foreign key linking a plate to an OT session</span>
+<span class="sd">    solventprepcsv: FileField</span>
+<span class="sd">        The csv file with solvent amount (ul), plate name and well index</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">otsession_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">OTSession</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;solventpreps&quot;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span>
+    <span class="p">)</span>
+    <span class="n">solventprepcsv</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span><span class="o">=</span><span class="s2">&quot;solventprep/&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">XChem-CAR</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Warren Thompson.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
