@@ -37,7 +37,7 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
 
 
-<div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../backend.html#backend.models.Project">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Project</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Project">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Project</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Project - a compound synthesis project.</span>
 
 <span class="sd">    Parameters</span>
@@ -68,7 +68,7 @@
     <span class="n">quoteurl</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Batch"><a class="viewcode-back" href="../../backend.html#backend.models.Batch">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Batch</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Batch"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Batch">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Batch</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Batch - a batch of compounds.</span>
 
 <span class="sd">    Parameters</span>
@@ -88,7 +88,7 @@
     <span class="n">batchtag</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Target"><a class="viewcode-back" href="../../backend.html#backend.models.Target">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Target</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Target"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Target">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Target</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Target - a target compound for synthesis.</span>
 
 <span class="sd">    Parameters</span>
@@ -121,7 +121,7 @@
     <span class="n">mols</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Method"><a class="viewcode-back" href="../../backend.html#backend.models.Method">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Method</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Method"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Method">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Method</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Method - a retrosynthetic pathway of reactions</span>
 <span class="sd">    for a target compound.</span>
 
@@ -142,7 +142,7 @@
     <span class="n">otchem</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Reaction"><a class="viewcode-back" href="../../backend.html#backend.models.Reaction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Reaction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Reaction"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Reaction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Reaction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Reaction - the reaction to make a compound.</span>
 
 <span class="sd">    Parameters</span>
@@ -180,7 +180,7 @@
     <span class="n">success</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="PubChemInfo"><a class="viewcode-back" href="../../backend.html#backend.models.PubChemInfo">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PubChemInfo</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="PubChemInfo"><a class="viewcode-back" href="../../djangomodels.html#backend.models.PubChemInfo">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PubChemInfo</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define PubChemInfo - the PubChem info for a compound.</span>
 
 <span class="sd">    Parameters</span>
@@ -204,7 +204,7 @@
     <span class="n">cas</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Reactant"><a class="viewcode-back" href="../../backend.html#backend.models.Reactant">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Reactant</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Reactant"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Reactant">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Reactant</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Reactant - the reactant compound of a reaction.</span>
 
 <span class="sd">    Parameters</span>
@@ -230,7 +230,7 @@
     <span class="n">previousreactionproduct</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Product"><a class="viewcode-back" href="../../backend.html#backend.models.Product">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Product</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Product"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Product">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Product</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Product- the product compound of a reaction.</span>
 
 <span class="sd">    Parameters</span>
@@ -258,7 +258,7 @@
     <span class="n">image</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span><span class="o">=</span><span class="s2">&quot;productimages/&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CatalogEntry"><a class="viewcode-back" href="../../backend.html#backend.models.CatalogEntry">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CatalogEntry</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="CatalogEntry"><a class="viewcode-back" href="../../djangomodels.html#backend.models.CatalogEntry">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CatalogEntry</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a CatalogEntry- the catalog information for a compound.</span>
 
 <span class="sd">    Parameters</span>
@@ -293,8 +293,8 @@
     <span class="n">leadtime</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ActionSession"><a class="viewcode-back" href="../../backend.html#backend.models.ActionSession">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ActionSession</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
-<div class="viewcode-block" id="ActionSession.Type"><a class="viewcode-back" href="../../backend.html#backend.models.ActionSession.Type">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="ActionSession"><a class="viewcode-back" href="../../djangomodels.html#backend.models.ActionSession">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ActionSession</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="ActionSession.Type"><a class="viewcode-back" href="../../djangomodels.html#backend.models.ActionSession.Type">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
         <span class="n">stir</span> <span class="o">=</span> <span class="s2">&quot;stir&quot;</span>
         <span class="n">workup</span> <span class="o">=</span> <span class="s2">&quot;workup&quot;</span>
@@ -302,7 +302,7 @@
         <span class="c1"># workup3 = &quot;workup3&quot;</span>
         <span class="n">analyse</span> <span class="o">=</span> <span class="s2">&quot;analyse&quot;</span></div>
 
-<div class="viewcode-block" id="ActionSession.Driver"><a class="viewcode-back" href="../../backend.html#backend.models.ActionSession.Driver">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Driver</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="ActionSession.Driver"><a class="viewcode-back" href="../../djangomodels.html#backend.models.ActionSession.Driver">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Driver</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">human</span> <span class="o">=</span> <span class="s2">&quot;human&quot;</span>
         <span class="n">robot</span> <span class="o">=</span> <span class="s2">&quot;robot&quot;</span></div>
 
@@ -317,7 +317,7 @@
     <span class="n">continuation</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="AddAction"><a class="viewcode-back" href="../../backend.html#backend.models.AddAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">AddAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="AddAction"><a class="viewcode-back" href="../../djangomodels.html#backend.models.AddAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">AddAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a AddAction - the add action details</span>
 
 <span class="sd">    Parameters</span>
@@ -351,20 +351,20 @@
 <span class="sd">        Optional concentration of the material solution prepared</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="AddAction.CalcUnit"><a class="viewcode-back" href="../../backend.html#backend.models.AddAction.CalcUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">CalcUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="AddAction.CalcUnit"><a class="viewcode-back" href="../../djangomodels.html#backend.models.AddAction.CalcUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">CalcUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">moleq</span> <span class="o">=</span> <span class="s2">&quot;moleq&quot;</span>
         <span class="n">masseq</span> <span class="o">=</span> <span class="s2">&quot;masseq&quot;</span>
         <span class="n">ul</span> <span class="o">=</span> <span class="s2">&quot;ul&quot;</span></div>
 
-<div class="viewcode-block" id="AddAction.VolumeUnit"><a class="viewcode-back" href="../../backend.html#backend.models.AddAction.VolumeUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">VolumeUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="AddAction.VolumeUnit"><a class="viewcode-back" href="../../djangomodels.html#backend.models.AddAction.VolumeUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">VolumeUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">ul</span> <span class="o">=</span> <span class="s2">&quot;ul&quot;</span>
         <span class="n">ml</span> <span class="o">=</span> <span class="s2">&quot;ml&quot;</span></div>
 
-<div class="viewcode-block" id="AddAction.MassUnit"><a class="viewcode-back" href="../../backend.html#backend.models.AddAction.MassUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">MassUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="AddAction.MassUnit"><a class="viewcode-back" href="../../djangomodels.html#backend.models.AddAction.MassUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">MassUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">mg</span> <span class="o">=</span> <span class="s2">&quot;mg&quot;</span>
         <span class="n">g</span> <span class="o">=</span> <span class="s2">&quot;g&quot;</span></div>
 
-<div class="viewcode-block" id="AddAction.PlateType"><a class="viewcode-back" href="../../backend.html#backend.models.AddAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="AddAction.PlateType"><a class="viewcode-back" href="../../djangomodels.html#backend.models.AddAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
         <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
         <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
@@ -399,7 +399,7 @@
     <span class="n">concentration</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ExtractAction"><a class="viewcode-back" href="../../backend.html#backend.models.ExtractAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ExtractAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="ExtractAction"><a class="viewcode-back" href="../../djangomodels.html#backend.models.ExtractAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ExtractAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define an extract action</span>
 
 <span class="sd">    Parameters</span>
@@ -434,11 +434,11 @@
 <span class="sd">        Optional concentration of the material solution prepared</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ExtractAction.Layer"><a class="viewcode-back" href="../../backend.html#backend.models.ExtractAction.Layer">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Layer</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="ExtractAction.Layer"><a class="viewcode-back" href="../../djangomodels.html#backend.models.ExtractAction.Layer">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Layer</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">top</span> <span class="o">=</span> <span class="s2">&quot;top&quot;</span>
         <span class="n">bottom</span> <span class="o">=</span> <span class="s2">&quot;bottom&quot;</span></div>
 
-<div class="viewcode-block" id="ExtractAction.PlateType"><a class="viewcode-back" href="../../backend.html#backend.models.ExtractAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="ExtractAction.PlateType"><a class="viewcode-back" href="../../djangomodels.html#backend.models.ExtractAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
         <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
         <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
@@ -468,7 +468,7 @@
     <span class="n">concentration</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MixAction"><a class="viewcode-back" href="../../backend.html#backend.models.MixAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MixAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="MixAction"><a class="viewcode-back" href="../../djangomodels.html#backend.models.MixAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MixAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a mix action</span>
 
 <span class="sd">    Parameters</span>
@@ -489,7 +489,7 @@
 <span class="sd">        The volume to mix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="MixAction.PlateType"><a class="viewcode-back" href="../../backend.html#backend.models.MixAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="MixAction.PlateType"><a class="viewcode-back" href="../../djangomodels.html#backend.models.MixAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
         <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
         <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
@@ -510,7 +510,7 @@
     <span class="n">repetitions</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="StirAction"><a class="viewcode-back" href="../../backend.html#backend.models.StirAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">StirAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="StirAction"><a class="viewcode-back" href="../../djangomodels.html#backend.models.StirAction">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">StirAction</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a StirAction - the stir action details</span>
 
 <span class="sd">    Parameters</span>
@@ -537,7 +537,7 @@
 <span class="sd">        The speed of the stir action (default=normal)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="StirAction.PlateType"><a class="viewcode-back" href="../../backend.html#backend.models.StirAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="StirAction.PlateType"><a class="viewcode-back" href="../../djangomodels.html#backend.models.StirAction.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
         <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
         <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
@@ -549,16 +549,16 @@
         <span class="n">startingmaterial</span> <span class="o">=</span> <span class="s2">&quot;startingmaterial&quot;</span>
         <span class="n">solvent</span> <span class="o">=</span> <span class="s2">&quot;solvent&quot;</span></div>
 
-<div class="viewcode-block" id="StirAction.TemperatureUnit"><a class="viewcode-back" href="../../backend.html#backend.models.StirAction.TemperatureUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="StirAction.TemperatureUnit"><a class="viewcode-back" href="../../djangomodels.html#backend.models.StirAction.TemperatureUnit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureUnit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">degcel</span> <span class="o">=</span> <span class="s2">&quot;degC&quot;</span>
         <span class="n">kelvin</span> <span class="o">=</span> <span class="s2">&quot;K&quot;</span></div>
 
-<div class="viewcode-block" id="StirAction.Unit"><a class="viewcode-back" href="../../backend.html#backend.models.StirAction.Unit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Unit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="StirAction.Unit"><a class="viewcode-back" href="../../djangomodels.html#backend.models.StirAction.Unit">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Unit</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">seconds</span> <span class="o">=</span> <span class="s2">&quot;seconds&quot;</span>
         <span class="n">minutes</span> <span class="o">=</span> <span class="s2">&quot;minutes&quot;</span>
         <span class="n">hours</span> <span class="o">=</span> <span class="s2">&quot;hours&quot;</span></div>
 
-<div class="viewcode-block" id="StirAction.Speed"><a class="viewcode-back" href="../../backend.html#backend.models.StirAction.Speed">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Speed</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="StirAction.Speed"><a class="viewcode-back" href="../../djangomodels.html#backend.models.StirAction.Speed">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Speed</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">gentle</span> <span class="o">=</span> <span class="s2">&quot;gentle&quot;</span>
         <span class="n">normal</span> <span class="o">=</span> <span class="s2">&quot;normal&quot;</span>
         <span class="n">vigorous</span> <span class="o">=</span> <span class="s2">&quot;vigorous&quot;</span></div>
@@ -585,7 +585,7 @@
 
 
 <span class="c1"># Models for capturing OT session, Deck, Plates and Wells</span>
-<div class="viewcode-block" id="OTProject"><a class="viewcode-back" href="../../backend.html#backend.models.OTProject">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTProject</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="OTProject"><a class="viewcode-back" href="../../djangomodels.html#backend.models.OTProject">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTProject</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define an OTProject - an OT project will</span>
 <span class="sd">       have one or more batch protocols for a project</span>
 
@@ -604,7 +604,7 @@
     <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="OTBatchProtocol"><a class="viewcode-back" href="../../backend.html#backend.models.OTBatchProtocol">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTBatchProtocol</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="OTBatchProtocol"><a class="viewcode-back" href="../../djangomodels.html#backend.models.OTBatchProtocol">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTBatchProtocol</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define an OTBatchProtocol - OT protocols for a batch of</span>
 <span class="sd">       targets</span>
 
@@ -629,7 +629,7 @@
     <span class="n">zipfile</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span><span class="o">=</span><span class="s2">&quot;otbatchprotocols/&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="OTSession"><a class="viewcode-back" href="../../backend.html#backend.models.OTSession">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTSession</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="OTSession"><a class="viewcode-back" href="../../djangomodels.html#backend.models.OTSession">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTSession</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define an OT Session - a OT session is a session (Reaction, Analysis)</span>
 <span class="sd">       that needs to be executed on the OT</span>
 
@@ -643,7 +643,7 @@
 <span class="sd">        The type of session ebing excecuted</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="OTSession.SessionType"><a class="viewcode-back" href="../../backend.html#backend.models.OTSession.SessionType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">SessionType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="OTSession.SessionType"><a class="viewcode-back" href="../../djangomodels.html#backend.models.OTSession.SessionType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">SessionType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
         <span class="n">workup</span> <span class="o">=</span> <span class="s2">&quot;workup&quot;</span>
         <span class="n">lcmsprep</span> <span class="o">=</span> <span class="s2">&quot;lcmsprep&quot;</span></div>
@@ -657,7 +657,7 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Deck"><a class="viewcode-back" href="../../backend.html#backend.models.Deck">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Deck</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Deck"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Deck">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Deck</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Deck Session - an OT Deck</span>
 
 <span class="sd">    Parameters</span>
@@ -680,7 +680,7 @@
     <span class="n">indexslotavailable</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Pipette"><a class="viewcode-back" href="../../backend.html#backend.models.Pipette">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Pipette</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Pipette"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Pipette">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Pipette</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Pipette - an OT Pipette</span>
 
 <span class="sd">    Parameters</span>
@@ -700,7 +700,7 @@
 <span class="sd">        and the position of the pipette uses in the session (right) eg. right_p300_single</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Pipette.Position"><a class="viewcode-back" href="../../backend.html#backend.models.Pipette.Position">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Position</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="Pipette.Position"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Pipette.Position">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Position</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">right</span> <span class="o">=</span> <span class="s2">&quot;Right&quot;</span>
         <span class="n">left</span> <span class="o">=</span> <span class="s2">&quot;Left&quot;</span></div>
 
@@ -714,7 +714,7 @@
     <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TipRack"><a class="viewcode-back" href="../../backend.html#backend.models.TipRack">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TipRack</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="TipRack"><a class="viewcode-back" href="../../djangomodels.html#backend.models.TipRack">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TipRack</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a TipRack - an OT tiprack</span>
 
 <span class="sd">    Parameters</span>
@@ -739,7 +739,7 @@
     <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Plate"><a class="viewcode-back" href="../../backend.html#backend.models.Plate">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Plate</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Plate"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Plate">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Plate</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Plate - an OT plate</span>
 
 <span class="sd">    Parameters</span>
@@ -776,7 +776,7 @@
 <span class="sd">        index starting from indices: A1, B1, C1 or 1, 2, 3 etc</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Plate.PlateType"><a class="viewcode-back" href="../../backend.html#backend.models.Plate.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="Plate.PlateType"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Plate.PlateType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">PlateType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
         <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
         <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
@@ -811,7 +811,7 @@
     <span class="n">indexcolumnavailable</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Column"><a class="viewcode-back" href="../../backend.html#backend.models.Column">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Column</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Column"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Column">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Column</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a plate column</span>
 
 <span class="sd">    Parameters</span>
@@ -828,7 +828,7 @@
 <span class="sd">        and grouping reactions on plates</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Column.ColumnType"><a class="viewcode-back" href="../../backend.html#backend.models.Column.ColumnType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">ColumnType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="Column.ColumnType"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Column.ColumnType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">ColumnType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
         <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
         <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
@@ -849,7 +849,7 @@
     <span class="n">reactionclass</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Well"><a class="viewcode-back" href="../../backend.html#backend.models.Well">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Well</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="Well"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Well">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Well</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a Well - an OT plate well</span>
 
 <span class="sd">    Parameters</span>
@@ -883,7 +883,7 @@
 <span class="sd">        vs. being empty (default=True)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Well.WellType"><a class="viewcode-back" href="../../backend.html#backend.models.Well.WellType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">WellType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
+<div class="viewcode-block" id="Well.WellType"><a class="viewcode-back" href="../../djangomodels.html#backend.models.Well.WellType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">WellType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">TextChoices</span><span class="p">):</span>
         <span class="n">reaction</span> <span class="o">=</span> <span class="s2">&quot;reaction&quot;</span>
         <span class="n">workup1</span> <span class="o">=</span> <span class="s2">&quot;workup1&quot;</span>
         <span class="n">workup2</span> <span class="o">=</span> <span class="s2">&quot;workup2&quot;</span>
@@ -916,7 +916,7 @@
     <span class="n">available</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CompoundOrder"><a class="viewcode-back" href="../../backend.html#backend.models.CompoundOrder">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CompoundOrder</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="CompoundOrder"><a class="viewcode-back" href="../../djangomodels.html#backend.models.CompoundOrder">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CompoundOrder</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a CompoundOrder - a csv</span>
 <span class="sd">       file of ordering information that includes SMILES,</span>
 <span class="sd">       plate name, well id, amount, solvent and concentration</span>
@@ -937,7 +937,7 @@
     <span class="n">ordercsv</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span><span class="o">=</span><span class="s2">&quot;compoundorders/&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="OTScript"><a class="viewcode-back" href="../../backend.html#backend.models.OTScript">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTScript</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="OTScript"><a class="viewcode-back" href="../../djangomodels.html#backend.models.OTScript">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OTScript</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a OTScript - a Python script</span>
 <span class="sd">       for executing a reaction OpenTrons protocol</span>
 
@@ -955,7 +955,7 @@
     <span class="n">otscript</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span><span class="o">=</span><span class="s2">&quot;otscripts/&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SolventPrep"><a class="viewcode-back" href="../../backend.html#backend.models.SolventPrep">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SolventPrep</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="SolventPrep"><a class="viewcode-back" href="../../djangomodels.html#backend.models.SolventPrep">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SolventPrep</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Django model to define a SolventPrep - a csv</span>
 <span class="sd">       file detailing the prepreation required for diluting previous</span>
 <span class="sd">       reaction step products for use in the next reaction</span>
