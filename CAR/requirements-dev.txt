@@ -13,3 +13,4 @@ flake8==3.9.1
 pycule==0.1.9b0 
 ratelimit==2.2.1
 sphinx==5.3.0
+sphinx-rtd-theme==1.2.1

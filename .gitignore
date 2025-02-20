@@ -4,6 +4,9 @@ __pycache__/
 /.vscode/
 wget-log
 
+# Ignore documentation files
+CAR/docs/*
+
 /static/*
 CAR/media/*
 .idea/

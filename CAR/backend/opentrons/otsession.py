@@ -502,7 +502,7 @@ class CreateOTSession(object):
         Parameters
         ----------
         addactionqueryset: QuerySet[AddAction]
-            The add actions to cacluate the rounded volumes (ul)
+            The add actions to calculate the rounded volumes (ul)
 
         Returns
         -------
@@ -543,7 +543,7 @@ class CreateOTSession(object):
         Parameters
         ----------
         groupedreactiontemperaturequerysets: QuerySet[Reaction]
-            The reactions executed at the same temeprature to
+            The reactions executed at the same temperature to
             calculate the rounded volumes (ul)
 
         Returns
@@ -565,7 +565,7 @@ class CreateOTSession(object):
 
     def getTipRackType(self, roundedvolumes: list) -> str:
         """Gets OT tiprack best suited for transferring volumes (ul)
-           that minimises the number of tranfers required
+           that minimises the number of transfers required
 
         Parameters
         ----------
@@ -591,7 +591,7 @@ class CreateOTSession(object):
         return tipracktype
 
     def getPipetteType(self, roundedvolumes: list, channeltype: str = "single") -> str:
-        """Gets the type of pippete that minmises the number of tranfers
+        """Gets the type of pippete that minmises the number of transfers
            needed for transferring volumes (ul).
 
         Parameters
@@ -1004,16 +1004,16 @@ class CreateOTSession(object):
         Optimises for (in order of decreasing preference) minimum:
         number of plates, volume difference and mumber of vials
 
-        Paramters
+        Parameters
         ---------
         platetype: str
             The plateype eg. reaction, starting plate
         volumes: list
-            The volumes that the plate and wells need to accomadate
+            The volumes that the plate and wells need to accomodate
         temperature: int = 25
             The temperature (degC) the plate will be used at
         wellsneeded: int = None
-            Optional to specifiy if a speciifc number of wells are needed
+            Optional to specify if a specific number of wells are needed
         """
         platetype = platetype.lower()
         medianvolume = self.getMedianValue(values=volumes)
@@ -1099,7 +1099,7 @@ class CreateOTSession(object):
         return labwareplatetypes[0]
 
     def getAddActionsMaterialDataFrame(self, productexists: bool) -> DataFrame:
-        """Aggegates all add actions materials and sums up volume requires using solvent type and
+        """Aggregates all add actions materials and sums up volume requires using solvent type and
         concentration
 
         Parameters
@@ -1157,7 +1157,7 @@ class CreateOTSession(object):
         return deckobj
 
     def createPipetteModel(self):
-        """Cretae a pipette object"""
+        """Create a pipette object"""
         pipetteobj = Pipette()
         pipetteobj.otsession_id = self.otsessionobj
         pipetteobj.position = self.pipettetype["position"]

@@ -169,7 +169,7 @@ def getGroupedActionSessionSequences(
     Returns
     -------
     groupedactionsessionsequences: list
-        List of sublists of action sessions grouped by sequence number
+        List of sub-lists of action sessions grouped by sequence number
     """
     groupedactionsessionsequences = []
     for sessionnumber in sessionnumbers:
@@ -195,7 +195,7 @@ def getGroupedActionSessionTypes(
     Returns
     -------
     groupedactionsessionquerysettypes: list
-        List of sublists of action sessions grouped by types
+        List of sub-lists of action sessions grouped by types
     """
     groupedactionsessiontypes = []
     for actionsessiontype in actionsessiontypes:
@@ -217,7 +217,7 @@ def getActionSessionQuerySet(
     Parameters
     ----------
     reactions_ids: QuerySet[Reaction]
-        The reactions that the action session will excecute
+        The reactions that the action session will execute
     driver: str
         The optional main driver of the action session
 
@@ -905,7 +905,7 @@ def checkPreviousReactionProducts(reaction_id: int, smiles: str) -> bool:
     ----------
     reaction_id: int
         The reaction id of the Django model object to search for
-        all relative previous reactions objects. The previosu reactions may
+        all relative previous reactions objects. The previous reactions may
         have products that are this reaction's reactant input
     smiles: str
         The SMILES of the reaction's reactant and previous reaction products
@@ -941,7 +941,7 @@ def getPreviousReactionQuerySets(reaction_id: int, smiles: str) -> QuerySet[Reac
     ----------
     reaction_id: int
         The reaction id of the Django model object to search for
-        all relative previous reactions objects. The previosu reactions may
+        all relative previous reactions objects. The previous reactions may
         have products that are this reaction's reactant input
     smiles: str
         The SMILES of the reaction's reactant and previous reaction products
@@ -1309,7 +1309,7 @@ def getAddtionOrder(
         if "ordered_smis" in locals():
             return ordered_smis
         else:
-            print("Additon order not found for product SMILES".format(product_smi))
+            print("Addition order not found for product SMILES".format(product_smi))
             print("The reaction SMARTS pattern is {}".format(reaction_SMARTS))
             print("The reactant SMILES are {}".format(reactant_SMILES))
             return None

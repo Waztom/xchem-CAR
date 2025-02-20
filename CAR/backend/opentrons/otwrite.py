@@ -1,7 +1,7 @@
-# this is vunrable to python injection by the lack of checking of metadata inputs
+# this is vulnerable to python injection by the lack of checking of metadata inputs
 # this opens and closes files frequently, could be improved by creating string to hold the file data before writing to file once
 
-#   NOTE: in this file "humanread" referes to the comments above each line/set of lines of ot code, human readable is a list of all the comments in format [oporator (human/ot), comment]
+#   NOTE: in this file "human read" refers to the comments above each line/set of lines of ot code, human readable is a list of all the comments in format [oporator (human/ot), comment]
 """Create otWrite object"""
 from __future__ import annotations
 from django.core.files.storage import default_storage
@@ -364,7 +364,7 @@ class OTWrite(object):
         return columnqueryset
 
     def createFilePath(self):
-        """Creates the OT protcol script filepath"""
+        """Creates the OT protocol script filepath"""
         filename = "{}.txt".format(self.protocolname)
         path = "tmp/" + filename
         filepath = str(os.path.join(settings.MEDIA_ROOT, path))
@@ -465,7 +465,7 @@ class OTWrite(object):
         reaction_id: int
             The reaction's id used in the transfer
         smiles: str
-            The SMILES of the starting material needed to be tranferred
+            The SMILES of the starting material needed to be transferred
         solvent: str
             The solvent used to prepare the starting material
         concentration: float
@@ -840,7 +840,7 @@ class OTWrite(object):
         Returns
         ------
         reactionrecipes: list
-            The set of reaction receipes
+            The set of reaction recipes
         """
         reactionrecipes = (
             reactionqueryset.filter(reactionclass=reactionclass)
@@ -1020,7 +1020,7 @@ class OTWrite(object):
         script.close()
 
     def writeCommand(self, comandString: str):
-        """Writes the command for an OT script"""
+        """Writes the for an OT script"""
         script = open(self.filepath, "a")
         if type(comandString) == str:
             script.write("\t" + str(comandString) + "\n")
@@ -1031,7 +1031,7 @@ class OTWrite(object):
         script.close()
 
     def mixWell(self, wellindex: int, nomixes: int, plate: str):
-        """Prepares mixing commmand instruction for a mixing action
+        """Prepares mixingcomand instruction for a mixing action
 
         Parameters
         ----------
@@ -1053,7 +1053,7 @@ class OTWrite(object):
         self.writeCommand(instruction)
 
     def mixColumn(self, columnindex: int, nomixes: int, plate: str):
-        """Prepares mixing commmand instruction for a mixing action
+        """Prepares mixingcomand instruction for a mixing action
         on a column in a plate. 0.7% of the max volume of the pipette
         is mixed.
 
@@ -1177,7 +1177,7 @@ class OTWrite(object):
         # airgap: int = 15,
         transfertype: str = "standard",
     ):
-        """Prepares the transfer commmand instruction for a tranfer action
+        """Prepares the transfercomand instruction for a tranfer action
            using a single well index
 
         Parameters
@@ -1187,7 +1187,7 @@ class OTWrite(object):
         dispenseplatename: str
             The name of the destination plate
         aspiratewellindex: int
-            The index of the well the transfer is orginating from
+            The index of the well the transfer is originating from
         dispensewellindex: int
             The index of the destination well
         transvolume: float
@@ -1196,7 +1196,7 @@ class OTWrite(object):
             The height (mm) the pipette tip will aspirate from.
             Set to 2 mm.
         dispenseheight: int
-            The hieght (mm) at which the pipette tip will dispense.
+            The height (mm) at which the pipette tip will dispense.
             Set to 5 mm above the bottom of the well.
         transfertype: str
             The tpye of transfer eg. reaction, workup
@@ -1226,7 +1226,7 @@ class OTWrite(object):
         # airgap: int = 15,
         transfertype: str = "standard",
     ):
-        """Prepares the mutli-pipette transfer commmand instruction for a
+        """Prepares the mutli-pipette transfer instruction for a
            transfer action using a column index
 
         Parameters
@@ -1236,7 +1236,7 @@ class OTWrite(object):
         dispenseplatename: str
             The name of the destination plate
         aspiratecolumnindex: int
-            The index of the column the transfer is orginating from
+            The index of the column the transfer is originating from
         dispensecolumnindex: int
             The index of the destination column
         transvolume: float
@@ -1245,10 +1245,10 @@ class OTWrite(object):
             The height (mm) the pipette tip will aspirate from.
             Set to 2 mm.
         dispenseheight: int
-            The hieght (mm) at which the pipette tip will dispense.
+            The height (mm) at which the pipette tip will dispense.
             Set to 5 mm above the bottom of the well.
         transfertype: str
-            The tpye of transfer eg. reaction, workup
+            The type of transfer eg. reaction, workup
         airgap: int
             The airgap (uL) setting for the pipette to draw air in after aspirating
             to prevent solvent pearling
@@ -1264,7 +1264,7 @@ class OTWrite(object):
         self.writeCommand(instruction)
 
     def calculateAspirateHeight(self, bottomlayervolume: float, labware: str) -> float:
-        """Calculate the height at wich to extract the top layer based
+        """Calculate the height at which to extract the top layer based
         on volume occupying the bottom layer
 
         Parameters
@@ -1517,7 +1517,7 @@ class OTWrite(object):
                 print(reactionqueryset)
 
             self.pauseProtocol(
-                message="Addtion of dilution solvent complete. Confirm dilution complete to restart protocol."
+                message="Addition of dilution solvent complete. Confirm dilution complete to restart protocol."
             )
 
         for index, actionsessionobj in enumerate(actionsessionqueryset):
