@@ -756,14 +756,14 @@ class CreateEncodedActionModels(object):
             toplatetype = action["content"]["plates"]["toplatetype"]
             materialinfo = action["content"]["material"]
             if materialinfo["SMARTS"]:
-                matches = [matchSMARTS(
-                    smiles=smi,
-                    smarts=materialinfo["SMARTS"]
-                ) for smi in self.reactant_pair_smiles]
+                matches = [
+                    matchSMARTS(smiles=smi, smarts=materialinfo["SMARTS"])
+                    for smi in self.reactant_pair_smiles
+                ]
                 if not any(matches):
                     print("No match found")
                 # if all(matches):
-                    # smiles = self.reactant_pair_smiles[matches.index(True)]
+                # smiles = self.reactant_pair_smiles[matches.index(True)]
                 if any(matches):
                     smiles = self.reactant_pair_smiles[matches.index(True)]
                 # MUst fix this to match SMARTS with molecule vs just taking first reactant SMILES!!!!!!

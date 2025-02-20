@@ -46,7 +46,9 @@ class IBMAPI(object):
                 "Accept": "application/json",
             }
             url = "https://rxn.res.ibm.com/rxn/api/api/v1/actions/convert-material-to-smiles"
-            r = requests.post(url=url, data=json.dumps(data), headers=headers, cookies={})
+            r = requests.post(
+                url=url, data=json.dumps(data), headers=headers, cookies={}
+            )
             response_dict = r.json()
             smiles = response_dict["payload"][chemical_name]
             return smiles
@@ -70,10 +72,8 @@ class IBMAPI(object):
                 )
                 while results["status"] != "SUCCESS":
                     time.sleep(130)
-                    results = (
-                        self.rxn4chemistry_wrapper.get_predict_automatic_retrosynthesis_results(
-                            response["prediction_id"]
-                        )
+                    results = self.rxn4chemistry_wrapper.get_predict_automatic_retrosynthesis_results(
+                        response["prediction_id"]
                     )
                     results["results"] = results
             except Exception as e:
@@ -146,12 +146,18 @@ class IBMAPI(object):
 
         try:
             time.sleep(10)
-            pathway_synthesis_response = self.rxn4chemistry_wrapper.create_synthesis_from_sequence(
-                sequence_id=pathway["sequenceId"]
+            pathway_synthesis_response = (
+                self.rxn4chemistry_wrapper.create_synthesis_from_sequence(
+                    sequence_id=pathway["sequenceId"]
+                )
             )
             pathway_synthesis_id = pathway_synthesis_response["synthesis_id"]
             time.sleep(10)
-            synthesis_tree, reactions, actions = self.rxn4chemistry_wrapper.get_synthesis_plan(
+            (
+                synthesis_tree,
+                reactions,
+                actions,
+            ) = self.rxn4chemistry_wrapper.get_synthesis_plan(
                 synthesis_id=pathway_synthesis_id
             )
 
@@ -177,11 +183,15 @@ class IBMAPI(object):
         reaction_classes = reaction_info["rclass"]
         reactants = reaction_info["reactants"]
         flat_list = [item for sublist in reactants for item in sublist]
-        reactants = [reactant for reactant in flat_list if reactant not in common_solvents]
+        reactants = [
+            reactant for reactant in flat_list if reactant not in common_solvents
+        ]
         reactants = list(dict.fromkeys(reactants))
         rxn_classes_integers = [
             self.convert(self.convertbytes(rxn_class)) for rxn_class in reaction_classes
         ]
-        reactant_integers = [self.convert(self.convertbytes(reactant)) for reactant in reactants]
+        reactant_integers = [
+            self.convert(self.convertbytes(reactant)) for reactant in reactants
+        ]
         method_integer = sum(reactant_integers) + sum(rxn_classes_integers)
         return method_integer

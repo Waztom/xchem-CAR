@@ -163,9 +163,9 @@ def uploadManifoldReaction(validate_output):
                         target_volumes_10,
                         batchrouteresults,
                     ):
-                        # Need to capture when route is not found                        
+                        # Need to capture when route is not found
                         if "routes" in routeresult:
-                            routes = routeresult["routes"] 
+                            routes = routeresult["routes"]
                             if routes:
                                 target_id = createTargetModel(
                                     batch_id=batch_id,
@@ -332,9 +332,7 @@ def uploadManifoldReaction(validate_output):
                                             reaction_smarts = (
                                                 AllChem.ReactionFromSmarts(
                                                     "{}>>{}".format(
-                                                        ".".join(
-                                                            reactant_smiles
-                                                        ),
+                                                        ".".join(reactant_smiles),
                                                         product_smiles,
                                                     ),
                                                     useSmiles=True,

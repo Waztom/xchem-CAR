@@ -1,13 +1,13 @@
 from __future__ import absolute_import, unicode_literals
 import os
-from django.conf import settings  
+from django.conf import settings
 from celery import Celery
 
 # set default Django settings module for celery
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CAR.settings')
- 
-app = Celery('CAR')
-app.config_from_object('django.conf:settings', namespace='CELERY')  
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "CAR.settings")
+
+app = Celery("CAR")
+app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
 # Commented out below - worked with rabbit

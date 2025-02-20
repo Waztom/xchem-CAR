@@ -1542,6 +1542,7 @@ def getChemicalName(inchikey: str) -> str:
             "Pubchempy could not convert SMILES to a IUPAC name with error {}".format(e)
         )
 
+
 def matchSMARTS(smiles: str, smarts: str) -> bool:
     """Matches a SMILES pattern to a SMARTS pattern
 

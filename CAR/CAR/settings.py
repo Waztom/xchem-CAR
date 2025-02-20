@@ -28,7 +28,13 @@ DEBUG = True
 # DEBBUG = False
 
 # NB Need to change this
-ALLOWED_HOSTS = [".diamond.ac.uk", ".xchem.diamond.ac.uk", ".localhost", "127.0.0.1", "[::1]"]
+ALLOWED_HOSTS = [
+    ".diamond.ac.uk",
+    ".xchem.diamond.ac.uk",
+    ".localhost",
+    "127.0.0.1",
+    "[::1]",
+]
 
 # Sendgrid email settings
 EMAIL_HOST = "smtp.sendgrid.net"
@@ -41,7 +47,7 @@ EMAIL_USE_TLS = True
 # Application definition
 INSTALLED_APPS = [
     "backend",
-    'corsheaders',
+    "corsheaders",
     "rest_framework",
     "django_filters",
     "django.contrib.admin",
@@ -94,7 +100,9 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ["POSTGRES_NAME"],
         "USER": os.environ["POSTGRES_USER"],
-        "PASSWORD": os.environ["POSTGRES_PASSWORD"],  # NB must get this stuff in .env file!
+        "PASSWORD": os.environ[
+            "POSTGRES_PASSWORD"
+        ],  # NB must get this stuff in .env file!
         "HOST": os.environ["POSTGRES_HOST"],  # set in docker-compose.yml
         "PORT": os.environ["POSTGRES_PORT"],  # default postgres port
     }
@@ -143,7 +151,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
 
 # Add search to all APIs created
-REST_FRAMEWORK = {"DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"]}
+REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"]
+}
 
 # Add logging
 LOGGING = {
@@ -167,8 +177,12 @@ LOGGING = {
 
 # celery setup
 CELERY = {
-    "CELERY_BROKER_URL": os.environ["CELERY_BROKER_URL"],  # 'amqp://localhost' for local devlopment
-    "CELERY_RESULT_BACKEND": os.environ["CELERY_RESULT_BACKEND"],  # 'redis://redis:6379'
+    "CELERY_BROKER_URL": os.environ[
+        "CELERY_BROKER_URL"
+    ],  # 'amqp://localhost' for local devlopment
+    "CELERY_RESULT_BACKEND": os.environ[
+        "CELERY_RESULT_BACKEND"
+    ],  # 'redis://redis:6379'
     "CELERY_ACCEPT_CONTENT": ["application/json"],
     "CELERY_RESULT_SERIALIZER": "json",
     "CELERY_TASK_SERIALIZER": "json",
