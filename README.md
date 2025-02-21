@@ -11,7 +11,7 @@ for running locally or development purposes**<br><br>
 ## <a name="Setting up Windows Subsystem for Linux"></a>Windows subsystem for linux
 
 If you're using Windows, to install git-crypt, it's strongly advised that you install Windows Subsystem for Linux (WSL).
-For seting up WSL2 - you can follow these instructions: https://www.digitalocean.com/community/tutorials/how-to-install-the-windows-subsystem-for-linux-2-on-microsoft-windows-10 and/or https://docs.microsoft.com/en-gb/windows/wsl/install-win10
+For setting up WSL2 - you can follow these instructions: https://www.digitalocean.com/community/tutorials/how-to-install-the-windows-subsystem-for-linux-2-on-microsoft-windows-10 and/or https://docs.microsoft.com/en-gb/windows/wsl/install-win10
 
 ## <a name="VisualStudioCode"></a>Visual Studio Code
 
@@ -47,7 +47,7 @@ all branches can be found: https://github.com/Waztom/xchem-CAR/branches
 
 ## <a name="InstallDocker"></a>Install Docker
 
-First you'll need Docker Desktop (or the relevent Docker Engine on Linux) you can find the appropriate download at: https://www.docker.com/get-started and specifically for Ubuntu, instructions at: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04
+First you'll need Docker Desktop (or the relevant Docker Engine on Linux) you can find the appropriate download at: https://www.docker.com/get-started and specifically for Ubuntu, instructions at: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04
 
 ## <a name="InstallDockerCompose"></a>Install Docker Compose
 
@@ -126,7 +126,7 @@ once Git-Crypt is installed unlock the secrets using:
 
 ### <a name="TimetoLaunch"></a>Time to Launch 
 
-- Open a new terminal that you can interact with. if the terminal is visible at the bottom of the screen click on the plus "create new integrated terminal" or use the keybord shortcut "**Ctrl+Shift+`**" button or use the adjacent "split terminal" (or "**Ctrl+Shift+5**") button to see the new terminal adjacent to the current terminal
+- Open a new terminal that you can interact with. if the terminal is visible at the bottom of the screen click on the plus "create new integrated terminal" or use the keyword shortcut "**Ctrl+Shift+`**" button or use the adjacent "split terminal" (or "**Ctrl+Shift+5**") button to see the new terminal adjacent to the current terminal
 - you should now be in the container running Debian Linux
 - in the new terminal type (Terminal 1):
   > `cd /code/.devcontainer/` <br> 
@@ -138,7 +138,7 @@ once Git-Crypt is installed unlock the secrets using:
   >`cd /code/CAR/frontend/`<br>
   >`npm run dev`<br>z
 
-- launch the django server in a seperate terminal:
+- launch the django server in a separate terminal:
   >`python3 manage.py runserver`<br>`
 
 

@@ -1289,7 +1289,7 @@ class OTWrite(object):
         bottomlayerheight = (
             aspirateheightconvesion_m * bottomlayervolume
         ) + aspirateheightconvesion_c
-        aspirateheight = (bottomlayerheight * 0.15) + bottomlayerheight
+        aspirateheight = bottomlayerheight * 1.15
         return aspirateheight
 
     def writeReactionActions(self, actionsessionqueryset: QuerySet[ActionSession]):

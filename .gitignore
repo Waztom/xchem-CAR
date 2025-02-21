@@ -7,7 +7,7 @@ wget-log
 # Ignore documentation files
 CAR/docs/*
 
-/static/*
+CAR/staticfiles/*
 CAR/media/*
 .idea/
 /Test_DB_files/*
