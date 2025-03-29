@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /code/CAR/frontend/
+cd /container/src/frontend/
 
 # Update npm
 npm npm i npm@latest -g 

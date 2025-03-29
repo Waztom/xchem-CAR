@@ -1,11 +1,11 @@
 FROM debian:bullseye-slim
 
 # Copy Python requirements and NPM packages
-COPY ./CAR/requirements-dev.txt /code/requirements-dev.txt
+COPY ./src/requirements-dev.txt /container/requirements-dev.txt
 
 USER root
 
-WORKDIR /code
+WORKDIR /container
 
 # Update and install
 RUN \

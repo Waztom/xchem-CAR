@@ -15,7 +15,7 @@ For setting up WSL2 - you can follow these instructions: https://www.digitalocea
 
 ## <a name="VisualStudioCode"></a>Visual Studio Code
 
-These instructions are designed for Visual Studio Code which can be installed for free from: https://code.visualstudio.com/
+These instructions are designed for Visual Studio Code which can be installed for free from: https://container.visualstudio.com/
 
 ## <a name="GitCryptKey"></a>Git-Crypt Key
 
@@ -79,7 +79,7 @@ once installed a box with two arrows pointing in opposite directions should appe
 If you are running WSL - you need to install the Remote - WSL extension. Skip this step if you're running Ubuntu/Linux. 
 
 Ctrl + SHIFT + X and type in 'Remote - WSL' to install the extension.
-See (https://code.visualstudio.com/blogs/2020/07/01/containers-wsl) for more information about using dev containers in WSL2
+See (https://container.visualstudio.com/blogs/2020/07/01/containers-wsl) for more information about using dev containers in WSL2
 
 # <a name="gitcrypt"></a>git-crypt
 
@@ -90,7 +90,7 @@ If you are using a Windows machine then it is necessary to download the Windows 
 
 You will need to allow WSL integration with Docker Desktop. To do this go to settings on Docker > Resources > WSL Integration. Then enable WSL integration for your desired distribution.
 
-Incorporation of VSCode with WSL for further information: https://code.visualstudio.com/docs/remote/wsl-tutorial
+Incorporation of VSCode with WSL for further information: https://container.visualstudio.com/docs/remote/wsl-tutorial
 
 **Note: We have tested this using Ubuntu 18.04 and 20.04, compatibility of other Linux distributions have not been investigated.**
 
@@ -129,13 +129,13 @@ once Git-Crypt is installed unlock the secrets using:
 - Open a new terminal that you can interact with. if the terminal is visible at the bottom of the screen click on the plus "create new integrated terminal" or use the keyword shortcut "**Ctrl+Shift+`**" button or use the adjacent "split terminal" (or "**Ctrl+Shift+5**") button to see the new terminal adjacent to the current terminal
 - you should now be in the container running Debian Linux
 - in the new terminal type (Terminal 1):
-  > `cd /code/.devcontainer/` <br> 
+  > `cd /container/.devcontainer/` <br> 
   > `chown -R root launch-backend.sh launch-frontend.sh` <br>
   > `./launch-backend.sh` <br>
   > `./launch-frontend.sh` <br>
   
 - to start the Vite server for the frontend, in a separate terminal inside your development container:
-  >`cd /code/CAR/frontend/`<br>
+  >`cd /container/src/frontend/`<br>
   >`npm run dev`<br>z
 
 - launch the django server in a separate terminal:
@@ -150,7 +150,7 @@ to upload files in CAR, you need to start a Celery worker in a separate terminal
 
 - open a new terminal the same way as last time ([see Time to Launch](#TimeToLaunch))
 - in the new terminal type:
-  > `cd /code/CAR/`<br> 
+  > `cd /container/src/`<br> 
   >`celery -A CAR worker -l info`<br>
 
 if you make any changes to the Django models, you will need to run the the migrations again in the CAR directory:

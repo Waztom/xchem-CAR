@@ -5,10 +5,10 @@ __pycache__/
 wget-log
 
 # Ignore documentation files
-CAR/docs/*
+src/docs/*
 
-CAR/staticfiles/*
-CAR/media/*
+src/staticfiles/*
+src/media/*
 .idea/
 /Test_DB_files/*
 *.csv
@@ -17,7 +17,7 @@ CAR/media/*
 *.rdb
 
 # Ignore Opentrons protocol files
-CAR/output/*
+src/output/*
 
 # Ignore .env files
 #.*env
@@ -28,14 +28,14 @@ Deploy_compare
 crypt-key
 
 # Ignore compiled main.js
-CAR/frontend/static/frontend/main.js
+src/frontend/static/frontend/main.js
 boilerplatenotes.txt
 
 # Ignore log file
-CAR/logs/*
+src/logs/*
     
 # Django / React / Webpack stuff
-CAR/backend/migrations/*
+src/backend/migrations/*
 venv/*
 db.sqlite3
 *.pyc
@@ -82,4 +82,4 @@ pytestdebug.log
 **/*.backup.*
 **/*.back.*
 node_modules
-CAR/frontend/static/frontend/main.js
+src/frontend/static/frontend/main.js

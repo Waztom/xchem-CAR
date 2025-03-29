@@ -6,7 +6,7 @@ services:
       context: ..
       dockerfile: .devcontainer/Dockerfile
     volumes:
-      - ..:/code:cached
+      - ..:/container:cached
     env_file:
       - ./.devcontainerenv
     # Overrides default command so things don't shut down after the process ends.
@@ -32,7 +32,7 @@ services:
       context: ..
       dockerfile: .devcontainer/Dockerfile
     volumes:
-      - ..:/code:cached
+      - ..:/container:cached
     env_file:
       - ./.devcontainerenv
     # Overrides default command so things don't shut down after the process ends.
