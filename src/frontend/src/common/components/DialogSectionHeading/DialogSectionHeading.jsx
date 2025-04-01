@@ -1,15 +1,17 @@
 import React from 'react';
-import { makeStyles, Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
-const useStyles = makeStyles(theme => ({
-  heading: {
-    fontSize: '0.9rem',
-    fontWeight: 500
-  }
+const StyledTypography = styled(Typography)(({ theme }) => ({
+  fontSize: '0.9rem',
+  fontWeight: 500,
+  marginBottom: theme.spacing(1)
 }));
 
-export const DialogSectionHeading = ({ children }) => {
-  const classes = useStyles();
+export const DialogSectionHeading = ({ children }) => (
+  <StyledTypography variant="h6" component="h3">
+    {children}
+  </StyledTypography>
+);
 
-  return <Typography className={classes.heading}>{children}</Typography>;
-};
+DialogSectionHeading.displayName = 'DialogSectionHeading';

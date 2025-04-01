@@ -1,29 +1,32 @@
-import { FormControl, FormHelperText, FormLabel, makeStyles } from '@material-ui/core';
+import { FormControl, FormHelperText, FormLabel } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { ErrorMessage, useField } from 'formik';
 import React from 'react';
 import { BatchSelector } from '../../../../../common/components/BatchSelector';
 import { SuspenseWithBoundary } from '../../../../../common/components/SuspenseWithBoundary';
 import { OTWarningSection } from '../OTWarningSection';
 
-const useStyles = makeStyles(theme => ({
-  container: {
-    display: 'grid',
-    gap: theme.spacing()
+const StyledContainer = styled('div')(({ theme }) => ({
+  display: 'grid',
+  gap: theme.spacing()
+}));
+
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  '& .MuiFormLabel-root': {
+    marginBottom: theme.spacing(1)
   }
 }));
 
 export const FormBatchSelector = ({ name, label }) => {
-  const classes = useStyles();
-
   const [field, meta, helpers] = useField(name);
   const selectedBatchesMap = field.value;
 
   return (
-    <FormControl variant="filled" error={meta.touched && !!meta.error}>
+    <StyledFormControl variant="filled" error={meta.touched && !!meta.error}>
       <FormLabel>{label}</FormLabel>
 
       <SuspenseWithBoundary>
-        <div className={classes.container}>
+        <StyledContainer>
           <BatchSelector
             selectedBatchesMap={selectedBatchesMap}
             onBatchSelected={(batchId, selected) => {
@@ -35,10 +38,14 @@ export const FormBatchSelector = ({ name, label }) => {
             }}
           />
           <OTWarningSection selectedBatchesMap={selectedBatchesMap} />
-        </div>
+        </StyledContainer>
       </SuspenseWithBoundary>
 
-      <ErrorMessage name={name}>{error => <FormHelperText error={true}>{error}</FormHelperText>}</ErrorMessage>
-    </FormControl>
+      <ErrorMessage name={name}>
+        {error => <FormHelperText error>{error}</FormHelperText>}
+      </ErrorMessage>
+    </StyledFormControl>
   );
 };
+
+FormBatchSelector.displayName = 'FormBatchSelector';

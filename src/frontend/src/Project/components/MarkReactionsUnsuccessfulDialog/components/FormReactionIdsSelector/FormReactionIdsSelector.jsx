@@ -1,101 +1,121 @@
 import React from 'react';
-import { Chip, FormControl, FormHelperText, IconButton, makeStyles, TextField, Tooltip } from '@material-ui/core';
+import { 
+  Chip, 
+  FormControl, 
+  FormHelperText, 
+  IconButton, 
+  TextField, 
+  Tooltip,
+  Autocomplete,
+  createFilterOptions 
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { ErrorMessage, useField } from 'formik';
-import { Autocomplete } from '@material-ui/lab';
-import { createFilterOptions } from '@material-ui/lab/Autocomplete';
-import classNames from 'classnames';
-import { CloudUpload } from '@material-ui/icons';
+import { CloudUpload } from '@mui/icons-material';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing()
-  },
-  chip: {
-    maxWidth: 240
-  },
-  error: {
-    backgroundColor: theme.palette.error.light,
-    color: theme.palette.error.contrastText
-  },
-  errorIcon: {
-    color: theme.palette.error.dark
-  },
-  input: {
-    display: 'none'
-  }
+const Container = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing()
 }));
 
-export const FormReactionIdsSelector = ({ name, label, autocompleteId, filePickerId, reactionsIds, reactionsMap }) => {
-  const classes = useStyles();
+const StyledChip = styled(Chip, {
+  shouldForwardProp: prop => prop !== 'isError'
+})(({ theme, isError }) => ({
+  maxWidth: 240,
+  ...(isError && {
+    backgroundColor: theme.palette.error.light,
+    color: theme.palette.error.contrastText,
+    '& .MuiChip-deleteIcon': {
+      color: theme.palette.error.dark
+    }
+  })
+}));
 
+const HiddenInput = styled('input')({
+  display: 'none'
+});
+
+export const FormReactionIdsSelector = ({ 
+  name, 
+  label, 
+  autocompleteId, 
+  filePickerId, 
+  reactionsIds, 
+  reactionsMap 
+}) => {
   const [field, meta, helpers] = useField(name);
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        const ids = reader.result.split(';');
+        helpers.setValue([...new Set([...field.value, ...ids])]);
+      });
+      reader.readAsText(file);
+    }
+  };
 
   return (
     <FormControl variant="filled" error={meta.touched && !!meta.error} fullWidth>
-      <div className={classes.root}>
+      <Container>
         <Autocomplete
           multiple
           fullWidth
           id={autocompleteId}
           options={reactionsIds}
           getOptionLabel={option => String(option.id)}
-          renderOption={option => (
-            <>
+          renderOption={(props, option) => (
+            <li {...props}>
               {option}&nbsp;<i>{reactionsMap[option].reactionclass}</i>
-            </>
+            </li>
           )}
           filterOptions={createFilterOptions({
             stringify: option => `${option} ${reactionsMap[option].reactionclass}`
           })}
           filterSelectedOptions
-          renderInput={params => <TextField {...params} variant="outlined" label={label} placeholder={label} />}
+          renderInput={params => (
+            <TextField 
+              {...params} 
+              variant="outlined" 
+              label={label} 
+              placeholder={label} 
+            />
+          )}
           renderTags={(values, getTagProps) =>
-            values.map((value, index) => {
-              return (
-                <Chip
-                  {...getTagProps({ index })}
-                  classes={{
-                    root: classNames(classes.chip, !reactionsMap[value] && classes.error),
-                    deleteIcon: classNames(!reactionsMap[value] && classes.errorIcon)
-                  }}
-                  label={value}
-                />
-              );
-            })
+            values.map((value, index) => (
+              <StyledChip
+                {...getTagProps({ index })}
+                key={value}
+                label={value}
+                isError={!reactionsMap[value]}
+              />
+            ))
           }
           value={field.value}
           onChange={(_, value) => helpers.setValue(value)}
         />
-        <input
+        <HiddenInput
           accept="text/csv"
-          className={classes.input}
           id={filePickerId}
           type="file"
-          onChange={event => {
-            const file = event.target.files[0];
-
-            if (file) {
-              const reader = new FileReader();
-              reader.addEventListener('load', () => {
-                const ids = reader.result.split(';');
-                helpers.setValue([...new Set([...field.value, ...ids])]);
-              });
-
-              reader.readAsText(file);
-            }
-          }}
+          onChange={handleFileChange}
         />
         <label htmlFor={filePickerId}>
           <Tooltip title="Upload reaction IDs from file">
-            <IconButton component="span">
+            <IconButton component="span" size="large">
               <CloudUpload />
             </IconButton>
           </Tooltip>
         </label>
-      </div>
-      <ErrorMessage name={name}>{error => <FormHelperText error={true}>{error}</FormHelperText>}</ErrorMessage>
+      </Container>
+      <ErrorMessage name={name}>
+        {error => <FormHelperText error>{error}</FormHelperText>}
+      </ErrorMessage>
     </FormControl>
   );
 };
+
+FormReactionIdsSelector.displayName = 'FormReactionIdsSelector';

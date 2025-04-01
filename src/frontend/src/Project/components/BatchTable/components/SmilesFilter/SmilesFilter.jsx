@@ -1,17 +1,19 @@
-import { Chip, IconButton, makeStyles, TextField, Tooltip } from '@material-ui/core';
-import { AddCircle, Clear, CloudUpload } from '@material-ui/icons';
-import classNames from 'classnames';
 import React, { useState } from 'react';
+import { Chip, IconButton, TextField, Tooltip } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { AddCircle, Clear, CloudUpload } from '@mui/icons-material';
+import { SuspenseWithBoundary } from '../../../../../common/components/SuspenseWithBoundary';
 import { CanonicalizeSmilesDialog } from '../../../CanonicalizeSmilesDialog';
 import { useCanonicalizeSmiles } from '../../../../hooks/useCanonicalizeSmiles';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing()
-  },
-  input: {
+const FilterRoot = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing()
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiInputBase-root': {
     padding: 9,
     paddingRight: 65,
     flexWrap: 'wrap',
@@ -19,40 +21,39 @@ const useStyles = makeStyles(theme => ({
       visibility: 'visible'
     }
   },
-  inputField: {
+  '& .MuiInputBase-input': {
     flexGrow: 1,
     minWidth: 30,
     width: 0,
     padding: '9.5px 4px'
-  },
-  chip: {
-    margin: 3,
-    maxWidth: 240
-  },
-  button: {
-    padding: 2,
-    marginRight: -2
-  },
-  clear: {
-    visibility: 'hidden'
-  },
-  clearActive: {
-    visibility: 'visible'
-  },
-  endAdornment: {
-    position: 'absolute',
-    right: 9,
-    top: 'calc(50% - 14px)'
   }
 }));
 
-export const SmilesFilter = ({ id, label, filterValue = [], setFilter }) => {
-  const classes = useStyles();
+const StyledChip = styled(Chip)(({ theme }) => ({
+  margin: 3,
+  maxWidth: 240
+}));
 
+const EndAdornment = styled('div')(({ theme }) => ({
+  position: 'absolute',
+  right: 9,
+  top: 'calc(50% - 14px)',
+  display: 'flex',
+  gap: theme.spacing(1/2)
+}));
+
+const ActionButton = styled(IconButton, {
+  shouldForwardProp: prop => prop !== 'isVisible'
+})(({ theme, isVisible }) => ({
+  padding: 2,
+  marginRight: -2,
+  visibility: isVisible ? 'visible' : 'hidden'
+}));
+
+const SmilesFilterContent = ({ id, label, filterValue = [], setFilter }) => {
   const [inputValue, setInputValue] = useState('');
   const [active, setActive] = useState(false);
   const [disabled, setDisabled] = useState(false);
-
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const dirty = !!filterValue.length;
@@ -63,11 +64,9 @@ export const SmilesFilter = ({ id, label, filterValue = [], setFilter }) => {
   };
 
   const { mutate: canonicalize } = useCanonicalizeSmiles(
-    () => {
-      setDisabled(true);
-    },
+    () => setDisabled(true),
     smiles => {
-      if (!!smiles) {
+      if (smiles) {
         addSmiles(smiles);
         setInputValue('');
       }
@@ -76,7 +75,7 @@ export const SmilesFilter = ({ id, label, filterValue = [], setFilter }) => {
   );
 
   const addSmilesFromInput = () => {
-    if (!!inputValue) {
+    if (inputValue) {
       const smiles = inputValue.split(';').map(val => val.trim());
       const formData = new FormData();
       smiles.forEach(smile => formData.append('smiles', smile));
@@ -85,83 +84,70 @@ export const SmilesFilter = ({ id, label, filterValue = [], setFilter }) => {
   };
 
   return (
-    <>
-      <div className={classes.root}>
-        <TextField
-          id={id}
-          label={label}
-          variant="outlined"
-          fullWidth
-          value={inputValue}
-          disabled={disabled}
-          onChange={event => setInputValue(event.target.value)}
-          onFocus={() => setActive(true)}
-          onBlur={() => setActive(false)}
-          InputProps={{
-            className: classes.input,
-            classes: { input: classes.inputField },
-            startAdornment:
-              !!filterValue.length &&
-              filterValue.map(value => (
-                <Chip
-                  className={classes.chip}
-                  key={value}
-                  label={value}
-                  tabIndex={-1}
-                  disabled={disabled}
-                  onDelete={() => {
-                    const newFilterValue = [...filterValue];
-                    const index = filterValue.findIndex(val => value === val);
-                    newFilterValue.splice(index, 1);
-                    setFilter(newFilterValue);
-                  }}
-                />
-              )),
-            endAdornment: (
-              <div className={classes.endAdornment}>
-                <IconButton
-                  className={classNames(
-                    classes.button,
-                    classes.clear,
-                    active && dirty && !disabled && classes.clearActive,
-                    dirty && !disabled && 'smiles-filter-dirty'
-                  )}
-                  size="small"
-                  title="Clear"
-                  aria-label="Clear"
-                  disabled={disabled}
-                  onClick={() => setFilter([])}
-                >
-                  <Clear fontSize="small" />
-                </IconButton>
-                <IconButton
-                  className={classes.button}
-                  size="small"
-                  title="Add smiles"
-                  aria-label="Add smiles"
-                  disabled={disabled}
-                  onClick={addSmilesFromInput}
-                >
-                  <AddCircle fontSize="small" />
-                </IconButton>
-              </div>
-            )
-          }}
-          inputProps={{
-            autoComplete: 'off'
-          }}
-          onKeyPress={event => {
-            if (event.key === 'Enter') {
-              addSmilesFromInput();
-            }
-          }}
-        />
-        <Tooltip title="Upload smiles from file">
-          <IconButton disabled={disabled} onClick={() => setDialogOpen(true)}>
-            <CloudUpload />
-          </IconButton>
-        </Tooltip>
-      </div>
+    <FilterRoot>
+      <StyledTextField
+        id={id}
+        label={label}
+        variant="outlined"
+        fullWidth
+        value={inputValue}
+        disabled={disabled}
+        onChange={event => setInputValue(event.target.value)}
+        onFocus={() => setActive(true)}
+        onBlur={() => setActive(false)}
+        InputProps={{
+          startAdornment: filterValue.map(value => (
+            <StyledChip
+              key={value}
+              label={value}
+              tabIndex={-1}
+              disabled={disabled}
+              onDelete={() => {
+                setFilter(filterValue.filter(val => val !== value));
+              }}
+            />
+          )),
+          endAdornment: (
+            <EndAdornment>
+              <ActionButton
+                size="small"
+                title="Clear"
+                isVisible={active && dirty && !disabled}
+                disabled={disabled}
+                onClick={() => setFilter([])}
+              >
+                <Clear fontSize="small" />
+              </ActionButton>
+              <ActionButton
+                size="small"
+                title="Add SMILES"
+                isVisible={true}
+                disabled={disabled}
+                onClick={addSmilesFromInput}
+              >
+                <AddCircle fontSize="small" />
+              </ActionButton>
+            </EndAdornment>
+          )
+        }}
+        inputProps={{
+          autoComplete: 'off'
+        }}
+        onKeyPress={event => {
+          if (event.key === 'Enter') {
+            addSmilesFromInput();
+          }
+        }}
+      />
+      <Tooltip title="Upload SMILES from file">
+        <IconButton 
+          disabled={disabled} 
+          onClick={() => setDialogOpen(true)}
+          size="large"
+        >
+          <CloudUpload />
+        </IconButton>
+      </Tooltip>
 
       <CanonicalizeSmilesDialog
         open={dialogOpen}
@@ -174,6 +160,14 @@ export const SmilesFilter = ({ id, label, filterValue = [], setFilter }) => {
           setDisabled(false);
         }}
       />
-    </>
+    </FilterRoot>
   );
 };
+
+export const SmilesFilter = (props) => (
+  <SuspenseWithBoundary>
+    <SmilesFilterContent {...props} />
+  </SuspenseWithBoundary>
+);
+
+SmilesFilter.displayName = 'SmilesFilter';

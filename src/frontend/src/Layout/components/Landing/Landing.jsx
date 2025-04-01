@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
-import { IconButton, makeStyles, Tooltip } from '@material-ui/core';
-import { AddCircle } from '@material-ui/icons';
+import { IconButton, Tooltip } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { AddCircle } from '@mui/icons-material';
 import { ContentBox } from '../../../common/components/ContentBox';
 import { ProjectList } from './components/ProjectList';
 import { UploadProjectDialog } from '../UploadProjectDialog';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1
-  }
+const StyledRoot = styled('div')(({ theme }) => ({
+  flexGrow: 1
 }));
 
 export const Landing = () => {
-  const classes = useStyles();
-
   const [uploadProjectDialogOpen, setUploadProjectDialogOpen] = useState(false);
 
   return (
@@ -21,7 +18,7 @@ export const Landing = () => {
       <ContentBox
         title="Projects"
         PaperProps={{
-          className: classes.root
+          component: StyledRoot
         }}
         endAdornment={
           <Tooltip title="Add new project">
@@ -34,7 +31,10 @@ export const Landing = () => {
         <ProjectList />
       </ContentBox>
 
-      <UploadProjectDialog open={uploadProjectDialogOpen} onClose={() => setUploadProjectDialogOpen(false)} />
+      <UploadProjectDialog 
+        open={uploadProjectDialogOpen} 
+        onClose={() => setUploadProjectDialogOpen(false)} 
+      />
     </>
   );
 };

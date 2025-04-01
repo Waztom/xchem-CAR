@@ -1,8 +1,10 @@
-import { makeStyles, Typography } from '@material-ui/core';
 import React from 'react';
+import { Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { CloseDialog } from '../../../common/components/CloseDialog';
 import { DialogSection } from '../../../common/components/DialogSection';
 import { DialogSectionHeading } from '../../../common/components/DialogSectionHeading';
+import { SuspenseWithBoundary } from '../../../common/components/SuspenseWithBoundary';
 import {
   setReactionDetailsDialogOpen,
   setReactionForReactionDetailsDialog,
@@ -11,31 +13,62 @@ import {
 import { ProductSection } from './components/ProductSection/ProductSection';
 import { ReactantSection } from './components/ReactantSection/ReactantSection';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    display: 'grid',
-    gap: theme.spacing(2),
-    '& > :nth-child(even)': {
-      backgroundColor: theme.palette.action.hover
-    }
-  },
-  reactionWrapper: {
-    display: 'grid',
-    justifyContent: 'center'
-  },
-  reactionNameWrapper: {
-    textAlign: 'center',
-    display: 'grid'
-  },
-  image: {
-    mixBlendMode: 'multiply'
+const StyledRoot = styled('div')(({ theme }) => ({
+  display: 'grid',
+  gap: theme.spacing(2),
+  '& > :nth-child(even)': {
+    backgroundColor: theme.palette.action.hover
   }
 }));
 
-export const ReactionDetailsDialog = () => {
-  const classes = useStyles();
+const ReactionWrapper = styled('div')(() => ({
+  display: 'grid',
+  justifyContent: 'center'
+}));
 
-  const { dialogOpen, reaction } = useReactionDetailsDialogStore();
+const ReactionNameWrapper = styled('div')(() => ({
+  textAlign: 'center',
+  display: 'grid'
+}));
+
+const StyledImage = styled('img')(() => ({
+  mixBlendMode: 'multiply'
+}));
+
+const ReactionDetailsContent = () => {
+  const { reaction } = useReactionDetailsDialogStore();
+
+  return (
+    <StyledRoot>
+      <DialogSection>
+        <DialogSectionHeading>Reaction</DialogSectionHeading>
+        <ReactionWrapper>
+          <StyledImage src={reaction?.image} width={270} height={60} />
+          <ReactionNameWrapper>
+            <Typography noWrap>{reaction?.reactionclass}</Typography>
+          </ReactionNameWrapper>
+        </ReactionWrapper>
+      </DialogSection>
+
+      {reaction?.reactants.map((reactant, index) => (
+        <ReactantSection key={reactant.id} reactant={reactant} index={index} />
+      ))}
+
+      {!!reaction && <ProductSection product={reaction?.products[0]} />}
+    </StyledRoot>
+  );
+};
+
+const LoadingFallback = () => (
+  <StyledRoot>
+    <DialogSection>
+      <Typography>Loading reaction details...</Typography>
+    </DialogSection>
+  </StyledRoot>
+);
+
+export const ReactionDetailsDialog = () => {
+  const { dialogOpen } = useReactionDetailsDialogStore();
 
   return (
     <CloseDialog
@@ -45,23 +78,9 @@ export const ReactionDetailsDialog = () => {
       maxWidth="md"
       fullWidth
       content={
-        <div className={classes.root}>
-          <DialogSection>
-            <DialogSectionHeading>Reaction</DialogSectionHeading>
-            <div className={classes.reactionWrapper}>
-              <img className={classes.image} src={reaction?.image} width={270} height={60} />
-              <div className={classes.reactionNameWrapper}>
-                <Typography noWrap>{reaction?.reactionclass}</Typography>
-              </div>
-            </div>
-          </DialogSection>
-
-          {reaction?.reactants.map((reactant, index) => (
-            <ReactantSection key={reactant.id} reactant={reactant} index={index} />
-          ))}
-
-          {!!reaction && <ProductSection product={reaction?.products[0]} />}
-        </div>
+        <SuspenseWithBoundary fallback={<LoadingFallback />}>
+          <ReactionDetailsContent />
+        </SuspenseWithBoundary>
       }
       onClose={() => {
         setReactionDetailsDialogOpen(false);
@@ -72,3 +91,5 @@ export const ReactionDetailsDialog = () => {
     />
   );
 };
+
+ReactionDetailsDialog.displayName = 'ReactionDetailsDialog';

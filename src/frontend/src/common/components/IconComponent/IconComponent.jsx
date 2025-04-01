@@ -1,15 +1,23 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material/styles';
 
-const useStyles = makeStyles(theme => ({
-  icon: {
-    width: 24,
-    height: 24
+const StyledIcon = styled('span')(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 24,
+  height: 24,
+  '& > svg': {
+    width: '100%',
+    height: '100%',
+    color: 'inherit'
   }
 }));
 
-export const IconComponent = ({ Component, ...rest }) => {
-  const classes = useStyles();
+export const IconComponent = ({ Component, ...rest }) => (
+  <StyledIcon>
+    <Component {...rest} />
+  </StyledIcon>
+);
 
-  return <Component className={classes.icon} {...rest} />;
-};
+IconComponent.displayName = 'IconComponent';

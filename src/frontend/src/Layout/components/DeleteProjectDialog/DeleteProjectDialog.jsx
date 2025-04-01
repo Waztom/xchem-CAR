@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { useDeleteProject } from './hooks/useDeleteProject';
 import { ConfirmationDialog } from '../../../common/components/ConfirmationDialog';
 import {

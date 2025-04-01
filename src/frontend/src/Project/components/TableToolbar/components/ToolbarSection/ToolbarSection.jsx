@@ -1,25 +1,23 @@
 import React from 'react';
-import { makeStyles, Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    marginBottom: theme.spacing()
-  },
-  content: {
-    display: 'grid',
-    gap: theme.spacing()
-  }
+const StyledSection = styled('section')(({ theme }) => ({
+  marginBottom: theme.spacing()
 }));
 
-export const ToolbarSection = ({ title, children }) => {
-  const classes = useStyles();
+const ContentWrapper = styled('div')(({ theme }) => ({
+  display: 'grid',
+  gap: theme.spacing()
+}));
 
-  return (
-    <section className={classes.root}>
-      <Typography variant="h6" component="p">
-        {title}
-      </Typography>
-      <div className={classes.content}>{children}</div>
-    </section>
-  );
-};
+export const ToolbarSection = ({ title, children }) => (
+  <StyledSection>
+    <Typography variant="h6" component="p">
+      {title}
+    </Typography>
+    <ContentWrapper>{children}</ContentWrapper>
+  </StyledSection>
+);
+
+ToolbarSection.displayName = 'ToolbarSection';

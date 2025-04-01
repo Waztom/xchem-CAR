@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
-import { colors, makeStyles, Tooltip, Typography } from '@material-ui/core';
+import { colors, Tooltip, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { IconComponent } from '../../../../common/components/IconComponent';
 import { IoFootsteps } from 'react-icons/io5';
+import { FormatListNumbered } from '@mui/icons-material';
+import { SuspenseWithBoundary } from '../../../../common/components/SuspenseWithBoundary';
 import { AutocompleteFilter } from '../components/AutocompleteFilter';
 import {
   createTableMethodAutocompleteFilter,
@@ -19,40 +22,38 @@ import { PREFERRED_LEAD_TIME, PREFERRED_PRICE, PREFERRED_VENDORS } from '../../.
 import { PreferredFlagIndicator } from '../components/PreferredFlagIndicator/PreferredFlagIndicator';
 import { formatPreferredVendorsString } from '../../../utils/formatPreferredVendorsString';
 import { SmilesFilter } from '../components/SmilesFilter/SmilesFilter';
-import classNames from 'classnames';
-import { FormatListNumbered } from '@material-ui/icons';
 import { requestReactionDetailsDialog } from '../../../stores/reactionDetailsDialogStore';
 
-const useStyles = makeStyles(theme => ({
-  text: {
-    width: '100%',
-    textAlign: 'center'
-  },
-  flexCell: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: theme.spacing(1 / 2)
-  },
-  reactionWrapper: {
-    display: 'grid',
-    cursor: 'pointer'
-  },
-  reactionNameWrapper: {
-    textAlign: 'center',
-    display: 'grid',
-    lineHeight: 1
-  },
-  preferredIndicatorsWrapper: {
-    display: 'grid',
-    gap: theme.spacing()
-  },
-  unsuccessful: {
-    backgroundColor: colors.red[100]
-  },
-  image: {
-    mixBlendMode: 'multiply'
-  }
+const StyledCellWrapper = styled('div')(({ theme }) => ({
+  width: '100%',
+  textAlign: 'center'
+}));
+
+const FlexCell = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: theme.spacing(1/2)
+}));
+
+const ReactionWrapper = styled('div')(({ theme, unsuccessful }) => ({
+  display: 'grid',
+  cursor: 'pointer',
+  backgroundColor: unsuccessful ? colors.red[100] : 'transparent'
+}));
+
+const ReactionContent = styled('div')(({ theme }) => ({
+  display: 'grid',
+  gap: theme.spacing(1)
+}));
+
+const StyledImage = styled('img')(() => ({
+  mixBlendMode: 'multiply'
+}));
+
+const PreferredIndicators = styled('div')(({ theme }) => ({
+  display: 'grid',
+  gap: theme.spacing()
 }));
 
 const filterByMethodReactionName = createTableMethodAutocompleteFilter((row, ids, filterValue) =>
@@ -114,10 +115,32 @@ const filterByMethodReactantsExcludeSmiles = createTableMethodSmilesFilter((row,
   return !smiles.some(smile => filterValue.includes(smile));
 });
 
-export const useTableColumns = maxNoSteps => {
-  const classes = useStyles();
+const ReactionCell = ({ reaction, value, onClick }) => (
+  <SuspenseWithBoundary fallback={<FlexCell>Loading...</FlexCell>}>
+    <FlexCell>
+      <Tooltip title="Show reaction details">
+        <ReactionWrapper 
+          unsuccessful={!reaction.success}
+          onClick={onClick}
+        >
+          <ReactionContent>
+            <StyledImage src={reaction.image} width={270} height={60} />
+            <Typography variant="caption" noWrap>
+              {value}
+            </Typography>
+          </ReactionContent>
+        </ReactionWrapper>
+      </Tooltip>
+      <PreferredIndicators>
+        <PreferredFlagIndicator reaction={reaction} type="vendor" />
+        <PreferredFlagIndicator reaction={reaction} type="leadTime" />
+        <PreferredFlagIndicator reaction={reaction} type="price" />
+      </PreferredIndicators>
+    </FlexCell>
+  </SuspenseWithBoundary>
+);
 
-  // Since filter functions should be memoized, we can't call them directly
+export const useTableColumns = maxNoSteps => {
   const reactantVendorFilters = useMemo(() => {
     return new Array(maxNoSteps).fill(0).map((_, index) => filterByMethodReactantVendor(index));
   }, [maxNoSteps]);
@@ -137,79 +160,58 @@ export const useTableColumns = maxNoSteps => {
         accessor: 'position',
         sortLabel: 'position',
         disableFilters: true,
-        Header: () => {
-          return <FormatListNumbered />;
-        },
-        Cell: ({ value }) => {
-          return (
-            <Typography className={classes.text} component="span" noWrap>
+        Header: () => <FormatListNumbered />,
+        Cell: ({ value }) => (
+          <StyledCellWrapper>
+            <Typography component="span" noWrap>
               {value}
             </Typography>
-          );
-        },
+          </StyledCellWrapper>
+        ),
         sortType: 'number'
       },
-      ...new Array(maxNoSteps).fill(0).map((_, index) => {
-        return {
-          accessor: `reactions[${index}].reactionclass`,
-          sortLabel: `reaction step ${index + 1}`,
-          filterOrder: 6,
-          Header: () => {
-            return (
-              <div className={classes.flexCell}>
-                <IconComponent Component={IoFootsteps} />
-                <Typography component="span">{index + 1}</Typography>
-              </div>
-            );
-          },
-          Cell: ({ value, row }) => {
-            const reaction = row.original.reactions[index];
-
-            if (!reaction) {
-              return null;
-            }
-
-            return (
-              <div className={classNames(classes.flexCell, !reaction.success && classes.unsuccessful)}>
-                <Tooltip title="Show reaction details">
-                  <div className={classes.reactionWrapper} onClick={() => requestReactionDetailsDialog(reaction)}>
-                    <img className={classes.image} src={reaction.image} width={270} height={60} />
-                    <div className={classes.reactionNameWrapper}>
-                      <Typography variant="caption" noWrap>
-                        {value}
-                      </Typography>
-                    </div>
-                  </div>
-                </Tooltip>
-                <div className={classes.preferredIndicatorsWrapper}>
-                  <PreferredFlagIndicator reaction={reaction} type="vendor" />
-                  <PreferredFlagIndicator reaction={reaction} type="leadTime" />
-                  <PreferredFlagIndicator reaction={reaction} type="price" />
-                </div>
-              </div>
-            );
-          },
-          Filter: ({ column: { filterValue, setFilter }, preFilteredFlatRows }) => {
-            return (
-              <AutocompleteFilter
-                id={`reaction-${index + 1}-filter`}
-                options={[
-                  ...new Set(
-                    preFilteredFlatRows
-                      .filter(row => row.depth === 1)
-                      .map(row => row.original.reactions?.[index]?.reactionclass)
-                  )
-                ].sort()}
-                label={`Reaction type - step ${index + 1}`}
-                placeholder="Reaction type"
-                filterValue={filterValue}
-                setFilter={setFilter}
-              />
-            );
-          },
-          filter: filterByMethodReactionName
-        };
-      }),
+      ...new Array(maxNoSteps).fill(0).map((_, index) => ({
+        accessor: `reactions[${index}].reactionclass`,
+        sortLabel: `reaction step ${index + 1}`,
+        filterOrder: 6,
+        Header: () => (
+          <FlexCell>
+            <IconComponent Component={IoFootsteps} />
+            <Typography component="span">{index + 1}</Typography>
+          </FlexCell>
+        ),
+        Cell: ({ value, row }) => {
+          const reaction = row.original.reactions[index];
+          if (!reaction) return null;
+          
+          return (
+            <ReactionCell
+              reaction={reaction}
+              value={value}
+              onClick={() => requestReactionDetailsDialog(reaction)}
+            />
+          );
+        },
+        Filter: ({ column: { filterValue, setFilter }, preFilteredFlatRows }) => (
+          <SuspenseWithBoundary>
+            <AutocompleteFilter
+              id={`reaction-${index + 1}-filter`}
+              options={[
+                ...new Set(
+                  preFilteredFlatRows
+                    .filter(row => row.depth === 1)
+                    .map(row => row.original.reactions?.[index]?.reactionclass)
+                )
+              ].sort()}
+              label={`Reaction type - step ${index + 1}`}
+              placeholder="Reaction type"
+              filterValue={filterValue}
+              setFilter={setFilter}
+            />
+          </SuspenseWithBoundary>
+        ),
+        filter: filterByMethodReactionName
+      })),
       {
         accessor: 'otchem',
         filterOrder: 1,
@@ -415,13 +417,6 @@ export const useTableColumns = maxNoSteps => {
     ];
   }, [
     maxNoSteps,
-    classes.text,
-    classes.flexCell,
-    classes.unsuccessful,
-    classes.reactionWrapper,
-    classes.image,
-    classes.reactionNameWrapper,
-    classes.preferredIndicatorsWrapper,
     reactantVendorFilters,
     preferredReactantVendorFilters,
     preferredReactantLeadTimeFilters,

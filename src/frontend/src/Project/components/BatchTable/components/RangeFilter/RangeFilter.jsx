@@ -1,27 +1,25 @@
-import { FormControl, FormLabel, IconButton, makeStyles, Slider, Tooltip } from '@material-ui/core';
-import { Cancel } from '@material-ui/icons';
 import React, { useLayoutEffect, useState } from 'react';
+import { FormControl, FormLabel, IconButton, Slider, Tooltip } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { Cancel } from '@mui/icons-material';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    marginBottom: theme.spacing(2),
-    display: 'flex',
-    alignItems: 'flex-start'
-  },
-  slider: {
-    margin: `0 ${theme.spacing()}px`,
-    width: `calc(100% - ${theme.spacing(2)}px)`
-  },
-  clearWrapper: {
-    paddingTop: 5
-  }
+const FilterWrapper = styled('div')(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+  display: 'flex',
+  alignItems: 'flex-start'
+}));
+
+const StyledSlider = styled(Slider)(({ theme }) => ({
+  margin: `0 ${theme.spacing()}px`,
+  width: `calc(100% - ${theme.spacing(2)}px)`
+}));
+
+const ClearButtonWrapper = styled('div')(({ theme }) => ({
+  paddingTop: theme.spacing(0.625)
 }));
 
 export const RangeFilter = ({ id, label, min, max, filterValue, setFilter }) => {
-  const classes = useStyles();
-
   const labelId = `${id}-label`;
-
   const [value, setValue] = useState(filterValue);
 
   useLayoutEffect(() => {
@@ -30,17 +28,14 @@ export const RangeFilter = ({ id, label, min, max, filterValue, setFilter }) => 
 
   // In case there are no numbers to take min and max from the STD returns +/-Infinity
   const valid = Number.isFinite(min) && Number.isFinite(max);
-
   const active = !!filterValue;
-
   const clearEnabled = valid && active;
 
   return (
-    <div className={classes.root}>
+    <FilterWrapper>
       <FormControl fullWidth>
         <FormLabel>{label}</FormLabel>
-        <Slider
-          className={classes.slider}
+        <StyledSlider
           value={value || [min, max]}
           onChange={(_, value) => setValue(Array.isArray(value) ? value : [value, value])}
           aria-labelledby={labelId}
@@ -65,13 +60,21 @@ export const RangeFilter = ({ id, label, min, max, filterValue, setFilter }) => 
           color={active ? 'primary' : 'secondary'}
         />
       </FormControl>
-      <div className={classes.clearWrapper}>
+      <ClearButtonWrapper>
         <Tooltip title={clearEnabled ? 'Clear filter' : ''}>
-          <IconButton onClick={() => setFilter()} disabled={!clearEnabled}>
-            <Cancel />
-          </IconButton>
+          <span>
+            <IconButton 
+              onClick={() => setFilter()} 
+              disabled={!clearEnabled} 
+              size="large"
+            >
+              <Cancel />
+            </IconButton>
+          </span>
         </Tooltip>
-      </div>
-    </div>
+      </ClearButtonWrapper>
+    </FilterWrapper>
   );
 };
+
+RangeFilter.displayName = 'RangeFilter';

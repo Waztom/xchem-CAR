@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   colors,
-  makeStyles,
   Table,
   TableBody,
   TableCell,
@@ -9,57 +8,57 @@ import {
   TableRow,
   TableSortLabel,
   Tooltip,
-  Typography
-} from '@material-ui/core';
+  Typography,
+  Box
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { DialogSection } from '../../../../../common/components/DialogSection';
 import { DialogSectionHeading } from '../../../../../common/components/DialogSectionHeading';
 import { useReactantProductTableColumns } from './hooks/useReactantProductTableColumns';
 import { useTable, useSortBy } from 'react-table';
+import { SuspenseWithBoundary } from '../../../../../common/components/SuspenseWithBoundary';
 import PubChem from '../../../../../assets/pubchem.svg';
 import PubChemSafety from '../../../../../assets/pubchem-safety.svg';
 
-const useStyles = makeStyles(theme => ({
-  table: {
-    '& tr': {
-      display: 'grid',
-      alignItems: 'stretch',
-      gap: `0 ${theme.spacing()}px`,
-      borderBottom: `1px solid ${theme.palette.divider}`,
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
-      gridTemplateColumns: '160px 1fr 105px repeat(2, 95px)'
-    },
-    '& th, td': {
-      display: 'grid',
-      placeItems: 'center start',
-      border: 0,
-      padding: 0
-    }
-  },
-  flexCell: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(1 / 2)
-  },
-  sortIconInactive: {
-    '& svg': {
-      color: `${colors.grey[400]} !important`
-    }
-  },
-  sections: {
+const StyledTable = styled(Table)(({ theme }) => ({
+  '& tr': {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)'
+    alignItems: 'stretch',
+    gap: `0 ${theme.spacing()}px`,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+    gridTemplateColumns: '160px 1fr 105px repeat(2, 95px)'
+  },
+  '& th, td': {
+    display: 'grid',
+    placeItems: 'center start',
+    border: 0,
+    padding: 0
   }
 }));
 
-export const ReactantSection = ({ reactant, index }) => {
-  const classes = useStyles();
+const FlexCell = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1/2)
+}));
 
+const StyledSortLabel = styled(TableSortLabel)(({ theme, active }) => ({
+  '& svg': {
+    color: !active ? `${colors.grey[400]} !important` : undefined
+  }
+}));
+
+const SectionsGrid = styled('div')(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)'
+}));
+
+const ReactantSectionContent = ({ reactant, index }) => {
   const reactantpubcheminfo = reactant.reactantpubcheminfo || {};
-
   const columns = useReactantProductTableColumns();
-
-  const { getTableProps, headerGroups, getTableBodyProps, rows, prepareRow } = useTable(
+  const tableInstance = useTable(
     {
       columns,
       data: reactant.catalogentries
@@ -67,11 +66,13 @@ export const ReactantSection = ({ reactant, index }) => {
     useSortBy
   );
 
+  const { getTableProps, headerGroups, getTableBodyProps, rows, prepareRow } = tableInstance;
+
   return (
     <DialogSection>
       <DialogSectionHeading>Reactant {index + 1}</DialogSectionHeading>
-      <div className={classes.sections}>
-        <div>
+      <SectionsGrid>
+        <Box>
           <Typography>
             Smiles: <strong>{reactant.smiles}</strong>
           </Typography>
@@ -80,51 +81,48 @@ export const ReactantSection = ({ reactant, index }) => {
               CAS number: <strong>{reactantpubcheminfo.cas}</strong>
             </Typography>
           )}
-        </div>
+        </Box>
 
         {!!reactantpubcheminfo.summaryurl && (
-          <div>
+          <Box>
             <Tooltip title="PubChem compound summary">
               <a href={reactantpubcheminfo.summaryurl} target="_blank" rel="noreferrer">
-                <img src={PubChem} height={50} />
+                <img src={PubChem} height={50} alt="PubChem" />
               </a>
             </Tooltip>
-          </div>
+          </Box>
         )}
         {!!reactantpubcheminfo.lcssurl && (
-          <div>
+          <Box>
             <Tooltip title="Laboratory chemical safety summary">
               <a href={reactantpubcheminfo.lcssurl} target="_blank" rel="noreferrer">
-                <img src={PubChemSafety} height={50} />
+                <img src={PubChemSafety} height={50} alt="PubChem Safety" />
               </a>
             </Tooltip>
-          </div>
+          </Box>
         )}
-      </div>
+      </SectionsGrid>
 
       {!!reactant.catalogentries.length && (
         <>
           <Typography>Catalog information: </Typography>
-          <Table className={classes.table} {...getTableProps()}>
+          <StyledTable {...getTableProps()}>
             <TableHead>
               {headerGroups.map(headerGroup => (
-                <TableRow {...headerGroup.getHeaderGroupProps()} className={classes.row}>
+                <TableRow {...headerGroup.getHeaderGroupProps()}>
                   {headerGroup.headers.map(column => {
                     if (column.canSort) {
-                      // Title is unused
                       const { title, ...rest } = column.getSortByToggleProps();
-
                       return (
                         <Tooltip title={`Sort by ${column.sortLabel}`} {...column.getHeaderProps()}>
                           <TableCell {...rest}>
-                            <div className={classes.flexCell}>
+                            <FlexCell>
                               {column.render('Header')}
-                              <TableSortLabel
-                                className={!column.isSorted ? classes.sortIconInactive : undefined}
+                              <StyledSortLabel
                                 active={true}
                                 direction={column.isSortedDesc ? 'desc' : 'asc'}
                               />
-                            </div>
+                            </FlexCell>
                           </TableCell>
                         </Tooltip>
                       );
@@ -137,9 +135,8 @@ export const ReactantSection = ({ reactant, index }) => {
             <TableBody {...getTableBodyProps()}>
               {rows.map(row => {
                 prepareRow(row);
-
                 return (
-                  <TableRow {...row.getRowProps()} className={classes.row}>
+                  <TableRow {...row.getRowProps()}>
                     {row.cells.map(cell => (
                       <TableCell {...cell.getCellProps()}>{cell.render('Cell')}</TableCell>
                     ))}
@@ -147,9 +144,17 @@ export const ReactantSection = ({ reactant, index }) => {
                 );
               })}
             </TableBody>
-          </Table>
+          </StyledTable>
         </>
       )}
     </DialogSection>
   );
 };
+
+export const ReactantSection = (props) => (
+  <SuspenseWithBoundary>
+    <ReactantSectionContent {...props} />
+  </SuspenseWithBoundary>
+);
+
+ReactantSection.displayName = 'ReactantSection';

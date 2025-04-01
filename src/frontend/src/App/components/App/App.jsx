@@ -1,4 +1,4 @@
-import { createTheme, ThemeProvider } from '@material-ui/core';
+import { createTheme, ThemeProvider, StyledEngineProvider } from '@mui/material';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { getTheme } from '../../../theme';
@@ -8,17 +8,19 @@ import { CustomSnackbarProvider } from '../CustomSnackbarProvider';
 
 const theme = createTheme({
   ...getTheme(),
-  overrides: {
+  components: {
     MuiAccordionSummary: {
-      root: {
-        '&$expanded': {
-          minHeight: 48
-        }
-      },
-      content: {
-        margin: 0,
-        '&$expanded': {
-          margin: 0
+      styleOverrides: {
+        root: {
+          '&.Mui-expanded': {
+            minHeight: 48
+          }
+        },
+        content: {
+          margin: 0,
+          '&.Mui-expanded': {
+            margin: 0
+          }
         }
       }
     }
@@ -36,13 +38,15 @@ const queryClient = new QueryClient({
 
 export const App = () => {
   return (
-    <ThemeProvider theme={theme}>
-      <CustomSnackbarProvider>
-        <QueryClientProvider client={queryClient}>
-          <Layout />
-          <CeleryTasksChecker />
-        </QueryClientProvider>
-      </CustomSnackbarProvider>
-    </ThemeProvider>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <CustomSnackbarProvider>
+          <QueryClientProvider client={queryClient}>
+            <Layout />
+            <CeleryTasksChecker />
+          </QueryClientProvider>
+        </CustomSnackbarProvider>
+      </ThemeProvider>
+    </StyledEngineProvider>
   );
 };

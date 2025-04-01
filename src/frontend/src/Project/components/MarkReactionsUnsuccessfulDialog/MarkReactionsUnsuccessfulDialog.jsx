@@ -4,7 +4,7 @@ import * as yup from 'yup';
 import { SubmitDialog } from '../../../common/components/SubmitDialog';
 import { DialogSection } from '../../../common/components/DialogSection';
 import { DialogSectionHeading } from '../../../common/components/DialogSectionHeading';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { FormReactionIdsSelector } from './components/FormReactionIdsSelector';
 import { useGetReactionsData } from './hooks/useGetReactionsData';
 import { useMarkReactionsUnsuccessful } from './hooks/useMarkReactionsUnsuccessful';

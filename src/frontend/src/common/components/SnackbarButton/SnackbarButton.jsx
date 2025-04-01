@@ -1,14 +1,16 @@
-import { Button, makeStyles } from '@material-ui/core';
-import React from 'react';
+import { Button } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
-const useStyles = makeStyles(theme => ({
-  button: {
-    color: theme.palette.primary.contrastText
-  }
+const StyledButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.primary.contrastText
 }));
 
-export const SnackbarButton = props => {
-  const classes = useStyles();
+export const SnackbarButton = props => (
+  <StyledButton 
+    variant="outlined" 
+    color="inherit" 
+    {...props} 
+  />
+);
 
-  return <Button className={classes.button} variant="outlined" color="inherit" {...props} />;
-};
+SnackbarButton.displayName = 'SnackbarButton';

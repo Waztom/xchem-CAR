@@ -1,25 +1,33 @@
 import React from 'react';
 import { ErrorMessage, useField } from 'formik';
-import { Button, FormControl, FormHelperText, FormLabel, makeStyles } from '@material-ui/core';
+import { Button, FormControl, FormHelperText, FormLabel } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
-const useStyles = makeStyles(theme => ({
-  input: {
-    display: 'none'
-  }
+const HiddenInput = styled('input')({
+  display: 'none'
+});
+
+const FilePickerControl = styled(FormControl)(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(1)
 }));
 
-export const FormFilePicker = ({ name, label, description, id, buttonText, accept }) => {
-  const classes = useStyles();
-
+export const FormFilePicker = ({ 
+  name, 
+  label, 
+  description, 
+  id, 
+  buttonText, 
+  accept 
+}) => {
   const [field, meta, helpers] = useField(name);
 
   return (
-    <FormControl variant="filled" error={meta.touched && !!meta.error}>
+    <FilePickerControl variant="filled" error={meta.touched && !!meta.error}>
       <FormLabel>{label}</FormLabel>
       {description}
-      <input
+      <HiddenInput
         accept={accept}
-        className={classes.input}
         id={id}
         type="file"
         onChange={event => {
@@ -33,12 +41,27 @@ export const FormFilePicker = ({ name, label, description, id, buttonText, accep
         onBlur={() => helpers.setTouched()}
       />
       <label htmlFor={id}>
-        <Button variant="contained" color="primary" component="span" fullWidth>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          component="span" 
+          fullWidth
+        >
           {buttonText ?? 'Select file'}
         </Button>
       </label>
-      <ErrorMessage name={name}>{error => <FormHelperText error={true}>{error}</FormHelperText>}</ErrorMessage>
-      {!!field.value && <FormHelperText>{field.value?.name}</FormHelperText>}
-    </FormControl>
+      <ErrorMessage name={name}>
+        {error => (
+          <FormHelperText error>{error}</FormHelperText>
+        )}
+      </ErrorMessage>
+      {!!field.value && (
+        <FormHelperText>
+          {field.value?.name}
+        </FormHelperText>
+      )}
+    </FilePickerControl>
   );
 };
+
+FormFilePicker.displayName = 'FormFilePicker';

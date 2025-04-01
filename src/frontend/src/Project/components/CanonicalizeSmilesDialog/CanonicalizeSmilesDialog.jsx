@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { Form, Formik } from 'formik';
 import * as yup from 'yup';
 import { DialogSection } from '../../../common/components/DialogSection';

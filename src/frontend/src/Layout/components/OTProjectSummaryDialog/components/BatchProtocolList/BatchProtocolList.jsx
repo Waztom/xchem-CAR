@@ -1,4 +1,4 @@
-import { Button, List, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
+import { Button, List, ListItem, ListItemSecondaryAction, ListItemText } from '@mui/material';
 import React from 'react';
 import { useGetProtocolsForTask } from './hooks/useGetProtocolsForTask';
 

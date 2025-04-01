@@ -1,4 +1,4 @@
-import { FormControl, FormHelperText, FormLabel } from '@material-ui/core';
+import { FormControl, FormHelperText, FormLabel } from '@mui/material';
 import { ErrorMessage, useField } from 'formik';
 import React from 'react';
 import { BatchSelector } from '../../../../../common/components/BatchSelector';

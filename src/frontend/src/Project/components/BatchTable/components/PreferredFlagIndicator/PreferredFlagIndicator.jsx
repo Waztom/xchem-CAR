@@ -1,33 +1,21 @@
-import { colors, makeStyles, Tooltip } from '@material-ui/core';
-import classNames from 'classnames';
 import React from 'react';
+import { colors, Tooltip } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { PREFERRED_LEAD_TIME, PREFERRED_PRICE, PREFERRED_VENDORS } from '../../../../constants/preferredContstants';
 import { formatPreferredVendorsString } from '../../../../utils/formatPreferredVendorsString';
 
-const useStyles = makeStyles(theme => ({
-  circle: {
-    borderRadius: '50%',
-    width: theme.spacing(),
-    height: theme.spacing(),
-    display: 'block'
-  },
-  green: {
-    backgroundColor: colors.lime[500]
-  },
-  red: {
-    backgroundColor: colors.red[500]
-  }
+const Circle = styled('span')(({ theme, color }) => ({
+  borderRadius: '50%',
+  width: theme.spacing(1),
+  height: theme.spacing(1),
+  display: 'block',
+  backgroundColor: color === 'green' ? colors.lime[500] : colors.red[500]
 }));
 
 const typeMapping = {
   vendor: 'preferredVendor',
   leadTime: 'preferredLeadTime',
   price: 'preferredPrice'
-};
-
-const colorMapping = {
-  true: 'green',
-  false: 'red'
 };
 
 const tooltipMapping = {
@@ -46,14 +34,14 @@ const tooltipMapping = {
 };
 
 export const PreferredFlagIndicator = ({ reaction, type }) => {
-  const classes = useStyles();
-
   const value = reaction[typeMapping[type]];
-  const colorClass = classes[colorMapping[value]];
+  const color = value ? 'green' : 'red';
 
   return (
     <Tooltip title={tooltipMapping[type][value]}>
-      <span className={classNames(classes.circle, colorClass)} />
+      <Circle color={color} />
     </Tooltip>
   );
 };
+
+PreferredFlagIndicator.displayName = 'PreferredFlagIndicator';

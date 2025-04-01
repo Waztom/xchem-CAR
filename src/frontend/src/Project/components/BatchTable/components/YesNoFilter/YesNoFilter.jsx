@@ -1,4 +1,4 @@
-import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import React from 'react';
 
 export const YesNoFilter = ({ id, label, filterValue, setFilter }) => {

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { useGetTargets } from '../../common/hooks/useGetTargets';
 import { PREFERRED_LEAD_TIME, PREFERRED_PRICE, PREFERRED_VENDORS } from '../constants/preferredContstants';
 import { useBatchContext } from './useBatchContext';
@@ -49,12 +49,23 @@ const getPreferredPriceFlag = reactants => {
 };
 
 export const useGetTableData = () => {
+  const mountedRef = useRef(true);
   const batch = useBatchContext();
 
-  const { data: targets } = useGetTargets({ batch_id: batch.id, fetchall: 'yes' });
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const { data: targets } = useGetTargets({ 
+    batch_id: batch.id, 
+    fetchall: 'yes',
+    enabled: mountedRef.current 
+  });
 
   const tableData = useMemo(() => {
-    if (!targets) {
+    if (!targets || !mountedRef.current) {
       return [];
     }
 
@@ -78,6 +89,8 @@ export const useGetTableData = () => {
       };
     });
   }, [targets]);
+
+  if (!mountedRef.current) return [];
 
   return tableData;
 };

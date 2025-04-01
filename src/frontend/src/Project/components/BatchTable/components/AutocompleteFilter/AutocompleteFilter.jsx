@@ -1,37 +1,67 @@
-import React from 'react';
-import { Autocomplete } from '@material-ui/lab';
-import { Chip, makeStyles, TextField } from '@material-ui/core';
+import React, { useState } from 'react';
+import { Autocomplete, TextField, Chip } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
-const useStyles = makeStyles(theme => ({
-  chip: {
-    maxWidth: 240
+const StyledChip = styled(Chip)(({ theme }) => ({
+  maxWidth: 240,
+  '& .MuiChip-label': {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
   }
 }));
 
-export const AutocompleteFilter = ({ id, options, label, placeholder, filterValue, setFilter }) => {
-  const classes = useStyles();
+export const AutocompleteFilter = ({ 
+  id, 
+  options, 
+  label, 
+  placeholder, 
+  filterValue, 
+  setFilter
+}) => {
+  const [inputValue, setInputValue] = useState('');
 
   return (
     <Autocomplete
       multiple
       fullWidth
+      freeSolo
       id={id}
       options={options}
+      inputValue={inputValue}
+      onInputChange={(event, newValue) => {
+        setInputValue(newValue);
+      }}
       getOptionLabel={option => String(option)}
-      renderOption={option => (!!option ? option : <i>{String(option)}</i>)}
+      renderOption={(props, option) => (
+        <li {...props}>
+          {!!option ? option : <i>{String(option)}</i>}
+        </li>
+      )}
       filterSelectedOptions
-      renderInput={params => <TextField {...params} variant="outlined" label={label} placeholder={placeholder} />}
+      renderInput={params => (
+        <TextField 
+          {...params} 
+          variant="outlined" 
+          label={label} 
+          placeholder={placeholder}
+        />
+      )}
       renderTags={(values, getTagProps) =>
         values.map((value, index) => (
-          <Chip
+          <StyledChip
+            key={value}
             {...getTagProps({ index })}
-            classes={{ root: classes.chip }}
             label={!!value ? value : <i>{String(value)}</i>}
           />
         ))
       }
       value={filterValue || []}
-      onChange={(_, value) => setFilter(value)}
+      onChange={(_, value) => {
+        setFilter(value);
+      }}
     />
   );
 };
+
+AutocompleteFilter.displayName = 'AutocompleteFilter';

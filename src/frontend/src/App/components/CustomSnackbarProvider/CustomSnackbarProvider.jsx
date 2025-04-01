@@ -1,16 +1,14 @@
 import React from 'react';
 import { SnackbarProvider } from 'notistack';
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material/styles';
 
-const useStyles = makeStyles(theme => ({
-  root: {
+const StyledSnackbarProvider = styled(SnackbarProvider)(({ theme }) => ({
+  '&.SnackbarContent-root': {
     pointerEvents: 'all',
-    margin: theme.spacing(6 / 8, 0)
+    margin: theme.spacing(6/8, 0)
   }
 }));
 
 export const CustomSnackbarProvider = ({ children }) => {
-  const classes = useStyles();
-
-  return <SnackbarProvider className={classes.root}>{children}</SnackbarProvider>;
+  return <StyledSnackbarProvider>{children}</StyledSnackbarProvider>;
 };

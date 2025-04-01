@@ -5,7 +5,7 @@ import { useBatchNavigationStore } from '../../../common/stores/batchNavigationS
 import { useCurrentProjectStore } from '../../../common/stores/currentProjectStore';
 import { useGetBatches } from '../../../common/hooks/useGetBatches';
 import { ReactionDetailsDialog } from '../ReactionDetailsDialog/ReactionDetailsDialog';
-import { List, ListItem, ListItemText, CircularProgress } from '@material-ui/core';
+import { List, ListItem, ListItemText, CircularProgress } from '@mui/material';
 
 export const ProjectView = () => {
   const currentProject = useCurrentProjectStore.useCurrentProject();

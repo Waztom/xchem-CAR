@@ -1,7 +1,7 @@
 import React from 'react';
-import { FormControl, FormControlLabel, FormLabel, FormHelperText, Radio } from '@material-ui/core';
+import { FormControl, FormControlLabel, FormLabel, FormHelperText, Radio } from '@mui/material';
 import { ErrorMessage, Field, useField } from 'formik';
-import { RadioGroup } from 'formik-material-ui';
+import { RadioGroup } from 'formik-mui'; 
 
 export const FormRadioGroup = ({ name, label, options, ...rest }) => {
   const meta = useField(name)[1];

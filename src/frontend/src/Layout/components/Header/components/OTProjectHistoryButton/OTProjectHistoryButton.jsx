@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import { CategoryMenu } from '../CategoryMenu';
 import { OTProjectMenuContents } from '../OTProjectMenuContents';
 import { requestOtProjectSummary } from '../../../../stores/otProjectSummaryDialogStore';

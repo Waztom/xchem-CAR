@@ -1,7 +1,7 @@
 import React, { forwardRef, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { LoadingSpinner } from '../LoadingSpinner';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Alert, AlertTitle } from '@mui/material';
 import { QuerySuspender } from './components/QuerySuspender';
 
 export const SuspenseWithBoundary = forwardRef(({ children, SuspenseProps = {}, ErrorBoundaryProps = {} }, ref) => {

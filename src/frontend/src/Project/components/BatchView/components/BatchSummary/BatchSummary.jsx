@@ -1,42 +1,50 @@
 import React from 'react';
-import { makeStyles, Tooltip, Typography } from '@material-ui/core';
+import { Tooltip, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { useGetBatchSummary } from './hooks/useGetBatchSummary';
 import { IconComponent } from '../../../../../common/components/IconComponent';
 import { FaFlask } from 'react-icons/fa';
-import { FindInPage } from '@material-ui/icons';
+import { FindInPage } from '@mui/icons-material';
+import { SuspenseWithBoundary } from '../../../../../common/components/SuspenseWithBoundary';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    display: 'flex'
-  },
-  categoryInfo: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, auto)',
-    alignItems: 'center',
-    gap: theme.spacing(1 / 2)
-  }
+const SummaryContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(2)
 }));
 
-export const BatchSummary = () => {
-  const classes = useStyles();
+const CategoryInfo = styled('div')(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, auto)',
+  alignItems: 'center',
+  gap: theme.spacing(1/2)
+}));
 
+const BatchSummaryContent = () => {
   const { targets, methods } = useGetBatchSummary();
 
   return (
-    <div className={classes.root}>
+    <SummaryContainer>
       <Tooltip title={`There are ${targets} targets in total`}>
-        <div className={classes.categoryInfo}>
+        <CategoryInfo>
           <Typography>{targets}</Typography>
           <IconComponent Component={FindInPage} />
-        </div>
+        </CategoryInfo>
       </Tooltip>
 
       <Tooltip title={`There are ${methods} methods in total`}>
-        <div className={classes.categoryInfo}>
+        <CategoryInfo>
           <Typography>{methods}</Typography>
           <IconComponent Component={FaFlask} />
-        </div>
+        </CategoryInfo>
       </Tooltip>
-    </div>
+    </SummaryContainer>
   );
 };
+
+export const BatchSummary = () => (
+  <SuspenseWithBoundary>
+    <BatchSummaryContent />
+  </SuspenseWithBoundary>
+);
+
+BatchSummary.displayName = 'BatchSummary';

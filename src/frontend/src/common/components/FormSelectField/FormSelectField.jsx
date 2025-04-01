@@ -1,7 +1,7 @@
 import React from 'react';
 import { ErrorMessage, Field, useField } from 'formik';
-import { Select } from 'formik-material-ui';
-import { FormControl, FormHelperText, InputLabel, MenuItem } from '@material-ui/core';
+import { Select } from 'formik-mui';
+import { FormControl, FormHelperText, InputLabel, MenuItem } from '@mui/material';
 
 export const FormSelectField = ({ id, name, label, items, ...rest }) => {
   const meta = useField(name)[1];

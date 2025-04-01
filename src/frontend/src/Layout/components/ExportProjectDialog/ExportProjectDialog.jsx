@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQueryClient } from 'react-query';
 import { SubmitDialog } from '../../../common/components/SubmitDialog';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { DialogSection } from '../../../common/components/DialogSection';
 import { DialogSectionHeading } from '../../../common/components/DialogSectionHeading';
 import { getTargetsQueryKey } from '../../../common/api/targetsQueryKeys';

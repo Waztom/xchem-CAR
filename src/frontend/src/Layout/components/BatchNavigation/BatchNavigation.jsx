@@ -1,16 +1,27 @@
 import React from 'react';
+import { TreeView } from '@mui/x-tree-view/TreeView';
+import { CircularProgress } from '@mui/material';
+import { ChevronRight, ExpandMore } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 import { useBatchTree } from '../../../common/hooks/useBatchTree';
-import { TreeView } from '@material-ui/lab';
-import { ChevronRight, ExpandMore } from '@material-ui/icons';
 import { NavigationItem } from './components/NavigationItem';
-import { makeStyles } from '@material-ui/core';
 import { setBatchesExpanded, useBatchNavigationStore } from '../../../common/stores/batchNavigationStore';
 import { DeleteSubBatchDialog } from '../DeleteSubBatchDialog';
+import { SuspenseWithBoundary } from '../../../common/components/SuspenseWithBoundary';
 
-const useStyles = makeStyles(theme => ({
-  icon: {
+const StyledTreeView = styled(TreeView)(({ theme }) => ({
+  '& .MuiTreeItem-iconContainer .MuiSvgIcon-root': {
     color: theme.palette.action.active
-  }
+  },
+  minHeight: 200
+}));
+
+const LoadingWrapper = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: theme.spacing(2),
+  minHeight: 200
 }));
 
 const selectedBatchesIdsSelector = state =>
@@ -18,39 +29,63 @@ const selectedBatchesIdsSelector = state =>
     .filter(([_, value]) => value)
     .map(([batchId]) => String(batchId));
 
-export const BatchNavigation = () => {
-  const classes = useStyles();
-
+const BatchNavigationContent = () => {
   const batchTree = useBatchTree();
-
   const selected = useBatchNavigationStore(selectedBatchesIdsSelector);
   const expanded = useBatchNavigationStore.useExpanded();
 
   const renderTree = node => {
-    const { batch } = node;
-
+    if (!node || !node.batch) return null;
+    
     return (
-      <NavigationItem key={batch.id} node={node}>
-        {Array.isArray(node.children) ? node.children.map(node => renderTree(node)) : null}
+      <NavigationItem key={node.batch.id} node={node}>
+        {Array.isArray(node.children) && node.children.length > 0
+          ? node.children.map(childNode => renderTree(childNode))
+          : null}
       </NavigationItem>
     );
   };
 
+  if (!batchTree || batchTree.length === 0) {
+    return (
+      <LoadingWrapper>
+        <div>No batches available</div>
+      </LoadingWrapper>
+    );
+  }
+
+  return (
+    <StyledTreeView
+      defaultCollapseIcon={<ExpandMore />}
+      defaultExpandIcon={<ChevronRight />}
+      selected={selected}
+      expanded={expanded}
+      onNodeToggle={(event, nodeIds) => setBatchesExpanded(nodeIds)}
+      disableSelection
+      multiSelect
+    >
+      {batchTree.map(item => renderTree(item))}
+    </StyledTreeView>
+  );
+};
+
+const LoadingFallback = () => (
+  <LoadingWrapper>
+    <CircularProgress />
+  </LoadingWrapper>
+);
+
+export const BatchNavigation = () => {
   return (
     <>
-      <TreeView
-        defaultCollapseIcon={<ExpandMore className={classes.icon} />}
-        defaultExpandIcon={<ChevronRight className={classes.icon} />}
-        selected={selected}
-        expanded={expanded}
-        onNodeToggle={(event, nodeIds) => setBatchesExpanded(nodeIds)}
-        disableSelection
-        multiSelect
+      <SuspenseWithBoundary
+        fallback={<LoadingFallback />}
       >
-        {batchTree.map(item => renderTree(item))}
-      </TreeView>
-
+        <BatchNavigationContent />
+      </SuspenseWithBoundary>
       <DeleteSubBatchDialog />
     </>
   );
 };
+
+BatchNavigation.displayName = 'BatchNavigation';

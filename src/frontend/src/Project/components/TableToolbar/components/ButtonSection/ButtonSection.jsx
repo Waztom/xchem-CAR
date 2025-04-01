@@ -1,4 +1,4 @@
-import { Button, Tooltip } from '@material-ui/core';
+import { Button, Tooltip } from '@mui/material';
 import React, { useState } from 'react';
 import { setRowsExpanded } from '../../../../../common/stores/batchesTableStateStore';
 import { useBatchContext } from '../../../../hooks/useBatchContext';

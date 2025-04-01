@@ -1,19 +1,27 @@
 import React from 'react';
-import { ChevronRight, ExpandMore } from '@material-ui/icons';
-import { makeStyles } from '@material-ui/core';
-import { TreeView } from '@material-ui/lab';
+import { ChevronRight, ExpandMore } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
+import { TreeView } from '@mui/x-tree-view/TreeView';
 import { BatchSelectorItem } from './components/BatchSelectorItem';
 import { useBatchTree } from '../../hooks/useBatchTree';
+import { SuspenseWithBoundary } from '../../components/SuspenseWithBoundary';
 
-const useStyles = makeStyles(theme => ({
-  icon: {
-    color: theme.palette.action.active
+const StyledTreeIcon = styled('span')(({ theme }) => ({
+  color: theme.palette.action.active,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+}));
+
+const StyledTreeView = styled(TreeView)(({ theme }) => ({
+  '& .MuiTreeItem-root': {
+    '& .MuiTreeItem-content': {
+      padding: theme.spacing(0.5, 1)
+    }
   }
 }));
 
-export const BatchSelector = ({ selectedBatchesMap, onBatchSelected }) => {
-  const classes = useStyles();
-
+const BatchSelectorContent = ({ selectedBatchesMap, onBatchSelected }) => {
   const batchTree = useBatchTree();
 
   const selectedBatchesIds = Object.entries(selectedBatchesMap)
@@ -22,7 +30,6 @@ export const BatchSelector = ({ selectedBatchesMap, onBatchSelected }) => {
 
   const renderTree = node => {
     const { batch } = node;
-
     return (
       <BatchSelectorItem
         key={batch.id}
@@ -30,20 +37,38 @@ export const BatchSelector = ({ selectedBatchesMap, onBatchSelected }) => {
         selected={!!selectedBatchesMap[batch.id]}
         onSelect={onBatchSelected}
       >
-        {Array.isArray(node.children) ? node.children.map(node => renderTree(node)) : null}
+        {Array.isArray(node.children) 
+          ? node.children.map(node => renderTree(node)) 
+          : null}
       </BatchSelectorItem>
     );
   };
 
   return (
-    <TreeView
-      defaultCollapseIcon={<ExpandMore className={classes.icon} />}
-      defaultExpandIcon={<ChevronRight className={classes.icon} />}
+    <StyledTreeView
+      defaultCollapseIcon={
+        <StyledTreeIcon>
+          <ExpandMore />
+        </StyledTreeIcon>
+      }
+      defaultExpandIcon={
+        <StyledTreeIcon>
+          <ChevronRight />
+        </StyledTreeIcon>
+      }
       selected={selectedBatchesIds}
-      disableSelection
       multiSelect
+      disableSelection
     >
       {batchTree.map(item => renderTree(item))}
-    </TreeView>
+    </StyledTreeView>
   );
 };
+
+export const BatchSelector = (props) => (
+  <SuspenseWithBoundary>
+    <BatchSelectorContent {...props} />
+  </SuspenseWithBoundary>
+);
+
+BatchSelector.displayName = 'BatchSelector';

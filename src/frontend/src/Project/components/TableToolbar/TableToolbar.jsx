@@ -1,86 +1,100 @@
 import React, { Fragment, useCallback, useState } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, makeStyles, Typography } from '@material-ui/core';
+import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { ExpandMore } from '@mui/icons-material';
+import { SuspenseWithBoundary } from '../../../common/components/SuspenseWithBoundary';
 import { useBatchesTableStateStore } from '../../../common/stores/batchesTableStateStore';
 import { useBatchContext } from '../../hooks/useBatchContext';
 import { ToolbarSection } from './components/ToolbarSection';
-import { ExpandMore } from '@material-ui/icons';
 import { ButtonSection } from './components/ButtonSection';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    margin: '0 !important'
-  },
-  heading: {
-    fontWeight: 500
-  },
-  details: {
-    display: 'flex',
-    gap: theme.spacing(2),
-    overflow: 'auto',
-    padding: `${theme.spacing()}px ${theme.spacing(2)}px`,
-    // Filters column
-    '& > :nth-child(2)': {
-      flex: '1 0 320px'
-    }
-  },
-  firstColumn: {
-    flex: '0 0 260px'
-  },
-  filterColumn: {
-    display: 'grid',
-    gap: theme.spacing(),
-    width: '100%'
+const StyledAccordion = styled(Accordion)(({ theme }) => ({
+  margin: '0 !important'
+}));
+
+const StyledAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(2),
+  overflow: 'auto',
+  padding: `${theme.spacing()}px ${theme.spacing(2)}`,
+  '& > *:nth-of-type(2)': {
+    flex: '1 0 320px'
   }
 }));
 
-export const TableToolbar = ({ tableInstance }) => {
-  const classes = useStyles();
+const FirstColumn = styled('div')(({ theme }) => ({
+  flex: '0 0 260px'
+}));
 
+const FilterColumn = styled('div')(({ theme }) => ({
+  display: 'grid',
+  gap: theme.spacing(),
+  width: '100%'
+}));
+
+const StyledHeading = styled(Typography)(({ theme }) => ({
+  fontWeight: 500
+}));
+
+const TableToolbarContent = ({ tableInstance }) => {
   const batch = useBatchContext();
-
   const { columns } = tableInstance;
+  const [accordionOpen, setAccordionOpen] = useState(false);
 
   const selectedMethodsIds = useBatchesTableStateStore(
     useCallback(
       state =>
         Object.entries(state.selected[batch.id] || {})
           .filter(([_, value]) => value)
-          // Method row ids are in a form targetId.methodId
           .map(([key]) => Number(key.split('.')[1])),
       [batch.id]
     )
   );
 
-  const [accordionOpen, setAccordionOpen] = useState(false);
-
   return (
-    <Accordion
+    <StyledAccordion
       expanded={accordionOpen}
-      className={classes.root}
       elevation={0}
-      onChange={(event, expanded) => setAccordionOpen(expanded)}
+      onChange={(_, expanded) => setAccordionOpen(expanded)}
     >
       <AccordionSummary expandIcon={<ExpandMore />}>
-        <Typography className={classes.heading}>
+        <StyledHeading>
           {accordionOpen ? 'Hide' : 'Show'} table summary, actions and filters
-        </Typography>
+        </StyledHeading>
       </AccordionSummary>
-      <AccordionDetails className={classes.details}>
-        <div className={classes.firstColumn}>
+      <StyledAccordionDetails>
+        <FirstColumn>
           <ToolbarSection title="Summary">
             <Typography>Selected methods: {selectedMethodsIds.length}</Typography>
           </ToolbarSection>
-          <ButtonSection tableInstance={tableInstance} selectedMethodsIds={selectedMethodsIds} />
-        </div>
+          <SuspenseWithBoundary>
+            <ButtonSection 
+              tableInstance={tableInstance} 
+              selectedMethodsIds={selectedMethodsIds} 
+            />
+          </SuspenseWithBoundary>
+        </FirstColumn>
         <ToolbarSection title="Filters">
-          {columns
-            .filter(column => column.canFilter)
-            .sort((a, b) => a.filterOrder - b.filterOrder)
-            .map(column => (
-              <Fragment key={column.id}>{column.render('Filter')}</Fragment>
-            ))}
+          <FilterColumn>
+            {columns
+              .filter(column => column.canFilter)
+              .sort((a, b) => a.filterOrder - b.filterOrder)
+              .map(column => (
+                <SuspenseWithBoundary key={column.id}>
+                  {column.render('Filter')}
+                </SuspenseWithBoundary>
+              ))}
+          </FilterColumn>
         </ToolbarSection>
-      </AccordionDetails>
-    </Accordion>
+      </StyledAccordionDetails>
+    </StyledAccordion>
   );
 };
+
+export const TableToolbar = (props) => (
+  <SuspenseWithBoundary>
+    <TableToolbarContent {...props} />
+  </SuspenseWithBoundary>
+);
+
+TableToolbar.displayName = 'TableToolbar';
