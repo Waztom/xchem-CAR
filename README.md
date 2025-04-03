@@ -143,7 +143,7 @@ once Git-Crypt is installed unlock the secrets using:
 
 
 for future launches, you will not need to perform the migrations and install the node packages; you will only need to launch the Django server by running: 
-  >`cd CAR` <br> 
+  >`cd /container/src/`<br> 
   >`python3 manage.py runserver`<br>
 
 to upload files in CAR, you need to start a Celery worker in a separate terminal inside your development container:
