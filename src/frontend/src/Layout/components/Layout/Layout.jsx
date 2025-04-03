@@ -17,10 +17,20 @@ const StyledRoot = styled('div')(({ theme }) => ({
   minHeight: '100vh'
 }));
 
+const StyledHeader = styled('div')(({ theme }) => ({
+  position: 'sticky',
+  top: 0,
+  zIndex: theme.zIndex.appBar,
+  backgroundColor: theme.palette.background.default,
+  boxShadow: theme.shadows[2]
+}));
+
 const ContentContainer = styled('div')(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(2),
-  padding: theme.spacing(2)
+  padding: theme.spacing(2),
+  minHeight: 0, // Allow content to scroll
+  flex: 1
 }));
 
 const Navigation = styled('aside')(({ theme }) => ({
@@ -48,7 +58,9 @@ export const Layout = () => {
 
   return (
     <StyledRoot>
-      <Header />
+      <StyledHeader>
+        <Header />
+      </StyledHeader>
       <ContentContainer>
         {currentProject ? (
           <>
