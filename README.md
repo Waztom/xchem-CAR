@@ -33,16 +33,6 @@ In you home directory eg `/home/<username>`, clone  xchem-car repo using:
 XChem-CAR uses GitHub for version control<br>
 to get started with working on CAR clone the <em>"xchem-CAR"</em> Repository from github to your device.<br><br>
 
-### <a name="UsefulGitHubbranches"></a>Useful GitHub branches - pass for setting up
-
-| Branch  | Description                                                | URL                                              |
-| ------- | ---------------------------------------------------------- | ------------------------------------------------ |
-| Main    | Most recent, stable, release                               | https://github.com/Waztom/xchem-CAR              |
-| Develop | new features will be added <br> here before being released | https://github.com/Waztom/xchem-CAR/tree/Develop |
-
-all branches can be found: https://github.com/Waztom/xchem-CAR/branches
-<br><br>
-
 # <a name="Docker"></a>Docker
 
 ## <a name="InstallDocker"></a>Install Docker
@@ -143,7 +133,7 @@ once Git-Crypt is installed unlock the secrets using:
 
 
 for future launches, you will not need to perform the migrations and install the node packages; you will only need to launch the Django server by running: 
-  >`cd CAR` <br> 
+  >`cd /container/src/`<br> 
   >`python3 manage.py runserver`<br>
 
 to upload files in CAR, you need to start a Celery worker in a separate terminal inside your development container:
