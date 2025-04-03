@@ -1,26 +1,43 @@
 FROM debian:bullseye-slim
 
-# Copy Python and Node reqs
-COPY ./CAR/frontend/package.json /workspace/CAR/frontend/package.json
-COPY ./CAR/requirements-dev.txt /workspace/requirements-dev.txt
+# Copy Python requirements and NPM packages
+COPY ./src/requirements-dev.txt /container/requirements-dev.txt
 
 USER root
 
-WORKDIR /workspace
+WORKDIR /container
 
-# Update and install
-RUN \
- apt-get update && \
- apt-get upgrade -y && \
- apt-get install --no-install-recommends -y gnupg2 python3-rdkit python3-pip python3-pandas python3-psycopg2 nodejs npm git git-crypt nano && \ 
- apt-get autoclean -y &&\
- pip install -r requirements-dev.txt  
+# Install base dependencies and NVM
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install --no-install-recommends -y \
+    curl \
+    gnupg2 \
+    python3-rdkit \
+    python3-pip \
+    python3-pandas \
+    python3-psycopg2 \
+    git \
+    git-crypt \
+    nano \
+    locales \
+    build-essential && \
+    apt-get autoclean -y && \
+    pip install -r requirements-dev.txt
 
-# Install frontend npm packages
-WORKDIR /workspace/CAR/frontend
+# Install NVM and Node.js 18
+ENV NVM_DIR=/root/.nvm
+ENV NODE_VERSION=18.19.0
 
-RUN \
- npm i npm@latest -g && \
- npm install --quiet --legacy-peer-deps
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash && \
+    . $NVM_DIR/nvm.sh && \
+    nvm install $NODE_VERSION && \
+    nvm alias default $NODE_VERSION && \
+    nvm use default
 
-CMD chown -R root /workspace/CAR/frontend
+# Set the locale to the UK
+RUN locale-gen en_GB.UTF-8 && \
+    update-locale LANG en_GB.UTF-8
+
+ENV LANG=en_GB.UTF-8
+ENV LANGUAGE=en_GB:en

@@ -1,9 +1,0 @@
-celery==5.0.4
-django==3.1.7
-django-filter==2.4.0
-djangorestframework==3.12.2
-pubchempy==1.0.4
-redis==3.5.3
-rxn4chemistry==0.4.0
-pycule==0.1.9b0 
-ratelimit==2.2.1

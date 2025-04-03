@@ -3,7 +3,7 @@
   "name": "CAR development sandbox",
   "dockerComposeFile": "docker-compose-dev.yml",
   "service": "app",
-  "workspaceFolder": "/workspace",
+  "workspaceFolder": "/container",
 
   // Set *default* container specific settings.json values on container create.
   "settings": {

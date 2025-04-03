@@ -6,8 +6,7 @@ services:
       context: ..
       dockerfile: .devcontainer/Dockerfile
     volumes:
-      - ..:/workspace:cached
-      - node_modules:/workspace/CAR/frontend/node_modules
+      - ..:/container:cached
     env_file:
       - ./.devcontainerenv
     # Overrides default command so things don't shut down after the process ends.
@@ -33,7 +32,7 @@ services:
       context: ..
       dockerfile: .devcontainer/Dockerfile
     volumes:
-      - ..:/workspace:cached
+      - ..:/container:cached
     env_file:
       - ./.devcontainerenv
     # Overrides default command so things don't shut down after the process ends.
@@ -50,4 +49,3 @@ services:
 
 volumes:
   pgdata:
-  node_modules:
