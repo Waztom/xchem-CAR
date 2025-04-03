@@ -33,16 +33,6 @@ In you home directory eg `/home/<username>`, clone  xchem-car repo using:
 XChem-CAR uses GitHub for version control<br>
 to get started with working on CAR clone the <em>"xchem-CAR"</em> Repository from github to your device.<br><br>
 
-### <a name="UsefulGitHubbranches"></a>Useful GitHub branches - pass for setting up
-
-| Branch  | Description                                                | URL                                              |
-| ------- | ---------------------------------------------------------- | ------------------------------------------------ |
-| Main    | Most recent, stable, release                               | https://github.com/Waztom/xchem-CAR              |
-| Develop | new features will be added <br> here before being released | https://github.com/Waztom/xchem-CAR/tree/Develop |
-
-all branches can be found: https://github.com/Waztom/xchem-CAR/branches
-<br><br>
-
 # <a name="Docker"></a>Docker
 
 ## <a name="InstallDocker"></a>Install Docker
