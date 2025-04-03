@@ -34,7 +34,6 @@ export const CreateSubBatchDialog = ({ open, onClose, selectedMethodsIds }) => {
       onClose();
     },
     onError: (error) => {
-      // Handle error case if needed
       console.error('Failed to create subbatch:', error);
     }
   });
@@ -72,13 +71,19 @@ export const CreateSubBatchDialog = ({ open, onClose, selectedMethodsIds }) => {
         })}
         onSubmit={handleSubmit}
       >
-        {({ isSubmitting, resetForm, values }) => (
+        {({ isSubmitting, resetForm, values, handleSubmit: formikHandleSubmit }) => (
           <SubmitDialog
             id="create-subbatch-dialog"
             open={open}
             title="Create subbatch"
             content={
-              <StyledForm id="create-subbatch-form">
+              <StyledForm 
+                id="create-subbatch-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  formikHandleSubmit(e);
+                }}
+              >
                 <DialogSection>
                   <DialogSectionHeading>Batch information</DialogSectionHeading>
                   <Typography>Please provide following information:</Typography>
@@ -115,10 +120,16 @@ export const CreateSubBatchDialog = ({ open, onClose, selectedMethodsIds }) => {
             submitDisabled={isSubmitting}
             SubmitButtonProps={{
               type: 'submit',
-              form: 'create-subbatch-form'
+              form: 'create-subbatch-form',
+              onClick: (e) => {
+                e.preventDefault();
+                formikHandleSubmit();
+              }
             }}
             TransitionProps={{
-              onExited: resetForm
+              onExited: () => {
+                resetForm();
+              }
             }}
           />
         )}

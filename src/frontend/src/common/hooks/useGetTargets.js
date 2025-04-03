@@ -10,10 +10,8 @@ export const useGetTargets = params => {
     async () => {
       try {
         const response = await axiosGet(queryKey);
-        console.log('response_step3', response);
         return response;
       } catch (error) {
-        console.error('Error fetching targets:', error);
         throw error;
       }
     },

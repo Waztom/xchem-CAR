@@ -8,8 +8,7 @@ import { getTargetsQueryKey } from '../../../common/api/targetsQueryKeys';
 import { Form, Formik } from 'formik';
 import * as yup from 'yup';
 import { FormExportBatchSelector } from './components/FormExportBatchSelector';
-import { StreamParser } from '@json2csv/plainjs';
-// import { parseAsync } from 'json2csv';
+import { Parser } from '@json2csv/plainjs';
 import { axiosGet } from '../../../common/utils/axiosFunctions';
 import { useGlobalSnackbar } from '../../../common/hooks/useGlobalSnackbar';
 import { useProjectSnackbar } from '../../../common/hooks/useProjectSnackbar';
@@ -93,29 +92,12 @@ export const ExportProjectDialog = ({ open, onClose }) => {
 
           console.log('fields', fields);
           
-          const opts = {fields};
-          const asyncOpts = {};
-          const parser = new StreamParser(opts, asyncOpts);
-          let csvData = '';
-          parser.onData = (chunk) => (csvData += chunk.toString());
-          // parser.onEnd = () => csvData = csv;
-          parser.onError = (err) => console.error(err);
-          
-          // Create a promise to handle the parsing completion
-          const parsingComplete = new Promise((resolve, reject) => {
-          parser.onEnd = () => resolve(csvData);
-          });
+          const parser = new Parser({ fields });
+          const csvData = parser.parse(data);
 
-          // Feed data to the parser
-          data.forEach(record => {
-            parser.write(record);
-          });
-        
-          // Signal end of input and wait for completion
-          parser.end();
-          await parsingComplete;
-          
-          // const csvData = await parseAsync(data, { fields });
+          if (!csvData) {
+            throw new Error('Failed to generate CSV data');
+          }
 
           closeSnackbar(messageId);
           enqueueSnackbarSuccess('Your download is ready', {
@@ -127,8 +109,9 @@ export const ExportProjectDialog = ({ open, onClose }) => {
             )
           });
         } catch (err) {
+          console.error('Export error:', err);
           closeSnackbar(messageId);
-          enqueueSnackbarError(err.message);
+          enqueueSnackbarError(err.message || 'Failed to export data');
         }
       }}
     >
