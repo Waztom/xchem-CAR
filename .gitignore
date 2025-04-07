@@ -83,3 +83,12 @@ pytestdebug.log
 **/*.back.*
 node_modules
 src/frontend/static/frontend/main.js
+
+# Sphinx documentation
+docs/build/
+docs/source/_build/
+docs/_autosummary/
+docs/_templates/
+*.doctree
+*.pickle
+docs/generated/
