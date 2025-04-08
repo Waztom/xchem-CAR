@@ -5,6 +5,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet, Q
 import logging
+
 logger = logging.getLogger(__name__)
 
 from statistics import median
@@ -15,6 +16,7 @@ import pandas as pd
 from pandas.core.frame import DataFrame
 
 from ..utils import (
+    canonSmiles,
     getProductSmiles,
     checkPreviousReactionProducts,
     getReactionQuerySet,
@@ -23,6 +25,7 @@ from ..utils import (
     getChemicalName,
     getInchiKey,
     wellIndexToWellName,
+    stripSalts,
 )
 
 from ..models import (
@@ -81,7 +84,7 @@ class CreateOTSession(object):
         self.reactionstep = reactionstep
         self.otbatchprotocolobj = otbatchprotocolobj
         self.actionsessionqueryset = actionsessionqueryset
-        self.customSMcsvpath = customSMcsvpath 
+        self.customSMcsvpath = customSMcsvpath
         self.actionsessionnumber = actionsessionqueryset.values_list(
             "sessionnumber", flat=True
         )[0]
@@ -1108,7 +1111,7 @@ class CreateOTSession(object):
 
     def getAddActionsMaterialDataFrame(self, productexists: bool) -> DataFrame:
         """Aggregates all add actions materials and sums up volume requires using solvent type and
-        concentration
+        concentration. Checks existing materials and only requests additional volume if needed.
 
         Parameters
         ----------
@@ -1120,7 +1123,7 @@ class CreateOTSession(object):
         -------
         materialsdf: DataFrame
             The add action material as dataframe grouping materials by SMILES, concentration
-            and solvent
+            and solvent, with volumes adjusted based on existing materials
         """
         try:
             materialsdf = self.addactionsdf.groupby(["uniquesolution"]).agg(
@@ -1133,6 +1136,11 @@ class CreateOTSession(object):
                     "molecularweight": "first",
                 }
             )
+
+            # Apply canonicalization to SMILES for consistent comparison
+            materialsdf["smiles"] = materialsdf["smiles"].apply(canonSmiles)
+
+            # Check if materials are products from previous reactions
             materialsdf["productexists"] = materialsdf.apply(
                 lambda row: checkPreviousReactionProducts(
                     reaction_id=row["reaction_id_id"], smiles=row["smiles"]
@@ -1140,31 +1148,73 @@ class CreateOTSession(object):
                 axis=1,
             )
 
-            materialsdf["materialexists"] = materialsdf.apply(
-                lambda row: self.checkStartingMaterialExists(
+            # Check existing materials and get remaining volume needed
+            material_status = []
+            for idx, row in materialsdf.iterrows():
+                (
+                    exists,
+                    matching_wells,
+                    plate,
+                    remaining_volume,
+                ) = self.checkStartingMaterialExists(
                     smiles=row["smiles"],
                     volume=row["volume"],
                     concentration=row["concentration"],
-                    solvent=row["solvent"]
-                )[0],  # Only take the boolean result
-                axis=1
-            )
+                    solvent=row["solvent"],
+                )
 
+                material_status.append(
+                    {
+                        "exists": exists,  # True if enough volume exists
+                        "remaining_volume": remaining_volume,  # 0 if exists=True, otherwise the additional volume needed
+                    }
+                )
+
+            # Add material status information to materialsdf
+            status_df = pd.DataFrame(material_status, index=materialsdf.index)
+            materialsdf = pd.concat([materialsdf, status_df], axis=1)
+
+            # Store original volume for reference
+            materialsdf["original_volume"] = materialsdf["volume"]
+
+            # Update volume to only request what's additionally needed
+            materialsdf["volume"] = materialsdf["remaining_volume"]
+
+            # Mark if material exists with enough volume
+            materialsdf["materialexists"] = materialsdf["exists"]
+
+            # Filter out materials based on existence and product status
             if productexists:
+                # Keep only products from previous reactions
                 materialsdf = materialsdf[materialsdf["productexists"]]
-
-            if not productexists:
+            else:
+                # Keep only non-products
                 materialsdf = materialsdf[~materialsdf["productexists"]]
 
-            materialsdf = materialsdf.sort_values(["solvent", "volume"], ascending=False)
+            print("Materials df after filtering: {}".format(materialsdf))
+
+            # Filter out materials that have enough volume (remaining_volume = 0)
+            materialsdf = materialsdf[materialsdf["remaining_volume"] > 0]
+
+            print("The materials df is: {}".format(materialsdf))
+
+            # Log materials that need additional volume
+            for idx, row in materialsdf.iterrows():
+                if row["original_volume"] > row["volume"]:
+                    logger.info(
+                        f"Partial material available for {row['smiles']}. "
+                        f"Total needed: {row['original_volume']}µL, "
+                        f"Adding {row['volume']}µL more"
+                    )
+
+            materialsdf = materialsdf.sort_values(
+                ["solvent", "volume"], ascending=False
+            )
             return materialsdf
 
         except Exception as e:
-            logger.error(
-                "Error in getAddActionsMaterialDataFrame: {}".format(e)
-            )
+            logger.error(f"Error in getAddActionsMaterialDataFrame: {str(e)}")
             return None
-    
 
     def createOTSessionModel(self):
         """Create an OT Session object"""
@@ -1345,24 +1395,46 @@ class CreateOTSession(object):
         wellobj.save()
         return wellobj
 
-    def createCompoundOrderModel(self, orderdf: DataFrame):
-        """Creates a compound order object"""
+    def createCompoundOrderModel(
+        self, orderdf: DataFrame, is_custom_starter_plate: bool = False
+    ):
+        """Creates a compound order object
+
+        Parameters
+        ----------
+        orderdf: DataFrame
+            DataFrame containing the compound order data
+        is_custom_starter: bool, optional
+            Flag to indicate this is a custom starter plate (default: False)
+        """
         compoundorderobj = CompoundOrder()
         compoundorderobj.otsession_id = self.otsessionobj
+
+        # Create a prefix based on whether this is a custom starter plate
+        prefix = (
+            f"custom-SMs-{self.actionsessiontype}-session-starterplate"
+            if is_custom_starter_plate
+            else f"{self.actionsessiontype}-session-starterplate"
+        )
+
         csvdata = orderdf.to_csv(encoding="utf-8", index=False)
         ordercsv = default_storage.save(
             "compoundorders/"
-            + "{}-session-starterplate-for-batch-{}-reactionstep-{}-sessionid-{}".format(
-                self.actionsessiontype,
-                self.batchobj.batchtag,
-                self.reactionstep,
-                str(self.otsessionobj.id),
-            )
+            + f"{prefix}-for-batch-{self.batchobj.batchtag}-reactionstep-{self.reactionstep}-sessionid-{str(self.otsessionobj.id)}"
             + ".csv",
             ContentFile(csvdata),
         )
+
         compoundorderobj.ordercsv = ordercsv
+        compoundorderobj.iscustomSMplate = is_custom_starter_plate  # This requires adding this field to the CompoundOrder model
         compoundorderobj.save()
+
+        if is_custom_starter_plate:
+            logger.info(
+                f"Created compound order model for custom starting material plate"
+            )
+        else:
+            logger.info(f"Created standard compound order model")
 
     def createSolventPrepModel(self, solventdf: DataFrame):
         """Creates a Django solvent prep object - a solvent prep file
@@ -1445,17 +1517,19 @@ class CreateOTSession(object):
             self.deckobj.slotavailable = False
             self.deckobj.save()
             return False
-        
-    def checkStartingMaterialExists(self, smiles: str, volume: float, concentration: float, solvent: str) -> tuple:
+
+    def checkStartingMaterialExists(
+        self, smiles: str, volume: float, concentration: float, solvent: str
+    ) -> tuple:
         """Checks if starting material exists with enough total volume across wells in current OT batch protocol.
-        
+
         Parameters
         ----------
         smiles: str
             The SMILES string of the starting material to check
         volume: float
             The total volume needed in microliters
-        concentration: float 
+        concentration: float
             The concentration in moles per liter
         solvent: str
             The solvent used
@@ -1463,59 +1537,72 @@ class CreateOTSession(object):
         Returns
         -------
         tuple
-            (exists: bool, matching_wells: list[Well], plate: Plate)
-            Returns if material exists, list of matching wells, and plate containing wells
+            (exists: bool, matching_wells: list[Well], plate: Plate, remaining_volume_needed: float)
+            Returns if material exists with enough volume, list of matching wells, plate containing wells,
+            and remaining volume needed (0 if all volume is available)
         """
         try:
+            # Canonicalize the SMILES for consistent comparison
+            canonical_smiles = canonSmiles(smiles)
+
             # Get all plates in current OT batch protocol
             plates = Plate.objects.filter(
-                otbatchprotocol_id=self.otbatchprotocolobj,
-                type='startingmaterial'
+                otbatchprotocol_id=self.otbatchprotocolobj, type="startingmaterial"
             )
 
             # Track total volume and matching wells across all plates
             total_volume = 0
             all_matching_wells = []
             containing_plate = None
+            remaining_volume_needed = volume  # Initialize with full volume needed
 
             for plate in plates:
                 # Find wells with matching material properties
                 matching_wells = Well.objects.filter(
                     plate_id=plate,
-                    smiles=smiles,
+                    smiles=canonical_smiles,
                     concentration=concentration,
                     solvent=solvent,
-                    type='startingmaterial'
-                ).order_by('volume')  # Order by volume for optimal usage
+                    type="startingmaterial",
+                ).order_by(
+                    "volume"
+                )  # Order by volume for optimal usage
 
                 if matching_wells.exists():
                     containing_plate = plate
-                    
+
                     # Sum up volumes until we have enough
                     for well in matching_wells:
                         all_matching_wells.append(well)
                         total_volume += well.volume
-                        
+                        remaining_volume_needed = max(0, volume - total_volume)
+
                         if total_volume >= volume:
                             logger.info(
-                                f"Found enough material: {smiles} across {len(all_matching_wells)} wells "
+                                f"Found enough material: {canonical_smiles} across {len(all_matching_wells)} wells "
                                 f"in plate {plate.name}. Required: {volume}µL, Available: {total_volume}µL"
                             )
-                            return True, all_matching_wells, containing_plate
+                            return (
+                                True,
+                                all_matching_wells,
+                                containing_plate,
+                                0,
+                            )  # No additional volume needed
 
             if all_matching_wells:
                 logger.warning(
-                    f"Found material {smiles} but insufficient volume. "
-                    f"Required: {volume}µL, Available: {total_volume}µL"
+                    f"Found material {canonical_smiles} but insufficient volume. "
+                    f"Required: {volume}µL, Available: {total_volume}µL, "
+                    f"Still need: {remaining_volume_needed}µL"
                 )
             else:
-                logger.info(f"No existing material found for: {smiles}")
+                logger.info(f"No existing material found for: {canonical_smiles}")
 
-            return False, None, None
+            return False, all_matching_wells, containing_plate, remaining_volume_needed
 
         except Exception as e:
             logger.error(f"Error checking starting material existence: {str(e)}")
-            return False, None, None
+            return False, None, None, volume  # Return full volume needed on error
 
     def getPlateCurrentColumnIndex(self, plateobj: Plate) -> int:
         """Check if any columns available on a plate
@@ -1625,179 +1712,204 @@ class CreateOTSession(object):
             columnobj.save()
 
     def createStartingMaterialPlatesFromCSV(self, csv_path: str) -> dict:
-        """Creates starting material plates from a CSV file containing well and plate assignments.
-        
-        Parameters
-        ----------
-        csv_path: str
-            Path to CSV file containing columns:
-            - labware_type: str (required) - must match types in labwareavailable.py
-            - well_index: int (required)
-            - smiles: str (required) 
-            - volume: float (required)
-            - concentration: float (required)
-            - solvent: str (required)
-
-        Returns
-        -------
-        dict
-            Dictionary of created plates with labware type as key
-            {labware_type: Plate object}
-
-        Example CSV format:
-        labware_type,well_index,smiles,volume,concentration,solvent
-        fluidx_24_vials_2500ul,0,CC(=O)O,100,0.1,DMSO
-        fluidx_96_vials_1000ul,1,CCO,200,0.2,MeOH
-        fluidx_24_vials_2500ul,1,c1ccccc1,150,0.15,ACN
-        """
+        """Creates starting material plates from a CSV file, but only for SMILES needed in the current reaction."""
         try:
             df = pd.read_csv(csv_path)
-            required_cols = ['labware_type', 'well_index', 'smiles', 'volume']
+            required_cols = ["labware_type", "well_index", "smiles", "volume"]
             if not all(col in df.columns for col in required_cols):
                 raise ValueError(f"CSV must contain columns: {required_cols}")
 
-            # plates_dict = {}
-            for labware_type, group_df in df.groupby('labware_type'):
+            # Keep the original SMILES for use in the compound records
+            df["original_smiles"] = df["smiles"].copy()
+
+            # Canonicalize and strip salts from SMILES for matching purposes
+            df["smiles"] = df["smiles"].apply(lambda s: stripSalts(canonSmiles(s)))
+
+            # Log cases where salts were removed
+            for i, (orig, desalted) in enumerate(
+                zip(df["original_smiles"], df["smiles"])
+            ):
+                if canonSmiles(orig) != desalted:
+                    logger.info(
+                        f"Removed salts from CSV entry {i}: {orig} -> {desalted}"
+                    )
+
+            # Get required SMILES from the current reaction session's add actions
+            if not hasattr(self, "addactionsdf") or self.addactionsdf.empty:
+                logger.warning(
+                    "No add actions found in current session, skipping custom starting materials"
+                )
+                return {}
+
+            required_smiles = set(
+                self.addactionsdf["smiles"].apply(canonSmiles).unique()
+            )
+            logger.info(f"Required SMILES for reaction session: {len(required_smiles)}")
+
+            # Filter CSV to only include rows with required SMILES (matching using desalted version)
+            filtered_df = df[df["smiles"].isin(required_smiles)]
+
+            if filtered_df.empty:
+                logger.warning(
+                    "No matching SMILES found in custom starting materials CSV"
+                )
+                return {}
+
+            logger.info(
+                f"Found {len(filtered_df)} matching entries in custom starting materials CSV"
+            )
+
+            # Dictionary to store created plates
+            created_plates = {}
+
+            # List to collect data for compound order
+            custom_plate_entries = []
+
+            for labware_type, group_df in filtered_df.groupby("labware_type"):
                 if labware_type not in labware_plates:
                     raise ValueError(f"Invalid labware type: {labware_type}")
-                
-                # Create plate for this labware type
-                plateobj = self.createPlateModel(
-                    platetype="startingmaterial",
-                    platename=f"Startingplate_{labware_type}",
-                    labwaretype=labware_type
-                )
-                
-                # Create wells from grouped data
-                for _, row in group_df.iterrows():
-                    indexwellavailable = self.getPlateWellIndexAvailable(
-                            plateobj=plateobj
-                        )
-                    if type(indexwellavailable) == bool:
-                            plateobj = self.createPlateModel(
-                                platetype="startingmaterial",
-                                platename="Startingplate",
-                                labwaretype=labware_type,
-                            )
-                            indexwellavailable = self.getPlateWellIndexAvailable(
-                                plateobj=plateobj
-                            )
-                    self.createWellModel(
-                        plateobj=plateobj,
-                        welltype="startingmaterial", 
-                        wellindex=int(row['well_index']),
-                        volume=float(row['volume']),
-                        smiles=str(row['smiles']),
-                        concentration=float(row['concentration']) if 'concentration' in row else None,
-                        solvent=str(row['solvent']) if 'solvent' in row else None
-                    )
-                    self.updatePlateWellIndex(
-                            plateobj=plateobj, wellindexupdate=indexwellavailable + 1
-                        )
-
-                # last_well_index = group_df['well_index'].max() + 1
-                # self.updatePlateWellIndex(
-                #     plateobj=plateobj,
-                #     wellindexupdate=last_well_index
-                # )
-                
-                # plates_dict[labware_type] = plateobj
-                
-            # return plates_dict
-
-        except Exception as e:
-            logger.error(f"Error creating starting material plates from CSV: {str(e)}")
-            raise
-            
-    def createReactionStartingPlate(self):
-        """Creates the starting material plate/s for executing a reaction's add actions"""
-        startingmaterialsdf = self.getAddActionsMaterialDataFrame(productexists=False)
-        if startingmaterialsdf is not None and not startingmaterialsdf.empty:
-            existing_materials = startingmaterialsdf[startingmaterialsdf["materialexists"]]
-            
-            if not existing_materials.empty:
-                logger.info("Some materials already exist and will not be added to the starting material plates.")
-                startingmaterialsdf = startingmaterialsdf[~startingmaterialsdf["materialexists"]]
-            
-            if startingmaterialsdf.empty:
-                logger.info("No new materials to add to starting material plates.")
-                return 
-            
-            else:
-                logger.info("Creating starting material plates for new materials.")
-                
-                startinglabwareplatetype = self.getPlateType(
-                    platetype="startingmaterial", volumes=startingmaterialsdf["volume"]
-                )
 
                 plateobj = self.createPlateModel(
                     platetype="startingmaterial",
                     platename="Startingplate",
-                    labwaretype=startinglabwareplatetype,
+                    labwaretype=labware_type,
                 )
-                maxwellvolume = self.getMaxWellVolume(plateobj=plateobj)
-                deadvolume = self.getDeadVolume(maxwellvolume=maxwellvolume)
-                orderdictslist = []
-                for i in startingmaterialsdf.index.values:
-                    extraerrorvolume = startingmaterialsdf.at[i, "volume"] * 0.05
-                    totalvolume = startingmaterialsdf.at[i, "volume"] + extraerrorvolume
-                    if totalvolume > maxwellvolume:
-                        nowellsneededratio = totalvolume / (maxwellvolume - deadvolume)
 
-                        frac, whole = math.modf(nowellsneededratio)
-                        volumestoadd = [maxwellvolume for i in range(int(whole))]
-                        volumestoadd.append(frac * maxwellvolume + deadvolume)
+                created_plates[labware_type] = plateobj
 
-                        for volumetoadd in volumestoadd:
-                            indexwellavailable = self.getPlateWellIndexAvailable(
-                                plateobj=plateobj
-                            )
-                            if type(indexwellavailable) == bool:
-                                plateobj = self.createPlateModel(
-                                    platetype="startingmaterial",
-                                    platename="Startingplate",
-                                    labwaretype=startinglabwareplatetype,
-                                )
-                                indexwellavailable = self.getPlateWellIndexAvailable(
-                                    plateobj=plateobj
-                                )
-
-                            wellobj = self.createWellModel(
-                                plateobj=plateobj,
-                                welltype="startingmaterial",
-                                wellindex=indexwellavailable,
-                                volume=volumetoadd,
-                                smiles=startingmaterialsdf.at[i, "smiles"],
-                                concentration=startingmaterialsdf.at[i, "concentration"],
-                                solvent=startingmaterialsdf.at[i, "solvent"],
-                            )
-                            self.updatePlateWellIndex(
-                                plateobj=plateobj, wellindexupdate=indexwellavailable + 1
-                            )
-
-                            orderdictslist.append(
-                                {
-                                    "SMILES": startingmaterialsdf.at[i, "smiles"],
-                                    "plate-name": plateobj.name,
-                                    "labware": plateobj.labware,
-                                    "well-index": wellobj.index,
-                                    "well-name": wellobj.name,
-                                    "concentration": startingmaterialsdf.at[
-                                        i, "concentration"
-                                    ],
-                                    "solvent": startingmaterialsdf.at[i, "solvent"],
-                                    "molecularweight": startingmaterialsdf.at[
-                                        i, "molecularweight"
-                                    ],
-                                    "amount-ul": round(volumetoadd, 2),
-                                }
-                            )
-
-                    else:
+                for _, row in group_df.iterrows():
+                    indexwellavailable = self.getPlateWellIndexAvailable(
+                        plateobj=plateobj
+                    )
+                    if type(indexwellavailable) == bool:
+                        plateobj = self.createPlateModel(
+                            platetype="startingmaterial",
+                            platename="Startingplate",
+                            labwaretype=labware_type,
+                        )
                         indexwellavailable = self.getPlateWellIndexAvailable(
                             plateobj=plateobj
                         )
-                        volumetoadd = totalvolume + deadvolume
+
+                    # Create the well using the desalted SMILES for internal consistency
+                    wellobj = self.createWellModel(
+                        plateobj=plateobj,
+                        welltype="startingmaterial",
+                        wellindex=int(row["well_index"]),
+                        volume=float(row["volume"]),
+                        smiles=str(row["smiles"]),  # Use the desalted SMILES
+                        concentration=float(row["concentration"])
+                        if "concentration" in row
+                        else None,
+                        solvent=str(row["solvent"]) if "solvent" in row else None,
+                    )
+
+                    # Update plate well index
+                    self.updatePlateWellIndex(
+                        plateobj=plateobj, wellindexupdate=indexwellavailable + 1
+                    )
+
+                    # Add entry for compound order using the ORIGINAL SMILES (with salts)
+                    custom_plate_entries.append(
+                        {
+                            "SMILES": row[
+                                "original_smiles"
+                            ],  # Use original SMILES with salts
+                            "plate-name": plateobj.name,
+                            "labware": labware_type,
+                            "well-index": row["well_index"],
+                            "well-name": wellIndexToWellName(
+                                wellindex=row["well_index"],
+                                platesize=labware_plates[labware_type]["no_wells"],
+                            ),
+                            "concentration": row["concentration"]
+                            if "concentration" in row
+                            else None,
+                            "solvent": row["solvent"] if "solvent" in row else None,
+                            "amount-ul": float(row["volume"]),
+                            "molecularweight": None,  # Will calculate below
+                        }
+                    )
+
+                logger.info(
+                    f"Created custom starting material plate: {plateobj.name} with labware type: {labware_type}"
+                )
+
+            # Create DataFrame for compound order
+            if custom_plate_entries:
+                customplatedf = pd.DataFrame(custom_plate_entries)
+
+                # Calculate molecular weight and add to DataFrame
+                customplatedf["molecularweight"] = customplatedf["SMILES"].apply(
+                    lambda smiles: Descriptors.MolWt(Chem.MolFromSmiles(smiles))
+                    if Chem.MolFromSmiles(smiles)
+                    else None
+                )
+
+                # Calculate mass
+                customplatedf["mass-mg"] = customplatedf.apply(
+                    lambda row: self.calcMass(row), axis=1
+                )
+
+                # Add inchikey
+                customplatedf["inchikey"] = customplatedf.apply(
+                    lambda row: getInchiKey(row["SMILES"]), axis=1
+                )
+
+                # Add compound name
+                compoundnames = customplatedf.apply(
+                    lambda row: getChemicalName(row["inchikey"]), axis=1
+                )
+                customplatedf.insert(1, column="compound-name", value=compoundnames)
+
+                # Create compound order
+                self.createCompoundOrderModel(
+                    orderdf=customplatedf, is_custom_starter_plate=True
+                )
+
+                logger.info(
+                    f"Created compound order for {len(customplatedf)} custom starting materials"
+                )
+
+            return created_plates
+
+        except Exception as e:
+            logger.error(f"Error creating starting material plates from CSV: {str(e)}")
+            raise
+
+    def createReactionStartingPlate(self):
+        """Creates the starting material plate/s for executing a reaction's add actions"""
+        startingmaterialsdf = self.getAddActionsMaterialDataFrame(productexists=False)
+        if startingmaterialsdf is not None and not startingmaterialsdf.empty:
+
+            logger.info("Creating starting material plates for new materials.")
+
+            startinglabwareplatetype = self.getPlateType(
+                platetype="startingmaterial", volumes=startingmaterialsdf["volume"]
+            )
+
+            plateobj = self.createPlateModel(
+                platetype="startingmaterial",
+                platename="Startingplate",
+                labwaretype=startinglabwareplatetype,
+            )
+            maxwellvolume = self.getMaxWellVolume(plateobj=plateobj)
+            deadvolume = self.getDeadVolume(maxwellvolume=maxwellvolume)
+            orderdictslist = []
+            for i in startingmaterialsdf.index.values:
+                extraerrorvolume = startingmaterialsdf.at[i, "volume"] * 0.05
+                totalvolume = startingmaterialsdf.at[i, "volume"] + extraerrorvolume
+                if totalvolume > maxwellvolume:
+                    nowellsneededratio = totalvolume / (maxwellvolume - deadvolume)
+
+                    frac, whole = math.modf(nowellsneededratio)
+                    volumestoadd = [maxwellvolume for i in range(int(whole))]
+                    volumestoadd.append(frac * maxwellvolume + deadvolume)
+
+                    for volumetoadd in volumestoadd:
+                        indexwellavailable = self.getPlateWellIndexAvailable(
+                            plateobj=plateobj
+                        )
                         if type(indexwellavailable) == bool:
                             plateobj = self.createPlateModel(
                                 platetype="startingmaterial",
@@ -1810,9 +1922,6 @@ class CreateOTSession(object):
 
                         wellobj = self.createWellModel(
                             plateobj=plateobj,
-                            reactionobj=getReaction(
-                                reaction_id=startingmaterialsdf.at[i, "reaction_id_id"]
-                            ),
                             welltype="startingmaterial",
                             wellindex=indexwellavailable,
                             volume=volumetoadd,
@@ -1823,6 +1932,7 @@ class CreateOTSession(object):
                         self.updatePlateWellIndex(
                             plateobj=plateobj, wellindexupdate=indexwellavailable + 1
                         )
+
                         orderdictslist.append(
                             {
                                 "SMILES": startingmaterialsdf.at[i, "smiles"],
@@ -1830,7 +1940,9 @@ class CreateOTSession(object):
                                 "labware": plateobj.labware,
                                 "well-index": wellobj.index,
                                 "well-name": wellobj.name,
-                                "concentration": startingmaterialsdf.at[i, "concentration"],
+                                "concentration": startingmaterialsdf.at[
+                                    i, "concentration"
+                                ],
                                 "solvent": startingmaterialsdf.at[i, "solvent"],
                                 "molecularweight": startingmaterialsdf.at[
                                     i, "molecularweight"
@@ -1839,16 +1951,62 @@ class CreateOTSession(object):
                             }
                         )
 
-                orderdf = pd.DataFrame(orderdictslist)
-                orderdf["mass-mg"] = orderdf.apply(lambda row: self.calcMass(row), axis=1)
-                orderdf["inchikey"] = orderdf.apply(
-                    lambda row: getInchiKey(row["SMILES"]), axis=1
-                )
-                compoundnames = orderdf.apply(
-                    lambda row: getChemicalName(row["inchikey"]), axis=1
-                )
-                orderdf.insert(1, column="compound-name", value=compoundnames)
-                self.createCompoundOrderModel(orderdf=orderdf)
+                else:
+                    indexwellavailable = self.getPlateWellIndexAvailable(
+                        plateobj=plateobj
+                    )
+                    volumetoadd = totalvolume + deadvolume
+                    if type(indexwellavailable) == bool:
+                        plateobj = self.createPlateModel(
+                            platetype="startingmaterial",
+                            platename="Startingplate",
+                            labwaretype=startinglabwareplatetype,
+                        )
+                        indexwellavailable = self.getPlateWellIndexAvailable(
+                            plateobj=plateobj
+                        )
+
+                    wellobj = self.createWellModel(
+                        plateobj=plateobj,
+                        reactionobj=getReaction(
+                            reaction_id=startingmaterialsdf.at[i, "reaction_id_id"]
+                        ),
+                        welltype="startingmaterial",
+                        wellindex=indexwellavailable,
+                        volume=volumetoadd,
+                        smiles=startingmaterialsdf.at[i, "smiles"],
+                        concentration=startingmaterialsdf.at[i, "concentration"],
+                        solvent=startingmaterialsdf.at[i, "solvent"],
+                    )
+                    self.updatePlateWellIndex(
+                        plateobj=plateobj, wellindexupdate=indexwellavailable + 1
+                    )
+                    orderdictslist.append(
+                        {
+                            "SMILES": startingmaterialsdf.at[i, "smiles"],
+                            "plate-name": plateobj.name,
+                            "labware": plateobj.labware,
+                            "well-index": wellobj.index,
+                            "well-name": wellobj.name,
+                            "concentration": startingmaterialsdf.at[i, "concentration"],
+                            "solvent": startingmaterialsdf.at[i, "solvent"],
+                            "molecularweight": startingmaterialsdf.at[
+                                i, "molecularweight"
+                            ],
+                            "amount-ul": round(volumetoadd, 2),
+                        }
+                    )
+
+            orderdf = pd.DataFrame(orderdictslist)
+            orderdf["mass-mg"] = orderdf.apply(lambda row: self.calcMass(row), axis=1)
+            orderdf["inchikey"] = orderdf.apply(
+                lambda row: getInchiKey(row["SMILES"]), axis=1
+            )
+            compoundnames = orderdf.apply(
+                lambda row: getChemicalName(row["inchikey"]), axis=1
+            )
+            orderdf.insert(1, column="compound-name", value=compoundnames)
+            self.createCompoundOrderModel(orderdf=orderdf)
 
     def getNewColumnAndWellIndexAvailable(self, plateobj: Plate) -> tuple:
         """Checks if a new column is available and updates the plates

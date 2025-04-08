@@ -884,12 +884,14 @@ class CompoundOrder(models.Model):
     """Django model to define a CompoundOrder - a csv
        file of ordering information that includes SMILES,
        plate name, well id, amount, solvent and concentration
-       required for the syhtesis of the reaction step
+       required for the synthesis of the reaction step
 
     Parameters
     ----------
     otsession_id: ForeignKey
         Foreign key linking a plate to an OT session
+    iscustomSMplate: BooleanField
+        If the plate is a custom SM plate (default=False)
     ordercsv: FileField
         The csv file of the ordering information for executing
         a reaction step on the OpenTrons
@@ -898,6 +900,7 @@ class CompoundOrder(models.Model):
     otsession_id = models.ForeignKey(
         OTSession, related_name="compoundorders", on_delete=models.CASCADE
     )
+    iscustomSMplate = models.BooleanField(default=False)
     ordercsv = models.FileField(upload_to="compoundorders/", max_length=255)
 
 

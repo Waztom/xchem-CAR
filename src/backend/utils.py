@@ -1571,6 +1571,7 @@ def matchSMARTS(smiles: str, smarts: str) -> bool:
         logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
         print(e)
 
+
 def atomRemover(mol, rxn):
     """Remove atoms from a molecule using a reaction pattern.
 
@@ -1596,21 +1597,22 @@ def atomRemover(mol, rxn):
     """
     try:
         ps = rxn.RunReactants((mol,))
-        
+
         logger.debug(f"Attempting to run reaction on molecule: {Chem.MolToSmiles(mol)}")
-        
+
         if not ps:
             logger.warning("Could not run the reaction, returning original molecule")
             return Chem.Mol(mol)
-        
+
         for p in ps:
             res = Chem.RemoveHs(p[0])
             logger.info(f"Successfully removed atoms, result: {Chem.MolToSmiles(res)}")
             return res
-            
+
     except Exception as e:
         logger.error(f"Error in atomRemover: {str(e)}")
         return None
+
 
 def getFrags(mols: list, smarts: str) -> list:
     """Get the fragments of a list of molecules"
@@ -1618,7 +1620,7 @@ def getFrags(mols: list, smarts: str) -> list:
     ----------
     frags: list[rdkit.Chem.rdchem.Mol]
         The molecules to fragment
-    
+
     Returns
     -------
     frags: list[rdkit.Chem.rdchem.Mol]
@@ -1628,8 +1630,8 @@ def getFrags(mols: list, smarts: str) -> list:
     try:
         rxn = AllChem.ReactionFromSmarts(smarts)
         for mol in mols:
-            try: 
-                ps = rxn.RunReactants((mol,))        
+            try:
+                ps = rxn.RunReactants((mol,))
                 if not ps:
                     frag_mols.append(None)
                     continue
@@ -1643,21 +1645,22 @@ def getFrags(mols: list, smarts: str) -> list:
         return frag_mols
     except Exception as e:
         logger.error(f"Error in getFrags: {str(e)}")
-        return None        
-    
+        return None
+
+
 def removeRadicals(mol):
     """Remove radicals from a molecule by adding hydrogens.
-    
+
     Parameters
     ----------
     mol : rdkit.Chem.rdchem.Mol
         The input molecule that may contain radicals
-        
+
     Returns
     -------
     rdkit.Chem.rdchem.Mol
         The molecule with radicals removed, or None if the operation fails
-        
+
     Examples
     --------
     >>> from rdkit import Chem
@@ -1671,11 +1674,81 @@ def removeRadicals(mol):
             if atom.GetNumRadicalElectrons() > 0:
                 atom.SetNumRadicalElectrons(0)
                 atom.SetNumExplicitHs(atom.GetNumExplicitHs() + 1)
-        
+
         Chem.SanitizeMol(mol)
-        
+
         return mol
-        
+
     except Exception as e:
         logger.error(f"Error removing radicals: {str(e)}")
         return None
+
+
+def stripSalts(smiles: str, return_details: bool = False):
+    """Strips salts from a SMILES string by returning the largest molecular fragment.
+
+    Parameters
+    ----------
+    smiles : str
+        The input SMILES string potentially containing salts
+    return_details : bool, optional
+        If True, returns additional information about salt stripping
+
+    Returns
+    -------
+    str or tuple
+        If return_details is False: The SMILES string with salts removed
+        If return_details is True: A tuple (desalted_smiles, salts_removed, salt_fragments)
+        Returns the original SMILES if processing fails
+
+    Examples
+    --------
+    >>> strip_salts("CC(=O)O.Na")  # Sodium acetate
+    'CC(=O)O'
+    >>> strip_salts("CC(=O)O.[Na+]", True)  # Sodium acetate with details
+    ('CC(=O)O', True, ['[Na+]'])
+    """
+    try:
+        # Canonicalize input SMILES first
+        canonical_smiles = canonSmiles(smiles)
+        if not canonical_smiles:
+            logger.warning(f"Could not canonicalize SMILES: {smiles}")
+            return (smiles, False, []) if return_details else smiles
+
+        # Convert to RDKit molecule
+        mol = Chem.MolFromSmiles(canonical_smiles)
+        if mol is None:
+            logger.warning(f"Could not parse SMILES: {canonical_smiles}")
+            return (canonical_smiles, False, []) if return_details else canonical_smiles
+
+        # Get fragments
+        fragments = Chem.GetMolFrags(mol, asMols=True)
+        if len(fragments) <= 1:
+            # No salts present
+            return (canonical_smiles, False, []) if return_details else canonical_smiles
+
+        # Find the largest fragment by molecular weight
+        fragment_weights = [Descriptors.MolWt(frag) for frag in fragments]
+        largest_idx = fragment_weights.index(max(fragment_weights))
+        main_fragment = fragments[largest_idx]
+
+        # Get salt fragments
+        salt_fragments = []
+        for i, frag in enumerate(fragments):
+            if i != largest_idx:
+                salt_fragments.append(Chem.MolToSmiles(frag))
+
+        # Convert to canonical SMILES
+        desalted_smiles = Chem.MolToSmiles(main_fragment)
+
+        logger.info(f"Removed salts from {canonical_smiles} -> {desalted_smiles}")
+        logger.info(f"Salt fragments: {salt_fragments}")
+
+        if return_details:
+            return desalted_smiles, True, salt_fragments
+        else:
+            return desalted_smiles
+
+    except Exception as e:
+        logger.error(f"Error stripping salts from {smiles}: {str(e)}")
+        return (smiles, False, []) if return_details else smiles

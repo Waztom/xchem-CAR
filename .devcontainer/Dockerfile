@@ -13,6 +13,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends -y \
     curl \
     gnupg2 \
+    procps \
     python3-rdkit \
     python3-pip \
     python3-pandas \
