@@ -3,7 +3,6 @@ from __future__ import annotations
 from celery import shared_task, current_task
 from django.conf import settings
 import logging
-
 logger = logging.getLogger(__name__)
 
 

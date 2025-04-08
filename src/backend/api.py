@@ -7,7 +7,6 @@ import os
 import json
 from celery.result import AsyncResult
 import logging
-
 logger = logging.getLogger(__name__)
 
 # from viewer.tasks import check_services
