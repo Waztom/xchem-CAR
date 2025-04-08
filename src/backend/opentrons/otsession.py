@@ -5,6 +5,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet, Q
 import logging
+
 logger = logging.getLogger(__name__)
 
 from statistics import median
@@ -24,6 +25,7 @@ from ..utils import (
     getChemicalName,
     getInchiKey,
     wellIndexToWellName,
+    stripSalts,
 )
 
 from ..models import (
@@ -1710,15 +1712,52 @@ class CreateOTSession(object):
             columnobj.save()
 
     def createStartingMaterialPlatesFromCSV(self, csv_path: str) -> dict:
-        """Creates starting material plates from a CSV file containing well and plate assignments."""
+        """Creates starting material plates from a CSV file, but only for SMILES needed in the current reaction."""
         try:
             df = pd.read_csv(csv_path)
             required_cols = ["labware_type", "well_index", "smiles", "volume"]
             if not all(col in df.columns for col in required_cols):
                 raise ValueError(f"CSV must contain columns: {required_cols}")
 
-            # Canonicalize SMILES
-            df["smiles"] = df["smiles"].apply(canonSmiles)
+            # Keep the original SMILES for use in the compound records
+            df["original_smiles"] = df["smiles"].copy()
+
+            # Canonicalize and strip salts from SMILES for matching purposes
+            df["smiles"] = df["smiles"].apply(lambda s: stripSalts(canonSmiles(s)))
+
+            # Log cases where salts were removed
+            for i, (orig, desalted) in enumerate(
+                zip(df["original_smiles"], df["smiles"])
+            ):
+                if canonSmiles(orig) != desalted:
+                    logger.info(
+                        f"Removed salts from CSV entry {i}: {orig} -> {desalted}"
+                    )
+
+            # Get required SMILES from the current reaction session's add actions
+            if not hasattr(self, "addactionsdf") or self.addactionsdf.empty:
+                logger.warning(
+                    "No add actions found in current session, skipping custom starting materials"
+                )
+                return {}
+
+            required_smiles = set(
+                self.addactionsdf["smiles"].apply(canonSmiles).unique()
+            )
+            logger.info(f"Required SMILES for reaction session: {len(required_smiles)}")
+
+            # Filter CSV to only include rows with required SMILES (matching using desalted version)
+            filtered_df = df[df["smiles"].isin(required_smiles)]
+
+            if filtered_df.empty:
+                logger.warning(
+                    "No matching SMILES found in custom starting materials CSV"
+                )
+                return {}
+
+            logger.info(
+                f"Found {len(filtered_df)} matching entries in custom starting materials CSV"
+            )
 
             # Dictionary to store created plates
             created_plates = {}
@@ -1726,13 +1765,13 @@ class CreateOTSession(object):
             # List to collect data for compound order
             custom_plate_entries = []
 
-            for labware_type, group_df in df.groupby("labware_type"):
+            for labware_type, group_df in filtered_df.groupby("labware_type"):
                 if labware_type not in labware_plates:
                     raise ValueError(f"Invalid labware type: {labware_type}")
 
                 plateobj = self.createPlateModel(
                     platetype="startingmaterial",
-                    platename=f"Startingplate_{labware_type}",
+                    platename="Startingplate",
                     labwaretype=labware_type,
                 )
 
@@ -1752,13 +1791,13 @@ class CreateOTSession(object):
                             plateobj=plateobj
                         )
 
-                    # Create the well
+                    # Create the well using the desalted SMILES for internal consistency
                     wellobj = self.createWellModel(
                         plateobj=plateobj,
                         welltype="startingmaterial",
                         wellindex=int(row["well_index"]),
                         volume=float(row["volume"]),
-                        smiles=str(row["smiles"]),
+                        smiles=str(row["smiles"]),  # Use the desalted SMILES
                         concentration=float(row["concentration"])
                         if "concentration" in row
                         else None,
@@ -1770,10 +1809,12 @@ class CreateOTSession(object):
                         plateobj=plateobj, wellindexupdate=indexwellavailable + 1
                     )
 
-                    # Add entry for compound order
+                    # Add entry for compound order using the ORIGINAL SMILES (with salts)
                     custom_plate_entries.append(
                         {
-                            "SMILES": row["smiles"],
+                            "SMILES": row[
+                                "original_smiles"
+                            ],  # Use original SMILES with salts
                             "plate-name": plateobj.name,
                             "labware": labware_type,
                             "well-index": row["well_index"],
@@ -1791,7 +1832,7 @@ class CreateOTSession(object):
                     )
 
                 logger.info(
-                    f"Created plate: {plateobj.name} with labware type: {labware_type}"
+                    f"Created custom starting material plate: {plateobj.name} with labware type: {labware_type}"
                 )
 
             # Create DataFrame for compound order
@@ -1825,6 +1866,12 @@ class CreateOTSession(object):
                 self.createCompoundOrderModel(
                     orderdf=customplatedf, is_custom_starter_plate=True
                 )
+
+                logger.info(
+                    f"Created compound order for {len(customplatedf)} custom starting materials"
+                )
+
+            return created_plates
 
         except Exception as e:
             logger.error(f"Error creating starting material plates from CSV: {str(e)}")
@@ -2354,4 +2401,3 @@ class CreateOTSession(object):
                     )
             solventdf = pd.DataFrame(solventdictslist)
             self.createSolventPrepModel(solventdf=solventdf)
-

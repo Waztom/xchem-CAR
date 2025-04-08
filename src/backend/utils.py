@@ -1682,3 +1682,73 @@ def removeRadicals(mol):
     except Exception as e:
         logger.error(f"Error removing radicals: {str(e)}")
         return None
+
+
+def stripSalts(smiles: str, return_details: bool = False):
+    """Strips salts from a SMILES string by returning the largest molecular fragment.
+
+    Parameters
+    ----------
+    smiles : str
+        The input SMILES string potentially containing salts
+    return_details : bool, optional
+        If True, returns additional information about salt stripping
+
+    Returns
+    -------
+    str or tuple
+        If return_details is False: The SMILES string with salts removed
+        If return_details is True: A tuple (desalted_smiles, salts_removed, salt_fragments)
+        Returns the original SMILES if processing fails
+
+    Examples
+    --------
+    >>> strip_salts("CC(=O)O.Na")  # Sodium acetate
+    'CC(=O)O'
+    >>> strip_salts("CC(=O)O.[Na+]", True)  # Sodium acetate with details
+    ('CC(=O)O', True, ['[Na+]'])
+    """
+    try:
+        # Canonicalize input SMILES first
+        canonical_smiles = canonSmiles(smiles)
+        if not canonical_smiles:
+            logger.warning(f"Could not canonicalize SMILES: {smiles}")
+            return (smiles, False, []) if return_details else smiles
+
+        # Convert to RDKit molecule
+        mol = Chem.MolFromSmiles(canonical_smiles)
+        if mol is None:
+            logger.warning(f"Could not parse SMILES: {canonical_smiles}")
+            return (canonical_smiles, False, []) if return_details else canonical_smiles
+
+        # Get fragments
+        fragments = Chem.GetMolFrags(mol, asMols=True)
+        if len(fragments) <= 1:
+            # No salts present
+            return (canonical_smiles, False, []) if return_details else canonical_smiles
+
+        # Find the largest fragment by molecular weight
+        fragment_weights = [Descriptors.MolWt(frag) for frag in fragments]
+        largest_idx = fragment_weights.index(max(fragment_weights))
+        main_fragment = fragments[largest_idx]
+
+        # Get salt fragments
+        salt_fragments = []
+        for i, frag in enumerate(fragments):
+            if i != largest_idx:
+                salt_fragments.append(Chem.MolToSmiles(frag))
+
+        # Convert to canonical SMILES
+        desalted_smiles = Chem.MolToSmiles(main_fragment)
+
+        logger.info(f"Removed salts from {canonical_smiles} -> {desalted_smiles}")
+        logger.info(f"Salt fragments: {salt_fragments}")
+
+        if return_details:
+            return desalted_smiles, True, salt_fragments
+        else:
+            return desalted_smiles
+
+    except Exception as e:
+        logger.error(f"Error stripping salts from {smiles}: {str(e)}")
+        return (smiles, False, []) if return_details else smiles
