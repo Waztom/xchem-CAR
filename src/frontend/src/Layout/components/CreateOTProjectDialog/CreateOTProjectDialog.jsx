@@ -11,20 +11,35 @@ import { FormBatchSelector } from './components/FormBatchSelector';
 export const CreateOTProjectDialog = ({ open, onClose }) => {
   const { mutate: createOTProject } = useCreateOTProject();
 
-  const handleSubmit = ({ selectedBatchesMap }) => {
+  const handleSubmit = async ({ selectedBatchesMap, startingMaterialFiles = {} }) => {
     const selectedBatchesIds = Object.entries(selectedBatchesMap)
       .filter(([_, value]) => value)
       .map(([key]) => {
         const batchId = Number(key);
         return isNaN(batchId) ? null : batchId;
       })
-      .filter(Boolean); // Remove any null/undefined values
+      .filter(Boolean);
 
     if (selectedBatchesIds.length > 0) {
-      createOTProject({
-        protocol_name: `OT Protocol ${new Date().toLocaleString()}`,
-        batchids: selectedBatchesIds
+      // Create FormData to send files
+      const formData = new FormData();
+      formData.append('protocol_name', `OT Protocol ${new Date().toLocaleString()}`);
+      formData.append('batchids', JSON.stringify(selectedBatchesIds));
+      
+      // Append starting material files (if any)
+      let hasFiles = false;
+      
+      Object.entries(startingMaterialFiles).forEach(([batchId, file]) => {
+        if (file && file instanceof File) {
+          hasFiles = true;
+          formData.append(`starting_materials_batch_${batchId}`, file);
+          console.log(`Added file for batch ${batchId}: ${file.name}`);
+        }
       });
+      
+      formData.append('has_custom_starting_materials', hasFiles ? 'true' : 'false');
+
+      createOTProject(formData);
       onClose();
     }
   };
@@ -32,13 +47,15 @@ export const CreateOTProjectDialog = ({ open, onClose }) => {
   return (
     <Formik
       initialValues={{
-        selectedBatchesMap: {}
+        selectedBatchesMap: {},
+        startingMaterialFiles: {}
       }}
       validationSchema={yup.object().shape({
         selectedBatchesMap: yup
           .object()
           .test('one-or-more-selected', 'Select at least one batch', value => 
             Object.values(value).some(val => val))
+        // No validation for startingMaterialFiles since it's optional
       })}
       onSubmit={handleSubmit}
     >

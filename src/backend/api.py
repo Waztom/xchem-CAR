@@ -6,6 +6,9 @@ from django.conf import settings
 import os
 import json
 from celery.result import AsyncResult
+import logging
+
+logger = logging.getLogger(__name__)
 
 # from viewer.tasks import check_services
 import pandas as pd
@@ -596,20 +599,58 @@ class OTProjectViewSet(viewsets.ModelViewSet):
 
         Parameters
         ----------
-        request: JSON
+        request: JSON or FormData
             Will have structure:
 
             {"batchids": list,
              "protocol_name": str,
+             "has_custom_starting_materials": "true" or "false" (optional),
+             "custom_starting_materials_batch_{batch_id}": file (optional)
             }
 
         The batch ids that the OT project will be created for
         The project name of the OT project
+        Optional custom starting materials CSV files for each batch
         """
+        logger.info("The data is: %s", request.data)
+        logger.info("The files are: %s", request.FILES)
+        logger.info(
+            "The starting  materials request is: %s",
+            request.data.get("has_custom_starting_materials"),
+        )
+
         # check_services()
-        batch_ids = request.data["batchids"]
+        batch_ids = json.loads(request.data["batchids"])
         protocol_name = request.data["protocol_name"]
-        task = createOTScript.delay(batchids=batch_ids, protocol_name=protocol_name)
+
+        # Check if custom starting materials are provided
+        has_custom_materials = request.data["has_custom_starting_materials"] == "true"
+
+        # Dictionary to store file paths for each batch
+        starting_material_files = {}
+
+        logger.info(
+            "The OT project has been custom starting materials set to %s",
+            has_custom_materials,
+        )
+
+        if has_custom_materials:
+            # Process each batch's starting material file
+            for batch_id in batch_ids:
+                file_key = f"starting_materials_batch_{batch_id}"
+                if file_key in request.FILES:
+                    # Save the file to a temporary location
+                    csv_file = request.FILES[file_key]
+                    tmp_file_path = save_tmp_file(csv_file)
+                    starting_material_files[str(batch_id)] = tmp_file_path
+
+        # Start the task with the optional starting material files
+        task = createOTScript.delay(
+            batchids=batch_ids,
+            protocol_name=protocol_name,
+            custom_SM_files=starting_material_files if has_custom_materials else None,
+        )
+
         data = {"task_id": task.id}
         return JsonResponse(data=data)
 

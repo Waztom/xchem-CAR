@@ -159,18 +159,29 @@ REST_FRAMEWORK = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} {levelname} {module} {message}",
+            "style": "{",
+        },
+    },
     "handlers": {
         "file": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
             "filename": str(BASE_DIR) + "/logs/logfile.log",
+            "formatter": "verbose",  # Use the formatter defined above
         },
     },
     "loggers": {
-        "django": {
+        "backend": {  # Add your app's logger
             "handlers": ["file"],
             "level": "DEBUG",
             "propagate": True,
+        },
+        "": {  # Root logger - catches all other loggers
+            "handlers": ["file"],
+            "level": "INFO",
         },
     },
 }

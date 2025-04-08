@@ -2,6 +2,9 @@
 from __future__ import annotations
 from celery import shared_task, current_task
 from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 from zipfile import ZipFile
@@ -703,9 +706,20 @@ def uploadCombiCustomReaction(validate_output):
 
 
 @shared_task
-def createOTScript(batchids: list, protocol_name: str):
-    """ "
+def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = None):
+    """
     Create otscripts and starting plates for a list of batch ids
+
+    Parameters
+    ----------
+    batchids: list
+        list of batch ids to create otscripts for
+    protocol_name: str
+        name of the protocol to create
+    custom_SM_files: dict
+        dictionary of optional custom SM files to use for the protocol
+        Keys are batch IDs (as strings) and values are paths to CSV files
+        Format: {"batch_id": "path/to/csv"}
     """
     task_summary = {}
     otprojectobj = OTProject()
@@ -802,10 +816,24 @@ def createOTScript(batchids: list, protocol_name: str):
                                         "id", flat=True
                                     )
                                 )
+
+                                logger.info(
+                                    f"The custom starting material files are: {custom_SM_files}"
+                                )
+                                # Get custom starting material CSV path if it exists for this batch
+                                custom_sm_csv_path = None
+                                if custom_SM_files and str(batchid) in custom_SM_files:
+                                    custom_sm_csv_path = custom_SM_files[str(batchid)]
+                                    logger.info(
+                                        f"Using custom SMILES CSV for batch {batchid}: {custom_sm_csv_path}"
+                                    )
+
+                                # Pass custom CSV path directly to the constructor
                                 session = CreateOTSession(
                                     reactionstep=index + 1,
                                     otbatchprotocolobj=otbatchprotocolobj,
                                     actionsessionqueryset=robot_actionsessionqueryset,
+                                    customSMcsvpath=custom_sm_csv_path,  # New parameter
                                 )
 
                                 OTWrite(
@@ -859,10 +887,23 @@ def createOTScript(batchids: list, protocol_name: str):
                                             "id", flat=True
                                         )
                                     )
+
+                                    # Get custom starting material CSV path if it exists for this batch
+                                    custom_sm_csv_path = None
+                                    if (
+                                        custom_SM_files
+                                        and str(batchid) in custom_SM_files
+                                    ):
+                                        custom_sm_csv_path = custom_SM_files[
+                                            str(batchid)
+                                        ]
+
+                                    # Pass custom CSV path directly to the constructor
                                     session = CreateOTSession(
                                         reactionstep=index + 1,
                                         otbatchprotocolobj=otbatchprotocolobj,
                                         actionsessionqueryset=robot_actionsessionqueryset,
+                                        customSMcsvpath=custom_sm_csv_path,  # New parameter
                                     )
 
                                     OTWrite(
@@ -881,6 +922,15 @@ def createOTScript(batchids: list, protocol_name: str):
                 task_summary[batchid] = True
     else:
         task_summary[batchid] = False
+
+    # Clean up temporary CSV files if they exist
+    if custom_SM_files:
+        for filepath in custom_SM_files.values():
+            try:
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+            except Exception as e:
+                print(f"Error cleaning up file {filepath}: {str(e)}")
 
     return task_summary, otprojectobj.id
 

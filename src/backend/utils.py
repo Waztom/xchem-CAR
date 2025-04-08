@@ -1571,6 +1571,7 @@ def matchSMARTS(smiles: str, smarts: str) -> bool:
         logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
         print(e)
 
+
 def atomRemover(mol, rxn):
     """Remove atoms from a molecule using a reaction pattern.
 
@@ -1596,21 +1597,22 @@ def atomRemover(mol, rxn):
     """
     try:
         ps = rxn.RunReactants((mol,))
-        
+
         logger.debug(f"Attempting to run reaction on molecule: {Chem.MolToSmiles(mol)}")
-        
+
         if not ps:
             logger.warning("Could not run the reaction, returning original molecule")
             return Chem.Mol(mol)
-        
+
         for p in ps:
             res = Chem.RemoveHs(p[0])
             logger.info(f"Successfully removed atoms, result: {Chem.MolToSmiles(res)}")
             return res
-            
+
     except Exception as e:
         logger.error(f"Error in atomRemover: {str(e)}")
         return None
+
 
 def getFrags(mols: list, smarts: str) -> list:
     """Get the fragments of a list of molecules"
@@ -1618,7 +1620,7 @@ def getFrags(mols: list, smarts: str) -> list:
     ----------
     frags: list[rdkit.Chem.rdchem.Mol]
         The molecules to fragment
-    
+
     Returns
     -------
     frags: list[rdkit.Chem.rdchem.Mol]
@@ -1628,8 +1630,8 @@ def getFrags(mols: list, smarts: str) -> list:
     try:
         rxn = AllChem.ReactionFromSmarts(smarts)
         for mol in mols:
-            try: 
-                ps = rxn.RunReactants((mol,))        
+            try:
+                ps = rxn.RunReactants((mol,))
                 if not ps:
                     frag_mols.append(None)
                     continue
@@ -1643,21 +1645,22 @@ def getFrags(mols: list, smarts: str) -> list:
         return frag_mols
     except Exception as e:
         logger.error(f"Error in getFrags: {str(e)}")
-        return None        
-    
+        return None
+
+
 def removeRadicals(mol):
     """Remove radicals from a molecule by adding hydrogens.
-    
+
     Parameters
     ----------
     mol : rdkit.Chem.rdchem.Mol
         The input molecule that may contain radicals
-        
+
     Returns
     -------
     rdkit.Chem.rdchem.Mol
         The molecule with radicals removed, or None if the operation fails
-        
+
     Examples
     --------
     >>> from rdkit import Chem
@@ -1671,11 +1674,11 @@ def removeRadicals(mol):
             if atom.GetNumRadicalElectrons() > 0:
                 atom.SetNumRadicalElectrons(0)
                 atom.SetNumExplicitHs(atom.GetNumExplicitHs() + 1)
-        
+
         Chem.SanitizeMol(mol)
-        
+
         return mol
-        
+
     except Exception as e:
         logger.error(f"Error removing radicals: {str(e)}")
         return None
