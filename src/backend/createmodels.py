@@ -313,15 +313,7 @@ def getPubChemInfo(smiles: str) -> object:
 
 
 def createProductModel(reaction_id: int, product_smiles: str):
-    """Creates a Django product object - the product of a reaction
-
-    Parameters
-    ----------
-    reaction_id: int
-        The reaction id the product is linked to
-    product_smiles: str
-        The SMILES of the product
-    """
+    """Creates a Django product object - the product of a reaction"""
     product_smiles = canonSmiles(smiles=product_smiles)
     # pubcheminfoobj = getPubChemInfo(smiles=product_smiles)
     product = Product()
@@ -330,9 +322,10 @@ def createProductModel(reaction_id: int, product_smiles: str):
     product.smiles = product_smiles
     # if pubcheminfoobj:
     #     product.pubcheminfo_id = pubcheminfoobj
+
     product_svg_string = createSVGString(product_smiles)
     product_svg_fn = default_storage.save(
-        "productimages/.svg", ContentFile(product_svg_string)
+        "productimages/product.svg", ContentFile(product_svg_string)
     )
     product.image = product_svg_fn
     product.save()

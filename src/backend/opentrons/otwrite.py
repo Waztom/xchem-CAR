@@ -585,19 +585,21 @@ class OTWrite(object):
                             "spefilter",
                         ]
                         criterion1 = Q(otsession_id=self.otsession_id)
-                        criterion1 = Q(reaction_id=reaction_id)
-                        criterion2 = Q(reaction_id__in=previousreactionqueryset)
-                        criterion3 = Q(smiles=smiles)
-                        criterion4 = Q(type__in=plates)
-                        criterion5 = Q(reactantfornextstep=True)
+                        criterion2 = Q(reaction_id=reaction_id)
+                        criterion3 = Q(reaction_id__in=previousreactionqueryset)
+                        criterion4 = Q(smiles=smiles)
+                        criterion5 = Q(type__in=plates)
+                        criterion6 = Q(reactantfornextstep=True)
 
                         wellqueryset = Well.objects.filter(
-                            (criterion1 | criterion2)
+                            criterion1
+                            & (criterion2 | criterion3)
                             & criterion3
                             & criterion4
                             & criterion5
+                            & criterion6
                         )
-                        if wellqueryset.exists:
+                        if wellqueryset.exists():
                             wellobj = wellqueryset[0]
                             wellinfo.append(
                                 [previousreactionqueryset, wellobj, transfervolume]
@@ -623,7 +625,7 @@ class OTWrite(object):
                     concentration,
                 )
         if not wellinfo:
-            print("No from well info found!")
+            logger.warning("No from starting plate well info found!")
         return wellinfo
 
     def checkVolumeClose(self, volume1: float, volume2: float) -> bool:

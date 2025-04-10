@@ -999,7 +999,7 @@ def getInchiKey(smiles: str) -> str:
         if mol is None:
             logger.warning(f"Could not create molecule from SMILES: {smiles}")
             return None
-            
+
         # Use the correct function from the inchi module
         inchikey = Chem.inchi.MolToInchiKey(mol)
         return inchikey
