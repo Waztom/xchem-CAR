@@ -1500,13 +1500,16 @@ class CreateOTSession(object):
 
     def checkDeckSlotAvailable(self) -> int:
         """Check if a deck slot is available
-
+        
         Returns
         -------
         testslotavailable: int
             The index of the deck slot available
-        status: False
-            Returns false if no deck slot/index is available
+            
+        Raises
+        ------
+        ValueError
+            When no deck slots are available
         """
         testslotavailable = self.deckobj.indexslotavailable
         if testslotavailable <= self.deckobj.numberslots:
@@ -1516,7 +1519,8 @@ class CreateOTSession(object):
         else:
             self.deckobj.slotavailable = False
             self.deckobj.save()
-            return False
+            logger.error("No deck slots available")
+            raise ValueError("No deck slots available - cannot create more plates")
 
     def checkStartingMaterialExists(
         self, smiles: str, volume: float, concentration: float, solvent: str

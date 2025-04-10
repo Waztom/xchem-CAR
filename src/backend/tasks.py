@@ -2,6 +2,7 @@
 from __future__ import annotations
 from celery import shared_task, current_task
 from django.conf import settings
+from django.db import transaction
 import logging
 
 logger = logging.getLogger(__name__)
@@ -828,19 +829,25 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
                                         f"Using custom SMILES CSV for batch {batchid}: {custom_sm_csv_path}"
                                     )
 
-                                # Pass custom CSV path directly to the constructor
-                                session = CreateOTSession(
+                                # Create multiple sessions for reactions
+                                sessions = createMultipleOTSessions(
                                     reactionstep=index + 1,
                                     otbatchprotocolobj=otbatchprotocolobj,
                                     actionsessionqueryset=robot_actionsessionqueryset,
-                                    customSMcsvpath=custom_sm_csv_path,  # New parameter
+                                    customSMcsvpath=custom_sm_csv_path,
                                 )
 
-                                OTWrite(
-                                    batchtag=batchtag,
-                                    otsessionobj=session.otsessionobj,
-                                    actionsession_ids=actionsession_ids,
-                                )
+                                # Process all created sessions
+                                for session_data in sessions:
+                                    session = session_data['session']
+                                    session_specific_ids = session_data['action_session_ids']
+                                    
+                                    # Use the session-specific action IDs
+                                    OTWrite(
+                                        batchtag=f"{batchtag}_session_{session.otsessionobj.id}",  # Add session ID to make unique
+                                        otsessionobj=session.otsessionobj,
+                                        actionsession_ids=session_specific_ids,  # Only use relevant action sessions
+                                    )
 
                 if index > 0:
                     groupreactiontodoqueryset = getReactionsToDo(
@@ -898,19 +905,25 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
                                             str(batchid)
                                         ]
 
-                                    # Pass custom CSV path directly to the constructor
-                                    session = CreateOTSession(
+                                    # Create multiple sessions for reactions
+                                    sessions = createMultipleOTSessions(
                                         reactionstep=index + 1,
                                         otbatchprotocolobj=otbatchprotocolobj,
                                         actionsessionqueryset=robot_actionsessionqueryset,
-                                        customSMcsvpath=custom_sm_csv_path,  # New parameter
+                                        customSMcsvpath=custom_sm_csv_path,
                                     )
 
-                                    OTWrite(
-                                        batchtag=batchtag,
-                                        otsessionobj=session.otsessionobj,
-                                        actionsession_ids=actionsession_ids,
-                                    )
+                                    # Process all created sessions
+                                    for session_data in sessions:
+                                        session = session_data['session']
+                                        session_specific_ids = session_data['action_session_ids']
+                                        
+                                        # Use the session-specific action IDs
+                                        OTWrite(
+                                            batchtag=f"{batchtag}_session_{session.otsessionobj.id}",  # Add session ID to make unique
+                                            otsessionobj=session.otsessionobj,
+                                            actionsession_ids=session_specific_ids,  # Only use relevant action sessions
+                                        )
 
             createZipOTBatchProtocol = ZipOTBatchProtocol(
                 otbatchprotocolobj=otbatchprotocolobj, batchtag=batchtag
@@ -933,6 +946,94 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
                 print(f"Error cleaning up file {filepath}: {str(e)}")
 
     return task_summary, otprojectobj.id
+
+
+def createMultipleOTSessions(
+    reactionstep: int,
+    otbatchprotocolobj: OTBatchProtocol,
+    actionsessionqueryset: QuerySet[ActionSession],
+    customSMcsvpath: str = None,
+    max_reactions_per_session: int = None
+):
+    """Splits a large reaction set into multiple OT sessions to prevent deck overflow."""
+    # Get unique reaction IDs from action sessions
+    reaction_ids = list(set(actionsessionqueryset.values_list('reaction_id', flat=True)))
+    total_reactions = len(reaction_ids)
+    
+    logger.info(f"Processing {total_reactions} unique reactions across {actionsessionqueryset.count()} action sessions")
+    
+    if max_reactions_per_session is None:
+        # Start with a smaller default to avoid issues
+        max_reactions_per_session = 600 if total_reactions > 600 else total_reactions
+    
+    # Calculate initial number of sessions needed
+    num_sessions = (total_reactions + max_reactions_per_session - 1) // max_reactions_per_session
+    
+    logger.info(f"Initial plan: Creating {num_sessions} sessions with max {max_reactions_per_session} reactions per session")
+    
+    created_sessions = []
+    reaction_groups = []
+    
+    # Create initial reaction groups
+    for i in range(0, total_reactions, max_reactions_per_session):
+        batch = reaction_ids[i:i + max_reactions_per_session]
+        reaction_groups.append(batch)
+    
+    # Try to create sessions for each reaction group
+    for group_index, reaction_group in enumerate(reaction_groups):
+        try:
+            # Find action sessions related to this reaction group
+            group_action_sessions = actionsessionqueryset.filter(reaction_id__in=reaction_group)
+            group_action_session_ids = list(group_action_sessions.values_list('id', flat=True))
+            
+            logger.info(f"Attempting session {group_index + 1} with {len(reaction_group)} reactions")
+            
+            # Use transaction to allow rollback if deck is full
+            with transaction.atomic():
+                # Create a session for this group
+                session = CreateOTSession(
+                    reactionstep=reactionstep,
+                    otbatchprotocolobj=otbatchprotocolobj,
+                    actionsessionqueryset=group_action_sessions,
+                    customSMcsvpath=customSMcsvpath
+                )
+                
+                # If we get here, deck had enough slots - store session info
+                created_sessions.append({
+                    'session': session,
+                    'action_session_ids': group_action_session_ids
+                })
+                
+                logger.info(f"Successfully created session {group_index + 1}")
+            
+        except ValueError as ve:
+            # Specifically catch ValueError, which is raised by checkDeckSlotAvailable
+            error_msg = str(ve)
+            logger.error(f"ValueError in session {group_index + 1}: {error_msg}")
+            if error_msg == "No deck slots available - cannot create more plates" and len(reaction_group) > 1:
+                logger.warning(f"Deck full error detected: {str(ve)}")
+                logger.warning(f"Splitting group of {len(reaction_group)} reactions in half")
+                
+                # Recursive call with smaller max_reactions_per_session for just this group
+                smaller_max = max(1, len(reaction_group) // 2)
+                logger.info(f"Trying with batch size: {smaller_max}")
+                
+                sub_action_sessions = actionsessionqueryset.filter(reaction_id__in=reaction_group)
+                sub_sessions = createMultipleOTSessions(
+                    reactionstep=reactionstep,
+                    otbatchprotocolobj=otbatchprotocolobj,
+                    actionsessionqueryset=sub_action_sessions,
+                    customSMcsvpath=customSMcsvpath,
+                    max_reactions_per_session=smaller_max
+                )
+                created_sessions.extend(sub_sessions)
+            else:
+                # If not a deck slot issue or already at minimum group size, propagate the error
+                logger.error(f"ValueError in session {group_index + 1}: {str(ve)}")
+                raise
+                
+    logger.info(f"Created {len(created_sessions)} sessions to handle {total_reactions} reactions")
+    return created_sessions
 
 
 class ZipOTBatchProtocol(object):
@@ -1043,7 +1144,7 @@ class ZipOTBatchProtocol(object):
     def getOTScriptQuerySet(self, otsessionobj: object):
         """Retrieve OTScript model queryset
         Args:
-            otsessionobj (Django obj): OTSession Django object
+            otsessionobj (Django obj): OTScript Django object
         """
         otscriptqueryset = OTScript.objects.filter(otsession_id=otsessionobj)
 
