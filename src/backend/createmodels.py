@@ -772,7 +772,7 @@ class CreateEncodedActionModels(object):
                 # smiles = self.reactant_pair_smiles[0]
                 # del self.reactant_pair_smiles[0]
             if materialinfo["SMILES"]:
-                smiles = materialinfo["SMILES"]
+                smiles = canonSmiles(materialinfo["SMILES"])
             if not materialinfo["SMILES"] and not materialinfo["SMARTS"]:
                 smiles = self.productsmiles
             calcvalue = materialinfo["quantity"]["value"]

@@ -5,6 +5,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import Draw
 from rdkit.Chem import rdMolDescriptors
+
 import pubchempy as pcp
 import itertools
 import re
@@ -994,11 +995,18 @@ def getInchiKey(smiles: str) -> str:
         The inchikeys
     """
     try:
-        inchikey = Chem.MolToInchiKey(Chem.MolFromSmiles(smiles))
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            logger.warning(f"Could not create molecule from SMILES: {smiles}")
+            return None
+            
+        # Use the correct function from the inchi module
+        inchikey = Chem.inchi.MolToInchiKey(mol)
         return inchikey
     except Exception as e:
-        logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-        print(e)
+        logger.info(f"{inspect.stack()[0][3]} yielded error: {str(e)}")
+        print(f"Failed to generate InChiKey for {smiles}: {e}")
+        return None
 
 
 def calculateMolsFromConc(target_concentration: float, target_volume: float) -> object:
