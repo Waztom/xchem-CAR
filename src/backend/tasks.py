@@ -988,23 +988,21 @@ def createMultipleOTSessions(
             
             logger.info(f"Attempting session {group_index + 1} with {len(reaction_group)} reactions")
             
-            # Use transaction to allow rollback if deck is full
-            with transaction.atomic():
-                # Create a session for this group
-                session = CreateOTSession(
-                    reactionstep=reactionstep,
-                    otbatchprotocolobj=otbatchprotocolobj,
-                    actionsessionqueryset=group_action_sessions,
-                    customSMcsvpath=customSMcsvpath
-                )
-                
-                # If we get here, deck had enough slots - store session info
-                created_sessions.append({
-                    'session': session,
-                    'action_session_ids': group_action_session_ids
-                })
-                
-                logger.info(f"Successfully created session {group_index + 1}")
+            # Create a session for this group - without transaction.atomic()
+            session = CreateOTSession(
+                reactionstep=reactionstep,
+                otbatchprotocolobj=otbatchprotocolobj,
+                actionsessionqueryset=group_action_sessions,
+                customSMcsvpath=customSMcsvpath
+            )
+            
+            # If we get here, deck had enough slots - store session info
+            created_sessions.append({
+                'session': session,
+                'action_session_ids': group_action_session_ids
+            })
+            
+            logger.info(f"Successfully created session {group_index + 1}")
             
         except ValueError as ve:
             # Specifically catch ValueError, which is raised by checkDeckSlotAvailable

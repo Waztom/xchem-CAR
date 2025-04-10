@@ -1,5 +1,7 @@
 from django.apps import AppConfig
 
-
-class CarConfig(AppConfig):
-    name = "backend"
+class BackendConfig(AppConfig):
+    name = 'backend'
+    
+    def ready(self):
+        import backend.signals  

@@ -1520,7 +1520,9 @@ class CreateOTSession(object):
             self.deckobj.slotavailable = False
             self.deckobj.save()
             logger.error("No deck slots available")
+            self.cleanup()   
             raise ValueError("No deck slots available - cannot create more plates")
+            
 
     def checkStartingMaterialExists(
         self, smiles: str, volume: float, concentration: float, solvent: str
@@ -2430,3 +2432,9 @@ class CreateOTSession(object):
                     )
             solventdf = pd.DataFrame(solventdictslist)
             self.createSolventPrepModel(solventdf=solventdf)
+
+    def cleanup(self):
+        """Clean up any created database entries if an error occurs"""
+        # Delete any plates, wells, etc. created by this session
+        if hasattr(self, 'otsessionobj') and self.otsessionobj:
+            self.otsessionobj.delete()  # Will cascade delete related objects

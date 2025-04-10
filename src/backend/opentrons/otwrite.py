@@ -625,7 +625,7 @@ class OTWrite(object):
                     concentration,
                 )
         if not wellinfo:
-            print("No from well info found!")
+            logger.warning("No from starting plate well info found!")
         return wellinfo
 
     def checkVolumeClose(self, volume1: float, volume2: float) -> bool:
