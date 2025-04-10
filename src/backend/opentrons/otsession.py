@@ -1500,12 +1500,12 @@ class CreateOTSession(object):
 
     def checkDeckSlotAvailable(self) -> int:
         """Check if a deck slot is available
-        
+
         Returns
         -------
         testslotavailable: int
             The index of the deck slot available
-            
+
         Raises
         ------
         ValueError
@@ -1520,14 +1520,14 @@ class CreateOTSession(object):
             self.deckobj.slotavailable = False
             self.deckobj.save()
             logger.error("No deck slots available")
-            self.cleanup()   
+            self.cleanup()
             raise ValueError("No deck slots available - cannot create more plates")
-            
 
     def checkStartingMaterialExists(
         self, smiles: str, volume: float, concentration: float, solvent: str
     ) -> tuple:
         """Checks if starting material exists with enough total volume across wells in current OT batch protocol.
+        Only considers custom starter plates loaded from CSV files, not auto-generated plates from previous sessions.
 
         Parameters
         ----------
@@ -1551,9 +1551,28 @@ class CreateOTSession(object):
             # Canonicalize the SMILES for consistent comparison
             canonical_smiles = canonSmiles(smiles)
 
-            # Get all plates in current OT batch protocol
+            # Find plates associated with custom starter materials
+            # First find CompoundOrder objects marked as custom starter plates
+            custom_compound_orders = CompoundOrder.objects.filter(
+                otsession_id__otbatchprotocol_id=self.otbatchprotocolobj,  # Use double underscore to traverse relationships
+                iscustomSMplate=True,
+            )
+
+            # Then find plates associated with these custom compound orders
+            # by matching otsession_id from the compound orders
+            custom_session_ids = custom_compound_orders.values_list(
+                "otsession_id", flat=True
+            )
+
+            # Get only custom starting material plates
             plates = Plate.objects.filter(
-                otbatchprotocol_id=self.otbatchprotocolobj, type="startingmaterial"
+                otbatchprotocol_id=self.otbatchprotocolobj,
+                type="startingmaterial",
+                otsession_id__in=custom_session_ids,
+            )
+
+            logger.debug(
+                f"Found {len(plates)} custom starter plates to check for materials"
             )
 
             # Track total volume and matching wells across all plates
@@ -1576,6 +1595,9 @@ class CreateOTSession(object):
 
                 if matching_wells.exists():
                     containing_plate = plate
+                    logger.debug(
+                        f"Found {matching_wells.count()} matching wells in custom plate {plate.name}"
+                    )
 
                     # Sum up volumes until we have enough
                     for well in matching_wells:
@@ -1585,7 +1607,7 @@ class CreateOTSession(object):
 
                         if total_volume >= volume:
                             logger.info(
-                                f"Found enough material: {canonical_smiles} across {len(all_matching_wells)} wells "
+                                f"Found enough material in custom plates: {canonical_smiles} across {len(all_matching_wells)} wells "
                                 f"in plate {plate.name}. Required: {volume}µL, Available: {total_volume}µL"
                             )
                             return (
@@ -1597,12 +1619,14 @@ class CreateOTSession(object):
 
             if all_matching_wells:
                 logger.warning(
-                    f"Found material {canonical_smiles} but insufficient volume. "
+                    f"Found material {canonical_smiles} in custom plates but insufficient volume. "
                     f"Required: {volume}µL, Available: {total_volume}µL, "
                     f"Still need: {remaining_volume_needed}µL"
                 )
             else:
-                logger.info(f"No existing material found for: {canonical_smiles}")
+                logger.info(
+                    f"No existing material found in custom plates for: {canonical_smiles}"
+                )
 
             return False, all_matching_wells, containing_plate, remaining_volume_needed
 
@@ -1721,80 +1745,106 @@ class CreateOTSession(object):
         """Creates starting material plates from a CSV file, supporting multiple plates identified by plate-ID."""
         try:
             df = pd.read_csv(csv_path)
-            required_cols = ["plate-ID", "labware-type", "well-index", "SMILES", "amount-uL"]
+            required_cols = [
+                "plate-ID",
+                "labware-type",
+                "well-index",
+                "SMILES",
+                "amount-uL",
+            ]
             if not all(col in df.columns for col in required_cols):
                 missing_cols = [col for col in required_cols if col not in df.columns]
-                raise ValueError(f"CSV must contain columns: {required_cols}. Missing: {missing_cols}")
-            
+                raise ValueError(
+                    f"CSV must contain columns: {required_cols}. Missing: {missing_cols}"
+                )
+
             # Keep the original SMILES for use in the compound records
             df["original_smiles"] = df["SMILES"].copy()
-            
+
             # Canonicalize both original and desalted versions for consistent comparison
             df["canonical_smiles"] = df["SMILES"].apply(canonSmiles)
             df["desalted_smiles"] = df["canonical_smiles"].apply(stripSalts)
-            
+
             # Log cases where salts were removed
-            for i, (orig, desalted) in enumerate(zip(df["canonical_smiles"], df["desalted_smiles"])):
+            for i, (orig, desalted) in enumerate(
+                zip(df["canonical_smiles"], df["desalted_smiles"])
+            ):
                 if orig != desalted:
-                    logger.info(f"Removed salts from CSV entry {i}: {orig} -> {desalted}")
+                    logger.info(
+                        f"Removed salts from CSV entry {i}: {orig} -> {desalted}"
+                    )
 
             # Get required SMILES from the current reaction session's add actions
             if not hasattr(self, "addactionsdf") or self.addactionsdf.empty:
-                logger.warning("No add actions found in current session, skipping custom starting materials")
+                logger.warning(
+                    "No add actions found in current session, skipping custom starting materials"
+                )
                 return {}
 
             # Create dictionary to store add action SMILES in both original and desalted forms
             required_smiles_map = {}
-            
+
             for _, row in self.addactionsdf.iterrows():
                 original = canonSmiles(row["smiles"])
                 desalted = stripSalts(original)
-                
+
                 # Store both forms with original as the value - we'll use the original in the well
                 required_smiles_map[original] = original
                 required_smiles_map[desalted] = original
-            
-            logger.info(f"Required unique SMILES for reaction session: {len(set(required_smiles_map.values()))}")
-            
+
+            logger.info(
+                f"Required unique SMILES for reaction session: {len(set(required_smiles_map.values()))}"
+            )
+
             # Create a map to track which SM SMILES corresponds to which add action SMILES
             matching_smiles_map = {}
             matched_rows = []
-            
+
             # Check all combinations for matches
             for i, row in df.iterrows():
                 csv_canonical = row["canonical_smiles"]
                 csv_desalted = row["desalted_smiles"]
-                
+
                 # Check if any form matches any required SMILES
                 matched = False
                 matched_add_action_smiles = None
-                
+
                 # Check original CSV SMILES against all required SMILES
                 if csv_canonical in required_smiles_map:
                     matched = True
                     matched_add_action_smiles = required_smiles_map[csv_canonical]
-                    logger.info(f"CSV SMILES {csv_canonical} matched add action SMILES directly")
-                
+                    logger.info(
+                        f"CSV SMILES {csv_canonical} matched add action SMILES directly"
+                    )
+
                 # Check desalted CSV SMILES against all required SMILES
                 elif csv_desalted in required_smiles_map:
                     matched = True
                     matched_add_action_smiles = required_smiles_map[csv_desalted]
-                    logger.info(f"Desalted CSV SMILES {csv_desalted} matched add action SMILES")
-                
+                    logger.info(
+                        f"Desalted CSV SMILES {csv_desalted} matched add action SMILES"
+                    )
+
                 if matched:
                     matching_smiles_map[i] = matched_add_action_smiles
                     matched_rows.append(i)
-                    
+
             # Create filtered dataframe with only matching rows
             if not matched_rows:
-                logger.warning("No matching SMILES found in custom starting materials CSV")
+                logger.warning(
+                    "No matching SMILES found in custom starting materials CSV"
+                )
                 return {}
-                
+
             filtered_df = df.loc[matched_rows].copy()
-            logger.info(f"Found {len(filtered_df)} matching entries in custom starting materials CSV")
-            
+            logger.info(
+                f"Found {len(filtered_df)} matching entries in custom starting materials CSV"
+            )
+
             # Add the matched add action SMILES to use for wells
-            filtered_df["add_action_smiles"] = filtered_df.index.map(matching_smiles_map)
+            filtered_df["add_action_smiles"] = filtered_df.index.map(
+                matching_smiles_map
+            )
 
             # Dictionary to store created plates
             created_plates = {}
@@ -1804,14 +1854,16 @@ class CreateOTSession(object):
 
             # First group by plate-ID, then by labware_type
             for plate_id, plate_df in filtered_df.groupby("plate-ID"):
-                logger.info(f"Processing plate ID: {plate_id} with {len(plate_df)} entries")
-                
+                logger.info(
+                    f"Processing plate ID: {plate_id} with {len(plate_df)} entries"
+                )
+
                 for labware_type, group_df in plate_df.groupby("labware-type"):
                     if labware_type not in labware_plates:
                         raise ValueError(f"Invalid labware type: {labware_type}")
-                    
+
                     plate_key = f"{plate_id}_{labware_type}"
-                    
+
                     plateobj = self.createPlateModel(
                         platetype="startingmaterial",
                         platename=f"Startingplate_{plate_id}",  # Include plate ID in name
@@ -1819,17 +1871,23 @@ class CreateOTSession(object):
                     )
 
                     created_plates[plate_key] = plateobj
-                    logger.info(f"Created plate {plateobj.name} for plate ID: {plate_id}, labware type: {labware_type}")
+                    logger.info(
+                        f"Created plate {plateobj.name} for plate ID: {plate_id}, labware type: {labware_type}"
+                    )
 
                     for _, row in group_df.iterrows():
-                        indexwellavailable = self.getPlateWellIndexAvailable(plateobj=plateobj)
+                        indexwellavailable = self.getPlateWellIndexAvailable(
+                            plateobj=plateobj
+                        )
                         if type(indexwellavailable) == bool:
                             plateobj = self.createPlateModel(
                                 platetype="startingmaterial",
                                 platename=f"Startingplate_{plate_id}",
                                 labwaretype=labware_type,
                             )
-                            indexwellavailable = self.getPlateWellIndexAvailable(plateobj=plateobj)
+                            indexwellavailable = self.getPlateWellIndexAvailable(
+                                plateobj=plateobj
+                            )
 
                         # Create the well using the ORIGINAL ADD ACTION SMILES for proper matching
                         wellobj = self.createWellModel(
@@ -1837,8 +1895,12 @@ class CreateOTSession(object):
                             welltype="startingmaterial",
                             wellindex=int(row["well-index"]),
                             volume=float(row["amount-uL"]),
-                            smiles=str(row["add_action_smiles"]),  # Use add action SMILES for well
-                            concentration=float(row["concentration"]) if "concentration" in row else None,
+                            smiles=str(
+                                row["add_action_smiles"]
+                            ),  # Use add action SMILES for well
+                            concentration=float(row["concentration"])
+                            if "concentration" in row
+                            else None,
                             solvent=str(row["solvent"]) if "solvent" in row else None,
                         )
 
@@ -1850,8 +1912,12 @@ class CreateOTSession(object):
                         # Add entry for compound order using the ORIGINAL SMILES (with salts)
                         custom_plate_entries.append(
                             {
-                                "SMILES": row["original_smiles"],  # Use original CSV SMILES with salts
-                                "plate-ID": row["plate-ID"],  # Include plate ID in compound order
+                                "SMILES": row[
+                                    "original_smiles"
+                                ],  # Use original CSV SMILES with salts
+                                "plate-ID": row[
+                                    "plate-ID"
+                                ],  # Include plate ID in compound order
                                 "plate-name": plateobj.name,
                                 "labware": labware_type,
                                 "well-index": row["well-index"],
@@ -1859,7 +1925,9 @@ class CreateOTSession(object):
                                     wellindex=row["well-index"],
                                     platesize=labware_plates[labware_type]["no_wells"],
                                 ),
-                                "concentration": row["concentration"] if "concentration" in row else None,
+                                "concentration": row["concentration"]
+                                if "concentration" in row
+                                else None,
                                 "solvent": row["solvent"] if "solvent" in row else None,
                                 "amount-uL": float(row["amount-uL"]),
                                 "molecularweight": None,
@@ -1871,7 +1939,7 @@ class CreateOTSession(object):
             # Create DataFrame for compound order
             if custom_plate_entries:
                 customplatedf = pd.DataFrame(custom_plate_entries)
-                
+
                 # Calculate molecular weight and add to DataFrame
                 customplatedf["molecularweight"] = customplatedf["SMILES"].apply(
                     lambda smiles: Descriptors.MolWt(Chem.MolFromSmiles(smiles))
@@ -1899,9 +1967,11 @@ class CreateOTSession(object):
                 self.createCompoundOrderModel(
                     orderdf=customplatedf, is_custom_starter_plate=True
                 )
-                
-                logger.info(f"Created compound order for {len(customplatedf)} custom starting materials across {len(customplatedf['plate-ID'].unique())} plates")
-                
+
+                logger.info(
+                    f"Created compound order for {len(customplatedf)} custom starting materials across {len(customplatedf['plate-ID'].unique())} plates"
+                )
+
             return created_plates
 
         except Exception as e:
@@ -2436,5 +2506,5 @@ class CreateOTSession(object):
     def cleanup(self):
         """Clean up any created database entries if an error occurs"""
         # Delete any plates, wells, etc. created by this session
-        if hasattr(self, 'otsessionobj') and self.otsessionobj:
+        if hasattr(self, "otsessionobj") and self.otsessionobj:
             self.otsessionobj.delete()  # Will cascade delete related objects

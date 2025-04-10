@@ -136,18 +136,18 @@ def getOTBatchProductSmiles(batch_obj: Batch) -> list:
 def cloneTarget(target_obj: Target, batch_obj: Batch) -> Target:
     """Clone a target"""
     related_catalogentry_queryset = target_obj.catalogentries.all().order_by("id")
-    
+
     # Store original image path
     original_image_path = target_obj.image.name if target_obj.image else None
-    
+
     # Create new target object
     target_obj.pk = None
     target_obj.batch_id = batch_obj
-    
+
     # Reuse the same image path without reading/duplicating the file
     if original_image_path:
         target_obj.image.name = original_image_path
-        
+
     target_obj.save()
 
     for catalogentry_obj in related_catalogentry_queryset:
@@ -168,18 +168,20 @@ def cloneMethod(method_obj: Method, target_obj: Target):
     for reaction_obj in related_reaction_queryset:
         product_obj = reaction_obj.products.all()[0]
         related_reactant_objs = reaction_obj.reactants.all().order_by("id")
-        
+
         # Store original image paths
-        original_reaction_image = reaction_obj.image.name if reaction_obj.image else None
+        original_reaction_image = (
+            reaction_obj.image.name if reaction_obj.image else None
+        )
         original_product_image = product_obj.image.name if product_obj.image else None
-        
+
         # Clone reaction with same image path
         reaction_obj.pk = None
         reaction_obj.method_id = method_obj
         if original_reaction_image:
             reaction_obj.image.name = original_reaction_image
         reaction_obj.save()
-        
+
         # Clone product with same image path
         product_obj.pk = None
         product_obj.reaction_id = reaction_obj

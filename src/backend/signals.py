@@ -19,6 +19,7 @@ def delete_compound_order_files(sender, instance, **kwargs):
         except Exception as e:
             logger.error(f"Error deleting file: {str(e)}")
 
+
 @receiver(post_delete, sender=OTScript)
 def delete_otscript_files(sender, instance, **kwargs):
     """Delete the file when OTScript is deleted"""
@@ -30,16 +31,21 @@ def delete_otscript_files(sender, instance, **kwargs):
         except Exception as e:
             logger.error(f"Error deleting file: {str(e)}")
 
+
 @receiver(post_delete, sender=SolventPrep)
 def delete_solventprep_files(sender, instance, **kwargs):
     """Delete the file when SolventPrep is deleted"""
     if instance.solventprepcsv:
         try:
-            storage, path = instance.solventprepcsv.storage, instance.solventprepcsv.path
+            storage, path = (
+                instance.solventprepcsv.storage,
+                instance.solventprepcsv.path,
+            )
             storage.delete(path)
             logger.info(f"Deleted file {path}")
         except Exception as e:
             logger.error(f"Error deleting file: {str(e)}")
+
 
 @receiver(post_delete, sender=OTBatchProtocol)
 def delete_otbatchprotocol_files(sender, instance, **kwargs):
@@ -52,20 +58,23 @@ def delete_otbatchprotocol_files(sender, instance, **kwargs):
         except Exception as e:
             logger.error(f"Error deleting file: {str(e)}")
 
+
 @receiver(post_delete, sender=Product)
 def cleanup_product_image(sender, instance, **kwargs):
     """Check and delete product image if no longer used"""
-    if hasattr(instance, 'image') and instance.image:
+    if hasattr(instance, "image") and instance.image:
         delete_file_if_unused(instance.image.name)
+
 
 @receiver(post_delete, sender=Reaction)
 def cleanup_reaction_image(sender, instance, **kwargs):
     """Check and delete reaction image if no longer used"""
-    if hasattr(instance, 'image') and instance.image:
+    if hasattr(instance, "image") and instance.image:
         delete_file_if_unused(instance.image.name)
+
 
 @receiver(post_delete, sender=Target)
 def cleanup_target_image(sender, instance, **kwargs):
     """Check and delete target image if no longer used"""
-    if hasattr(instance, 'image') and instance.image:
+    if hasattr(instance, "image") and instance.image:
         delete_file_if_unused(instance.image.name)

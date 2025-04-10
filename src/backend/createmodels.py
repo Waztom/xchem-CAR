@@ -322,7 +322,7 @@ def createProductModel(reaction_id: int, product_smiles: str):
     product.smiles = product_smiles
     # if pubcheminfoobj:
     #     product.pubcheminfo_id = pubcheminfoobj
-    
+
     product_svg_string = createSVGString(product_smiles)
     product_svg_fn = default_storage.save(
         "productimages/product.svg", ContentFile(product_svg_string)

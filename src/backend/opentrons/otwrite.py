@@ -592,7 +592,7 @@ class OTWrite(object):
                         criterion6 = Q(reactantfornextstep=True)
 
                         wellqueryset = Well.objects.filter(
-                            criterion1 
+                            criterion1
                             & (criterion2 | criterion3)
                             & criterion3
                             & criterion4
