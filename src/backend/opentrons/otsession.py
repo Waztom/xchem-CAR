@@ -111,6 +111,7 @@ class CreateOTSession(object):
         if self.actionsessiontype in actionSessionTypes:
             actionSessionTypes[self.actionsessiontype]()
 
+    # Sessions - reaction
     def createReactionSession(self):
         """Creates a reaction OT session"""
         self.groupedreactiontemperaturequerysets = self.getGroupedTemperatureReactions(
@@ -164,6 +165,8 @@ class CreateOTSession(object):
             )
             self.createSolventPlate(materialsdf=self.solventmaterialsdf)
 
+
+    # Sessions - workup
     def createWorkUpSession(self):
         """Creates a workup OT session"""
         self.roundedvolumes = []
@@ -211,6 +214,8 @@ class CreateOTSession(object):
         for workuplateneeded in self.workupplatesneeded:
             self.createWorkUpPlate(platetype=workuplateneeded)
 
+
+    # Sessions - analyse
     def createAnalyseSession(self):
         """Creates an analyse OT session"""
         self.roundedvolumes = []
@@ -257,6 +262,7 @@ class CreateOTSession(object):
         for analyseplateneeded in self.analyseplatesneeded:
             self.createAnalysePlate(platetype=analyseplateneeded)
 
+    # Manager functions - plate manager
     def getInputPlatesNeeded(
         self, searchsmiles: list, reaction_ids: list = None
     ) -> list[Plate]:
@@ -305,6 +311,7 @@ class CreateOTSession(object):
                     inputplatesneeded.append(plateobj)
         return inputplatesneeded
 
+    # Manager functions - plate manager
     def getAllOTBatchProtocolPlates(
         self, otbatchprotocol_id: OTBatchProtocol
     ) -> QuerySet[Plate]:
@@ -330,6 +337,7 @@ class CreateOTSession(object):
         otbatchprotocolplatequeryset = Plate.objects.filter(criterion1 & criterion2)
         return otbatchprotocolplatequeryset
 
+    # Manager functions - plate manager
     def updatePlateDeckOTSessionIDs(self, platequeryset: QuerySet[Plate]):
         """Updates the plates to link to the current Deck and
         OT session
@@ -365,6 +373,7 @@ class CreateOTSession(object):
             plateobj.otsession_id = self.otsessionobj
             plateobj.save()
 
+    # Manager functions - plate manager
     def getActionSessionByPlateType(self, platetype: str) -> QuerySet[ActionSession]:
         criterion1 = Q(id__in=self.actionsessionqueryset)
         criterion2 = Q(addaction__toplatetype=platetype)
@@ -374,6 +383,7 @@ class CreateOTSession(object):
         ).distinct()
         return actionsessionqueryset
 
+    # Manager functions - plate manager
     def getUniqueToPlates(
         self, actionsessionqueryset: QuerySet[ActionSession], platetypes: list
     ) -> list:
@@ -408,6 +418,7 @@ class CreateOTSession(object):
         toplatetypes = set(list(toaddplates) + list(toextractplates))
         return toplatetypes
 
+    # Manager functions - material manager
     def getProductSmiles(self, reaction_ids: list) -> list:
         """Get product smiles of reactions
 
@@ -430,6 +441,7 @@ class CreateOTSession(object):
         else:
             return None
 
+    # Manager functions - material manager
     def getAddActionQuerySet(
         self,
         reaction_ids: list,
@@ -468,6 +480,7 @@ class CreateOTSession(object):
             ).order_by("id")
             return addactionqueryset
 
+    # Manager functions - material manager
     def getExtractActionQuerySet(
         self,
         reaction_ids: list,
@@ -505,6 +518,7 @@ class CreateOTSession(object):
             ).order_by("id")
             return extractactionqueryset
 
+    # Manager functions - material manager
     def getRoundedAddActionVolumes(
         self, addactionqueryset: QuerySet[AddAction]
     ) -> list:
@@ -525,6 +539,7 @@ class CreateOTSession(object):
         ]
         return roundedvolumes
 
+    # Manager functions - material manager
     def getRoundedExtractActionVolumes(
         self, extractactionqueryset: QuerySet[ExtractAction]
     ) -> list:
@@ -545,6 +560,7 @@ class CreateOTSession(object):
         ]
         return roundedvolumes
 
+    # Manager functions - material manager
     def getRoundedReactionVolumes(
         self, groupedreactiontemperaturequeryset: QuerySet[Reaction]
     ) -> list:
@@ -574,6 +590,7 @@ class CreateOTSession(object):
             reactionvolumes.append(sumvolume)
         return reactionvolumes
 
+    # Manager functions - pipette manager
     def getTipRackType(self, roundedvolumes: list) -> str:
         """Gets OT tiprack best suited for transferring volumes (ul)
            that minimises the number of transfers required
@@ -601,6 +618,7 @@ class CreateOTSession(object):
         tipracktype = tipsavailable[tipkey]
         return tipracktype
 
+    # Manager functions - pipette manager
     def getPipetteType(self, roundedvolumes: list, channeltype: str = "single") -> str:
         """Gets the type of pippete that minmises the number of transfers
            needed for transferring volumes (ul).
@@ -694,6 +712,7 @@ class CreateOTSession(object):
 
         return pipettetype
 
+    # Manager functions - pipette manager
     def getNumberTransfers(self, pipettevolume: int, roundedvolumes: list) -> int:
         """Gets the number of transfers required for transferring
            a list of rounded volumes
@@ -718,6 +737,7 @@ class CreateOTSession(object):
         )
         return numbertransfers
 
+    # Manager functions - material manager
     def getAddActionsDataFrame(
         self, addactionqueryset: QuerySet[AddAction]
     ) -> DataFrame:
@@ -742,6 +762,7 @@ class CreateOTSession(object):
 
         return addactionsdf
 
+    # Manager functions - well manager
     def getMaxWellVolume(self, plateobj: Plate) -> float:
         """Get max well volume of a well plate
 
@@ -758,6 +779,7 @@ class CreateOTSession(object):
         maxwellvolume = plateobj.maxwellvolume
         return maxwellvolume
 
+    # Manager functions - well manager
     def getDeadVolume(self, maxwellvolume: float) -> float:
         """Calculates the dead volume (5%) of a well
 
@@ -774,6 +796,7 @@ class CreateOTSession(object):
         deadvolume = maxwellvolume * 0.05
         return deadvolume
 
+    # Manager functions - plate manager
     def getPlateWells(self, plateobj: Plate) -> QuerySet[Well]:
         """Retrieves the wells for a plate
 
@@ -790,6 +813,7 @@ class CreateOTSession(object):
         wellqueryset = Well.objects.filter(plate_id=plateobj.id)
         return wellqueryset
 
+    # Manager functions - plate manager
     def getPlateColumns(self, plateobj: Plate) -> QuerySet[Column]:
         """Retrieves the columns for a plate
 
@@ -806,6 +830,7 @@ class CreateOTSession(object):
         columnqueryset = Column.objects.filter(plate_id=plateobj.id)
         return columnqueryset
 
+    # Manager functions - material manager
     def getActionSessionType(self) -> str:
         """Get the action session type
 
@@ -819,6 +844,7 @@ class CreateOTSession(object):
         ).distinct()[0]
         return actionsessiontype
 
+    # Manager functions - material manager
     def getUniqueTemperatures(self, reactionqueryset: QuerySet[Reaction]) -> list:
         """Set of reaction temperatures
 
@@ -839,6 +865,7 @@ class CreateOTSession(object):
         )
         return temperatures
 
+    # Manager functions - material manager
     def getUniqueReactionClasses(self, reactionqueryset: QuerySet[Reaction]) -> list:
         """Set of unique reaction classes
 
@@ -859,6 +886,7 @@ class CreateOTSession(object):
         )
         return reactionclasses
 
+    # Manager functions - material manager
     def getUniqueReactionRecipes(
         self, reactionclass: str, reactionqueryset: QuerySet[Reaction]
     ) -> list:
@@ -884,6 +912,7 @@ class CreateOTSession(object):
         )
         return reactionrecipes
 
+    # Manager functions - material manager
     def getGroupedTemperatureReactions(
         self, reactionqueryset: QuerySet[Reaction]
     ) -> list:
@@ -912,6 +941,7 @@ class CreateOTSession(object):
                 groupedreactiontemperaturequerysets.append(reactiontemperaturequeryset)
         return groupedreactiontemperaturequerysets
 
+    # Manager functions - material manager
     def getGroupedReactionByClassRecipe(
         self, reactionqueryset: QuerySet[Reaction]
     ) -> list:
@@ -969,14 +999,17 @@ class CreateOTSession(object):
 
         return groupedreactionquerysets
 
+    # Utility functions
     def getMedianValue(self, values: list) -> float:
         medianvalue = median(values)
         return medianvalue
 
+    # Utility functions
     def getSumValue(self, values: list) -> float:
         sumvalue = sum(values)
         return sumvalue
 
+    # Manager functions - well manager
     def getNumberVials(self, maxvolumevial: float, volumematerial: float) -> int:
         """Gets the total number of vials needed to prepare a starter plate
 
@@ -1004,6 +1037,7 @@ class CreateOTSession(object):
             novialsneeded = sum(volumestoadd)
         return novialsneeded
 
+    # Manager functions - plate manager
     def getPlateType(
         self,
         platetype: str,
@@ -1109,6 +1143,7 @@ class CreateOTSession(object):
 
         return labwareplatetypes[0]
 
+    # Manager functions - material manager
     def getAddActionsMaterialDataFrame(self, productexists: bool) -> DataFrame:
         """Aggregates all add actions materials and sums up volume requires using solvent type and
         concentration. Checks existing materials and only requests additional volume if needed.
@@ -1216,6 +1251,7 @@ class CreateOTSession(object):
             logger.error(f"Error in getAddActionsMaterialDataFrame: {str(e)}")
             return None
 
+    # Sessions - base session
     def createOTSessionModel(self):
         """Create an OT Session object"""
         otsessionobj = OTSession()
@@ -1225,6 +1261,7 @@ class CreateOTSession(object):
         otsessionobj.save()
         return otsessionobj
 
+    # Manager functions - deck manager
     def createDeckModel(self):
         """Create a deck object"""
         deckobj = Deck()
@@ -1233,6 +1270,7 @@ class CreateOTSession(object):
         deckobj.save()
         return deckobj
 
+    # Manager functions - pipette manager
     def createPipetteModel(self):
         """Create a pipette object"""
         pipetteobj = Pipette()
@@ -1246,6 +1284,7 @@ class CreateOTSession(object):
         pipetteobj.labware = self.pipettetype["labware"]
         pipetteobj.save()
 
+    # Manager functions - pipette manager
     def createTiprackModel(self, name: str):
         """Creates TipRack object"""
         indexslot = self.checkDeckSlotAvailable()
@@ -1262,6 +1301,7 @@ class CreateOTSession(object):
             print("createTiprackModel")
             print("No more deck slots available")
 
+    # Manager functions - plate manager
     def createPlateModel(self, platetype: str, platename: str, labwaretype: str):
         """Creates Plate model if Deck index is available"""
         indexslot = self.checkDeckSlotAvailable()
@@ -1292,6 +1332,7 @@ class CreateOTSession(object):
             print("CreatePlateModel")
             print("No more deck slots available")
 
+    # Manager functions - plate manager
     def createColumnModel(
         self,
         plateobj: Plate,
@@ -1328,6 +1369,7 @@ class CreateOTSession(object):
         columnobj.save()
         return columnobj
 
+    # Manager functions - well manager
     def createWellModel(
         self,
         plateobj: Plate,
@@ -1395,6 +1437,7 @@ class CreateOTSession(object):
         wellobj.save()
         return wellobj
 
+    # Manager functions - data manager
     def createCompoundOrderModel(
         self, orderdf: DataFrame, is_custom_starter_plate: bool = False
     ):
@@ -1436,6 +1479,7 @@ class CreateOTSession(object):
         else:
             logger.info(f"Created standard compound order model")
 
+    # Manager functions - material manager
     def createSolventPrepModel(self, solventdf: DataFrame):
         """Creates a Django solvent prep object - a solvent prep file
 
@@ -1463,6 +1507,7 @@ class CreateOTSession(object):
         solventprepobj.solventprepcsv = ordercsv
         solventprepobj.save()
 
+    # Manager functions - pipette manager
     def createTipRacks(self, tipracktype: str, numbertipracks: int = 3):
         """Creates three tipracks
 
@@ -1477,6 +1522,7 @@ class CreateOTSession(object):
         for _ in range(numbertipracks):
             self.createTiprackModel(name=tipracktype)
 
+    # Manager functions - material manager
     def calcMass(self, row) -> float:
         """Calculates the mass of material (mg) from the
            concentration (mol/L) and volume (ul) needed
@@ -1498,6 +1544,7 @@ class CreateOTSession(object):
         massmg = mols * mw * 1e3
         return round(massmg, 2)
 
+    # Manager functions - deck manager
     def checkDeckSlotAvailable(self) -> int:
         """Check if a deck slot is available
 
@@ -1523,6 +1570,7 @@ class CreateOTSession(object):
             self.cleanup()
             raise ValueError("No deck slots available - cannot create more plates")
 
+    # Manager functions - material manager
     def checkStartingMaterialExists(
         self, smiles: str, volume: float, concentration: float, solvent: str
     ) -> tuple:
@@ -1634,6 +1682,7 @@ class CreateOTSession(object):
             logger.error(f"Error checking starting material existence: {str(e)}")
             return False, None, None, volume  # Return full volume needed on error
 
+    # Manager functions - plate manager
     def getPlateCurrentColumnIndex(self, plateobj: Plate) -> int:
         """Check if any columns available on a plate
 
@@ -1656,6 +1705,7 @@ class CreateOTSession(object):
         else:
             return False
 
+    # Manager functions - plate manager
     def getPlateWellIndexAvailable(self, plateobj: Plate) -> int:
         """Check if any wells available on a plate
         Parameters
@@ -1676,6 +1726,7 @@ class CreateOTSession(object):
         else:
             return False
 
+    # Manager functions - plate manager
     def updatePlateWellIndex(self, plateobj: Plate, wellindexupdate: int):
         """Updates the plates well index used
 
@@ -1689,6 +1740,7 @@ class CreateOTSession(object):
         plateobj.indexswellavailable = wellindexupdate
         plateobj.save()
 
+    # Manager functions - plate manager
     def updatePlateColumnIndexAvailable(self, plateobj: Plate, columnindexupdate: int):
         """Updates the column index used
 
@@ -1702,6 +1754,7 @@ class CreateOTSession(object):
         plateobj.indexcolumnavailable = columnindexupdate
         plateobj.save()
 
+    # Utility functions
     def combinestrings(self, row):
         return (
             str(row["smiles"])
@@ -1711,6 +1764,7 @@ class CreateOTSession(object):
             + str(row["concentration"])
         )
 
+    # Manager functions - well manager
     def updateWellOTSessionIDs(self, wellqueryset: QuerySet[Well], plateobj: Plate):
         """Updates well to link to current OT session
 
@@ -1726,6 +1780,7 @@ class CreateOTSession(object):
             wellobj.otsession_id = self.otsessionobj
             wellobj.save()
 
+    # Manager functions - plate manager
     def updateColumnOTSessionIDs(self, columnqueryset: QuerySet[Well], plateobj: Plate):
         """Updates column to link to current OT session
 
@@ -1741,6 +1796,7 @@ class CreateOTSession(object):
             columnobj.otsession_id = self.otsessionobj
             columnobj.save()
 
+    # Manager functions - plate manager
     def createStartingMaterialPlatesFromCSV(self, csv_path: str) -> dict:
         """Creates starting material plates from a CSV file, supporting multiple plates identified by plate-ID."""
         try:
@@ -1978,6 +2034,7 @@ class CreateOTSession(object):
             logger.error(f"Error creating starting material plates from CSV: {str(e)}")
             raise
 
+    # Manager functions - plate manager        
     def createReactionStartingPlate(self):
         """Creates the starting material plate/s for executing a reaction's add actions"""
         startingmaterialsdf = self.getAddActionsMaterialDataFrame(productexists=False)
@@ -2109,6 +2166,7 @@ class CreateOTSession(object):
             orderdf.insert(1, column="compound-name", value=compoundnames)
             self.createCompoundOrderModel(orderdf=orderdf)
 
+    # Manager functions - plate manager
     def getNewColumnAndWellIndexAvailable(self, plateobj: Plate) -> tuple:
         """Checks if a new column is available and updates the plates
         column and well index
@@ -2138,6 +2196,7 @@ class CreateOTSession(object):
         else:
             return False
 
+    # Manager functions - plate manager
     def checkIndexWellIsNewColumn(self, plateobj: Plate):
         """Checks if current available well index on plate is the beginning
            of a new plate column
@@ -2162,6 +2221,7 @@ class CreateOTSession(object):
             if (indexwellavailable % numberwellsincolumn) != 0:
                 return False
 
+    # Manager functions - plate manager
     def createPlateByReactionClassRecipe(
         self,
         reactionqueryset: QuerySet[Reaction],
@@ -2321,6 +2381,7 @@ class CreateOTSession(object):
                     plateobj=plateobj, wellindexupdate=indexwellavailable + 1
                 )
 
+    # Manager functions - plate manager
     def createReactionPlate(self, platetype: str):
         """Creates reaction plate/s for executing reaction's add actions"""
         for (
@@ -2339,6 +2400,7 @@ class CreateOTSession(object):
                 platetype=platetype,
             )
 
+    # Manager functions - plate manager
     def createWorkUpPlate(self, platetype: str):
         """Creates workup plate/s for executing work up actions"""
 
@@ -2374,6 +2436,7 @@ class CreateOTSession(object):
             platetype=platetype,
         )
 
+    # Manager functions - plate manager
     def createAnalysePlate(self, platetype: str):
         """Creates analyse plate/s for executing analyse actions"""
         actionsessionqueryset = self.getActionSessionByPlateType(platetype=platetype)
@@ -2408,6 +2471,7 @@ class CreateOTSession(object):
             platetype=platetype,
         )
 
+    # Manager functions - plate manager
     def createSolventPlate(self, materialsdf: DataFrame):
         """Creates solvent plate/s for diluting reactants for reactions or analysis."""
         if not materialsdf.empty:
@@ -2503,6 +2567,7 @@ class CreateOTSession(object):
             solventdf = pd.DataFrame(solventdictslist)
             self.createSolventPrepModel(solventdf=solventdf)
 
+    # Sessions - base sessions
     def cleanup(self):
         """Clean up any created database entries if an error occurs"""
         # Delete any plates, wells, etc. created by this session
