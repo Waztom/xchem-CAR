@@ -1,31 +1,32 @@
 """Manages deck operations for OpenTrons sessions."""
 
 import logging
-from django.db.models import Q
-from ...models import Deck, Plate, Well, Column
+
+from ...models import Deck
 
 logger = logging.getLogger(__name__)
+
 
 class DeckManager:
     """
     Manages deck slot allocation and resources.
     """
-    
+
     def __init__(self, session):
         """
         Initialize with a reference to the parent session.
-        
+
         Parameters
         ----------
         session: BaseSession
             The parent session object
         """
         self.session = session
-    
+
     def create_deck_model(self):
         """
         Create a deck object.
-        
+
         Returns
         -------
         deckobj: Deck
@@ -36,16 +37,16 @@ class DeckManager:
         deckobj.numberslots = 11
         deckobj.save()
         return deckobj
-    
+
     def check_deck_slot_available(self):
         """
         Check if a deck slot is available and allocate it.
-        
+
         Returns
         -------
         testslotavailable: int
             The index of the deck slot available
-            
+
         Raises
         ------
         ValueError
@@ -62,5 +63,3 @@ class DeckManager:
             logger.error("No deck slots available")
             self.session.cleanup()
             raise ValueError("No deck slots available - cannot create more plates")
-    
-    

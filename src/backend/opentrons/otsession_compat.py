@@ -5,12 +5,19 @@ Forwards calls to the new modular implementation.
 
 from .session_orchestrator import SessionOrchestrator
 
+
 class CreateOTSession:
     """
     Legacy compatibility class that forwards to the new modular implementation.
     """
-    
-    def __init__(self, reactionstep, otbatchprotocolobj, actionsessionqueryset, customSMcsvpath=None):
+
+    def __init__(
+        self,
+        reactionstep,
+        otbatchprotocolobj,
+        actionsessionqueryset,
+        customSMcsvpath=None,
+    ):
         """
         Initialize using the new SessionOrchestrator.
         """
@@ -19,7 +26,7 @@ class CreateOTSession:
         self.session = orchestrator.create_session(
             reactionstep, otbatchprotocolobj, actionsessionqueryset, customSMcsvpath
         )
-        
+
         # Expose session attributes for backward compatibility
         self.reactionstep = self.session.reactionstep
         self.otbatchprotocolobj = self.session.otbatchprotocolobj
@@ -33,21 +40,21 @@ class CreateOTSession:
         self.batchobj = self.session.batchobj
         self.actionsessiontype = self.session.actionsessiontype
         self.otsessionobj = self.session.otsessionobj
-        
+
         # Map other attributes as needed (roundedvolumes, addactionqueryset, etc.)
-        if hasattr(self.session, 'deckobj'):
+        if hasattr(self.session, "deckobj"):
             self.deckobj = self.session.deckobj
-        if hasattr(self.session, 'tipracktype'):
+        if hasattr(self.session, "tipracktype"):
             self.tipracktype = self.session.tipracktype
-        if hasattr(self.session, 'pipettetype'):
+        if hasattr(self.session, "pipettetype"):
             self.pipettetype = self.session.pipettetype
         # ...map other attributes as needed
-    
+
     # Forward method calls to the session or appropriate manager
     def getActionSessionType(self):
         return self.session._get_action_session_type()
-    
+
     def createOTSessionModel(self):
         return self.session._create_ot_session_model()
-    
+
     # ... forward other method calls as needed

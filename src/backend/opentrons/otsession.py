@@ -165,7 +165,6 @@ class CreateOTSession(object):
             )
             self.createSolventPlate(materialsdf=self.solventmaterialsdf)
 
-
     # Sessions - workup
     def createWorkUpSession(self):
         """Creates a workup OT session"""
@@ -213,7 +212,6 @@ class CreateOTSession(object):
         )
         for workuplateneeded in self.workupplatesneeded:
             self.createWorkUpPlate(platetype=workuplateneeded)
-
 
     # Sessions - analyse
     def createAnalyseSession(self):
@@ -2034,7 +2032,7 @@ class CreateOTSession(object):
             logger.error(f"Error creating starting material plates from CSV: {str(e)}")
             raise
 
-    # Manager functions - plate manager        
+    # Manager functions - plate manager
     def createReactionStartingPlate(self):
         """Creates the starting material plate/s for executing a reaction's add actions"""
         startingmaterialsdf = self.getAddActionsMaterialDataFrame(productexists=False)

@@ -60,7 +60,7 @@ from .utils import (
     groupReactions,
 )
 
-from .opentrons.otsession import CreateOTSession
+from .opentrons import SessionOrchestrator
 from .opentrons.otwrite import OTWrite
 
 
@@ -986,32 +986,34 @@ def createMultipleOTSessions(
             )
 
             # Create a session for this group
-            session = CreateOTSession(
+            orchestrator = SessionOrchestrator(
                 reactionstep=reactionstep,
                 otbatchprotocolobj=otbatchprotocolobj,
                 actionsessionqueryset=group_action_sessions,
                 customSMcsvpath=customSMcsvpath,
             )
 
+            orchestrator.execute()
+
             # IMPORTANT: Immediately run OTWrite for this session before proceeding
             # This ensures database changes from this write are available to next sessions
             session_batchtag = (
-                f"{batchtag}_session_{session.otsessionobj.id}"
+                f"{batchtag}_session_{orchestrator.otsessionobj.id}"
                 if batchtag
-                else f"session_{session.otsessionobj.id}"
+                else f"session_{orchestrator.otsessionobj.id}"
             )
 
             logger.info(f"Running OTWrite for session {group_index + 1}")
             otwrite_result = OTWrite(
                 batchtag=session_batchtag,
-                otsessionobj=session.otsessionobj,
+                otsessionobj=orchestrator.otsessionobj,
                 actionsession_ids=group_action_session_ids,
             )
 
             # If we get here, everything worked - store session info
             created_sessions.append(
                 {
-                    "session": session,
+                    "session": orchestrator,
                     "action_session_ids": group_action_session_ids,
                     "otwrite_result": otwrite_result,
                 }
