@@ -109,7 +109,7 @@ class SessionOrchestrator:
             
         return session
     
-    def execute(self) -> bool:
+    def execute(self):
         """
         Execute the session protocol.
         
@@ -121,9 +121,18 @@ class SessionOrchestrator:
         try:
             logger.info(f"Executing {self.actionsessiontype} session via orchestrator")
             result = self.session.execute()
+            
+            # Update otsessionobj reference after execution
+            self.otsessionobj = self.session.otsessionobj if hasattr(self.session, 'otsessionobj') else None
+            
+            if self.otsessionobj is None:
+                logger.error("Session execution didn't create an OTSession object")
+                raise ValueError("Failed to create OTSession object during execution")
+                
             logger.info(f"Session execution complete with result: {result}")
             return result
         except Exception as e:
             logger.error(f"Error executing session: {str(e)}")
-            self.session.cleanup()
+            if hasattr(self.session, 'cleanup'):
+                self.session.cleanup()
             raise

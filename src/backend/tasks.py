@@ -2,7 +2,6 @@
 from __future__ import annotations
 from celery import shared_task, current_task
 from django.conf import settings
-from django.db import transaction
 import logging
 
 logger = logging.getLogger(__name__)
@@ -995,8 +994,16 @@ def createMultipleOTSessions(
 
             orchestrator.execute()
 
-            # IMPORTANT: Immediately run OTWrite for this session before proceeding
-            # This ensures database changes from this write are available to next sessions
+            # Validate the otsessionobj exists before using it
+            if not orchestrator.otsessionobj:
+                logger.error(
+                    "Orchestrator execution completed but didn't create an OTSession object"
+                )
+                raise ValueError(
+                    "Session execution failed to create necessary database objects"
+                )
+
+            # Now it's safe to use orchestrator.otsessionobj.id
             session_batchtag = (
                 f"{batchtag}_session_{orchestrator.otsessionobj.id}"
                 if batchtag

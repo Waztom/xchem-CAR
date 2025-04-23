@@ -20,6 +20,92 @@ from ...utils import (
 logger = logging.getLogger(__name__)
 
 
+class MaterialCalculator:
+    """
+    Handles calculations related to material properties.
+    """
+    pass  # Placeholder for MaterialCalculator implementation
+
+
+class SaltMatchingService:
+    """
+    Handles salt matching and material identification.
+    """
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+
+    def find_matching_materials(self, canonical_smiles, potential_matches, volume):
+        """
+        Finds matching materials considering salt variations.
+
+        Parameters
+        ----------
+        canonical_smiles: str
+            Canonical SMILES string of the compound
+        potential_matches: list
+            Potential matches (wells) from the database
+        volume: float
+            Volume needed
+
+        Returns
+        -------
+        tuple
+            (exists, matching_wells, containing_plate, remaining_volume)
+        """
+        try:
+            if not potential_matches:
+                self.logger.debug("No potential matches found")
+                return (False, [], None, volume)
+                
+            # Clean the query SMILES
+            cleaned_smiles = stripSalts(canonical_smiles)
+            
+            matching_wells = []
+            containing_plate = None
+            total_available_volume = 0
+            
+            # Process the potential matches
+            for well in potential_matches:
+                # Canonicalize and strip salts from the well's SMILES
+                well_canonical = canonSmiles(well.smiles)
+                well_cleaned = stripSalts(well_canonical)
+                
+                # Compare the cleaned, salt-free structures
+                if well_cleaned == cleaned_smiles:
+                    matching_wells.append(well)
+                    if containing_plate is None and hasattr(well, 'plate_id'):
+                        containing_plate = well.plate_id
+                    if well.volume is not None:
+                        total_available_volume += well.volume
+                        
+            # Calculate remaining volume needed
+            remaining_volume_needed = max(0, volume - total_available_volume)
+            
+            # Check if we have enough volume
+            if remaining_volume_needed <= 0:
+                self.logger.info(
+                    f"Found enough material for structure: {cleaned_smiles} "
+                    f"Required: {volume}µL, Available: {total_available_volume}µL"
+                )
+                return (True, matching_wells, containing_plate, 0)
+            elif matching_wells:
+                self.logger.info(
+                    f"Found material matching structure {cleaned_smiles} but insufficient volume. "
+                    f"Required: {volume}µL, Available: {total_available_volume}µL, "
+                    f"Still need: {remaining_volume_needed}µL"
+                )
+                return (False, matching_wells, containing_plate, remaining_volume_needed)
+            else:
+                self.logger.info(f"No existing material found matching structure: {cleaned_smiles}")
+                return (False, [], None, volume)
+                
+        except Exception as e:
+            import traceback
+            self.logger.error(f"Error in salt matching: {str(e)}")
+            self.logger.error(traceback.format_exc())
+            return (False, [], None, volume)
+
+
 class MaterialManager:
     """
     Manages material properties, concentrations, and preparation.
@@ -35,6 +121,8 @@ class MaterialManager:
             The parent session object
         """
         self.session = session
+        self.calculator = MaterialCalculator()
+        self.salt_matcher = SaltMatchingService()  
 
     def get_add_actions_material_dataframe(self, product_exists: bool) -> pd.DataFrame:
         """
@@ -88,26 +176,30 @@ class MaterialManager:
             if filtered_df.empty:
                 return pd.DataFrame()
 
-            # Group by SMILES, concentration, and solvent, summing the volumes
+            # First create a unique solution identifier for each row
+            filtered_df["uniquesolution"] = filtered_df.apply(
+                self.combine_strings, axis=1
+            )
+
+            # Group by the unique solution identifier instead of individual fields
             materials_df = (
-                filtered_df.groupby(["smiles", "concentration", "solvent"])
+                filtered_df.groupby(["uniquesolution"])
                 .agg(
                     {
                         "reaction_id_id": "first",
                         "smiles": "first",
                         "volume": "sum",
-                        "solvent": "first",
+                        "solvent": "first", 
                         "concentration": "first",
                         "molecularweight": "first",
                     }
                 )
-                .reset_index()
             )
 
-            # Create a unique identifier for each material
-            materials_df["uniquesolution"] = materials_df.apply(
-                self.combine_strings, axis=1
+            logger.debug(
+                f"Grouped materials dataframe: {materials_df.head()}"
             )
+
 
             # Canonicalize SMILES for consistent comparison
             materials_df["SMILES"] = materials_df["smiles"].apply(canonSmiles)
@@ -115,6 +207,9 @@ class MaterialManager:
             # Check existing materials and get remaining volume needed
             adjusted_materials = []
             for _, row in materials_df.iterrows():
+                logger.debug(
+                    f"Processing row: {row}"
+                )
                 # Add 10% safety margin to volume
                 total_volume_needed = row["volume"] * 1.1
 
@@ -150,6 +245,9 @@ class MaterialManager:
             if not adjusted_materials:
                 return pd.DataFrame()
 
+            logger.debug(
+                f"Adjusted materials after checking existing ones: {adjusted_materials}"
+            )
             # Create final dataframe with adjusted volumes
             result_df = pd.DataFrame(adjusted_materials)
 
@@ -212,136 +310,74 @@ class MaterialManager:
             logger.error(f"Error getting product SMILES: {str(e)}")
             return []
 
-    def check_starting_material_exists(
-        self, smiles: str, volume: float, concentration: float, solvent: str
-    ) -> tuple:
+    def check_starting_material_exists(self, smiles, volume, concentration, solvent):
+        """Coordinates the process of finding materials with salt handling"""
+        canonical_smiles = canonSmiles(smiles)
+        # Query DB for potential matches
+        potential_matches = self._get_potential_matches(concentration, solvent)
+        # Delegate the complex salt matching to specialized service
+        return self.salt_matcher.find_matching_materials(
+            canonical_smiles, potential_matches, volume
+        )
+
+    def _get_potential_matches(self, concentration, solvent):
         """
-        Checks if starting material exists with enough total volume across wells in 
-        custom starter plates, handling salt form variations appropriately.
-        
+        Retrieves potential matches from the database based on concentration and solvent.
+
         Parameters
         ----------
-        smiles: str
-            The SMILES string of the compound to search for
-        volume: float
-            The volume needed (µL)
         concentration: float
-            The concentration needed (M)
+            The concentration needed
         solvent: str
             The solvent type needed
-            
+
         Returns
         -------
-        exists: bool
-            True if sufficient material exists, False otherwise
-        matching_wells: list
-            List of wells containing the material
-        containing_plate: Plate or None
-            The plate containing the material, if found
-        remaining_volume: float
-            The remaining volume needed (0 if fully available)
+        QuerySet
+            Potential matches from the database
         """
         try:
-            # Canonicalize and strip salts from the input SMILES
-            canonical_smiles = canonSmiles(smiles)
-            cleaned_smiles = stripSalts(canonical_smiles)
-            
-            logger.debug(f"Searching for material: {cleaned_smiles} (from {smiles})")
-            
             # Get custom starting material plates
             custom_compound_orders = CompoundOrder.objects.filter(
                 otsession_id__otbatchprotocol_id=self.session.otbatchprotocolobj,
                 iscustomSMplate=True,
             )
-            
+
             if not custom_compound_orders.exists():
                 logger.debug("No custom starting material compound orders found")
-                return (False, [], None, volume)
-            
+                return []
+
             # Get session IDs from the compound orders
             custom_session_ids = custom_compound_orders.values_list(
                 "otsession_id", flat=True
             )
-            
+
             # Get only custom starting material plates
             plates = Plate.objects.filter(
                 otbatchprotocol_id=self.session.otbatchprotocolobj,
                 type="startingmaterial",
                 otsession_id__in=custom_session_ids,
             )
-            
+
             if not plates.exists():
                 logger.debug("No custom starting material plates found")
-                return (False, [], None, volume)
-                
-            # Track total volume and matching wells across all plates
-            total_available_volume = 0
-            all_matching_wells = []
-            containing_plate = None
-            
-            # Check each plate for wells containing the desired material
+                return []
+
+            # Retrieve wells with matching concentration and solvent
+            potential_matches = []
             for plate in plates:
-                # First get wells with matching concentration and solvent
-                potential_wells = Well.objects.filter(
+                wells = Well.objects.filter(
                     plate_id=plate.id,
                     concentration=concentration,
                     solvent=solvent,
                 )
-                
-                matching_wells = []
-                
-                # Then examine SMILES with salt handling
-                for well in potential_wells:
-                    well_canonical = canonSmiles(well.smiles)
-                    well_cleaned = stripSalts(well_canonical)
-                    
-                    # Compare the desalted structures
-                    if well_cleaned == cleaned_smiles:
-                        matching_wells.append(well)
-                        logger.debug(f"Found match: {well.smiles} ≈ {smiles} in well {well.name}")
-                
-                if matching_wells:
-                    containing_plate = plate
-                    logger.debug(
-                        f"Found {len(matching_wells)} matching wells in plate {plate.name} "
-                        f"after salt stripping"
-                    )
-                    
-                    # Sum the volumes
-                    for well in matching_wells:
-                        if well.volume is not None:
-                            all_matching_wells.append(well)
-                            total_available_volume += well.volume
-            
-            # Calculate remaining volume needed
-            remaining_volume_needed = max(0, volume - total_available_volume)
-            
-            # Return appropriate result based on available volume
-            if remaining_volume_needed <= 0:
-                logger.info(
-                    f"Found enough material in custom plates for structure: {cleaned_smiles} "
-                    f"Required: {volume}µL, Available: {total_available_volume}µL"
-                )
-                return (True, all_matching_wells, containing_plate, 0)
-            elif all_matching_wells:
-                logger.info(
-                    f"Found material matching structure {cleaned_smiles} but insufficient volume. "
-                    f"Required: {volume}µL, Available: {total_available_volume}µL, "
-                    f"Still need: {remaining_volume_needed}µL"
-                )
-                return (
-                    False,
-                    all_matching_wells,
-                    containing_plate, 
-                    remaining_volume_needed,
-                )
-            else:
-                logger.info(f"No existing material found matching structure: {cleaned_smiles}")
-                return (False, [], None, volume)
-                    
+                potential_matches.extend(wells)
+
+            return potential_matches
+
         except Exception as e:
-            logger.exception(f"Error checking if starting material exists: {str(e)}")
-            return (False, [], None, volume)
+            logger.exception(f"Error retrieving potential matches: {str(e)}")
+            return []
 
     def get_max_well_volume(self, plateobj: Plate) -> float:
         """
@@ -509,19 +545,39 @@ class MaterialManager:
         no_vials_needed: int
             The number of vials needed to store the material
         """
+        # Add logging to understand inputs
+        logger.debug(f"Calculating vials needed for volume {volume_material}µL in vial of {max_volume_vial}µL")
+        
+        # Special handling for microvolumes (< 5 µL)
+        is_microvolume = volume_material < 5
+        
+        # For tiny volumes, just use 1 vial regardless
+        if is_microvolume:
+            logger.debug(f"Microvolume detected ({volume_material}µL), using 1 vial")
+            return 1
+        
+        # Regular calculation for normal volumes
         if max_volume_vial > volume_material:
-            no_vials_needed = 1
+            logger.debug(f"Volume {volume_material}µL fits in one vial of {max_volume_vial}µL")
+            return 1
         else:
-            volumes_to_add = []
-            dead_volume = self.session.plate_manager.get_dead_volume(
-                max_well_volume=max_volume_vial
+            # Calculate dead volume - use a fixed minimum to avoid issues with very small wells
+            dead_volume = self.get_dead_volume(max_volume_vial)
+            
+            # Calculate effective capacity per vial
+            effective_capacity = max_volume_vial - dead_volume
+            
+            # Calculate needed vials
+            no_vials_needed_raw = volume_material / effective_capacity
+            no_vials_needed = math.ceil(no_vials_needed_raw)
+            
+            logger.debug(
+                f"Volume {volume_material}µL requires {no_vials_needed} vials "
+                f"(effective capacity: {effective_capacity}µL per vial, "
+                f"dead volume: {dead_volume}µL)"
             )
-            no_vials_needed_ratio = volume_material / (max_volume_vial - dead_volume)
-            frac, whole = math.modf(no_vials_needed_ratio)
-            volumes_to_add = [max_volume_vial for _ in range(int(whole))]
-            volumes_to_add.append(frac * max_volume_vial + dead_volume)
-            no_vials_needed = len(volumes_to_add)
-        return no_vials_needed
+            
+            return no_vials_needed
 
     def prepare_materials_for_reaction(self):
         """
@@ -569,3 +625,5 @@ class MaterialManager:
         except Exception as e:
             logger.error(f"Error preparing materials for workup: {str(e)}")
             return pd.DataFrame()
+
+    

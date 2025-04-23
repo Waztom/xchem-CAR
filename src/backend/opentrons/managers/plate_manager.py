@@ -5,6 +5,8 @@ import math
 import pandas as pd
 from django.core.files.storage import default_storage
 from django.db.models import QuerySet, Q
+from rdkit import Chem
+from rdkit.Chem import Descriptors
 
 from ...models import (
     Plate,
@@ -17,6 +19,7 @@ from ...models import (
 )
 from ...utils import (
     wellIndexToWellName,
+    sanitize_for_python_var,
 )
 from ..labwareavailable import labware_plates
 
@@ -64,6 +67,7 @@ class PlateManager:
             max_well_volume = labware_plates[labwaretype]["volume_well"]
             number_wells = labware_plates[labwaretype]["no_wells"]
             number_columns = labware_plates[labwaretype]["no_columns"]
+            sanitized_platename = sanitize_for_python_var(platename)
 
             plate_obj = Plate()
             plate_obj.otbatchprotocol_id = self.session.otbatchprotocolobj
@@ -79,7 +83,7 @@ class PlateManager:
             plate_obj.save()
 
             plate_obj.name = (
-                f"Reaction_step_{self.session.reactionstep}_{platename}_{plate_obj.id}"
+                f"Reaction_step_{self.session.reactionstep}_{sanitized_platename}_{plate_obj.id}"
             )
             plate_obj.save()
 
@@ -586,6 +590,12 @@ class PlateManager:
             and labware_plates[labware_plate]["max_temp"] >= temperature
         ]
 
+        if not possible_labware_plate_types:
+            logger.warning(
+                f"No labware types found for {platetype} at {temperature}°C for type {platetype} and volumes {platetype}"
+            )
+            return None 
+        
         vial_compare_dict = {}
 
         for labware_plate in possible_labware_plate_types:
@@ -607,6 +617,12 @@ class PlateManager:
             volume_difference = max_volume_vial - median_volume
             temp_difference = max_temp - temperature
 
+            logger.debug(
+                f"Labware: {labware_plate}, Max Temp: {max_temp}, "
+                f"Max Volume: {max_volume_vial}, "
+                f"Volume Difference: {volume_difference}, "
+                f"Temperature Difference: {temp_difference}"
+            )
             if platetype == "reaction":  # Reaction plates can only fill one well
                 max_volume_exceeded_test = all(
                     [False if max_volume_vial - vol <= 0 else True for vol in volumes]
@@ -628,6 +644,34 @@ class PlateManager:
                 "novialsneeded": wellsneeded,
                 "tempdifference": temp_difference,
             }
+    
+        logger.debug(f"Vial compare dict: {vial_compare_dict}")
+        
+        # Add check for empty dictionary
+        if not vial_compare_dict:
+            logger.warning(f"No suitable labware found for {platetype}-plate with volumes {volumes} at {temperature}°C")
+            if platetype == "starting":
+                # For starting materials, use the largest available plate that can handle the temperature
+                fallback_plates = [
+                    p for p in labware_plates 
+                    if "starting" in labware_plates[p]["type"]
+                    and labware_plates[p]["max_temp"] >= temperature
+                ]
+                if fallback_plates:
+                    # Sort by volume capacity (descending)
+                    fallback_plates.sort(
+                        key=lambda x: labware_plates[x]["volume_well"], 
+                        reverse=True
+                    )
+                    logger.info(f"Falling back to largest compatible plate: {fallback_plates[0]}")
+                    return fallback_plates[0]
+                else:
+                    # Last resort fallback
+                    logger.warning("No compatible labware found, defaulting to standard 96-well plate")
+                    return "plateone_96_wellplate_2500ul"
+            else:
+                # For other plate types
+                return "plateone_96_wellplate_2500ul"
 
         minimum_no_plates_needed = min(
             (d["noplatesneeded"] for d in vial_compare_dict.values())
@@ -760,18 +804,27 @@ class PlateManager:
 
                     # Add wells for each reaction in this group
                     for reaction in group_reactions:
-                        # Check if well index is available
-                        well_index = self.get_plate_well_index_available(
-                            plate_obj=plate_obj
+                        # Get product SMILES for this reaction
+                        product_smiles = self.session.material_manager.get_product_smiles([reaction.id])[0]
+
+                        # Log product information
+                        logger.debug(
+                            f"Creating well for reaction {reaction.id} with product SMILES: "
+                            f"{product_smiles}"
                         )
+
+                        # Check if well index is available
+                        well_index = self.get_plate_well_index_available(plate_obj=plate_obj)
                         if well_index is not False:
-                            # Create well
+                            # Create well with product information
                             well_obj = self.create_well_model(
                                 plate_obj=plate_obj,
                                 welltype=platetype,
                                 wellindex=well_index,
                                 reactionobj=reaction,
                                 columnobj=column_obj,
+                                smiles=product_smiles,  # Store product SMILES
+                                reactantfornextstep=True  # Mark as available for next step
                             )
 
                             # Update well index
@@ -779,9 +832,7 @@ class PlateManager:
                                 plate_obj=plate_obj, wellindexupdate=well_index + 1
                             )
                         else:
-                            logger.warning(
-                                f"No wells available on plate {plate_obj.name}"
-                            )
+                            logger.warning(f"No wells available on plate {plate_obj.name}")
                             break
             else:
                 logger.warning(f"Could not create plate for {group_key}")
@@ -943,7 +994,7 @@ class PlateManager:
 
             # Create or use existing plate based on volume
             labware_type = self.get_plate_type(
-                platetype="starting", volumes=[total_volume], temperature=25
+                platetype="startingmaterial", volumes=[total_volume], temperature=25
             )
 
             # Create a solvent plate (or reuse existing one)
@@ -1057,7 +1108,7 @@ class PlateManager:
 
             # Determine best labware type
             labware_type = self.get_plate_type(
-                platetype="starting", volumes=volumes, temperature=25
+                platetype="startingmaterial", volumes=volumes, temperature=25
             )
 
             # Create the plate
@@ -1125,6 +1176,7 @@ class PlateManager:
             product_exists=True
         )
 
+        logger.debug(f"Materials needed for starting plate: {materials_df}")
         if materials_df.empty:
             logger.info("No materials needed for starting plate")
             return None
@@ -1169,7 +1221,7 @@ class PlateManager:
 
         # Determine best labware type
         labware_type = self.get_plate_type(
-            platetype="starting", volumes=volumes, temperature=25
+            platetype="startingmaterial", volumes=volumes, temperature=25
         )
 
         # Create the plate
@@ -1183,32 +1235,154 @@ class PlateManager:
             logger.warning("Could not create starting material plate")
             return None
 
+        # Calculate dead volume for this plate type
+        max_well_volume = self.get_max_well_volume(plate_obj)
+        dead_volume = self.get_dead_volume(max_well_volume)
+        logger.debug(f"Using dead volume of {dead_volume}µL for plate with max well volume {max_well_volume}µL")
+        
+        # Tracking for compound order
+        order_dicts_list = []
+        
         # Add each material to the plate
         for _, row in adjusted_df.iterrows():
-            # Check for available well
-            index_well_available = self.get_plate_well_index_available(
-                plate_obj=plate_obj
-            )
-            if index_well_available is False:
-                logger.warning(f"No wells available on starting plate {plate_obj.name}")
-                break
-
-            # Create well for this material
-            well_obj = self.create_well_model(
-                plate_obj=plate_obj,
-                welltype="startingmaterial",
-                wellindex=index_well_available,
-                volume=row["volume"],
-                smiles=row["smiles"],
-                concentration=row["concentration"],
-                solvent=row["solvent"],
-            )
-
-            # Update well index
-            self.update_plate_well_index(
-                plate_obj=plate_obj, wellindexupdate=index_well_available + 1
-            )
-
+            # Add 5% extra volume as error margin
+            extra_error_volume = row["volume"] * 0.05
+            total_volume = row["volume"] + extra_error_volume + dead_volume
+            
+            # Handle case where volume exceeds max well volume
+            if total_volume > max_well_volume:
+                # Calculate how many wells are needed
+                wells_needed_ratio = total_volume / (max_well_volume - dead_volume)
+                
+                # Split into whole wells and fractional well
+                frac, whole = math.modf(wells_needed_ratio)
+                
+                # Create a list of volumes to add
+                volumes_to_add = [max_well_volume for _ in range(int(whole))]
+                
+                # Add the fractional well if needed
+                if frac > 0:
+                    volumes_to_add.append(frac * (max_well_volume - dead_volume) + dead_volume)
+                
+                logger.info(
+                    f"Material {row['smiles']} requires multiple wells. "
+                    f"Total volume with margin: {total_volume}µL, "
+                    f"Splitting across {len(volumes_to_add)} wells"
+                )
+                
+                # Create a well for each volume portion
+                for volume_to_add in volumes_to_add:
+                    # Check for available well
+                    index_well_available = self.get_plate_well_index_available(plate_obj=plate_obj)
+                    
+                    if index_well_available is False:
+                        # Create a new plate if current one is full
+                        plate_obj = self.create_plate_model(
+                            platetype="startingmaterial",
+                            platename="reaction-starting-materials",
+                            labwaretype=labware_type,
+                        )
+                        index_well_available = self.get_plate_well_index_available(plate_obj=plate_obj)
+                    
+                    # Create well
+                    well_obj = self.create_well_model(
+                        plate_obj=plate_obj,
+                        welltype="startingmaterial",
+                        wellindex=index_well_available,
+                        volume=volume_to_add,
+                        smiles=row["smiles"],
+                        concentration=row["concentration"],
+                        solvent=row["solvent"],
+                    )
+                    
+                    # Update well index
+                    self.update_plate_well_index(
+                        plate_obj=plate_obj, wellindexupdate=index_well_available + 1
+                    )
+                    
+                    # Add to order list
+                    order_dicts_list.append({
+                        "SMILES": row["smiles"],
+                        "plate-name": plate_obj.name,
+                        "labware": plate_obj.labware,
+                        "well-index": well_obj.index,
+                        "well-name": well_obj.name,
+                        "concentration": row["concentration"],
+                        "solvent": row["solvent"],
+                        "molecularweight": row.get("molecularweight"),
+                        "amount-uL": round(volume_to_add, 2),
+                    })
+            else:
+                # Standard case - fits in one well
+                # Check for available well
+                index_well_available = self.get_plate_well_index_available(plate_obj=plate_obj)
+                
+                if index_well_available is False:
+                    logger.warning(f"No wells available on starting plate {plate_obj.name}")
+                    # Create a new plate
+                    plate_obj = self.create_plate_model(
+                        platetype="startingmaterial",
+                        platename="reaction-starting-materials",
+                        labwaretype=labware_type,
+                    )
+                    index_well_available = self.get_plate_well_index_available(plate_obj=plate_obj)
+                
+                # Create well for this material with the adjusted volume including dead volume
+                well_obj = self.create_well_model(
+                    plate_obj=plate_obj,
+                    welltype="startingmaterial",
+                    wellindex=index_well_available,
+                    volume=total_volume,
+                    smiles=row["smiles"],
+                    concentration=row["concentration"],
+                    solvent=row["solvent"],
+                )
+                
+                # Log the volume adjustment for transparency
+                logger.info(
+                    f"Added material {row['smiles']} with {total_volume}µL "
+                    f"(required {row['volume']}µL + error margin + {dead_volume}µL dead volume)"
+                )
+                
+                # Update well index
+                self.update_plate_well_index(
+                    plate_obj=plate_obj, wellindexupdate=index_well_available + 1
+                )
+                
+                # Add to order list
+                order_dicts_list.append({
+                    "SMILES": row["smiles"],
+                    "plate-name": plate_obj.name,
+                    "labware": plate_obj.labware,
+                    "well-index": well_obj.index,
+                    "well-name": well_obj.name,
+                    "concentration": row["concentration"],
+                    "solvent": row["solvent"],
+                    "molecularweight": row.get("molecularweight"),
+                    "amount-uL": round(total_volume, 2),
+                })
+        
+        # Create compound order
+        if order_dicts_list:
+            order_df = pd.DataFrame(order_dicts_list)
+            
+            # Calculate additional fields
+            if "molecularweight" not in order_df.columns or order_df["molecularweight"].isna().any():
+                order_df["molecularweight"] = order_df["SMILES"].apply(
+                    lambda smiles: Descriptors.MolWt(Chem.MolFromSmiles(smiles))
+                )
+            
+            # Calculate mass
+            order_df["mass-mg"] = order_df.apply(self.session.material_manager.calc_mass, axis=1)
+            
+            # Add inchikey and compound name if available
+            if hasattr(self.session, "data_manager") and hasattr(self.session.data_manager, "get_inchi_key"):
+                order_df["inchikey"] = order_df["SMILES"].apply(self.session.data_manager.get_inchi_key)
+                order_df["compound-name"] = order_df["inchikey"].apply(self.session.data_manager.get_chemical_name)
+            
+            # Create the compound order
+            self.session.data_manager.create_compound_order_model(order_df=order_df)
+        
         logger.info(f"Created starting material plate with {len(adjusted_df)} materials")
         return plate_obj
 
@@ -1320,7 +1494,6 @@ class PlateManager:
             # Create the plate using the existing class-recipe function
             plate = self.create_plate_by_reaction_class_recipe(
                 reaction_queryset=reaction_temp_queryset,
-                labware_platetype=labware_platetype,
                 platetype=platetype,
             )
             

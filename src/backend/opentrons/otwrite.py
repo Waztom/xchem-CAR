@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db.models import QuerySet, Q, Max, Min
 import os
 from graphene_django import DjangoObjectType
+import pdb
 
 from ..utils import (
     getProductSmiles,
@@ -626,7 +627,21 @@ class OTWrite(object):
                 )
         if not wellinfo:
             logger.warning("No from starting plate well info found!")
-        return wellinfo
+            logger.debug("The SMILES is: {}".format(smiles))
+            logger.debug("The solvent is: {}".format(solvent))
+            logger.debug("The concentration is: {}".format(concentration))
+            starterwellsmilesavailable = Well.objects.values_list(
+                "smiles", flat=True
+            ).filter(
+                otsession_id=self.otsession_id,
+                type="startingmaterial",
+                available=True,
+            )
+            logger.debug("The available starting material SMILES are: {}".format(starterwellsmilesavailable))
+            logger.debug("The session id is: {}".format(self.otsession_id))
+            return None
+        if wellinfo:
+            return wellinfo
 
     def checkVolumeClose(self, volume1: float, volume2: float) -> bool:
         """Checks if two volumes are almost the same value"""
@@ -688,6 +703,10 @@ class OTWrite(object):
         wellobj: Well
             The well used in the reaction
         """
+        # pdb.set_trace()
+        logger.debug("Finding well object for reaction id: {}".format(reaction_id))
+        logger.debug("Finding well object for well type: {}".format(welltype))
+        logger.debug("Finding well object for otsession id: {}".format(self.otsession_id))
         productsmiles = getProductSmiles(reaction_ids=[reaction_id])[0]
         wellobj = Well.objects.get(
             otsession_id=self.otsession_id,
@@ -695,6 +714,7 @@ class OTWrite(object):
             type=welltype,
             smiles=productsmiles,
         )
+        logger.debug("Found well object: {}".format(wellobj))
         return wellobj
 
     def getWellVolumeAvailable(self, wellobj: Well) -> float:
