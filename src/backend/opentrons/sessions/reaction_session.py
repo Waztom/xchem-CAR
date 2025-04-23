@@ -5,6 +5,11 @@ Implements reaction session functionality for OpenTrons protocols.
 import logging
 
 from .base_session import BaseSession
+from ..managers.plate_manager.plate_factory import PlateFactory
+from ..managers.plate_manager.plate_query_service import PlateQueryService
+from ..managers.plate_manager.well_manager import WellManager
+from ..managers.plate_manager.column_manager import ColumnManager
+from ..managers.plate_manager.labware_selector import LabwareSelector
 
 logger = logging.getLogger(__name__)
 
@@ -90,18 +95,18 @@ class ReactionSession(BaseSession):
         else:
             searchsmiles = list(self.addactionqueryset.values_list("smiles", flat=True))
             # Create reaction plate for non-continuation reactions
-            self.plate_manager.create_plates_by_temperature(
+            self.plate_factory.create_plates_by_temperature(
                 grouped_reaction_temperature_querysets=self.grouped_reaction_temperature_querysets,
                 platetype="reaction"
             )
 
         # Get input plates needed based on SMILES
-        input_plates = self.plate_manager.get_input_plates_needed(
+        input_plates = self.plate_query_service.get_input_plates_needed(
             searchsmiles=searchsmiles,
             groupreactionqueryset=self.groupreactionqueryset,
         )
         if input_plates:
-            self.plate_manager.update_plate_deck_ot_session_ids(
+            self.plate_factory.update_plate_deck_ot_session_ids(
                 plate_queryset=input_plates
             )
 
@@ -109,14 +114,13 @@ class ReactionSession(BaseSession):
         self.pipette_manager.create_pipette_model()
 
         # Create custom starting material plates if CSV path provided
-        # Up to here for review
         if self.customSMcsvpath:
-            self.plate_manager.create_starting_material_plates_from_csv(
+            self.plate_factory.create_starting_material_plates_from_csv(
                 csv_path=self.customSMcsvpath
             )
 
         # Create reaction starting plate for new materials
-        self.plate_manager.create_reaction_starting_plate()
+        self.plate_factory.create_reaction_starting_plate()
 
         # For steps after the first, create solvent plate for previous products
         if self.reactionstep > 1:
@@ -133,8 +137,8 @@ class ReactionSession(BaseSession):
                 self.solventmaterialsdf is not None
                 and not self.solventmaterialsdf.empty
             ):
-                self.plate_manager.create_solvent_plate(
-                    materialsdf=self.solventmaterialsdf
+                self.plate_factory.create_solvent_plate(
+                    materials_df=self.solventmaterialsdf
                 )
 
         logger.info(

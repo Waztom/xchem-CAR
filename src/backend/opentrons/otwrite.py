@@ -9,7 +9,6 @@ from django.conf import settings
 from django.db.models import QuerySet, Q, Max, Min
 import os
 from graphene_django import DjangoObjectType
-import pdb
 
 from ..utils import (
     getProductSmiles,
@@ -703,10 +702,6 @@ class OTWrite(object):
         wellobj: Well
             The well used in the reaction
         """
-        # pdb.set_trace()
-        logger.debug("Finding well object for reaction id: {}".format(reaction_id))
-        logger.debug("Finding well object for well type: {}".format(welltype))
-        logger.debug("Finding well object for otsession id: {}".format(self.otsession_id))
         productsmiles = getProductSmiles(reaction_ids=[reaction_id])[0]
         wellobj = Well.objects.get(
             otsession_id=self.otsession_id,

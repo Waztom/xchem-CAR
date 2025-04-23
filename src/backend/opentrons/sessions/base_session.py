@@ -6,7 +6,11 @@ import logging
 from abc import ABC, abstractmethod
 
 from ..managers.deck_manager import DeckManager
-from ..managers.plate_manager import PlateManager
+from ..managers.plate_manager.plate_factory import PlateFactory
+from ..managers.plate_manager.well_manager import WellManager
+from ..managers.plate_manager.column_manager import ColumnManager
+from ..managers.plate_manager.labware_selector import LabwareSelector
+from ..managers.plate_manager.plate_query_service import PlateQueryService
 from ..managers.pipette_manager import PipetteManager
 from ..managers.material_manager import MaterialManager
 from ..managers.data_manager import DataManager
@@ -75,7 +79,11 @@ class BaseSession(ABC):
 
         # Manager instances will be created in setup_common_resources
         self.deck_manager = None
-        self.plate_manager = None
+        self.plate_factory = None
+        self.well_manager = None
+        self.column_manager = None
+        self.labware_selector = None
+        self.plate_query_service = None
         self.pipette_manager = None
         self.material_manager = None
         self.data_manager = None
@@ -118,7 +126,7 @@ class BaseSession(ABC):
             The type of action session (reaction, workup, analyse)
         """
         return self.actionsessiontype
-
+    
     def setup_common_resources(self):
         """
         Initialize managers and set up resources needed by all session types.
@@ -130,7 +138,14 @@ class BaseSession(ABC):
             # Initialize managers - order matters here due to dependencies
             self.data_manager = DataManager(self)
             self.deck_manager = DeckManager(self)
-            self.plate_manager = PlateManager(self)
+            
+            # Replace plate_manager with specialized components
+            self.well_manager = WellManager(self)
+            self.column_manager = ColumnManager(self)
+            self.labware_selector = LabwareSelector(self)
+            self.plate_query_service = PlateQueryService(self)
+            self.plate_factory = PlateFactory(self)
+            
             self.material_manager = MaterialManager(self)
             self.pipette_manager = PipetteManager(self)
 
@@ -144,7 +159,7 @@ class BaseSession(ABC):
 
             self.is_initialized = True
             logger.info(f"Common resources set up for {self.actionsessiontype} session")
-
+            
         except Exception as e:
             logger.error(f"Error setting up common resources: {str(e)}")
             self.cleanup()
