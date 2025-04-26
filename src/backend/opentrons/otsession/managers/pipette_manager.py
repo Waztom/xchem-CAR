@@ -5,7 +5,7 @@ Manages pipette and tip rack selection, creation, and configuration.
 import logging
 from statistics import median
 
-from ...models import Pipette, TipRack
+from ....models import Pipette, TipRack
 
 logger = logging.getLogger(__name__)
 

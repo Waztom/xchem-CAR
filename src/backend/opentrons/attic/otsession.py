@@ -15,7 +15,7 @@ from rdkit.Chem import Descriptors
 import pandas as pd
 from pandas.core.frame import DataFrame
 
-from ..utils import (
+from ...utils import (
     canonSmiles,
     getProductSmiles,
     checkPreviousReactionProducts,
@@ -28,7 +28,7 @@ from ..utils import (
     stripSalts,
 )
 
-from ..models import (
+from ...models import (
     ActionSession,
     Batch,
     Column,
@@ -48,7 +48,7 @@ from ..models import (
 )
 
 import math
-from .labwareavailable import labware_plates
+from ..labwareavailable import labware_plates
 
 
 class CreateOTSession(object):

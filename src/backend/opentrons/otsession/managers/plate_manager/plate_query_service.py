@@ -1,7 +1,7 @@
 import logging
 from django.db.models import QuerySet, Q
 
-from ....models import (
+from .....models import (
     ActionSession, 
     AddAction, 
     ExtractAction, 

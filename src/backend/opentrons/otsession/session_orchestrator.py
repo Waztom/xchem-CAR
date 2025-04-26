@@ -9,7 +9,7 @@ from .sessions.base_session import BaseSession
 from .sessions.reaction_session import ReactionSession
 from .sessions.workup_session import WorkupSession
 from .sessions.analysis_session import AnalysisSession
-from ..models import ActionSession, OTBatchProtocol
+from ...models import ActionSession, OTBatchProtocol
 
 logger = logging.getLogger(__name__)
 

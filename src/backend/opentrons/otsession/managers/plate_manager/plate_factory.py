@@ -4,9 +4,9 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 
-from ....models import Plate
-from ....utils import sanitize_for_python_var
-from ...labwareavailable import labware_plates
+from .....models import Plate
+from .....utils import sanitize_for_python_var
+from ....labwareavailable import labware_plates
 
 logger = logging.getLogger(__name__)
 

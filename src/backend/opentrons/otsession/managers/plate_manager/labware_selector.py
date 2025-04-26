@@ -1,8 +1,8 @@
 import logging
 import math
 
-from ....models import Plate
-from ...labwareavailable import labware_plates
+from .....models import Plate
+from ....labwareavailable import labware_plates
 
 logger = logging.getLogger(__name__)
 

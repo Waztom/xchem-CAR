@@ -47,7 +47,6 @@ from .utils import (
     getActionSessionQuerySet,
     getActionSessionSequenceNumbers,
     getActionSessionTypes,
-    getAddtionOrder,
     canonSmiles,
     getBatchReactions,
     getBatchTag,
@@ -59,13 +58,13 @@ from .utils import (
     groupReactions,
 )
 
-from .opentrons import SessionOrchestrator
-from .opentrons.otwrite import OTWrite
+from .opentrons.otsession import SessionOrchestrator
+from .opentrons.otwriter import script_generator
 
 
 def delete_tmp_file(filepath):
     os.remove(filepath)
-
+x
 
 @shared_task
 def validateFileUpload(

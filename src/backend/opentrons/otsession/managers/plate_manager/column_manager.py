@@ -1,7 +1,7 @@
 import logging
 from django.db.models import QuerySet
 
-from ....models import Plate, Column
+from .....models import Plate, Column
 
 logger = logging.getLogger(__name__)
 

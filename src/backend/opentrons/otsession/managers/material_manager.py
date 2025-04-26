@@ -10,8 +10,8 @@ from django.core.files.base import ContentFile
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 
-from ...models import Plate, Well, CompoundOrder, SolventPrep, Product
-from ...utils import (
+from ....models import Plate, Well, CompoundOrder, SolventPrep, Product
+from ....utils import (
     canonSmiles,
     stripSalts,
     checkPreviousReactionProducts,

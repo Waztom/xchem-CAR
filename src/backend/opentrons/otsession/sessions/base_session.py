@@ -14,8 +14,8 @@ from ..managers.plate_manager.plate_query_service import PlateQueryService
 from ..managers.pipette_manager import PipetteManager
 from ..managers.material_manager import MaterialManager
 from ..managers.data_manager import DataManager
-from ...models import OTSession
-from ...utils import getReactionQuerySet
+from ....models import OTSession
+from ....utils import getReactionQuerySet
 
 logger = logging.getLogger(__name__)
 

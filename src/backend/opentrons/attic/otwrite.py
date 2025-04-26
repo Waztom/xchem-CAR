@@ -10,14 +10,14 @@ from django.db.models import QuerySet, Q, Max, Min
 import os
 from graphene_django import DjangoObjectType
 
-from ..utils import (
+from ...utils import (
     getProductSmiles,
     getReaction,
     getPreviousReactionQuerySets,
     getReactionQuerySet,
 )
-from ..recipebuilder.encodedrecipes import encoded_recipes
-from ..models import (
+from ...recipebuilder.encodedrecipes import encoded_recipes
+from ...models import (
     ActionSession,
     AddAction,
     Column,
@@ -37,7 +37,7 @@ import math
 import inspect
 import logging
 
-from .labwareavailable import labware_plates
+from ..labwareavailable import labware_plates
 
 logger = logging.getLogger(__name__)
 

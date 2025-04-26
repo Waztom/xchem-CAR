@@ -1,8 +1,8 @@
 import logging
 from django.db.models import QuerySet
 
-from ....models import Plate, Well, Reaction, Column
-from ....utils import wellIndexToWellName
+from .....models import Plate, Well, Reaction, Column
+from .....utils import wellIndexToWellName
 
 logger = logging.getLogger(__name__)
 

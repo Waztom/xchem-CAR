@@ -2,7 +2,7 @@
 
 import logging
 
-from ...models import Deck
+from ....models import Deck
 
 logger = logging.getLogger(__name__)
 
