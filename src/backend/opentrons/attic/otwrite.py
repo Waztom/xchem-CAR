@@ -10,14 +10,14 @@ from django.db.models import QuerySet, Q, Max, Min
 import os
 from graphene_django import DjangoObjectType
 
-from ..utils import (
+from ...utils import (
     getProductSmiles,
     getReaction,
     getPreviousReactionQuerySets,
     getReactionQuerySet,
 )
-from ..recipebuilder.encodedrecipes import encoded_recipes
-from ..models import (
+from ...recipebuilder.encodedrecipes import encoded_recipes
+from ...models import (
     ActionSession,
     AddAction,
     Column,
@@ -37,7 +37,7 @@ import math
 import inspect
 import logging
 
-from .labwareavailable import labware_plates
+from ..labwareavailable import labware_plates
 
 logger = logging.getLogger(__name__)
 
@@ -626,7 +626,21 @@ class OTWrite(object):
                 )
         if not wellinfo:
             logger.warning("No from starting plate well info found!")
-        return wellinfo
+            logger.debug("The SMILES is: {}".format(smiles))
+            logger.debug("The solvent is: {}".format(solvent))
+            logger.debug("The concentration is: {}".format(concentration))
+            starterwellsmilesavailable = Well.objects.values_list(
+                "smiles", flat=True
+            ).filter(
+                otsession_id=self.otsession_id,
+                type="startingmaterial",
+                available=True,
+            )
+            logger.debug("The available starting material SMILES are: {}".format(starterwellsmilesavailable))
+            logger.debug("The session id is: {}".format(self.otsession_id))
+            return None
+        if wellinfo:
+            return wellinfo
 
     def checkVolumeClose(self, volume1: float, volume2: float) -> bool:
         """Checks if two volumes are almost the same value"""
@@ -695,6 +709,7 @@ class OTWrite(object):
             type=welltype,
             smiles=productsmiles,
         )
+        logger.debug("Found well object: {}".format(wellobj))
         return wellobj
 
     def getWellVolumeAvailable(self, wellobj: Well) -> float:

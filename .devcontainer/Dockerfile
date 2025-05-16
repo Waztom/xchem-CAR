@@ -16,7 +16,6 @@ RUN apt-get update && \
     procps \
     python3-rdkit \
     python3-pip \
-    python3-pandas \
     python3-psycopg2 \
     git \
     git-crypt \

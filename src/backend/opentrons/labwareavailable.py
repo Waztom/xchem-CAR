@@ -45,7 +45,7 @@ labware_plates = {
         "reflux": False,
     },
     "labcyte_384_wellplate_100ul": {
-        "type": ["xchem", "reaction"],
+        "type": ["xchem", "reaction", "startingmaterial"],
         "no_wells_in_column": 16,
         "no_wells": 384,
         "no_columns": 24,
@@ -54,7 +54,7 @@ labware_plates = {
         "reflux": False,
     },
     "labcyte_384_wellplate_12ul": {
-        "type": ["xchem", "reaction"],
+        "type": ["xchem", "reaction", "startingmaterial"],
         "no_wells_in_column": 16,
         "no_wells": 384,
         "no_columns": 24,

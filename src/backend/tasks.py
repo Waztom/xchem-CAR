@@ -2,7 +2,6 @@
 from __future__ import annotations
 from celery import shared_task, current_task
 from django.conf import settings
-from django.db import transaction
 import logging
 
 logger = logging.getLogger(__name__)
@@ -48,7 +47,6 @@ from .utils import (
     getActionSessionQuerySet,
     getActionSessionSequenceNumbers,
     getActionSessionTypes,
-    getAddtionOrder,
     canonSmiles,
     getBatchReactions,
     getBatchTag,
@@ -60,13 +58,13 @@ from .utils import (
     groupReactions,
 )
 
-from .opentrons.otsession import CreateOTSession
-from .opentrons.otwrite import OTWrite
+from .opentrons.otsession import SessionOrchestrator
+from .opentrons.otwriter import script_generator
 
 
 def delete_tmp_file(filepath):
     os.remove(filepath)
-
+x
 
 @shared_task
 def validateFileUpload(
@@ -986,32 +984,42 @@ def createMultipleOTSessions(
             )
 
             # Create a session for this group
-            session = CreateOTSession(
+            orchestrator = SessionOrchestrator(
                 reactionstep=reactionstep,
                 otbatchprotocolobj=otbatchprotocolobj,
                 actionsessionqueryset=group_action_sessions,
                 customSMcsvpath=customSMcsvpath,
             )
 
-            # IMPORTANT: Immediately run OTWrite for this session before proceeding
-            # This ensures database changes from this write are available to next sessions
+            orchestrator.execute()
+
+            # Validate the otsessionobj exists before using it
+            if not orchestrator.otsessionobj:
+                logger.error(
+                    "Orchestrator execution completed but didn't create an OTSession object"
+                )
+                raise ValueError(
+                    "Session execution failed to create necessary database objects"
+                )
+
+            # Now it's safe to use orchestrator.otsessionobj.id
             session_batchtag = (
-                f"{batchtag}_session_{session.otsessionobj.id}"
+                f"{batchtag}_session_{orchestrator.otsessionobj.id}"
                 if batchtag
-                else f"session_{session.otsessionobj.id}"
+                else f"session_{orchestrator.otsessionobj.id}"
             )
 
             logger.info(f"Running OTWrite for session {group_index + 1}")
             otwrite_result = OTWrite(
                 batchtag=session_batchtag,
-                otsessionobj=session.otsessionobj,
+                otsessionobj=orchestrator.otsessionobj,
                 actionsession_ids=group_action_session_ids,
             )
 
             # If we get here, everything worked - store session info
             created_sessions.append(
                 {
-                    "session": session,
+                    "session": orchestrator,
                     "action_session_ids": group_action_session_ids,
                     "otwrite_result": otwrite_result,
                 }
