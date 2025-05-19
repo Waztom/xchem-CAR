@@ -22,11 +22,13 @@ logger = logging.getLogger(__name__)
 
 class MaterialCalculator:
     """Handles calculations related to material properties."""
-    
-    def recalculate_amount_for_salt_form(self, original_smiles, actual_smiles, original_volume):
+
+    def recalculate_amount_for_salt_form(
+        self, original_smiles, actual_smiles, original_volume
+    ):
         """
         Recalculates the amount needed when switching to a different salt form.
-        
+
         Parameters
         ----------
         original_smiles: str
@@ -35,7 +37,7 @@ class MaterialCalculator:
             Actual SMILES string found in custom plate
         original_volume: float
             Original volume calculated
-            
+
         Returns
         -------
         new_volume: float
@@ -45,29 +47,31 @@ class MaterialCalculator:
             # Get molecular weights
             mol_original = Chem.MolFromSmiles(original_smiles)
             mol_actual = Chem.MolFromSmiles(actual_smiles)
-            
+
             if not mol_original or not mol_actual:
-                logger.warning(f"Could not parse SMILES for recalculation: {original_smiles} or {actual_smiles}")
+                logger.warning(
+                    f"Could not parse SMILES for recalculation: {original_smiles} or {actual_smiles}"
+                )
                 return original_volume
-                
+
             mw_original = Descriptors.MolWt(mol_original)
             mw_actual = Descriptors.MolWt(mol_actual)
-            
+
             # Calculate volume ratio based on molecular weight
             # The ratio is determined by the number of moles needed, which is constant
             # If MW increases, volume must increase proportionally
             volume_ratio = mw_actual / mw_original
             new_volume = original_volume * volume_ratio
-            
+
             logger.info(
                 f"Recalculated volume for salt form. "
                 f"Original MW: {mw_original:.2f}, Actual MW: {mw_actual:.2f}, "
                 f"Ratio: {volume_ratio:.3f}, "
                 f"Original volume: {original_volume:.2f}µL, New volume: {new_volume:.2f}µL"
             )
-            
+
             return new_volume
-            
+
         except Exception as e:
             logger.error(f"Error recalculating amount for salt form: {str(e)}")
             return original_volume
@@ -109,11 +113,13 @@ class SaltMatchingService:
                         containing_plate = well.plate_id
                     if well.volume is not None:
                         total_available_volume += well.volume
-                    
+
                     # Store the actual SMILES if not set yet (prioritize first match)
                     if actual_smiles is None:
                         actual_smiles = well.smiles
-                        self.logger.info(f"Using SMILES from matched well: {actual_smiles}")
+                        self.logger.info(
+                            f"Using SMILES from matched well: {actual_smiles}"
+                        )
 
             # Calculate remaining volume needed
             remaining_volume_needed = max(0, volume - total_available_volume)
@@ -146,6 +152,7 @@ class SaltMatchingService:
 
         except Exception as e:
             import traceback
+
             self.logger.error(f"Error in salt matching: {str(e)}")
             self.logger.error(traceback.format_exc())
             return (False, [], None, volume, None)
@@ -207,7 +214,7 @@ class MaterialManager:
             addactionsdf["uniquesolution"] = addactionsdf.apply(
                 self.combine_strings, axis=1
             )
-            
+
             # Select only add actions that are not products from previous reactions
             if product_exists:
                 condition = addactionsdf.apply(
@@ -247,69 +254,71 @@ class MaterialManager:
             # Check existing materials and get remaining volume needed
             adjusted_materials = []
             updated_add_actions = {}  # Track which add actions were updated
-            
+
             for _, row in materials_df.iterrows():
                 logger.debug(f"Processing row: {row}")
                 # Add 10% safety margin to volume
                 total_volume_needed = row["volume"] * 1.1
-                
+
                 # Check if this material already exists
                 (
                     exists,
                     matching_wells,
                     plate,
                     remaining_volume,
-                    actual_smiles,  
+                    actual_smiles,
                 ) = self.check_starting_material_exists(
                     smiles=row["smiles"],
                     volume=total_volume_needed,
                     concentration=row["concentration"],
                     solvent=row["solvent"],
                 )
-                
+
                 # Handle salt form matches - update add actions if needed
                 if exists and actual_smiles and actual_smiles != row["smiles"]:
                     # Find which add action(s) used this material
                     add_actions_to_update = addactionsdf[
                         (addactionsdf["uniquesolution"] == row["uniquesolution"])
                     ]
-                    
+
                     for idx, add_action_row in add_actions_to_update.iterrows():
                         add_action_id = add_action_row["id"]
                         logger.info(
                             f"Updating add action {add_action_id} for salt form match: "
                             f"{row['smiles']} -> {actual_smiles}"
                         )
-                        
+
                         # Only update if we haven't already processed this add action
-                        if add_action_id not in updated_add_actions:                            
+                        if add_action_id not in updated_add_actions:
                             try:
                                 add_action = AddAction.objects.get(id=add_action_id)
-                                
+
                                 # Calculate new volume based on molecular weight differences
-                                new_volume = self.calculator.recalculate_amount_for_salt_form(
-                                    row["smiles"],
-                                    actual_smiles,
-                                    add_action.volume
+                                new_volume = (
+                                    self.calculator.recalculate_amount_for_salt_form(
+                                        row["smiles"], actual_smiles, add_action.volume
+                                    )
                                 )
-                                
+
                                 # Update the add action
                                 add_action.smiles = actual_smiles
                                 add_action.volume = new_volume
                                 add_action.save()
-                                
+
                                 logger.info(
                                     f"Updated add action {add_action_id}: "
                                     f"SMILES from {row['smiles']} to {actual_smiles}, "
                                     f"Amount from {add_action_row['volume']} to {new_volume}µL"
                                 )
-                                
+
                                 # Track that we've updated this add action
                                 updated_add_actions[add_action_id] = True
-                                
+
                             except Exception as e:
-                                logger.error(f"Error updating add action {add_action_id}: {str(e)}")
-                
+                                logger.error(
+                                    f"Error updating add action {add_action_id}: {str(e)}"
+                                )
+
                 # Only include materials that need additional volume
                 if not exists or remaining_volume > 0:
                     # Copy the row and update the volume to what's additionally needed
@@ -317,7 +326,7 @@ class MaterialManager:
                     if exists:
                         # Only request the additional volume needed
                         adjusted_row["volume"] = remaining_volume
-                        
+
                     adjusted_materials.append(adjusted_row)
 
             if not adjusted_materials:
@@ -399,14 +408,22 @@ class MaterialManager:
         # Query DB for potential matches
         potential_matches = self._get_potential_matches(concentration, solvent)
         # Delegate the complex salt matching to specialized service
-        exists, matching_wells, containing_plate, remaining_volume, actual_smiles = self.salt_matcher.find_matching_materials(
+        (
+            exists,
+            matching_wells,
+            containing_plate,
+            remaining_volume,
+            actual_smiles,
+        ) = self.salt_matcher.find_matching_materials(
             canonical_smiles, potential_matches, volume
         )
-        
+
         # Log when a salt form is found
         if actual_smiles and actual_smiles != smiles:
-            logger.info(f"Found salt form match. Original: {smiles}, Found: {actual_smiles}")
-        
+            logger.info(
+                f"Found salt form match. Original: {smiles}, Found: {actual_smiles}"
+            )
+
         return exists, matching_wells, containing_plate, remaining_volume, actual_smiles
 
     def _get_potential_matches(self, concentration, solvent):

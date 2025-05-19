@@ -579,82 +579,8 @@ class PlateFactory:
             logger.info("No materials needed for starting plate")
             return None
 
-        # Check for materials already available in custom starting material plates
-        adjusted_materials = []
-        for _, row in materials_df.iterrows():
-            # Check if this material already exists with sufficient volume
-            (
-                exists,
-                matching_wells,
-                containing_plate,
-                remaining_volume,
-                actual_smiles  
-            ) = self.session.material_manager.check_starting_material_exists(
-                smiles=row["smiles"],
-                volume=row["volume"],
-                concentration=row["concentration"],
-                solvent=row["solvent"],
-            )
-            # Update add action if we found a salt form match
-            if exists and actual_smiles and actual_smiles != row["smiles"]:
-                # Try to get the add action ID if it exists in the row
-                add_action_id = row.get("add_action_id")
-                if add_action_id:
-                    try:
-                        add_action = AddAction.objects.get(id=add_action_id)
-                        
-                        # Get original amount
-                        original_volume = add_action.volume
-                        
-                        # Recalculate amount based on molecular weight difference
-                        new_amount = self.session.material_manager.calculator.recalculate_amount_for_salt_form(
-                            row["smiles"], actual_smiles, original_volume
-                        )
-                        
-                        # Update the add action with the actual SMILES and new amount
-                        add_action.smiles = actual_smiles
-                        add_action.volume = new_amount
-                        add_action.save()
-                        
-                        logger.info(
-                            f"Updated add action {add_action_id}: SMILES from {row['smiles']} "
-                            f"to {actual_smiles}, amount from {original_volume} to {new_amount}"
-                        )
-                        
-                        # Update row's SMILES for subsequent processing
-                        row = row.copy()
-                        row["smiles"] = actual_smiles
-                    except Exception as e:
-                        logger.error(f"Error updating add action: {str(e)}")
-            
-            # Only include materials that aren't fully available in custom plates
-            if not exists or remaining_volume > 0:
-                # If partially available, adjust the volume needed
-                if exists and remaining_volume > 0:
-                    adjusted_row = row.copy()
-                    adjusted_row["volume"] = remaining_volume
-                    logger.info(
-                        f"Material {row['smiles']} partially available. "
-                        f"Total needed: {row['volume']}µL, "
-                        f"Still need: {remaining_volume}µL"
-                    )
-                    adjusted_materials.append(adjusted_row)
-                else:
-                    # Material not found at all
-                    adjusted_materials.append(row)
-
-        # If all materials are already available in custom plates, no need to create a new plate
-        if not adjusted_materials:
-            logger.info(
-                "All required materials already available in custom starting plates"
-            )
-            return None
-
-        # Create adjusted dataframe with only the materials we still need to prepare
-        adjusted_df = pd.DataFrame(adjusted_materials)
-
         # Get total volumes needed for plate sizing
-        volumes = adjusted_df["volume"].tolist()
+        volumes = materials_df["volume"].tolist()
 
         # Determine best labware type
         labware_type = self.session.labware_selector.get_plate_type(
@@ -683,7 +609,7 @@ class PlateFactory:
         order_dicts_list = []
 
         # Add each material to the plate
-        for _, row in adjusted_df.iterrows():
+        for _, row in materials_df.iterrows():
             # Add 5% extra volume as error margin
             extra_error_volume = row["volume"] * 0.05
             total_volume = row["volume"] + extra_error_volume + dead_volume
@@ -858,7 +784,7 @@ class PlateFactory:
             self.session.data_manager.create_compound_order_model(order_df=order_df)
 
         logger.info(
-            f"Created starting material plate with {len(adjusted_df)} materials"
+            f"Created starting material plate with {len(materials_df)} materials"
         )
         return plate_obj
 
