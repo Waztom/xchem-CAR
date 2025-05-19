@@ -13,17 +13,23 @@ from ...models import ActionSession, OTBatchProtocol
 
 logger = logging.getLogger(__name__)
 
+
 class SessionOrchestrator:
     """
     Determines the appropriate session type based on action sessions,
     instantiates it, and manages its execution.
     """
-    
-    def __init__(self, reactionstep: int, otbatchprotocolobj: OTBatchProtocol, 
-                actionsessionqueryset: QuerySet[ActionSession], customSMcsvpath: str = None):
+
+    def __init__(
+        self,
+        reactionstep: int,
+        otbatchprotocolobj: OTBatchProtocol,
+        actionsessionqueryset: QuerySet[ActionSession],
+        customSMcsvpath: str = None,
+    ):
         """
         Initialize the orchestrator.
-        
+
         Parameters
         ----------
         reactionstep: int
@@ -39,22 +45,26 @@ class SessionOrchestrator:
         self.otbatchprotocolobj = otbatchprotocolobj
         self.actionsessionqueryset = actionsessionqueryset
         self.customSMcsvpath = customSMcsvpath
-        
+
         # Determine the session type
         self.actionsessiontype = self._determine_session_type()
-        
+
         # Initialize session object for appropriate type
         self.session = self._create_session()
-        
+
         # Reference to session's OT session object for compatibility with existing code
-        self.otsessionobj = self.session.otsessionobj if hasattr(self.session, 'otsessionobj') else None
-        
-        logger.info(f"SessionOrchestrator created for {self.actionsessiontype} session, step {reactionstep}")
-    
+        self.otsessionobj = (
+            self.session.otsessionobj if hasattr(self.session, "otsessionobj") else None
+        )
+
+        logger.info(
+            f"SessionOrchestrator created for {self.actionsessiontype} session, step {reactionstep}"
+        )
+
     def _determine_session_type(self) -> str:
         """
         Determine the appropriate session type based on action sessions.
-        
+
         Returns
         -------
         session_type: str
@@ -63,56 +73,60 @@ class SessionOrchestrator:
         if not self.actionsessionqueryset.exists():
             logger.error("No action sessions provided")
             raise ValueError("No action sessions provided")
-            
+
         # Get the session type from the action sessions
-        session_types = set(self.actionsessionqueryset.values_list('type', flat=True).distinct())
-        
+        session_types = set(
+            self.actionsessionqueryset.values_list("type", flat=True).distinct()
+        )
+
         if len(session_types) > 1:
-            logger.warning(f"Multiple session types found: {session_types}. Using the first one.")
-            
+            logger.warning(
+                f"Multiple session types found: {session_types}. Using the first one."
+            )
+
         session_type = list(session_types)[0]
         return session_type
-    
+
     def _create_session(self) -> BaseSession:
         """
         Create an appropriate session based on the action session type.
-        
+
         Returns
         -------
         session: BaseSession
             The created session instance
         """
-        if self.actionsessiontype == 'reaction':
+        if self.actionsessiontype == "reaction":
             session = ReactionSession(
                 reactionstep=self.reactionstep,
                 otbatchprotocolobj=self.otbatchprotocolobj,
                 actionsessionqueryset=self.actionsessionqueryset,
-                customSMcsvpath=self.customSMcsvpath
+                customSMcsvpath=self.customSMcsvpath,
             )
-        elif self.actionsessiontype == 'workup':
+        elif self.actionsessiontype == "workup":
             session = WorkupSession(
                 reactionstep=self.reactionstep,
                 otbatchprotocolobj=self.otbatchprotocolobj,
                 actionsessionqueryset=self.actionsessionqueryset,
-                customSMcsvpath=self.customSMcsvpath
+                customSMcsvpath=self.customSMcsvpath,
             )
-        elif self.actionsessiontype in ['analyse', 'analysis']:
+        elif self.actionsessiontype in ["analyse", "analysis"]:
             session = AnalysisSession(
                 reactionstep=self.reactionstep,
                 otbatchprotocolobj=self.otbatchprotocolobj,
                 actionsessionqueryset=self.actionsessionqueryset,
-                customSMcsvpath=self.customSMcsvpath
+                customSMcsvpath=self.customSMcsvpath,
             )
         else:
             logger.error(f"Unknown session type: {self.actionsessiontype}")
             raise ValueError(f"Unknown session type: {self.actionsessiontype}")
-            
+
         return session
-    
+
     def execute(self):
         """
         Execute the session protocol.
-        
+
         Returns
         -------
         success: bool
@@ -121,18 +135,22 @@ class SessionOrchestrator:
         try:
             logger.info(f"Executing {self.actionsessiontype} session via orchestrator")
             result = self.session.execute()
-            
+
             # Update otsessionobj reference after execution
-            self.otsessionobj = self.session.otsessionobj if hasattr(self.session, 'otsessionobj') else None
-            
+            self.otsessionobj = (
+                self.session.otsessionobj
+                if hasattr(self.session, "otsessionobj")
+                else None
+            )
+
             if self.otsessionobj is None:
                 logger.error("Session execution didn't create an OTSession object")
                 raise ValueError("Failed to create OTSession object during execution")
-                
+
             logger.info(f"Session execution complete with result: {result}")
             return result
         except Exception as e:
             logger.error(f"Error executing session: {str(e)}")
-            if hasattr(self.session, 'cleanup'):
+            if hasattr(self.session, "cleanup"):
                 self.session.cleanup()
             raise

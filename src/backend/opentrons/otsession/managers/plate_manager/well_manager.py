@@ -38,7 +38,6 @@ class WellManager:
         well_queryset = Well.objects.filter(plate_id=plate_obj.id)
         return well_queryset
 
-
     def get_plate_well_index_available(self, plate_obj: Plate) -> int:
         """
         Check if any wells are available on a plate.
@@ -189,7 +188,6 @@ class WellManager:
                 return True
             if (index_well_available % number_wells_in_column) != 0:
                 return False
-
 
     def get_new_column_and_well_index_available(self, plate_obj: Plate) -> tuple:
         """

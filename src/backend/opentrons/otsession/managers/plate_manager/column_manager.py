@@ -5,6 +5,7 @@ from .....models import Plate, Column
 
 logger = logging.getLogger(__name__)
 
+
 class ColumnManager:
     """
     Class to manage columns in a plate.
@@ -37,7 +38,7 @@ class ColumnManager:
         """
         column_queryset = Column.objects.filter(plate_id=plate_obj.id)
         return column_queryset
-    
+
     def get_plate_current_column_index(self, plate_obj: Plate) -> int:
         """
         Check if any columns available on a plate.
@@ -59,7 +60,7 @@ class ColumnManager:
             return index_column_available
         else:
             return False
-        
+
     def update_column_ot_session_ids(
         self, column_queryset: QuerySet[Column], plate_obj: Plate
     ):
@@ -93,7 +94,7 @@ class ColumnManager:
         """
         plate_obj.indexcolumnavailable = columnindexupdate
         plate_obj.save()
-    
+
     def create_column_model(
         self, plate_obj: Plate, columnindex: int, columntype: str, reactionclass: str
     ) -> Column:

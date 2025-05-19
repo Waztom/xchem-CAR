@@ -636,7 +636,11 @@ class OTWrite(object):
                 type="startingmaterial",
                 available=True,
             )
-            logger.debug("The available starting material SMILES are: {}".format(starterwellsmilesavailable))
+            logger.debug(
+                "The available starting material SMILES are: {}".format(
+                    starterwellsmilesavailable
+                )
+            )
             logger.debug("The session id is: {}".format(self.otsession_id))
             return None
         if wellinfo:

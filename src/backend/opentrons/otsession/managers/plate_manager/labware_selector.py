@@ -6,7 +6,8 @@ from ....labwareavailable import labware_plates
 
 logger = logging.getLogger(__name__)
 
-class LabwareSelector :
+
+class LabwareSelector:
     """Class to select labware based on the given criteria."""
 
     def __init__(self, session):
@@ -19,7 +20,6 @@ class LabwareSelector :
             The parent session object
         """
         self.session = session
-
 
     def get_plate_type(
         self,
@@ -62,8 +62,8 @@ class LabwareSelector :
             logger.warning(
                 f"No labware types found for {platetype} at {temperature}°C for type {platetype} and volumes {platetype}"
             )
-            return None 
-        
+            return None
+
         vial_compare_dict = {}
 
         for labware_plate in possible_labware_plate_types:
@@ -112,30 +112,36 @@ class LabwareSelector :
                 "novialsneeded": wellsneeded,
                 "tempdifference": temp_difference,
             }
-    
+
         logger.debug(f"Vial compare dict: {vial_compare_dict}")
-        
+
         # Add check for empty dictionary
         if not vial_compare_dict:
-            logger.warning(f"No suitable labware found for {platetype}-plate with volumes {volumes} at {temperature}°C")
+            logger.warning(
+                f"No suitable labware found for {platetype}-plate with volumes {volumes} at {temperature}°C"
+            )
             if platetype == "starting":
                 # For starting materials, use the largest available plate that can handle the temperature
                 fallback_plates = [
-                    p for p in labware_plates 
+                    p
+                    for p in labware_plates
                     if "starting" in labware_plates[p]["type"]
                     and labware_plates[p]["max_temp"] >= temperature
                 ]
                 if fallback_plates:
                     # Sort by volume capacity (descending)
                     fallback_plates.sort(
-                        key=lambda x: labware_plates[x]["volume_well"], 
-                        reverse=True
+                        key=lambda x: labware_plates[x]["volume_well"], reverse=True
                     )
-                    logger.info(f"Falling back to largest compatible plate: {fallback_plates[0]}")
+                    logger.info(
+                        f"Falling back to largest compatible plate: {fallback_plates[0]}"
+                    )
                     return fallback_plates[0]
                 else:
                     # Last resort fallback
-                    logger.warning("No compatible labware found, defaulting to standard 96-well plate")
+                    logger.warning(
+                        "No compatible labware found, defaulting to standard 96-well plate"
+                    )
                     return "plateone_96_wellplate_2500ul"
             else:
                 # For other plate types
@@ -197,7 +203,7 @@ class LabwareSelector :
         """
         max_well_volume = plate_obj.maxwellvolume
         return max_well_volume
-    
+
     def get_dead_volume(self, max_well_volume: float) -> float:
         """
         Calculates the dead volume (5%) of a well.
@@ -214,4 +220,3 @@ class LabwareSelector :
         """
         dead_volume = max_well_volume * 0.05
         return dead_volume
-

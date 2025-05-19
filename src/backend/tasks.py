@@ -59,12 +59,12 @@ from .utils import (
 )
 
 from .opentrons.otsession import SessionOrchestrator
-from .opentrons.otwriter import script_generator
+from .opentrons.otwriter import ScriptGenerator
 
 
 def delete_tmp_file(filepath):
     os.remove(filepath)
-x
+
 
 @shared_task
 def validateFileUpload(
@@ -1009,23 +1009,46 @@ def createMultipleOTSessions(
                 else f"session_{orchestrator.otsessionobj.id}"
             )
 
-            logger.info(f"Running OTWrite for session {group_index + 1}")
-            otwrite_result = OTWrite(
-                batchtag=session_batchtag,
-                otsessionobj=orchestrator.otsessionobj,
-                actionsession_ids=group_action_session_ids,
-            )
+            logger.info(f"Running ScriptGenerator for session {group_index + 1}")
+            try:
+                # Create ScriptGenerator instance and generate the script
+                script_generator = ScriptGenerator(
+                    batchtag=session_batchtag,
+                    otsessionobj=orchestrator.otsessionobj,
+                    actionsession_ids=group_action_session_ids,
+                )
 
-            # If we get here, everything worked - store session info
-            created_sessions.append(
-                {
-                    "session": orchestrator,
-                    "action_session_ids": group_action_session_ids,
-                    "otwrite_result": otwrite_result,
+                # Generate the script and get the filepath
+                filepath = script_generator.generate_script()
+
+                # Create a result object similar to what OTWrite would have returned
+                otwrite_result = {
+                    "success": True,
+                    "filepath": filepath,
+                    "session_id": orchestrator.otsessionobj.id,
                 }
-            )
 
-            logger.info(f"Successfully created and wrote session {group_index + 1}")
+                # If we get here, everything worked - store session info
+                created_sessions.append(
+                    {
+                        "session": orchestrator,
+                        "action_session_ids": group_action_session_ids,
+                        "otwrite_result": otwrite_result,
+                    }
+                )
+
+                logger.info(f"Successfully created and wrote session {group_index + 1}")
+
+            except Exception as e:
+                logger.error(
+                    f"Error in script generation for session {group_index + 1}: {str(e)}"
+                )
+                otwrite_result = {
+                    "success": False,
+                    "error": str(e),
+                    "session_id": orchestrator.otsessionobj.id,
+                }
+                raise
 
         except ValueError as ve:
             # Handle deck slot issues by splitting the group

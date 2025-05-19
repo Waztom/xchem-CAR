@@ -10,8 +10,8 @@ from .workup_handler import WorkupSessionHandler
 from .analysis_handler import AnalysisSessionHandler
 
 __all__ = [
-    'SessionHandler',
-    'ReactionSessionHandler',
-    'WorkupSessionHandler',
-    'AnalysisSessionHandler',
+    "SessionHandler",
+    "ReactionSessionHandler",
+    "WorkupSessionHandler",
+    "AnalysisSessionHandler",
 ]

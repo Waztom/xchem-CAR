@@ -7,4 +7,3 @@ chemical reactions on OpenTrons hardware.
 
 # Django app configuration
 default_app_config = "backend.apps.BackendConfig"
-

@@ -2,16 +2,16 @@ import logging
 from django.db.models import QuerySet, Q
 
 from .....models import (
-    ActionSession, 
-    AddAction, 
-    ExtractAction, 
+    ActionSession,
+    AddAction,
+    ExtractAction,
     Plate,
 )
 
 logger = logging.getLogger(__name__)
 
+
 class PlateQueryService:
-   
     def __init__(self, session):
         """
         Initialize with a reference to the parent session.
@@ -50,7 +50,6 @@ class PlateQueryService:
         )
 
         return plates
-
 
     def get_action_session_by_plate_type(
         self, platetype: str
@@ -114,7 +113,6 @@ class PlateQueryService:
 
         to_plate_types = set(list(to_add_plates) + list(to_extract_plates))
         return list(to_plate_types)
-
 
     def get_all_ot_batch_protocol_plates(self, otbatchprotocol_id):
         """

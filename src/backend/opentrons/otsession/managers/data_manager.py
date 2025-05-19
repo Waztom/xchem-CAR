@@ -189,7 +189,7 @@ class DataManager:
             round(addactionobj.volume) for addactionobj in addactionqueryset
         ]
         return roundedvolumes
-    
+
     def get_rounded_extract_action_volumes(
         self, extractactionqueryset: QuerySet[ExtractAction]
     ) -> list:
@@ -230,7 +230,7 @@ class DataManager:
         reactionvolumes = []
         for reactionobj in reactionqueryset:
             addactionqueryset = self.get_add_action_query_set(
-                reaction_ids=[reactionobj.id], 
+                reaction_ids=[reactionobj.id],
                 actionsession_ids=self.session.actionsession_ids,
             )
             roundedvolumes = self.get_rounded_add_action_volumes(
@@ -239,7 +239,7 @@ class DataManager:
             sumvolume = self.get_sum_value(values=roundedvolumes)
             reactionvolumes.append(sumvolume)
         return reactionvolumes
-    
+
     def get_add_actions_dataframe(
         self, addactionqueryset: QuerySet[AddAction]
     ) -> pd.DataFrame:
@@ -262,7 +262,7 @@ class DataManager:
 
             add_actions_df = pd.DataFrame(list(addactionqueryset.values()))
             add_actions_df["uniquesolution"] = add_actions_df.apply(
-            lambda row: self.session.material_manager.combine_strings(row), axis=1
+                lambda row: self.session.material_manager.combine_strings(row), axis=1
             )
             return add_actions_df
 
@@ -441,12 +441,11 @@ class DataManager:
             # Convert the dataframe to CSV format
             csv_data = order_df.to_csv(encoding="utf-8", index=False)
 
-            # Generate a filename based on session type and IDs
-            filename = (
-                f"{self.session.actionsessiontype}-session-orderplate-for-batch-"
-                f"{self.session.batchobj.batchtag}-reactionstep-{self.session.reactionstep}-"
-                f"sessionid-{str(self.session.otsessionobj.id)}.csv"
-            )
+            # Determine plate type based on is_custom_starter_plate flag
+            platetype = "custom-sm" if is_custom_starter_plate else "sm"
+
+            # Generate a shorter filename with the essential information
+            filename = f"{self.session.actionsessiontype}-{platetype}-b{self.session.batchobj.batchtag}-r{self.session.reactionstep}-s{self.session.otsessionobj.id}.csv"
 
             # Save the CSV file to storage
             order_csv = default_storage.save(

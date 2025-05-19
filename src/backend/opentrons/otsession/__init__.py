@@ -31,7 +31,7 @@ __all__ = [
     "DeckManager",
     "PlateFactory",
     "WellManager",
-    "ColumnManager", 
+    "ColumnManager",
     "LabwareSelector",
     "PlateQueryService",
     "PipetteManager",

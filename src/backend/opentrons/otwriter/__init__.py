@@ -19,16 +19,16 @@ from .session_handlers import (
 )
 
 __all__ = [
-    'ScriptGenerator',
-    'CommandGenerator',
-    'FileManager',
-    'QueryService',
-    'VolumeManager',
-    'WellFinder',
-    'SessionHandler',
-    'ReactionSessionHandler',
-    'WorkupSessionHandler',
-    'AnalysisSessionHandler',
+    "ScriptGenerator",
+    "CommandGenerator",
+    "FileManager",
+    "QueryService",
+    "VolumeManager",
+    "WellFinder",
+    "SessionHandler",
+    "ReactionSessionHandler",
+    "WorkupSessionHandler",
+    "AnalysisSessionHandler",
 ]
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"

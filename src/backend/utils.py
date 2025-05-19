@@ -1816,22 +1816,22 @@ def stripSalts(smiles: str, return_details: bool = False):
 def sanitize_for_python_var(name):
     """
     Convert a string to a valid Python variable name.
-    
+
     Parameters
     ----------
     name: str
         The string to be converted to a valid Python variable name
-        
+
     Returns
     -------
     str
         A string that conforms to Python variable naming rules
     """
     # Replace any non-alphanumeric characters (except underscore) with underscore
-    name = re.sub(r'[^\w]', '_', name)
-    
+    name = re.sub(r"[^\w]", "_", name)
+
     # Ensure it starts with a letter or underscore
-    if name and not (name[0].isalpha() or name[0] == '_'):
-        name = 'plate_' + name
-        
+    if name and not (name[0].isalpha() or name[0] == "_"):
+        name = "plate_" + name
+
     return name

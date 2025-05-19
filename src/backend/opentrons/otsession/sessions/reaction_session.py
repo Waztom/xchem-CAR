@@ -40,9 +40,7 @@ class ReactionSession(BaseSession):
             reaction_ids=self.reaction_ids, actionsession_ids=self.actionsession_ids
         )
 
-        logger.info(
-            f"Add action queryset: {self.addactionqueryset}"
-        )
+        logger.info(f"Add action queryset: {self.addactionqueryset}")
 
         # Create dataframe from add actions
         self.addactionsdf = self.data_manager.get_add_actions_dataframe(
@@ -97,7 +95,7 @@ class ReactionSession(BaseSession):
             # Create reaction plate for non-continuation reactions
             self.plate_factory.create_plates_by_temperature(
                 grouped_reaction_temperature_querysets=self.grouped_reaction_temperature_querysets,
-                platetype="reaction"
+                platetype="reaction",
             )
 
         # Get input plates needed based on SMILES
@@ -124,9 +122,7 @@ class ReactionSession(BaseSession):
 
         # For steps after the first, create solvent plate for previous products
         if self.reactionstep > 1:
-            logger.info(
-                f"Creating solvent plate for step {self.reactionstep}"
-            )
+            logger.info(f"Creating solvent plate for step {self.reactionstep}")
             # Get solvent materials for the current step
             self.solventmaterialsdf = (
                 self.material_manager.get_add_actions_material_dataframe(

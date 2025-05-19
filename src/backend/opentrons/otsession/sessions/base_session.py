@@ -126,7 +126,7 @@ class BaseSession(ABC):
             The type of action session (reaction, workup, analyse)
         """
         return self.actionsessiontype
-    
+
     def setup_common_resources(self):
         """
         Initialize managers and set up resources needed by all session types.
@@ -138,14 +138,14 @@ class BaseSession(ABC):
             # Initialize managers - order matters here due to dependencies
             self.data_manager = DataManager(self)
             self.deck_manager = DeckManager(self)
-            
+
             # Replace plate_manager with specialized components
             self.well_manager = WellManager(self)
             self.column_manager = ColumnManager(self)
             self.labware_selector = LabwareSelector(self)
             self.plate_query_service = PlateQueryService(self)
             self.plate_factory = PlateFactory(self)
-            
+
             self.material_manager = MaterialManager(self)
             self.pipette_manager = PipetteManager(self)
 
@@ -159,7 +159,7 @@ class BaseSession(ABC):
 
             self.is_initialized = True
             logger.info(f"Common resources set up for {self.actionsessiontype} session")
-            
+
         except Exception as e:
             logger.error(f"Error setting up common resources: {str(e)}")
             self.cleanup()
