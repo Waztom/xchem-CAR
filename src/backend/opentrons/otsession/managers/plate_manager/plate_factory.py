@@ -561,8 +561,8 @@ class PlateFactory:
 
     def create_reaction_starting_plate(self):
         """
-        Creates a starting material plate for reaction materials, but only for materials
-        that aren't already available in custom starting material plates.
+        Creates a starting material plate for reaction materials, respecting the maximum
+        fill percentage defined in labware configuration.
 
         Returns
         -------
@@ -579,7 +579,7 @@ class PlateFactory:
             logger.info("No materials needed for starting plate")
             return None
 
-        # Get total volumes needed for plate sizing
+        # Get total volumes for plate sizing
         volumes = materials_df["volume"].tolist()
 
         # Determine best labware type
@@ -598,147 +598,89 @@ class PlateFactory:
             logger.warning("Could not create starting material plate")
             return None
 
+        # Get the maximum well volume with headspace consideration
+        effective_max_volume = self.session.well_manager.get_max_well_volume(plate_obj)
+        raw_max_volume = plate_obj.maxwellvolume
+
+        # Log the effective max volume with max fill percentage applied
+        logger.info(
+            f"Using effective max volume of {effective_max_volume}µL for plate with raw max volume {raw_max_volume}µL"
+        )
+
         # Calculate dead volume for this plate type
-        max_well_volume = self.session.labware_selector.get_max_well_volume(plate_obj)
-        dead_volume = self.session.labware_selector.get_dead_volume(max_well_volume)
-        logger.debug(
-            f"Using dead volume of {dead_volume}µL for plate with max well volume {max_well_volume}µL"
+        dead_volume = self.session.labware_selector.get_dead_volume(raw_max_volume)
+        logger.debug(f"Using dead volume of {dead_volume}µL")
+
+        # Sort materials to optimize well usage (by similar properties)
+        sorted_materials_df = materials_df.sort_values(
+            by=["smiles", "concentration", "solvent"]
         )
 
         # Tracking for compound order
         order_dicts_list = []
 
-        # Add each material to the plate
-        for _, row in materials_df.iterrows():
+        # Process each material - ALWAYS use a new well for each material
+        for _, row in sorted_materials_df.iterrows():
             # Add 5% extra volume as error margin
             extra_error_volume = row["volume"] * 0.05
-            total_volume = row["volume"] + extra_error_volume + dead_volume
+            total_volume_needed = row["volume"] + extra_error_volume + dead_volume
 
-            # Handle case where volume exceeds max well volume
-            if total_volume > max_well_volume:
-                # Calculate how many wells are needed
-                wells_needed_ratio = total_volume / (max_well_volume - dead_volume)
+            # Get next available well index
+            well_idx = self.session.well_manager.get_plate_well_index_available(
+                plate_obj
+            )
 
-                # Split into whole wells and fractional well
-                frac, whole = math.modf(wells_needed_ratio)
-
-                # Create a list of volumes to add
-                volumes_to_add = [max_well_volume for _ in range(int(whole))]
-
-                # Add the fractional well if needed
-                if frac > 0:
-                    volumes_to_add.append(
-                        frac * (max_well_volume - dead_volume) + dead_volume
+            # If no well is available, create a new plate
+            if well_idx is False:
+                plate_obj = self.create_plate_model(
+                    platetype="startingmaterial",
+                    platename="reaction-starting-materials",
+                    labwaretype=labware_type,
+                )
+                if not plate_obj:
+                    logger.warning(
+                        "Could not create additional starting material plate"
                     )
+                    break
 
-                logger.info(
-                    f"Material {row['smiles']} requires multiple wells. "
-                    f"Total volume with margin: {total_volume}µL, "
-                    f"Splitting across {len(volumes_to_add)} wells"
+                well_idx = self.session.well_manager.get_plate_well_index_available(
+                    plate_obj
+                )
+                effective_max_volume = self.session.well_manager.get_max_well_volume(
+                    plate_obj
                 )
 
-                # Create a well for each volume portion
-                for volume_to_add in volumes_to_add:
-                    # Check for available well
-                    index_well_available = (
-                        self.session.well_manager.get_plate_well_index_available(
-                            plate_obj=plate_obj
-                        )
-                    )
+            # Ensure we don't exceed maximum volume limit
+            if total_volume_needed > effective_max_volume:
+                logger.warning(
+                    f"Material volume {total_volume_needed}µL exceeds effective max volume {effective_max_volume}µL; "
+                    f"Material will be split across multiple wells"
+                )
 
-                    if index_well_available is False:
-                        # Create a new plate if current one is full
-                        plate_obj = self.create_plate_model(
-                            platetype="startingmaterial",
-                            platename="reaction-starting-materials",
-                            labwaretype=labware_type,
-                        )
-                        index_well_available = (
-                            self.session.well_manager.get_plate_well_index_available(
-                                plate_obj=plate_obj
-                            )
-                        )
+                # Split into multiple wells if needed
+                remaining_volume = total_volume_needed
+                while remaining_volume > 0:
+                    volume_this_well = min(remaining_volume, effective_max_volume)
 
                     # Create well
                     well_obj = self.session.well_manager.create_well_model(
                         plate_obj=plate_obj,
                         welltype="startingmaterial",
-                        wellindex=index_well_available,
-                        volume=volume_to_add,
+                        wellindex=well_idx,
+                        volume=volume_this_well,
                         smiles=row["smiles"],
                         concentration=row["concentration"],
                         solvent=row["solvent"],
                     )
 
-                    # Update well index
-                    self.session.well_manager.update_plate_well_index(
-                        plate_obj=plate_obj, wellindexupdate=index_well_available + 1
-                    )
+                    if not well_obj:
+                        logger.warning(
+                            f"Could not create well for material {row['smiles']}"
+                        )
+                        break
 
                     # Add to order list
-                    order_dicts_list.append(
-                        {
-                            "SMILES": row["smiles"],
-                            "plate-name": plate_obj.name,
-                            "labware": plate_obj.labware,
-                            "well-index": well_obj.index,
-                            "well-name": well_obj.name,
-                            "concentration": row["concentration"],
-                            "solvent": row["solvent"],
-                            "molecularweight": row.get("molecularweight"),
-                            "amount-uL": round(volume_to_add, 2),
-                        }
-                    )
-            else:
-                # Standard case - fits in one well
-                # Check for available well
-                index_well_available = (
-                    self.session.well_manager.get_plate_well_index_available(
-                        plate_obj=plate_obj
-                    )
-                )
-
-                if index_well_available is False:
-                    logger.warning(
-                        f"No wells available on starting plate {plate_obj.name}"
-                    )
-                    # Create a new plate
-                    plate_obj = self.create_plate_model(
-                        platetype="startingmaterial",
-                        platename="reaction-starting-materials",
-                        labwaretype=labware_type,
-                    )
-                    index_well_available = (
-                        self.session.well_manager.get_plate_well_index_available(
-                            plate_obj=plate_obj
-                        )
-                    )
-
-                # Create well for this material with the adjusted volume including dead volume
-                well_obj = self.session.well_manager.create_well_model(
-                    plate_obj=plate_obj,
-                    welltype="startingmaterial",
-                    wellindex=index_well_available,
-                    volume=total_volume,
-                    smiles=row["smiles"],
-                    concentration=row["concentration"],
-                    solvent=row["solvent"],
-                )
-
-                # Log the volume adjustment for transparency
-                logger.info(
-                    f"Added material {row['smiles']} with {total_volume}µL "
-                    f"(required {row['volume']}µL + error margin + {dead_volume}µL dead volume)"
-                )
-
-                # Update well index
-                self.session.well_manager.update_plate_well_index(
-                    plate_obj=plate_obj, wellindexupdate=index_well_available + 1
-                )
-
-                # Add to order list
-                order_dicts_list.append(
-                    {
+                    order_dict = {
                         "SMILES": row["smiles"],
                         "plate-name": plate_obj.name,
                         "labware": plate_obj.labware,
@@ -747,11 +689,79 @@ class PlateFactory:
                         "concentration": row["concentration"],
                         "solvent": row["solvent"],
                         "molecularweight": row.get("molecularweight"),
-                        "amount-uL": round(total_volume, 2),
+                        "amount-uL": round(volume_this_well, 2),
                     }
+                    order_dicts_list.append(order_dict)
+
+                    # Update remaining volume
+                    remaining_volume -= volume_this_well
+
+                    # CRITICAL FIX: Always update the well index after creating a well,
+                    # regardless of whether there's more volume to process
+                    self.session.well_manager.update_plate_well_index(
+                        plate_obj=plate_obj, wellindexupdate=well_idx + 1
+                    )
+
+                    # Only get a new well index if there's more volume to process
+                    if remaining_volume > 0:
+                        well_idx = (
+                            self.session.well_manager.get_plate_well_index_available(
+                                plate_obj
+                            )
+                        )
+                        if well_idx is False:
+                            plate_obj = self.create_plate_model(
+                                platetype="startingmaterial",
+                                platename="reaction-starting-materials",
+                                labwaretype=labware_type,
+                            )
+                            if not plate_obj:
+                                logger.warning(
+                                    "Could not create additional starting material plate"
+                                )
+                                break
+
+                            well_idx = self.session.well_manager.get_plate_well_index_available(
+                                plate_obj
+                            )
+            else:
+                # Create a single well for this material
+                well_obj = self.session.well_manager.create_well_model(
+                    plate_obj=plate_obj,
+                    welltype="startingmaterial",
+                    wellindex=well_idx,
+                    volume=total_volume_needed,
+                    smiles=row["smiles"],
+                    concentration=row["concentration"],
+                    solvent=row["solvent"],
                 )
 
-        # Create compound order
+                if not well_obj:
+                    logger.warning(
+                        f"Could not create well for material {row['smiles']}"
+                    )
+                    continue
+
+                # Add to order list
+                order_dict = {
+                    "SMILES": row["smiles"],
+                    "plate-name": plate_obj.name,
+                    "labware": plate_obj.labware,
+                    "well-index": well_obj.index,
+                    "well-name": well_obj.name,
+                    "concentration": row["concentration"],
+                    "solvent": row["solvent"],
+                    "molecularweight": row.get("molecularweight"),
+                    "amount-uL": round(total_volume_needed, 2),
+                }
+                order_dicts_list.append(order_dict)
+
+            # Update plate's next available well index after creating this well
+            self.session.well_manager.update_plate_well_index(
+                plate_obj=plate_obj, wellindexupdate=well_idx + 1
+            )
+
+        # Create compound order from well assignments
         if order_dicts_list:
             order_df = pd.DataFrame(order_dicts_list)
 
@@ -781,10 +791,12 @@ class PlateFactory:
                 )
 
             # Create the compound order
-            self.session.data_manager.create_compound_order_model(order_df=order_df)
+            self.session.data_manager.create_compound_order_model(
+                order_df=order_df, is_custom_starter_plate=False
+            )
 
         logger.info(
-            f"Created starting material plate with {len(materials_df)} materials"
+            f"Created starting material plate with {len(order_dicts_list)} material wells"
         )
         return plate_obj
 

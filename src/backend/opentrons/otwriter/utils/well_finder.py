@@ -317,7 +317,7 @@ class WellFinder:
             logger.error(f"Error finding starting material wells: {e}")
 
         if not well_info:
-            logger.warning(f"No starting plate well info found for SMILES: {smiles}...")
+            logger.warning(f"No starting plate well info found for SMILES: {smiles}")
 
             starter_well_smiles_available = (
                 Well.objects.values_list("smiles", flat=True)

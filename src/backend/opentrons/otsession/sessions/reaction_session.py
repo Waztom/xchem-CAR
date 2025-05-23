@@ -5,11 +5,6 @@ Implements reaction session functionality for OpenTrons protocols.
 import logging
 
 from .base_session import BaseSession
-from ..managers.plate_manager.plate_factory import PlateFactory
-from ..managers.plate_manager.plate_query_service import PlateQueryService
-from ..managers.plate_manager.well_manager import WellManager
-from ..managers.plate_manager.column_manager import ColumnManager
-from ..managers.plate_manager.labware_selector import LabwareSelector
 
 logger = logging.getLogger(__name__)
 
