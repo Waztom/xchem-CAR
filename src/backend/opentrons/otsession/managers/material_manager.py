@@ -210,11 +210,6 @@ class MaterialManager:
             if addactionsdf.empty:
                 return pd.DataFrame()
 
-            # Begin processing the data
-            addactionsdf["uniquesolution"] = addactionsdf.apply(
-                self.combine_strings, axis=1
-            )
-
             # Select only add actions that are not products from previous reactions
             if product_exists:
                 condition = addactionsdf.apply(
@@ -231,10 +226,15 @@ class MaterialManager:
             if filtered_df.empty:
                 return pd.DataFrame()
 
+            # Begin processing the data
+            addactionsdf["uniquesolution"] = addactionsdf.apply(
+                self.combine_strings, axis=1
+            )
+
             # Group by the unique solution identifier
             materials_df = filtered_df.groupby(["uniquesolution"]).agg(
                 {
-                    "reaction_id_id": "first",
+                    # "reaction_id_id": "first",
                     "smiles": "first",
                     "volume": "sum",
                     "solvent": "first",

@@ -213,3 +213,38 @@ class WellManager:
             return (index_column_available, new_well_index)
         else:
             return False
+
+    def get_max_well_volume(self, plate_obj):
+        """
+        Get the maximum well volume for a plate, adjusted for necessary headspace.
+
+        Parameters
+        ----------
+        plate_obj : Plate
+            The plate object to get the maximum well volume for
+
+        Returns
+        -------
+        float
+            The effective maximum well volume with headspace consideration
+        """
+        # Get the raw maximum volume
+        max_volume = plate_obj.maxwellvolume
+
+        # Get labware type
+        labware_type = plate_obj.labware
+
+        # Get max fill percentage from labware definition (default to 80% if not specified)
+        from backend.opentrons.labwareavailable import labware_plates
+
+        max_fill_percentage = labware_plates.get(labware_type, {}).get(
+            "max_fill_percentage", 80
+        )
+
+        # Apply fill percentage limit
+        effective_max_volume = max_volume * (max_fill_percentage / 100.0)
+
+        logger.info(
+            f"Using effective well volume of {effective_max_volume}µL ({max_fill_percentage}% of {max_volume}µL)"
+        )
+        return effective_max_volume
