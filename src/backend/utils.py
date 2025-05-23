@@ -832,6 +832,57 @@ def getReaction(reaction_id: int) -> Reaction:
     return reactionobj
 
 
+def getReactionTemperature(reaction_id: int) -> float:
+    """Get reaction temperature
+
+    Parameters
+    ----------
+    reaction_id: int
+        The reaction id to search for a reaction
+
+    Returns
+    -------
+    reactionobj: Reaction
+        The reaction Django model object
+    """
+    reactionobj = Reaction.objects.get(id=reaction_id)
+    return reactionobj.temperature
+
+
+def getReactionClass(reaction_id: int) -> str:
+    """Get reaction class
+
+    Parameters
+    ----------
+    reaction_id: int
+        The reaction id to search for a reaction
+
+    Returns
+    -------
+    reactionobj: Reaction
+        The reaction Django model object
+    """
+    reactionobj = Reaction.objects.get(id=reaction_id)
+    return reactionobj.reactionclass
+
+
+def getReactionRecipe(reaction_id: int) -> str:
+    """Get reaction recipe
+
+    Parameters
+    ----------
+    reaction_id: int
+        The reaction id to search for a reaction
+
+    Returns
+    -------
+    reactionobj: Reaction
+        The reaction Django model object
+    """
+    reactionobj = Reaction.objects.get(id=reaction_id)
+    return reactionobj.recipe
+
+
 def getReactionQuerySet(
     reaction_ids: list = None, method_id: int = None
 ) -> QuerySet[Reaction]:
@@ -1760,3 +1811,27 @@ def stripSalts(smiles: str, return_details: bool = False):
     except Exception as e:
         logger.error(f"Error stripping salts from {smiles}: {str(e)}")
         return (smiles, False, []) if return_details else smiles
+
+
+def sanitize_for_python_var(name):
+    """
+    Convert a string to a valid Python variable name.
+
+    Parameters
+    ----------
+    name: str
+        The string to be converted to a valid Python variable name
+
+    Returns
+    -------
+    str
+        A string that conforms to Python variable naming rules
+    """
+    # Replace any non-alphanumeric characters (except underscore) with underscore
+    name = re.sub(r"[^\w]", "_", name)
+
+    # Ensure it starts with a letter or underscore
+    if name and not (name[0].isalpha() or name[0] == "_"):
+        name = "plate_" + name
+
+    return name
