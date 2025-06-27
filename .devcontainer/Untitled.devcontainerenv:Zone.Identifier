@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://github.com/Waztom/xchem-CAR/blob/master/.devcontainer/.devcontainerenv
+HostUrl=https://raw.githubusercontent.com/Waztom/xchem-CAR/refs/heads/master/.devcontainer/.devcontainerenv
