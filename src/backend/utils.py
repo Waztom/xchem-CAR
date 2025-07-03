@@ -5,6 +5,9 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import Draw
 from rdkit.Chem import rdMolDescriptors
+from rdkit.Chem import DataStructs
+from rdkit.Chem import MolStandardize
+from rdkit.Chem import inchi
 
 import pubchempy as pcp
 import itertools
@@ -1835,3 +1838,79 @@ def sanitize_for_python_var(name):
         name = "plate_" + name
 
     return name
+
+
+def are_equivalent_structures(smiles1, smiles2, match_tautomers=True, similarity_threshold=0.9):
+    """
+    Determines if two chemical structures are equivalent using multiple approaches.
+    Handles tautomers and different structural representations of the same compound.
+
+    Parameters
+    ----------
+    smiles1 : str
+        First SMILES string
+    smiles2 : str
+        Second SMILES string
+    match_tautomers : bool
+        Whether to attempt tautomer matching (more computationally expensive)
+    similarity_threshold : float
+        Threshold for fingerprint similarity (0-1)
+
+    Returns
+    -------
+    bool
+        True if structures are considered equivalent, False otherwise
+    """
+    try:
+        # Handle empty or None inputs
+        if not smiles1 or not smiles2:
+            return False
+            
+        # Method 1: Direct canonicalized SMILES comparison after stripping salts
+        clean1 = stripSalts(canonSmiles(smiles1))
+        clean2 = stripSalts(canonSmiles(smiles2))
+        
+        if clean1 == clean2:
+            logger.debug(f"Structures matched by direct SMILES comparison")
+            return True
+        
+        mol1 = Chem.MolFromSmiles(clean1)
+        mol2 = Chem.MolFromSmiles(clean2)
+        
+        if not mol1 or not mol2:
+            logger.warning(f"Could not parse molecules from SMILES")
+            return False
+            
+        # Method 3: Tautomer standardization (if enabled)
+        if match_tautomers:
+            try:
+                enumerator = MolStandardize.tautomerEnumerator.TautomerEnumerator()
+                
+                # Get canonical tautomers
+                canon_taut1 = enumerator.Canonicalize(mol1)
+                canon_taut2 = enumerator.Canonicalize(mol2)
+                
+                if canon_taut1 and canon_taut2:
+                    smiles_taut1 = Chem.MolToSmiles(canon_taut1)
+                    smiles_taut2 = Chem.MolToSmiles(canon_taut2)
+                    
+                    if smiles_taut1 == smiles_taut2:
+                        logger.debug(f"Structures matched by tautomer canonicalization")
+                        return True
+                        
+                    # Try full enumeration as a last resort
+                    tautomers1 = {Chem.MolToSmiles(x) for x in enumerator.Enumerate(mol1)}
+                    tautomers2 = {Chem.MolToSmiles(x) for x in enumerator.Enumerate(mol2)}
+                    
+                    if tautomers1.intersection(tautomers2):
+                        logger.debug(f"Structures matched by tautomer enumeration")
+                        return True
+            except Exception as e:
+                logger.debug(f"Tautomer comparison failed: {str(e)}")
+        
+        # If we get here, no match was found
+        return False
+                
+    except Exception as e:
+        logger.error(f"Error comparing structures: {str(e)}")
+        return False  # Better to return False than None on error

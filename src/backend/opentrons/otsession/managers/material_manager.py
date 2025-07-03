@@ -3,6 +3,7 @@ Manages material properties and preparation for OpenTrons sessions.
 """
 
 import logging
+import traceback
 import math
 import pandas as pd
 from django.core.files.storage import default_storage
@@ -15,6 +16,7 @@ from ....utils import (
     canonSmiles,
     stripSalts,
     checkPreviousReactionProducts,
+    are_equivalent_structures,
 )
 
 logger = logging.getLogger(__name__)
@@ -99,15 +101,14 @@ class SaltMatchingService:
             containing_plate = None
             total_available_volume = 0
             actual_smiles = None  # Track the actual SMILES found
-
+            
             # Process the potential matches
             for well in potential_matches:
                 # Canonicalize and strip salts from the well's SMILES
                 well_canonical = canonSmiles(well.smiles)
-                well_cleaned = stripSalts(well_canonical)
 
-                # Compare the cleaned, salt-free structures
-                if well_cleaned == cleaned_smiles:
+               # Use our comprehensive structure comparison
+                if are_equivalent_structures(cleaned_smiles, well_canonical):
                     matching_wells.append(well)
                     if containing_plate is None and hasattr(well, "plate_id"):
                         containing_plate = well.plate_id
@@ -120,7 +121,6 @@ class SaltMatchingService:
                         self.logger.info(
                             f"Using SMILES from matched well: {actual_smiles}"
                         )
-
             # Calculate remaining volume needed
             remaining_volume_needed = max(0, volume - total_available_volume)
 
@@ -151,8 +151,6 @@ class SaltMatchingService:
                 return (False, [], None, volume, None)
 
         except Exception as e:
-            import traceback
-
             self.logger.error(f"Error in salt matching: {str(e)}")
             self.logger.error(traceback.format_exc())
             return (False, [], None, volume, None)

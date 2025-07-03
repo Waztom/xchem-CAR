@@ -42446,7 +42446,7 @@ encoded_recipes = {
             "RdRp-p001": {
                 "yield": 85,
                 "reactionSMARTS": [
-                    "[#6:1](=[#8:2])-[#8;H1].[#7;H3,H2,H1:3]>>[#6:1](=[#8:2])-[#7:3]"
+                    "[#6:1](=[#8:2])-[#8].[#7;H2:3]>>[#6:1](=[#8:2])-[#7:3]"
                 ],
                 "references": None,
                 "actionsessions": [
@@ -42465,7 +42465,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#6:1](=[#8:2])-[#8;H1]",
+                                            "SMARTS": "[#6:1](=[#8:2])-[#8]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.0, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -42520,7 +42520,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#6:1](=[#8:2])-[#8;H1]",
+                                            "SMARTS": "[#6:1](=[#8:2])-[#8]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.0, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -42581,7 +42581,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#7;H3,H2,H1]",
+                                            "SMARTS": "[#7;H2:3]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.0, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -42613,7 +42613,7 @@ encoded_recipes = {
             "RdRp-p002": {
                 "yield": 85,
                 "reactionSMARTS": [
-                    "[#6:1](=[#8:2])-[#8;H1].[#7;H3,H2,H1:3]>>[#6:1](=[#8:2])-[#7:3]"
+                    "[#6:1](=[#8:2])-[#8].[#7;H2:3]>>[#6:1](=[#8:2])-[#7:3]"
                 ],
                 "references": None,
                 "actionsessions": [
@@ -42632,7 +42632,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#6:1](=[#8:2])-[#8;H1]",
+                                            "SMARTS": "[#6:1](=[#8:2])-[#8]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.0, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -42687,7 +42687,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#6:1](=[#8:2])-[#8;H1]",
+                                            "SMARTS": "[#6:1](=[#8:2])-[#8]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.0, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -42748,7 +42748,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#7;H3,H2,H1]",
+                                            "SMARTS": "[#7;H2:3]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.0, "unit": "moleq"},
                                             "solvent": "DMF",
