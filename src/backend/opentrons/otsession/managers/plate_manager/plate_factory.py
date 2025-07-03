@@ -461,7 +461,8 @@ class PlateFactory:
 
     def create_starting_material_plates_from_csv(self, csv_path: str):
         """
-        Creates starting material plates from a CSV file.
+        Creates starting material plates from a CSV file, handling multiple plate IDs
+        and different labware types. Supports both numeric indices and well names.
 
         Parameters
         ----------
@@ -470,8 +471,8 @@ class PlateFactory:
 
         Returns
         -------
-        plate_obj: Plate
-            The created starting material plate
+        plate_objects: dict
+            Dictionary mapping plate IDs to created plate objects
         """
         try:
             # Read the CSV file
@@ -479,86 +480,101 @@ class PlateFactory:
 
             if materials_df.empty:
                 logger.warning("CSV file is empty")
-                return None
+                return {}
 
             # Make sure required columns exist
             required_columns = [
-                "plate-ID",
-                "labware-type",
-                "well-index",
-                "SMILES",
+                "plate-ID", 
+                "labware-type", 
+                "well-index", 
+                "SMILES", 
                 "amount-uL",
             ]
-            missing_columns = [
-                col for col in required_columns if col not in materials_df.columns
-            ]
+            missing_columns = [col for col in required_columns if col not in materials_df.columns]
 
             if missing_columns:
-                logger.error(
-                    f"CSV is missing required columns: {', '.join(missing_columns)}"
-                )
-                return None
-
-            # Get volumes for plate sizing
-            volumes = materials_df["amount-uL"].tolist()
-
-            # Determine best labware type
-            labware_type = self.session.labware_selector.get_plate_type(
-                platetype="startingmaterial", volumes=volumes, temperature=25
-            )
-
-            # Create the plate
-            plate_obj = self.create_plate_model(
-                platetype="startingmaterial",
-                platename="custom-starting-materials",
-                labwaretype=labware_type,
-            )
-
-            if not plate_obj:
-                logger.warning("Could not create custom starting material plate")
-                return None
-
-            # Add each material to the plate
-            for _, row in materials_df.iterrows():
-                # Check for available well
-                index_well_available = (
-                    self.session.well_manager.get_plate_well_index_available(
-                        plate_obj=plate_obj
-                    )
-                )
-                if index_well_available is False:
+                logger.error(f"CSV is missing required columns: {', '.join(missing_columns)}")
+                return {}
+                
+            # Group materials by plate ID
+            plate_groups = materials_df.groupby("plate-ID")
+            
+            # Store created plates by ID
+            created_plates = {}
+            
+            # Process each plate group
+            for plate_id, plate_df in plate_groups:
+                # Get labware type for this plate group
+                labware_type = plate_df["labware-type"].iloc[0]
+                
+                # Check for consistent labware type within the plate
+                if not plate_df["labware-type"].eq(labware_type).all():
                     logger.warning(
-                        f"No wells available on custom starting plate {plate_obj.name}"
+                        f"Inconsistent labware types for plate {plate_id}. "
+                        f"Using '{labware_type}' from first row."
                     )
-                    break
-
-                # Create well for this material
-                well_obj = self.session.well_manager.create_well_model(
-                    plate_obj=plate_obj,
-                    welltype="startingmaterial",
-                    wellindex=index_well_available,
-                    volume=row["amount-uL"],
-                    smiles=row["SMILES"],
-                    concentration=row["concentration"],
-                    solvent=row["solvent"],
+                    
+                # Create the plate
+                plate_obj = self.create_plate_model(
+                    platetype="startingmaterial",
+                    platename=f"custom-starting-materials-{plate_id}",
+                    labwaretype=labware_type,
                 )
-
-                # Update well index
+                
+                if not plate_obj:
+                    logger.warning(f"Could not create custom starting plate for ID {plate_id}")
+                    continue
+                    
+                # Store the created plate
+                created_plates[plate_id] = plate_obj
+                
+                # Track highest well index for this plate
+                highest_well_idx = 0
+                
+                # Create wells for this plate group
+                for _, row in plate_df.iterrows():
+                    well_idx = row["well-index"]
+                    
+                    # Track highest index for plate's next available well
+                    highest_well_idx = max(highest_well_idx, well_idx)
+                    
+                    # Create well for this material
+                    well_obj = self.session.well_manager.create_well_model(
+                        plate_obj=plate_obj,
+                        welltype="startingmaterial",
+                        wellindex=well_idx,
+                        volume=row["amount-uL"],
+                        smiles=row["SMILES"],
+                        concentration=row["concentration"] if "concentration" in row else None,
+                        solvent=row["solvent"] if "solvent" in row else None,
+                    )
+                    
+                    if not well_obj:
+                        logger.warning(f"Plate {plate_id}: Could not create well at index {well_idx}")
+                        continue
+                
+                # Update plate's next available well index
                 self.session.well_manager.update_plate_well_index(
-                    plate_obj=plate_obj, wellindexupdate=index_well_available + 1
+                    plate_obj=plate_obj, 
+                    wellindexupdate=highest_well_idx + 1
                 )
-
-            # Create compound order record
-            self.session.data_manager.create_compound_order_model(
-                order_df=materials_df, is_custom_starter_plate=True
-            )
-
-            return plate_obj
-
+                
+                # Create compound order for this plate
+                self.session.data_manager.create_compound_order_model(
+                    order_df=plate_df, 
+                    is_custom_starter_plate=True
+                )
+                
+                logger.info(f"Created custom starter plate {plate_id} with {len(plate_df)} wells")
+                
+            return created_plates
+            
         except Exception as e:
             logger.error(f"Error creating starting material plates from CSV: {str(e)}")
-            return None
-
+            import traceback
+            logger.error(traceback.format_exc())
+            return {}
+        
     def create_reaction_starting_plate(self):
         """
         Creates a starting material plate for reaction materials, respecting the maximum
@@ -621,8 +637,8 @@ class PlateFactory:
 
         # Process each material - ALWAYS use a new well for each material
         for _, row in sorted_materials_df.iterrows():
-            # Add 5% extra volume as error margin
-            extra_error_volume = row["volume"] * 0.05
+            # Add 15% extra volume as error margin
+            extra_error_volume = row["volume"] * 0.15
             total_volume_needed = row["volume"] + extra_error_volume + dead_volume
 
             # Get next available well index
