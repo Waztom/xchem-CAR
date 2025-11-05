@@ -1,3 +1,4 @@
+.devcontainer/.devcontainerenv
 secrets.py
 
 __pycache__/
