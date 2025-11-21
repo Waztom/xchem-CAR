@@ -4,7 +4,6 @@ Manages data query, processing, and analysis for OpenTrons sessions.
 
 import logging
 import pandas as pd
-import numpy as np
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet, Q
