@@ -864,17 +864,108 @@ class PlateFactory:
                 f"Creating {platetype} plate for temperature {reaction_temperature}°C using {labware_platetype}"
             )
 
-            # Create the plate using the existing class-recipe function
-            plate = self.create_plate_by_reaction_class_recipe(
-                reaction_queryset=reaction_temp_queryset,
+            # CREATE PLATE DIRECTLY BY TEMPERATURE - NOT by class/recipe
+            plate_name = f"{platetype}-{reaction_temperature}C"
+            
+            # Create the plate
+            plate_obj = self.create_plate_model(
                 platetype=platetype,
+                platename=plate_name,
+                labwaretype=labware_platetype,
             )
 
-            if plate:
-                created_plates.extend(plate if isinstance(plate, list) else [plate])
+            if plate_obj:
+                created_plates.append(plate_obj)
+
+                # NOW GROUP REACTIONS BY CLASS WITHIN THIS TEMPERATURE PLATE
+                # Group reactions by class for column organization
+                reaction_class_groups = {}
+                for reaction in reaction_temp_queryset:
+                    reaction_class = getattr(reaction, 'reactionclass', 'unknown')
+                    if reaction_class not in reaction_class_groups:
+                        reaction_class_groups[reaction_class] = []
+                    reaction_class_groups[reaction_class].append(reaction)
+
+                # Create columns for each reaction class within the temperature plate
+                for reaction_class, class_reactions in reaction_class_groups.items():
+                    column_index = (
+                        self.session.column_manager.get_plate_current_column_index(
+                            plate_obj=plate_obj
+                        )
+                    )
+                    if column_index is not False:
+                        column_obj = self.session.column_manager.create_column_model(
+                            plate_obj=plate_obj,
+                            columnindex=column_index,
+                            columntype=platetype,
+                            reactionclass=reaction_class,
+                        )
+
+                        # Update column index
+                        self.session.column_manager.update_plate_column_index_available(
+                            plate_obj=plate_obj, columnindexupdate=column_index + 1
+                        )
+
+                        # Add wells for each reaction in this class
+                        for reaction in class_reactions:
+                            # Get product SMILES for this reaction
+                            product_smiles = (
+                                self.session.material_manager.get_product_smiles(
+                                    [reaction.id]
+                                )[0]
+                            )
+
+                            logger.debug(
+                                f"Creating well for reaction {reaction.id} (class: {reaction_class}, "
+                                f"temp: {reaction_temperature}°C) with product SMILES: {product_smiles}"
+                            )
+
+                            # Check if well index is available
+                            well_index = (
+                                self.session.well_manager.get_plate_well_index_available(
+                                    plate_obj=plate_obj
+                                )
+                            )
+                            
+                            if well_index is False:
+                                # Create a new plate for the same temperature
+                                new_plate_name = f"{plate_name}-continued"
+                                plate_obj = self.create_plate_model(
+                                    platetype=platetype,
+                                    platename=new_plate_name,
+                                    labwaretype=labware_platetype,
+                                )
+                                
+                                if not plate_obj:
+                                    logger.error("Failed to create additional plate")
+                                    break
+                                    
+                                created_plates.append(plate_obj)
+                                
+                                well_index = self.session.well_manager.get_plate_well_index_available(
+                                    plate_obj=plate_obj
+                                )
+                                if well_index is False:
+                                    logger.error("New plate has no available wells")
+                                    break
+
+                            # Create well directly (you may want to add column management here)
+                            well_obj = self.session.well_manager.create_well_model(
+                                plate_obj=plate_obj,
+                                welltype=platetype,
+                                wellindex=well_index,
+                                reactionobj=reaction,
+                                smiles=product_smiles,
+                                reactantfornextstep=True,
+                            )
+
+                            # Update well index
+                            self.session.well_manager.update_plate_well_index(
+                                plate_obj=plate_obj, wellindexupdate=well_index + 1
+                            )
 
         logger.info(f"Created {len(created_plates)} {platetype} plates by temperature")
-        return created_plates
+        # return created_plates
 
     def update_plate_deck_ot_session_ids(self, plate_queryset):
         """
