@@ -65,205 +65,205 @@ class PlateFactory:
             logger.warning("CreatePlateModel - No more deck slots available")
             return None
 
-    def create_plate_by_reaction_class_recipe(self, reaction_queryset, platetype: str):
-        """
-        Creates plates by reaction class and recipe.
+    # def create_plate_by_reaction_class_recipe(self, reaction_queryset, platetype: str):
+    #     """
+    #     Creates plates by reaction class and recipe.
 
-        Parameters
-        ----------
-        reaction_queryset: QuerySet[Reaction]
-            The reactions to create plates for
-        platetype: str
-            The type of plate to create
+    #     Parameters
+    #     ----------
+    #     reaction_queryset: QuerySet[Reaction]
+    #         The reactions to create plates for
+    #     platetype: str
+    #         The type of plate to create
 
-        Returns
-        -------
-        plate_objs: list
-            List of created plate objects
-        """
-        # Get grouped reactions by class and recipe
-        grouped_reaction_querysets = (
-            self.session.data_manager.get_grouped_reaction_by_class_recipe(
-                reactionqueryset=reaction_queryset
-            )
-        )
+    #     Returns
+    #     -------
+    #     plate_objs: list
+    #         List of created plate objects
+    #     """
+    #     # Get grouped reactions by class and recipe
+    #     grouped_reaction_querysets = (
+    #         self.session.data_manager.get_grouped_reaction_by_class_recipe(
+    #             reactionqueryset=reaction_queryset
+    #         )
+    #     )
 
-        # Store created plates
-        plate_objs = []
+    #     # Store created plates
+    #     plate_objs = []
 
-        # Create a plate for each group
-        for group_key, group_reactions in grouped_reaction_querysets.items():
-            # Extract class and recipe from group key
-            reaction_class, recipe = group_key.split("-", 1)
+    #     # Create a plate for each group
+    #     for group_key, group_reactions in grouped_reaction_querysets.items():
+    #         # Extract class and recipe from group key
+    #         reaction_class, recipe = group_key.split("-", 1)
 
-            # Generate plate name
-            plate_name = f"{platetype}-{reaction_class}-{recipe}"
+    #         # Generate plate name
+    #         plate_name = f"{platetype}-{reaction_class}-{recipe}"
 
-            # Get volumes for the reaction group
-            reaction_volumes = self.session.data_manager.get_rounded_reaction_volumes(
-                reactionqueryset=group_reactions
-            )
+    #         # Get volumes for the reaction group
+    #         reaction_volumes = self.session.data_manager.get_rounded_reaction_volumes(
+    #             reactionqueryset=group_reactions
+    #         )
 
-            # Determine best labware type
-            labware_type = self.session.labware_selector.get_plate_type(
-                platetype="reaction", volumes=reaction_volumes, temperature=25
-            )
+    #         # Determine best labware type
+    #         labware_type = self.session.labware_selector.get_plate_type(
+    #             platetype="reaction", volumes=reaction_volumes, temperature=25
+    #         )
 
-            # Create the plate
-            plate_obj = self.create_plate_model(
-                platetype=platetype, platename=plate_name, labwaretype=labware_type
-            )
+    #         # Create the plate
+    #         plate_obj = self.create_plate_model(
+    #             platetype=platetype, platename=plate_name, labwaretype=labware_type
+    #         )
 
-            if plate_obj:
-                plate_objs.append(plate_obj)
+    #         if plate_obj:
+    #             plate_objs.append(plate_obj)
 
-                # Create a column for the reaction class-recipe
-                column_index = (
-                    self.session.column_manager.get_plate_current_column_index(
-                        plate_obj=plate_obj
-                    )
-                )
-                if column_index is not False:
-                    column_obj = self.session.column_manager.create_column_model(
-                        plate_obj=plate_obj,
-                        columnindex=column_index,
-                        columntype=platetype,
-                        reactionclass=reaction_class,
-                    )
+    #             # Create a column for the reaction class-recipe
+    #             column_index = (
+    #                 self.session.column_manager.get_plate_current_column_index(
+    #                     plate_obj=plate_obj
+    #                 )
+    #             )
+    #             if column_index is not False:
+    #                 column_obj = self.session.column_manager.create_column_model(
+    #                     plate_obj=plate_obj,
+    #                     columnindex=column_index,
+    #                     columntype=platetype,
+    #                     reactionclass=reaction_class,
+    #                 )
 
-                    # Update column index
-                    self.session.column_manager.update_plate_column_index_available(
-                        plate_obj=plate_obj, columnindexupdate=column_index + 1
-                    )
+    #                 # Update column index
+    #                 self.session.column_manager.update_plate_column_index_available(
+    #                     plate_obj=plate_obj, columnindexupdate=column_index + 1
+    #                 )
 
-                    # Add wells for each reaction in this group
-                    for reaction in group_reactions:
-                        # Get product SMILES for this reaction
-                        product_smiles = (
-                            self.session.material_manager.get_product_smiles(
-                                [reaction.id]
-                            )[0]
-                        )
+    #                 # Add wells for each reaction in this group
+    #                 for reaction in group_reactions:
+    #                     # Get product SMILES for this reaction
+    #                     product_smiles = (
+    #                         self.session.material_manager.get_product_smiles(
+    #                             [reaction.id]
+    #                         )[0]
+    #                     )
 
-                        # Log product information
-                        logger.debug(
-                            f"Creating well for reaction {reaction.id} with product SMILES: "
-                            f"{product_smiles}"
-                        )
+    #                     # Log product information
+    #                     logger.debug(
+    #                         f"Creating well for reaction {reaction.id} with product SMILES: "
+    #                         f"{product_smiles}"
+    #                     )
 
-                        # Check if well index is available
-                        well_index = (
-                            self.session.well_manager.get_plate_well_index_available(
-                                plate_obj=plate_obj
-                            )
-                        )
-                        if well_index is False:
-                            # No wells available - create a new plate with the same parameters
-                            logger.info(
-                                f"Plate {plate_obj.name} is full. Creating another plate."
-                            )
+    #                     # Check if well index is available
+    #                     well_index = (
+    #                         self.session.well_manager.get_plate_well_index_available(
+    #                             plate_obj=plate_obj
+    #                         )
+    #                     )
+    #                     if well_index is False:
+    #                         # No wells available - create a new plate with the same parameters
+    #                         logger.info(
+    #                             f"Plate {plate_obj.name} is full. Creating another plate."
+    #                         )
 
-                            # Create new plate with same parameters but incremented name
-                            new_plate_name = f"{plate_name}-continued"
-                            plate_obj = self.create_plate_model(
-                                platetype=platetype,
-                                platename=new_plate_name,
-                                labwaretype=labware_type,
-                            )
+    #                         # Create new plate with same parameters but incremented name
+    #                         new_plate_name = f"{plate_name}-continued"
+    #                         plate_obj = self.create_plate_model(
+    #                             platetype=platetype,
+    #                             platename=new_plate_name,
+    #                             labwaretype=labware_type,
+    #                         )
 
-                            if not plate_obj:
-                                logger.error(
-                                    "Failed to create additional plate - no more deck slots?"
-                                )
-                                break
+    #                         if not plate_obj:
+    #                             logger.error(
+    #                                 "Failed to create additional plate - no more deck slots?"
+    #                             )
+    #                             break
 
-                            # Add the new plate to our result list
-                            plate_objs.append(plate_obj)
+    #                         # Add the new plate to our result list
+    #                         plate_objs.append(plate_obj)
 
-                            # Create a new column in the new plate
-                            column_index = self.session.column_manager.get_plate_current_column_index(
-                                plate_obj=plate_obj
-                            )
-                            if column_index is False:
-                                logger.error("Failed to get column index for new plate")
-                                break
+    #                         # Create a new column in the new plate
+    #                         column_index = self.session.column_manager.get_plate_current_column_index(
+    #                             plate_obj=plate_obj
+    #                         )
+    #                         if column_index is False:
+    #                             logger.error("Failed to get column index for new plate")
+    #                             break
 
-                            column_obj = (
-                                self.session.column_manager.create_column_model(
-                                    plate_obj=plate_obj,
-                                    columnindex=column_index,
-                                    columntype=platetype,
-                                    reactionclass=reaction_class,
-                                )
-                            )
+    #                         column_obj = (
+    #                             self.session.column_manager.create_column_model(
+    #                                 plate_obj=plate_obj,
+    #                                 columnindex=column_index,
+    #                                 columntype=platetype,
+    #                                 reactionclass=reaction_class,
+    #                             )
+    #                         )
 
-                            # Update column index
-                            self.session.column_manager.update_plate_column_index_available(
-                                plate_obj=plate_obj, columnindexupdate=column_index + 1
-                            )
+    #                         # Update column index
+    #                         self.session.column_manager.update_plate_column_index_available(
+    #                             plate_obj=plate_obj, columnindexupdate=column_index + 1
+    #                         )
 
-                            # Try to get well index again on new plate
-                            well_index = self.session.well_manager.get_plate_well_index_available(
-                                plate_obj=plate_obj
-                            )
-                            if well_index is False:
-                                logger.error("New plate has no available wells")
-                                break
+    #                         # Try to get well index again on new plate
+    #                         well_index = self.session.well_manager.get_plate_well_index_available(
+    #                             plate_obj=plate_obj
+    #                         )
+    #                         if well_index is False:
+    #                             logger.error("New plate has no available wells")
+    #                             break
 
-                        # Create well with product information
-                        well_obj = self.session.well_manager.create_well_model(
-                            plate_obj=plate_obj,
-                            welltype=platetype,
-                            wellindex=well_index,
-                            reactionobj=reaction,
-                            columnobj=column_obj,
-                            smiles=product_smiles,  # Store product SMILES
-                            reactantfornextstep=True,  # Mark as available for next step
-                        )
+    #                     # Create well with product information
+    #                     well_obj = self.session.well_manager.create_well_model(
+    #                         plate_obj=plate_obj,
+    #                         welltype=platetype,
+    #                         wellindex=well_index,
+    #                         reactionobj=reaction,
+    #                         columnobj=column_obj,
+    #                         smiles=product_smiles,  # Store product SMILES
+    #                         reactantfornextstep=True,  # Mark as available for next step
+    #                     )
 
-                        # Update well index
-                        self.session.well_manager.update_plate_well_index(
-                            plate_obj=plate_obj, wellindexupdate=well_index + 1
-                        )
-            else:
-                logger.warning(f"Could not create plate for {group_key}")
+    #                     # Update well index
+    #                     self.session.well_manager.update_plate_well_index(
+    #                         plate_obj=plate_obj, wellindexupdate=well_index + 1
+    #                     )
+    #         else:
+    #             logger.warning(f"Could not create plate for {group_key}")
 
-        return plate_objs
+    #     return plate_objs
 
-    def create_reaction_plate(self, platetype: str = "reaction"):
-        """
-        Creates a reaction plate.
+    # def create_reaction_plate(self, platetype: str = "reaction"):
+    #     """
+    #     Creates a reaction plate.
 
-        Parameters
-        ----------
-        platetype: str
-            The type of plate to create, default is "reaction"
+    #     Parameters
+    #     ----------
+    #     platetype: str
+    #         The type of plate to create, default is "reaction"
 
-        Returns
-        -------
-        plate_objs: list
-            List of created plate objects
-        """
-        # Get grouped reactions by temperature
-        grouped_reaction_querysets = (
-            self.session.data_manager.get_grouped_temperature_reactions(
-                reactionqueryset=self.session.groupreactionqueryset
-            )
-        )
+    #     Returns
+    #     -------
+    #     plate_objs: list
+    #         List of created plate objects
+    #     """
+    #     # Get grouped reactions by temperature
+    #     grouped_reaction_querysets = (
+    #         self.session.data_manager.get_grouped_temperature_reactions(
+    #             reactionqueryset=self.session.groupreactionqueryset
+    #         )
+    #     )
 
-        # Store created plates
-        plate_objs = []
+    #     # Store created plates
+    #     plate_objs = []
 
-        # Create reaction plates based on temperature groups
-        for temp, reaction_queryset in grouped_reaction_querysets.items():
-            # Create plates by reaction class and recipe
-            temp_plates = self.create_plate_by_reaction_class_recipe(
-                reaction_queryset=reaction_queryset, platetype=platetype
-            )
+    #     # Create reaction plates based on temperature groups
+    #     for temp, reaction_queryset in grouped_reaction_querysets.items():
+    #         # Create plates by reaction class and recipe
+    #         temp_plates = self.create_plate_by_reaction_class_recipe(
+    #             reaction_queryset=reaction_queryset, platetype=platetype
+    #         )
 
-            plate_objs.extend(temp_plates)
+    #         plate_objs.extend(temp_plates)
 
-        return plate_objs
+    #     return plate_objs
 
     def create_workup_plate(self, platetype: str):
         """
