@@ -153,7 +153,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-A71EV2A-p0015": {
+            "OB-A71EV2A-r0015": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#6:1](=[#8:2])-[#8H:3].[#6:4]([#8;H])>>[#6:1](=[#8:2])-[#8:3][#6:4]"
@@ -261,10 +261,10 @@ encoded_recipes = {
     "Formation of urea from isocyanate and amine": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0013": {
+            "OB-A71EV2A-r0013": {
                 "yield": 75,
                 "reactionSMARTS": [
-                    "[#7;H1,H2:1].[C:2](=O:3)-[#7:4]>>[#7:1]-[C:2](=O:3)-[#7:4]"
+                    "[#7;H1,H2:1].[C](=O)=[#7:4]>>[#7:1]-[C](=O)-[#7:4]"
                 ],
                 "references": None,
                 "actionsessions": [
@@ -319,7 +319,7 @@ encoded_recipes = {
                                         },
                                         "material": {
                                             #isocyanate
-                                            "SMARTS": "[C:2](=O:3)-[#7:4]",
+                                            "SMARTS": "[C](=O)=[#7:4]",
                                             "SMILES": None,
                                             "quantity": {"value": 1, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -348,10 +348,10 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-A71EV2A-p0014": {
+            "OB-A71EV2A-r0014": {
                 "yield": 75,
                 "reactionSMARTS": [
-                    "[#7;H1,H2:1].[C:2](=O:3)-[#7:4]>>[#7:1]-[C:2](=O:3)-[#7:4]"
+                    "[#7;H1,H2:1].[C](=O)=[#7:4]>>[#7:1]-[C](=O)-[#7:4]"
                 ],
                 "references": None,
                 "actionsessions": [
@@ -406,10 +406,10 @@ encoded_recipes = {
                                         },
                                         "material": {
                                             #isocyanate
-                                            "SMARTS": "[C:2](=O:3)-[#7:4]",
+                                            "SMARTS": "[C](=O)=[#7:4]",
                                             "SMILES": None,
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "toluene",
+                                            "solvent": "Toluene",
                                             "concentration": 0.5,
                                         },
                                     },
@@ -824,7 +824,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p001": {
+            "OB-NS5-RdRp-r0001": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -927,7 +927,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p002": {
+            "OB-NS5-RdRp-r0002": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -1030,120 +1030,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p003": {
-                "yield": 75,
-                "reactionSMARTS": [
-                    "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
-                ],
-                "references": None,
-                "actionsessions": [
-                    {
-                        "type": "reaction",
-                        "driver": "robot",
-                        "sessionnumber": 1,
-                        "intermolecular": {
-                            "actions": [
-                                {
-                                    "type": "add",
-                                    "actionnumber": 1,
-                                    "content": {
-                                        "plates": {
-                                            "fromplatetype": "startingmaterial",
-                                            "toplatetype": "reaction",
-                                        },
-                                        "material": {
-                                            "SMARTS": "[#7;H1,H2:1]",
-                                            "SMILES": None,
-                                            "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "DMF",
-                                            "concentration": 0.5,
-                                        },
-                                    },
-                                },
-                                {
-                                    "type": "add",
-                                    "actionnumber": 2,
-                                    "content": {
-                                        "plates": {
-                                            "fromplatetype": "startingmaterial",
-                                            "toplatetype": "reaction",
-                                        },
-                                        "material": {
-                                            "SMARTS": None,
-                                            "SMILES": "CCN(C(C)C)C(C)C",
-                                            "quantity": {"value": 1.5, "unit": "moleq"},
-                                            "solvent": "DMF",
-                                            "concentration": 0.5,
-                                        },
-                                    },
-                                },
-                                {
-                                    "type": "add",
-                                    "actionnumber": 3,
-                                    "content": {
-                                        "plates": {
-                                            "fromplatetype": "startingmaterial",
-                                            "toplatetype": "reaction",
-                                        },
-                                        "material": {
-                                            "SMARTS": None,
-                                            "SMILES": "C1=CC(=CC=C1[N+](=O)[O-])OC(=O)Cl",
-                                            # Smiles for 4-Nitrophenyl chloroformate
-                                            "quantity": {"value": 5, "unit": "moleq"},
-                                            "solvent": "DMF",
-                                            "concentration": 0.25,
-                                        },
-                                    },
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        "type": "reaction",
-                        "driver": "robot",
-                        "sessionnumber": 2,
-                        "continuation": True,
-                        "intermolecular": {
-                            "actions": [
-                                {
-                                    "type": "add",
-                                    "actionnumber": 4,
-                                    "content": {
-                                        "plates": {
-                                            "fromplatetype": "starting material",
-                                            "toplatetype": "reaction",
-                                        },
-                                        "material": {
-                                            "SMARTS": "[#7;H1,H2:2]",
-                                            "SMILES": None,
-                                            "quantity": {"value": 1.1, "unit": "moleq"},
-                                            "solvent": "DMF",
-                                            "concentration": 0.5,
-                                        },
-                                    },
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        "type": "stir",
-                        "sessionnumber": 3,
-                        "driver": "human",
-                        "actions": [
-                            {
-                                "type": "stir",
-                                "actionnumber": 5,
-                                "content": {
-                                    "platetype": "reaction",
-                                    "temperature": {"value": 25, "unit": "degC"},
-                                    "duration": {"value": 16, "unit": "hours"},
-                                },
-                            },
-                        ],
-                    },
-                ],
-            },
-            "OB-RdRp-p004": {
+            "OB-NS5-RdRp-r0003": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -1248,6 +1135,119 @@ encoded_recipes = {
                                 "actionnumber": 5,
                                 "content": {
                                     "platetype": "reaction",
+                                    "temperature": {"value": 25, "unit": "degC"},
+                                    "duration": {"value": 16, "unit": "hours"},
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            "OB-NS5-RdRp-r0004": {
+                "yield": 75,
+                "reactionSMARTS": [
+                    "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
+                ],
+                "references": None,
+                "actionsessions": [
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 1,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 1,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#7;H1,H2:1]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 2,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "CCN(C(C)C)C(C)C",
+                                            "quantity": {"value": 1.5, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 3,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "C1=CC(=CC=C1[N+](=O)[O-])OC(=O)Cl",
+                                            # Smiles for 4-Nitrophenyl chloroformate
+                                            "quantity": {"value": 5, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.25,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 2,
+                        "continuation": True,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 4,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "starting material",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#7;H1,H2:2]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.1, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "stir",
+                        "sessionnumber": 3,
+                        "driver": "human",
+                        "actions": [
+                            {
+                                "type": "stir",
+                                "actionnumber": 5,
+                                "content": {
+                                    "platetype": "reaction",
                                     "temperature": {"value": 120, "unit": "degC"},
                                     "duration": {"value": 16, "unit": "hours"},
                                 },
@@ -1256,7 +1256,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p005": {
+            "OB-NS5-RdRp-r0005": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -1359,7 +1359,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p006": {
+            "OB-NS5-RdRp-r0006": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -1462,120 +1462,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p007": {
-                "yield": 75,
-                "reactionSMARTS": [
-                    "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
-                ],
-                "references": None,
-                "actionsessions": [
-                    {
-                        "type": "reaction",
-                        "driver": "robot",
-                        "sessionnumber": 1,
-                        "intermolecular": {
-                            "actions": [
-                                {
-                                    "type": "add",
-                                    "actionnumber": 1,
-                                    "content": {
-                                        "plates": {
-                                            "fromplatetype": "startingmaterial",
-                                            "toplatetype": "reaction",
-                                        },
-                                        "material": {
-                                            "SMARTS": "[#7;H1,H2:1]",
-                                            "SMILES": None,
-                                            "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "DMF",
-                                            "concentration": 0.5,
-                                        },
-                                    },
-                                },
-                                {
-                                    "type": "add",
-                                    "actionnumber": 2,
-                                    "content": {
-                                        "plates": {
-                                            "fromplatetype": "startingmaterial",
-                                            "toplatetype": "reaction",
-                                        },
-                                        "material": {
-                                            "SMARTS": None,
-                                            "SMILES": "CCN(CC)CC",
-                                            "quantity": {"value": 1.5, "unit": "moleq"},
-                                            "solvent": "DMF",
-                                            "concentration": 0.5,
-                                        },
-                                    },
-                                },
-                                {
-                                    "type": "add",
-                                    "actionnumber": 3,
-                                    "content": {
-                                        "plates": {
-                                            "fromplatetype": "startingmaterial",
-                                            "toplatetype": "reaction",
-                                        },
-                                        "material": {
-                                            "SMARTS": None,
-                                            "SMILES": "C1=CC(=CC=C1[N+](=O)[O-])OC(=O)Cl",
-                                            # Smiles for 4-Nitrophenyl chloroformate
-                                            "quantity": {"value": 5, "unit": "moleq"},
-                                            "solvent": "DMF",
-                                            "concentration": 0.25,
-                                        },
-                                    },
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        "type": "reaction",
-                        "driver": "robot",
-                        "sessionnumber": 2,
-                        "continuation": True,
-                        "intermolecular": {
-                            "actions": [
-                                {
-                                    "type": "add",
-                                    "actionnumber": 4,
-                                    "content": {
-                                        "plates": {
-                                            "fromplatetype": "starting material",
-                                            "toplatetype": "reaction",
-                                        },
-                                        "material": {
-                                            "SMARTS": "[#7;H1,H2:2]",
-                                            "SMILES": None,
-                                            "quantity": {"value": 1.1, "unit": "moleq"},
-                                            "solvent": "DMF",
-                                            "concentration": 0.5,
-                                        },
-                                    },
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        "type": "stir",
-                        "sessionnumber": 3,
-                        "driver": "human",
-                        "actions": [
-                            {
-                                "type": "stir",
-                                "actionnumber": 5,
-                                "content": {
-                                    "platetype": "reaction",
-                                    "temperature": {"value": 25, "unit": "degC"},
-                                    "duration": {"value": 16, "unit": "hours"},
-                                },
-                            },
-                        ],
-                    },
-                ],
-            },
-            "OB-RdRp-p008": {
+            "OB-NS5-RdRp-r0007": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -1680,6 +1567,119 @@ encoded_recipes = {
                                 "actionnumber": 5,
                                 "content": {
                                     "platetype": "reaction",
+                                    "temperature": {"value": 25, "unit": "degC"},
+                                    "duration": {"value": 16, "unit": "hours"},
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            "OB-NS5-RdRp-r0008": {
+                "yield": 75,
+                "reactionSMARTS": [
+                    "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
+                ],
+                "references": None,
+                "actionsessions": [
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 1,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 1,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#7;H1,H2:1]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 2,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "CCN(CC)CC",
+                                            "quantity": {"value": 1.5, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 3,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "C1=CC(=CC=C1[N+](=O)[O-])OC(=O)Cl",
+                                            # Smiles for 4-Nitrophenyl chloroformate
+                                            "quantity": {"value": 5, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.25,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 2,
+                        "continuation": True,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 4,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "starting material",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#7;H1,H2:2]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.1, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "stir",
+                        "sessionnumber": 3,
+                        "driver": "human",
+                        "actions": [
+                            {
+                                "type": "stir",
+                                "actionnumber": 5,
+                                "content": {
+                                    "platetype": "reaction",
                                     "temperature": {"value": 120, "unit": "degC"},
                                     "duration": {"value": 16, "unit": "hours"},
                                 },
@@ -1688,7 +1688,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p009": {
+            "OB-NS5-RdRp-r0009": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -1791,7 +1791,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p010": {
+            "OB-NS5-RdRp-r0010": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -1894,7 +1894,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p011": {
+            "OB-NS5-RdRp-r0011": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -2007,7 +2007,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p012": {
+            "OB-NS5-RdRp-r0012": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -2120,7 +2120,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p013": {
+            "OB-NS5-RdRp-r0013": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -2223,7 +2223,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p014": {
+            "OB-NS5-RdRp-r0014": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -2326,7 +2326,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p015": {
+            "OB-NS5-RdRp-r0015": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -2439,7 +2439,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-RdRp-p016": {
+            "OB-NS5-RdRp-r0016": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -2552,7 +2552,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-A71EV2A-p0006": {
+            "OB-A71EV2A-r0006": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#7;H1,H2:1].[#7;H1,H2:2]>>[#7:1]-[#6](=[#8])-[#7:2]"
@@ -4289,7 +4289,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -4452,7 +4452,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -4616,7 +4616,7 @@ encoded_recipes = {
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             # smiles for suzuki bromide
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -4779,7 +4779,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -4943,7 +4943,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -5106,7 +5106,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -5270,7 +5270,7 @@ encoded_recipes = {
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             # smiles for suzuki bromide
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -6742,7 +6742,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -6906,7 +6906,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -7069,7 +7069,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -7233,7 +7233,7 @@ encoded_recipes = {
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             # smiles for suzuki bromide
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -7396,7 +7396,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -7560,7 +7560,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -7723,7 +7723,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -7887,7 +7887,7 @@ encoded_recipes = {
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             # smiles for suzuki bromide
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -9359,7 +9359,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -9523,7 +9523,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -9686,7 +9686,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -9850,7 +9850,7 @@ encoded_recipes = {
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             # smiles for suzuki bromide
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -10013,7 +10013,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -10177,7 +10177,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -10340,7 +10340,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -10504,7 +10504,7 @@ encoded_recipes = {
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             # smiles for suzuki bromide
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -11976,7 +11976,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -12140,7 +12140,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -12303,7 +12303,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -12467,7 +12467,7 @@ encoded_recipes = {
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             # smiles for suzuki bromide
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -12630,7 +12630,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -12794,7 +12794,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -12957,7 +12957,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -13121,7 +13121,7 @@ encoded_recipes = {
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             # smiles for suzuki bromide
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -14593,7 +14593,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -14757,7 +14757,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -14920,7 +14920,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -15084,7 +15084,7 @@ encoded_recipes = {
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             # smiles for suzuki bromide
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -15247,7 +15247,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -15411,7 +15411,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -15574,7 +15574,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -15738,7 +15738,7 @@ encoded_recipes = {
                                             "SMILES": "BrC1=CC=CC(S(N)(=O)=O)=C1",
                                             # smiles for suzuki bromide
                                             "quantity": {"value": 1, "unit": "moleq"},
-                                            "solvent": "TOLUENE",
+                                            "solvent": "Toluene",
                                             "concentration": 0.25,
                                         },
                                     },
@@ -44890,7 +44890,7 @@ encoded_recipes = {
                     # },
                 ],
             },
-            "OB-A71EV2A-p0004": {
+            "OB-A71EV2A-r0004": {
                 "yield": 85,
                 "reactionSMARTS": [
                     "[#6:1](=[#8:2])-[#8].[#7;H2:3]>>[#6:1](=[#8:2])-[#7:3]"
@@ -45057,7 +45057,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-A71EV2A-p0003": {
+            "OB-A71EV2A-r0003": {
                 "yield": 85,
                 "reactionSMARTS": [
                     "[#6:1](=[#8:2])-[#8].[#7;H1,H2:3]>>[#6:1](=[#8:2])-[#7:3]"
@@ -69291,7 +69291,7 @@ encoded_recipes = {
     "Amide schotten - baumann": {
         "intramolecular": True,
         "recipes": {
-            "OB-A71EV2A-p0032": {
+            "OB-A71EV2A-r0032": {
                 "yield": 80,
                 "reactionSMARTS": [
                     "[C:1](=O)[Cl].[#7;H1,H2:2]>>[C:1](=O)[#7:2]"
@@ -69393,7 +69393,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-A71EV2A-p0033": {
+            "OB-A71EV2A-r0033": {
                 "yield": 80,
                 "reactionSMARTS": [
                     "[C:1](=O)[Cl].[#7;H1,H2:2]>>[C:1](=O)[#7:2]"
@@ -91103,7 +91103,7 @@ encoded_recipes = {
                     # },
                 ],
             },
-            "OB-A71EV2A-p0019": {
+            "OB-A71EV2A-r0019": {
                 "yield": 70,
                 "reactionSMARTS": ["[c:1]-[F,I,Br,Cl].[#7:2]>>[c:1]-[#7:2]"],
                 "references": "https://doi.org/10.1021/acs.oprd.0c00018",
@@ -92632,12 +92632,120 @@ encoded_recipes = {
                     # },
                 ],
             },
+            "OB-NS5-RdRp-r0017": {
+                "yield": 70,
+                "reactionSMARTS": [
+                    "[c:4]-[F,I,Br,Cl].[#7:1]-[#6,#16:2]=[#8:3]>>[c:4]-[#7:1]-[#6,#16:2]=[#8:3]"
+                ],
+                "references": "",
+                "actionsessions": [
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 1,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 1,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[c:4]-[F,I,Br,Cl]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.0, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 2,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#7:1]-[#6,#16:2]=[#8:3]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.2, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 3,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "CC(C)(C)[O-].[Na+]",
+                                            "quantity": {"value": 3, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 4,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "CC(C)C1=CC(=C(C(=C1)C(C)C)C2=CC=CC=C2P(C3CCCCC3)C4CCCCC4)C(C)C.CS(=O)(=O)O.C1=CC=C([C-]=C1)C2=CC=CC=C2N.[Pd]",
+                                            "quantity": {
+                                                "value": 0.1,
+                                                "unit": "moleq",
+                                            },
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "stir",
+                        "driver": "human",
+                        "sessionnumber": 2,
+                        "actions": [
+                            {
+                                "type": "stir",
+                                "actionnumber": 5,
+                                "content": {
+                                    "platetype": "reaction",
+                                    "temperature": {
+                                        "value": 100,
+                                        "unit": "degC",
+                                    },
+                                    "duration": {"value": 18, "unit": "hours"},
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
         },
     },
     "Buchwald-Hartwig (thio)etherification": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0024": {
+            "OB-A71EV2A-r0024": {
                 "yield": 70,
                 "reactionSMARTS": ["[c:1]-[F,I,Br,Cl].[#16;H1:2]>>[c:1]-[#16:2]"],
                 "references": "https://doi.org/10.1021/acs.oprd.0c00018",
@@ -93160,7 +93268,7 @@ encoded_recipes = {
     "Ester amidation": {
         "intramolecular": True,
         "recipes": {
-            "OB-A71EV2A-p0012": {
+            "OB-A71EV2A-r0012": {
                 "yield": 80,
                 "reactionSMARTS": [
                     "[#6:1](=[#8:2])-[#8]-[#6].[#7;H2,H1:3]>>[#6:1](=[#8:2])-[#7:3]"
@@ -95173,7 +95281,7 @@ encoded_recipes = {
     "Mitsunobu aryl ether synthesis": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0029": {
+            "OB-A71EV2A-r0029": {
                 "yield": 70,
                 "reactionSMARTS": ["[#8][#6:1].[#8;H1:2]>>[#6:1][#8:2]"],
                 "references": None,
@@ -95560,9 +95668,9 @@ encoded_recipes = {
     "Mitsunobu reaction with amine alcohol and thioalcohol": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0010": {
+            "OB-A71EV2A-r0010": {
                 "yield": 70,
-                "reactionSMARTS": ["[#8;H]-[#6:1].[#16X2,#7X3;H1:2]>>[#6:1]-[#16X2,#7X3:2]"],
+                "reactionSMARTS": ["[#8;H]-[#6:1].[#16,#7:2]>>[#6:1]-[#16,#7:2]"],
                 "references": None,
                 "actionsessions": [
                     {
@@ -95631,7 +95739,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#16X2,#7X3;H1:2]",
+                                            "SMARTS": "[#16,#7:2]",
                                             "SMILES": None,
                                             "quantity": {"value": 1, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -96260,10 +96368,10 @@ encoded_recipes = {
                     # },
                 ],
             },
-            "OB-A71EV2A-p0005": {
+            "OB-A71EV2A-r0005": {
                 "yield": 90,
                 "reactionSMARTS": [
-                    "[c:1]-[F,Cl,Br,I].[#6:3]-[#7;H3,H2,H1:2]>>[#6:3]-[#7:2]-[c:1]"
+                    "[c:1]-[F,Cl,Br,I].[#7;H1,H2:2]>>[#7:2]-[c:1]"
                 ],
                 "references": None,
                 "actionsessions": [
@@ -96299,7 +96407,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#6:3]-[#7;H2,H1:2]",
+                                            "SMARTS": "[#7;H1,H2:2]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.1, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -110663,7 +110771,7 @@ encoded_recipes = {
                     # },
                 ],
             },
-            "OB-A71EV2A-p0018": {
+            "OB-A71EV2A-r0018": {
                 "yield": 70,
                 "reactionSMARTS": ["[#6:2](=[#8]).[#7;H3,H2,H1:3]>>[#6:2]-[#7:3]"],
                 "references": None,
@@ -112891,9 +112999,9 @@ encoded_recipes = {
     "Sp2-sp2 Suzuki coupling": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0020": {
+            "OB-A71EV2A-r0020": {
                 "yield": 75,
-                "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[c:2]-[B]>>[c:1]-[c:2]"],
+                "reactionSMARTS": ["[#6:1]-[F,Cl,Br,I].[#6:2]-[B]>>[#6:1]-[#6:2]"],
                 "references": None,
                 "actionsessions": [
                     {
@@ -112911,7 +113019,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[c:1]-[F,Cl,Br,I]",
+                                            "SMARTS": "[#6:1]-[F,Cl,Br,I]",
                                             "SMILES": None,
                                             "quantity": {"value": 1, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -112928,7 +113036,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[c:2]-[B]",
+                                            "SMARTS": "[#6:2]-[B]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.2, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -117675,7 +117783,7 @@ encoded_recipes = {
                     #                    },
                 ],
             },
-            "OB-A71EV2A-p0001": {
+            "OB-A71EV2A-r0001": {
                 "yield": 75,
                 "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:2]-[B]>>[c:1]-[#6:2]"],
                 "references": None,
@@ -117932,7 +118040,7 @@ encoded_recipes = {
                     #                    },
                 ],
             },
-            "OB-A71EV2A-p0002": {
+            "OB-A71EV2A-r0002": {
                 "yield": 75,
                 "reactionSMARTS": ["[c:1]-[F,Cl,Br,I].[#6:2]-[B]>>[c:1]-[#6:2]"],
                 "references": None,
@@ -122232,10 +122340,10 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-A71EV2A-p0007": {
+            "OB-A71EV2A-r0007": {
                 "yield": 75,
                 "reactionSMARTS": [
-                    "[#16:5](=[#8])(=[#8:7])-[#17].[#7;H1,H2:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"
+                    "[#16:5](=[#8])(=[#8:7]).[#7;H1,H2:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"
                 ],
                 "references": None,
                 "actionsessions": [
@@ -122254,7 +122362,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#16:5](=[#8])(=[#8:7])-[#17]",
+                                            "SMARTS": "[#16:5](=[#8])(=[#8:7])",
                                             "SMILES": None,
                                             "quantity": {"value": 1.0, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -122355,7 +122463,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-A71EV2A-p0008": {
+            "OB-A71EV2A-r0008": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#16:5](=[#8])(=[#8:7])-[#17].[#7;H1,H2:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"
@@ -122531,7 +122639,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-A71EV2A-p0009": {
+            "OB-A71EV2A-r0009": {
                 "yield": 75,
                 "reactionSMARTS": [
                     "[#16:5](=[#8])(=[#8:7])-[#17].[#7;H1,H2:2]>>[#16:5](=[#8])(=[#8:7])-[#7:2]"
@@ -129072,7 +129180,7 @@ encoded_recipes = {
     "Williamson ether synthesis": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0021": {
+            "OB-A71EV2A-r0021": {
                 "yield": 77,
                 "reactionSMARTS": [
                     "[#6:1]-[#8;H:2].[#6:3]-[Cl,Br,I]>>[#6:1]-[#8:2]-[#6:3]"
@@ -129160,7 +129268,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-A71EV2A-p0022": {
+            "OB-A71EV2A-r0022": {
                 "yield": 77,
                 "reactionSMARTS": [
                     "[#6:1]-[#8;H:2].[#6:3]-[Cl,Br,I]>>[#6:1]-[#8:2]-[#6:3]"
@@ -134987,7 +135095,7 @@ encoded_recipes = {
     "Petasis-borono Mannich reaction": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0011": {
+            "OB-A71EV2A-r0011": {
                 "yield": 70,
                 "reactionSMARTS": [
                     "[#7;H1,H2:2].[#6:3][#5](-O)[O].[C:1](=O)>>[#6:3][#6:1][#7:2]"
@@ -135078,10 +135186,10 @@ encoded_recipes = {
     "Amine alkylation": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0016": {
+            "OB-A71EV2A-r0016": {
                 "yield": 70,
                 "reactionSMARTS": [
-                    "[#7;H1,H2:1].[C:2]-[Br,I]>>[#7:1]-[C:2]"
+                    "[#7;H1,H2:1].[C:2]-[Cl,Br,I]>>[#7:1]-[C:2]"
                 ],
                 "references": "To do",
                 "actionsessions": [
@@ -135134,7 +135242,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[C:2]-[Br,I]",
+                                            "SMARTS": "[C:2]-[Cl,Br,I]",
                                             "SMILES": None,
                                             "quantity": {"value": 2, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -135165,13 +135273,13 @@ encoded_recipes = {
             },
         },
     },
-    "Nucleophilic subsitution with thiol": {
+    "Nucleophilic substitution with thiol": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0017": {
+            "OB-A71EV2A-r0017": {
                 "yield": 70,
                 "reactionSMARTS": [
-                    "[#16;H1:1].[#6:2]-[Br,I]>>[#16:1]-[#6:2]"
+                    "[#16:1].[#6:2][#17,#35,#53]>>[#16:1]-[#6:2]"
                 ],
                 "references": "To do",
                 "actionsessions": [
@@ -135190,7 +135298,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#16;H1:1]",
+                                            "SMARTS": "[#16:1]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.0, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -135224,7 +135332,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#6:2]-[Br,I]",
+                                            "SMARTS": "[#6:2][#17,#35,#53]",
                                             "SMILES": None,
                                             "quantity": {"value": 2, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -135258,7 +135366,7 @@ encoded_recipes = {
     "Baeyer-Villiger oxidation": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0023": {
+            "OB-A71EV2A-r0023": {
                 "yield": 70,
                 "reactionSMARTS": [
                     "[#6:1]1[#6:2](=O:3)[#6:4][#6:5]1>>[#6:1]1[#6:2](=O:3)[O][#6:4][#6:5]1"
@@ -135331,7 +135439,7 @@ encoded_recipes = {
     "Chan-Lam coupling (amindation)": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0025": {
+            "OB-A71EV2A-r0025": {
                 "yield": 70,
                 "reactionSMARTS": [
                     "[#6:1][B](O)(O).[#7;H1,H2:2]>>[#6:1][#7:2]"
@@ -135416,7 +135524,7 @@ encoded_recipes = {
                     },
                 ],
             },
-            "OB-A71EV2A-p0026": {
+            "OB-A71EV2A-r0026": {
                 "yield": 70,
                 "reactionSMARTS": [
                     "[#6:1][B](O)(O).[#7;H1,H2:2]>>[#6:1][#7:2]"
@@ -135506,10 +135614,10 @@ encoded_recipes = {
     "Ester Schotten-Baumann": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0027": {
+            "OB-A71EV2A-r0027": {
                 "yield": 70,
                 "reactionSMARTS": [
-                    "[C:1](=O:2)[Cl].[O;H1:3]>>[C:1](=O:2)[O:3]"
+                    "[C:1](=O)[Cl].[O;H1:2]>>[C:1](=O)[O:2]"
                 ],
                 "references": "To do",
                 "actionsessions": [
@@ -135528,7 +135636,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[C:1](=O:2)[Cl]",
+                                            "SMARTS": "[C:1](=O)[Cl]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.0, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -135610,10 +135718,10 @@ encoded_recipes = {
             },
         },
     },
-     "Formation of sulfonamide from halide - Shavnya reaction": {
+    "Formation of sulfonamide from halide - Shavnya reaction": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0028": {
+            "OB-A71EV2A-r0028": {
                 "yield": 70,
                 "reactionSMARTS": [
                     "[#6:1][Cl,I,Br,F].[#6:2][#7;H1,H2:3]>>[#6:1][#16](=O)(=O)[#7:3][#6:2]"
@@ -135723,7 +135831,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "C1=CC2=C(C3=C(C=CC=N3)C=C2)N=C1",
                                             "quantity": {"value": 0.15, "unit": "moleq"},
-                                            "solvent": "DMFSO",
+                                            "solvent": "DMSO",
                                             "concentration": 0.5,
                                         },
                                     },
@@ -135797,7 +135905,7 @@ encoded_recipes = {
     "Nucleophilic aromatic substitution (methylsulfone)": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0030": {
+            "OB-A71EV2A-r0030": {
                 "yield": 90,
                 "reactionSMARTS": [
                     "[c:1]-[#16](=O)(=O)[C].[#7;H1,H2:2]>>[c:1]-[#7:2]"
@@ -136112,10 +136220,10 @@ encoded_recipes = {
             },
         },
     },
-    "S-Nucleophilic aromatic substitution": {
+    "S-nucleophilic aromatic substitution": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0031": {
+            "OB-A71EV2A-r0031": {
                 "yield": 90,
                 "reactionSMARTS": [
                     "[c:1]-[F,Cl,Br,I].[#6:3]-[#16;H1:2]>>[#6:3]-[#16:2]-[c:1]"
@@ -136433,10 +136541,10 @@ encoded_recipes = {
     "Chan-Lam coupling of amides, sulfonamides, and imides": {
         "intramolecular": False,
         "recipes": {
-            "OB-A71EV2A-p0032": {
+            "OB-EVD68-r0001": {
                 "yield": 90,
                 "reactionSMARTS": [
-                    "[#6:1][#5](-O)[O].[#7:2][#6,#16]>>[#6:1][#7:2][#6,#16]"
+                    "[#6:1]-[B].[#7,#16:2][#6](=O)>>[#6:1]-[#7,#16:2][#6](=O)"
                 ],
                 "references": None,
                 "actionsessions": [
@@ -136455,7 +136563,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "",
+                                            "SMARTS": "[#6:1]-[B]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.0, "unit": "moleq"},
                                             "solvent": "p-pyridine",
@@ -136472,7 +136580,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "",
+                                            "SMARTS": "[#7,#16:2][#6](=O)",
                                             "SMILES": None,
                                             "quantity": {"value": 1.2, "unit": "moleq"},
                                             "solvent": "p-pyridine",
@@ -136489,8 +136597,8 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "",
-                                            "SMILES": None,
+                                            "SMARTS": None,
+                                            "SMILES": "CC(=O)[O-].[Cu]",
                                             "quantity": {"value": 0.1, "unit": "moleq"},
                                             "solvent": "p-pyridine",
                                             "concentration": 0.5,
@@ -136499,6 +136607,775 @@ encoded_recipes = {
                                 },
                             ],
                         },
+                    },
+                    {
+                        "type": "stir",
+                        "driver": "human",
+                        "sessionnumber": 2,
+                        "actions": [
+                            {
+                                "type": "stir",
+                                "actionnumber": 4,
+                                "content": {
+                                    "platetype": "reaction",
+                                    "temperature": {"value": 25, "unit": "degC"},
+                                    "duration": {"value": 12, "unit": "hours"},
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    },
+    "Formation of sulfonamide from boronic and amine": {
+        "intramolecular": False,
+        "recipes": {
+            "OB-NS2B-NS3-r0001": {
+                "yield": 90,
+                "reactionSMARTS": [
+                    "[#6:1]-[B].[#7:2]>>[#6:1]-[#16](=O)(=O)[#7:2]"
+                ],
+                "references": None,
+                "actionsessions": [
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 1,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 1,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#6:1]-[B]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.0, "unit": "moleq"},
+                                            "solvent": "water",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 2,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "CC(=O)[O-].[Cu]",
+                                            "quantity": {"value": 0.2, "unit": "moleq"},
+                                            "solvent": "water",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 3,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "[K+].[K+].[O-]C([O-])=O",
+                                            "quantity": {"value": 1.3, "unit": "moleq"},
+                                            "solvent": "water",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 4,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#7:2]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.0, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "stir",
+                        "driver": "human",
+                        "sessionnumber": 2,
+                        "actions": [
+                            {
+                                "type": "stir",
+                                "actionnumber": 5,
+                                "content": {
+                                    "platetype": "reaction",
+                                    "temperature": {"value": 100, "unit": "degC"},
+                                    "duration": {"value": 12, "unit": "hours"},
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            "OB-NS2B-NS3-r0002": {
+                "yield": 90,
+                "reactionSMARTS": [
+                    "[#6:1]-[B].[#7:2]>>[#6:1]-[#16](=O)(=O)[#7:2]"
+                ],
+                "references": None,
+                "actionsessions": [
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 1,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 1,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#6:1]-[B]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.0, "unit": "moleq"},
+                                            "solvent": "water",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 2,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "CC(=O)[O-].[Cu]",
+                                            "quantity": {"value": 0.2, "unit": "moleq"},
+                                            "solvent": "water",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 3,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "[K+].[K+].[O-]C([O-])=O",
+                                            "quantity": {"value": 1.3, "unit": "moleq"},
+                                            "solvent": "water",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 4,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#7:2]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.0, "unit": "moleq"},
+                                            "solvent": "water",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "stir",
+                        "driver": "human",
+                        "sessionnumber": 2,
+                        "actions": [
+                            {
+                                "type": "stir",
+                                "actionnumber": 5,
+                                "content": {
+                                    "platetype": "reaction",
+                                    "temperature": {"value": 100, "unit": "degC"},
+                                    "duration": {"value": 12, "unit": "hours"},
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    },
+    "Imine formation": {
+        "intramolecular": False,
+        "recipes": {
+            "OB-EVD68-r0002": {
+                "yield": 90,
+                "reactionSMARTS": [
+                    "[#7;H2:1].[#6:2](=O)>>[#7:1]=[#6:2]"
+                ],
+                "references": None,
+                "actionsessions": [
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 1,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 1,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#7;H2:1]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.0, "unit": "moleq"},
+                                            "solvent": "Toluene",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 2,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#6:2](=O)",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.3, "unit": "moleq"},
+                                            "solvent": "Toluene",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 3,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "OS(=O)(=O)O.[Mg+2]",
+                                            "quantity": {"value": 0.5, "unit": "moleq"},
+                                            "solvent": "Toluene",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "stir",
+                        "driver": "human",
+                        "sessionnumber": 2,
+                        "actions": [
+                            {
+                                "type": "stir",
+                                "actionnumber": 4,
+                                "content": {
+                                    "platetype": "reaction",
+                                    "temperature": {"value": 100, "unit": "degC"},
+                                    "duration": {"value": 12, "unit": "hours"},
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    },
+    "Buchwald-Hartwig amination with aromatic nh": {
+        "intramolecular": False,
+        "recipes": {
+            "OB-NS2B-NS3-r0003": {
+                "yield": 90,
+                "reactionSMARTS": [
+                    "[c:3]-[F,I,Br,Cl].[n;H1:2]>>[c:3]-[n:2]"
+                ],
+                "references": None,
+                "actionsessions": [
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 1,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 1,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[c:3]-[F,I,Br,Cl]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.0, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 2,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[n;H1:2]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.3, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 3,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "CC(C)(C)[O-].[Na+]",
+                                            "quantity": {"value": 3.0, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 3,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "CC(C)C1=CC(=C(C(=C1)C(C)C)C2=CC=CC=C2P(C3CCCCC3)C4CCCCC4)C(C)C.CS(=O)(=O)O.C1=CC=C([C-]=C1)C2=CC=CC=C2N.[Pd]",
+                                            "quantity": {"value": 0.1, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "stir",
+                        "driver": "human",
+                        "sessionnumber": 2,
+                        "actions": [
+                            {
+                                "type": "stir",
+                                "actionnumber": 5,
+                                "content": {
+                                    "platetype": "reaction",
+                                    "temperature": {"value": 100, "unit": "degC"},
+                                    "duration": {"value": 12, "unit": "hours"},
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    },
+    "Formation of sulfone from halide - Shavnya reaction": {
+        "intramolecular": False,
+        "recipes": {
+            "OB-NS2B-NS3-r0004": {
+                "yield": 70,
+                "reactionSMARTS": [
+                    "[#6:1][Cl,I,Br,F].[#6:2][Cl,I,Br,F]>>[#6:1][#16](=O)(=O)[#6:2]"
+                ],
+                "references": "To do",
+                "actionsessions": [
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 1,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 1,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#6:1][Cl,I,Br,F]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.0, "unit": "moleq"},
+                                            "solvent": "DMSO",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 2,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "[O-]S(=O)S(=O)(=O)[O-].[K+].[K+]",
+                                            "quantity": {"value": 2, "unit": "moleq"},
+                                            "solvent": "DMSO",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 3,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "CCCC[N+](CCCC)(CCCC)CCCC.[Br-]",
+                                            "quantity": {"value": 1.1, "unit": "moleq"},
+                                            "solvent": "DMSO",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 4,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "C(=O)[O-].[Na+]",
+                                            "quantity": {"value": 2.2, "unit": "moleq"},
+                                            "solvent": "DMSO",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 5,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "C1(C2C([Pd]OS(=O)(=O)C)=CC=CC=2)C(N)=CC=CC=1.C1(C=CC=CC=1C1C(C(C)C)=CC(C(C)C)=CC=1C(C)C)P(C1CCCCC1)C1CCCCC1",
+                                            "quantity": {"value": 0.05, "unit": "moleq"},
+                                            "solvent": "DMSO",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 6,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "C1=CC2=C(C3=C(C=CC=N3)C=C2)N=C1",
+                                            "quantity": {"value": 0.15, "unit": "moleq"},
+                                            "solvent": "DMFSO",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "stir",
+                        "sessionnumber": 2,
+                        "driver": "human",
+                        "actions": [
+                            {
+                                "type": "stir",
+                                "actionnumber": 7,
+                                "content": {
+                                    "platetype": "reaction",
+                                    "temperature": {"value": 70, "unit": "degC"},
+                                    "duration": {"value": 2, "unit": "hours"},
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 3,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 8,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#6:2][Cl,I,Br,F]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 3, "unit": "moleq"},
+                                            "solvent": "DMSO",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    },
+    "Passerini reaction": {
+        "intramolecular": False,
+        "recipes": {
+            "OB-NS2B-NS3-r0005": {
+                "yield": 90,
+                "reactionSMARTS": [
+                    "[#6:1](=O:5).[#6:2](=O:6)[#8:7].[#7:3]=[#6:4]>>[O:8]=[#6:2][#8:5][#6:1][#6:4](=O:7)[#7:3]"
+                ],
+                "references": None,
+                "actionsessions": [
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 1,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 1,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#6:1](=O:5)",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.1, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 2,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#6:2](=O:6)[#8:7]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.1, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 3,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#7:3]=[#6:4]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.0, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "stir",
+                        "driver": "human",
+                        "sessionnumber": 2,
+                        "actions": [
+                            {
+                                "type": "stir",
+                                "actionnumber": 4,
+                                "content": {
+                                    "platetype": "reaction",
+                                    "temperature": {"value": 100, "unit": "degC"},
+                                    "duration": {"value": 12, "unit": "hours"},
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    },
+    "Epoxide + amine coupling": {
+       "intramolecular": False,
+        "recipes": {
+            "OB-NS5-RdRp-r0018": {
+                "yield": 90,
+                "reactionSMARTS": [
+                    "[C:1]1[O:2][C:3]1.[#7;H1,H2:4]>>[O:2][C:1][C:3][#7:4]"
+                ],
+                "references": None,
+                "actionsessions": [
+                    {
+                        "type": "reaction",
+                        "driver": "robot",
+                        "sessionnumber": 1,
+                        "intermolecular": {
+                            "actions": [
+                                {
+                                    "type": "add",
+                                    "actionnumber": 1,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[C:1]1[O:2][C:3]1",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 2,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": "[#7:4]",
+                                            "SMILES": None,
+                                            "quantity": {"value": 1.1, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                                {
+                                    "type": "add",
+                                    "actionnumber": 3,
+                                    "content": {
+                                        "plates": {
+                                            "fromplatetype": "startingmaterial",
+                                            "toplatetype": "reaction",
+                                        },
+                                        "material": {
+                                            "SMARTS": None,
+                                            "SMILES": "CC(=O)O",
+                                            "quantity": {"value": 1.0, "unit": "moleq"},
+                                            "solvent": "DMF",
+                                            "concentration": 0.5,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "type": "stir",
+                        "driver": "human",
+                        "sessionnumber": 2,
+                        "actions": [
+                            {
+                                "type": "stir",
+                                "actionnumber": 4,
+                                "content": {
+                                    "platetype": "reaction",
+                                    "temperature": {"value": 25, "unit": "degC"},
+                                    "duration": {"value": 12, "unit": "hours"},
+                                },
+                            },
+                        ],
                     },
                 ],
             },
