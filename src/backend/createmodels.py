@@ -512,6 +512,7 @@ class CreateEncodedActionModels(object):
         self.reaction_id = reaction_id
         self.reaction_obj = Reaction.objects.get(id=reaction_id)
         self.reactant_pair_smiles = reactant_pair_smiles
+        self.used_reactant_indices = []  # Track which reactants have been used
         self.reaction_name = reaction_name
         self.product_obj = getProduct(reaction_id=reaction_id)
         self.target_obj = Target.objects.get(id=target_id)
@@ -754,16 +755,26 @@ class CreateEncodedActionModels(object):
                     for smi in self.reactant_pair_smiles
                 ]
                 if not any(matches):
-                    print("No match found")
-                # if all(matches):
-                # smiles = self.reactant_pair_smiles[matches.index(True)]
-                if any(matches):
-                    smiles = self.reactant_pair_smiles[matches.index(True)]
-                # MUst fix this to match SMARTS with molecule vs just taking first reactant SMILES!!!!!!
-                # FIX!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                # Do not use reactant pair smiles here
-                # smiles = self.reactant_pair_smiles[0]
-                # del self.reactant_pair_smiles[0]
+                    logger.warning("No match found for SMARTS pattern: {}".format(materialinfo["SMARTS"]))
+                    smiles = None
+                else:
+                    # Find all indices that match the SMARTS pattern
+                    matching_indices = [i for i, match in enumerate(matches) if match]
+                    
+                    # Filter out already used indices
+                    available_indices = [i for i in matching_indices if i not in self.used_reactant_indices]
+                    
+                    if available_indices:
+                        # Use the first available (unused) match
+                        selected_index = available_indices[0]
+                    else:
+                        # All matches have been used - fall back to first match
+                        # (this handles edge cases where same reactant is intentionally used twice)
+                        selected_index = matching_indices[0]
+                    
+                    smiles = self.reactant_pair_smiles[selected_index]
+                    self.used_reactant_indices.append(selected_index)
+                    
             if materialinfo["SMILES"]:
                 smiles = canonSmiles(materialinfo["SMILES"])
             if not materialinfo["SMILES"] and not materialinfo["SMARTS"]:
@@ -819,7 +830,8 @@ class CreateEncodedActionModels(object):
             add.save()
 
         except Exception as e:
-            print(smiles)
+            logger.warning("Error creating AddAction for SMILES: {}".format(smiles))
+            logger.warning("Action data: {}".format(action))
             logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
 
     def createExtractActionModel(self, actionsession_obj: ActionSession, action: dict):
