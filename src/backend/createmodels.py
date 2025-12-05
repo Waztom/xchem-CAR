@@ -792,6 +792,15 @@ class CreateEncodedActionModels(object):
                 )
                 add.solvent = solvent
             if calcunit == "moleq":
+                if not solvent and concentration:
+                    logger.warning(
+                        "No solvent specified for concentration based volume calculation for add action: number: {} for reaction class: {} and recipe: {} ".format(actionnumber, self.reaction_obj.reactionclass, self.reaction_obj.recipe)
+                    )
+                    add.volume = self.calculateVolume(
+                        calcunit=calcunit,
+                        calcvalue=calcvalue,
+                        conc_reagents=concentration,
+                    )
                 if not solvent and not concentration:
 
                     add.mass = self.calculateMass(

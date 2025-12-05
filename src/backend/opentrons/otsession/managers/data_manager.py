@@ -184,9 +184,11 @@ class DataManager:
         rounded_volumes: list
             The list of rounded volumes
         """
+        logger.info("Calculating rounded add action volumes.")
         roundedvolumes = [
-            round(addactionobj.volume) for addactionobj in addactionqueryset
+            round(addactionobj.volume) for addactionobj in addactionqueryset 
         ]
+        logger.info(f"Rounded volumes: {roundedvolumes}")
         return roundedvolumes
 
     def get_rounded_extract_action_volumes(

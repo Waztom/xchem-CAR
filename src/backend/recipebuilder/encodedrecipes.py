@@ -91116,7 +91116,7 @@ encoded_recipes = {
                             "actions": [
                                 {
                                     "type": "add",
-                                    "actionnumber": 2,
+                                    "actionnumber": 1,
                                     "content": {
                                         "plates": {
                                             "fromplatetype": "startingmaterial",
@@ -91133,7 +91133,7 @@ encoded_recipes = {
                                 },
                                 {
                                     "type": "add",
-                                    "actionnumber": 3,
+                                    "actionnumber": 2,
                                     "content": {
                                         "plates": {
                                             "fromplatetype": "startingmaterial",
@@ -91150,7 +91150,7 @@ encoded_recipes = {
                                 },
                                 {
                                     "type": "add",
-                                    "actionnumber": 4,
+                                    "actionnumber": 3,
                                     "content": {
                                         "plates": {
                                             "fromplatetype": "startingmaterial",
@@ -91181,7 +91181,7 @@ encoded_recipes = {
                                                 "unit": "moleq",
                                             },
                                             "solvent": "DMF",
-                                            "concentration": 0.01,
+                                            "concentration": 0.25,
                                         },
                                     },
                                 },
@@ -92290,7 +92290,7 @@ encoded_recipes = {
                                             "SMILES": "CC(C1=CC(C(C)C)=C(C2=CC=CC=C2P(C3CCCCC3)C4CCCCC4)C(C(C)C)=C1)C.NC5=C(C=CC=C5)C6=C(C=CC=C6)[Pd]OS(C)(=O)=O",
                                             "quantity": {"value": 0.1, "unit": "moleq"},
                                             "solvent": "DMA",
-                                            "concentration": 0.01,
+                                            "concentration": 0.25,
                                         },
                                     },
                                 },
@@ -92823,7 +92823,7 @@ encoded_recipes = {
                                                 "unit": "moleq",
                                             },
                                             "solvent": "DMF",
-                                            "concentration": 0.01,
+                                            "concentration": 0.25,
                                         },
                                     },
                                 },
@@ -113057,7 +113057,7 @@ encoded_recipes = {
                                             "SMILES": "[K+].[K+].[K+].[O-]P([O-])([O-])=O",
                                             "quantity": {"value": 2, "unit": "moleq"},
                                             "solvent": "DMF",
-                                            "concentration": 1,
+                                            "concentration": 0.5,
                                         },
                                     },
                                 },
@@ -117841,7 +117841,7 @@ encoded_recipes = {
                                             "SMILES": "[K+].[K+].[K+].[O-]P([O-])([O-])=O",
                                             "quantity": {"value": 2, "unit": "moleq"},
                                             "solvent": "DMF",
-                                            "concentration": 1,
+                                            "concentration": 0.5,
                                         },
                                     },
                                 },
@@ -118098,7 +118098,7 @@ encoded_recipes = {
                                             "SMILES": "[K+].[K+].[K+].[O-]P([O-])([O-])=O",
                                             "quantity": {"value": 2, "unit": "moleq"},
                                             "solvent": "Toluene",
-                                            "concentration": 1,
+                                            "concentration": 0.5,
                                         },
                                     },
                                 },
@@ -122379,7 +122379,7 @@ encoded_recipes = {
                                             "toplatetype": "reaction",
                                         },
                                         "material": {
-                                            "SMARTS": "[#6]-[#7;H2,H1:2]",
+                                            "SMARTS": "[#7;H2,H1:2]",
                                             "SMILES": None,
                                             "quantity": {"value": 1.0, "unit": "moleq"},
                                             "solvent": "DMF",
@@ -122399,7 +122399,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "CCN(C(C)C)C(C)C",
                                             "quantity": {"value": 3, "unit": "moleq"},
-                                            "solvent": None,
+                                            "solvent": "DMF",
                                             "concentration": 0.5,
                                         },
                                     },
@@ -122505,7 +122505,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "CCN(CC)CC",
                                             "quantity": {"value": 3, "unit": "moleq"},
-                                            "solvent": None,
+                                            "solvent": "DMF",
                                             "concentration": 0.5,
                                         },
                                     },
@@ -122681,7 +122681,7 @@ encoded_recipes = {
                                             "SMARTS": None,
                                             "SMILES": "CCN(CC)CC",
                                             "quantity": {"value": 3, "unit": "moleq"},
-                                            "solvent": None,
+                                            "solvent": "DMF",
                                             "concentration": 0.5,
                                         },
                                     },

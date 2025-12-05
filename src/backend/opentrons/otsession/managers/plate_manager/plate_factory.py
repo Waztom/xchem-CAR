@@ -588,8 +588,9 @@ class PlateFactory:
         materials_df = self.session.material_manager.get_add_actions_material_dataframe(
             product_exists=True
         )
-
-        logger.debug(f"Materials needed for starting plate: {materials_df}")
+        logger.info("Creating starting material plate for reaction materials")
+        logger.info(f"The materials needed are:\n{materials_df}")
+        logger.info(f"Materials needed for starting plate: {materials_df}")
         if materials_df.empty:
             logger.info("No materials needed for starting plate")
             return None
