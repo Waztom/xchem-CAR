@@ -229,6 +229,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
              "proteintarget": str
              "validate_choice": int,
              "API_choice": int,
+             "fetch_pubchem": bool,
+             "fetch_catalogue": bool,
             }
 
         """
@@ -240,6 +242,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
         project_info["proteintarget"] = request.data["protein_target"]
         validate_choice = request.data["validate_choice"]
         API_choice = request.data["API_choice"]
+        fetch_pubchem = request.data.get("fetch_pubchem", True)
+        fetch_catalogue = request.data.get("fetch_catalogue", True)
 
         csvfile = request.FILES["csv_file"]
         tmp_file = save_tmp_file(csvfile)
@@ -269,7 +273,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
                         project_info=project_info,
                         validate_only=False,
                     )
-                    | uploadManifoldReaction.s()
+                    | uploadManifoldReaction.s(
+                        fetch_pubchem=fetch_pubchem,
+                    )
                 ).apply_async()
 
             if str(API_choice) == "1":
@@ -280,7 +286,10 @@ class ProjectViewSet(viewsets.ModelViewSet):
                         project_info=project_info,
                         validate_only=False,
                     )
-                    | uploadCustomReaction.s()
+                    | uploadCustomReaction.s(
+                        fetch_pubchem=fetch_pubchem,
+                        fetch_catalogue=fetch_catalogue,
+                    )
                 ).apply_async()
 
             if str(API_choice) == "2":
@@ -291,7 +300,10 @@ class ProjectViewSet(viewsets.ModelViewSet):
                         project_info=project_info,
                         validate_only=False,
                     )
-                    | uploadCombiCustomReaction.s()
+                    | uploadCombiCustomReaction.s(
+                        fetch_pubchem=fetch_pubchem,
+                        fetch_catalogue=fetch_catalogue,
+                    )
                 ).apply_async()
 
         data = {"task_id": task.id}

@@ -312,16 +312,18 @@ def getPubChemInfo(smiles: str) -> object:
             return False
 
 
-def createProductModel(reaction_id: int, product_smiles: str):
+def createProductModel(reaction_id: int, product_smiles: str, fetch_pubchem: bool = True):
     """Creates a Django product object - the product of a reaction"""
     product_smiles = canonSmiles(smiles=product_smiles)
-    # pubcheminfoobj = getPubChemInfo(smiles=product_smiles)
     product = Product()
     reaction_obj = Reaction.objects.get(id=reaction_id)
     product.reaction_id = reaction_obj
     product.smiles = product_smiles
-    # if pubcheminfoobj:
-    #     product.pubcheminfo_id = pubcheminfoobj
+    
+    if fetch_pubchem:
+        pubcheminfoobj = getPubChemInfo(smiles=product_smiles)
+        if pubcheminfoobj:
+            product.pubcheminfo_id = pubcheminfoobj
 
     product_svg_string = createSVGString(product_smiles)
     product_svg_fn = default_storage.save(
@@ -332,7 +334,7 @@ def createProductModel(reaction_id: int, product_smiles: str):
 
 
 def createReactantModel(
-    reaction_id: int, reactant_smiles: str, previous_reaction_product: bool
+    reaction_id: int, reactant_smiles: str, previous_reaction_product: bool, fetch_pubchem: bool = True
 ) -> int:
     """Creates a Django reactant object - the reactant in a reaction
 
@@ -346,19 +348,24 @@ def createReactantModel(
         If the reactant is the product from a previous reaction in the method. Used
         for later determining if reactant needs to be purchased vs is made in the
         synthesis
+    fetch_pubchem: bool
+        If True, fetch PubChem info for the reactant
 
     Returns
     -------
     reactant_id: int
         The id of the reactant model object created
     """
-    # pubcheminfoobj = getPubChemInfo(smiles=reactant_smiles)
     reactant = Reactant()
     reaction_obj = Reaction.objects.get(id=reaction_id)
     reactant.reaction_id = reaction_obj
     reactant.smiles = reactant_smiles
-    # if pubcheminfoobj:
-    #     reactant.pubcheminfo_id = pubcheminfoobj
+    
+    if fetch_pubchem:
+        pubcheminfoobj = getPubChemInfo(smiles=reactant_smiles)
+        if pubcheminfoobj:
+            reactant.pubcheminfo_id = pubcheminfoobj
+    
     reactant.previousreactionproduct = previous_reaction_product
     reactant.save()
     return reactant.id
