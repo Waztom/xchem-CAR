@@ -3,6 +3,7 @@ from ratelimit import limits, sleep_and_retry
 import os
 
 api_key = os.environ["MANIFOLD_API_KEY"]
+manifold_base_url = "https://api.asap.postera.ai/api/v1"
 
 
 @sleep_and_retry
@@ -35,7 +36,7 @@ def getManifoldRetrosynthesis(smiles: str):
     }
 
     response = requests.post(
-        url="https://api.postera.ai/api/v1/retrosynthesis/",
+        url=f"{manifold_base_url}/retrosynthesis/",
         headers={
             "X-API-KEY": api_key,
         },
@@ -75,7 +76,7 @@ def getManifoldRetrosynthesisBatch(smiles: list):
     }
 
     response = requests.post(
-        url="https://api.postera.ai/api/v1/retrosynthesis/batch/",
+        url=f"{manifold_base_url}/retrosynthesis/batch/",
         headers={
             "X-API-KEY": api_key,
         },
@@ -107,7 +108,7 @@ def getExactSearch(smiles: str):
     }
 
     response = requests.post(
-        "https://api.postera.ai/api/v1/exact/",
+        f"{manifold_base_url}/exact/",
         headers={
             "X-API-KEY": api_key,
         },
@@ -141,7 +142,7 @@ def getExactSearchBatch(smilesList: list):
     }
 
     response = requests.post(
-        "https://api.postera.ai/api/v1/exact/batch/",
+        f"{manifold_base_url}/exact/batch/",
         headers={
             "X-API-KEY": api_key,
         },
