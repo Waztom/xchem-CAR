@@ -114,7 +114,7 @@ def validateFileUpload(
 
 
 @shared_task
-def uploadManifoldReaction(validate_output):
+def uploadManifoldReaction(validate_output, fetch_pubchem=True):
 
     _, validate_dict, validated, project_info, csv_fp, uploaded_dict = validate_output
     uploaded_df = pd.DataFrame(uploaded_dict)
@@ -207,7 +207,7 @@ def uploadManifoldReaction(validate_output):
                                         )
 
                                         for index, reaction in enumerate(
-                                            reversed(reactions)
+                                            reactions
                                         ):
                                             reaction_name = reaction["name"]
                                             reactant_smiles = reaction["reactantSmiles"]
@@ -237,6 +237,7 @@ def uploadManifoldReaction(validate_output):
                                             createProductModel(
                                                 reaction_id=reaction_id,
                                                 product_smiles=product_smiles,
+                                                fetch_pubchem=fetch_pubchem,
                                             )
 
                                             for reactant_smi in reactant_smiles:
@@ -252,6 +253,7 @@ def uploadManifoldReaction(validate_output):
                                                         reaction_id=reaction_id,
                                                         reactant_smiles=reactant_smi,
                                                         previous_reaction_product=previous_reaction_product,
+                                                        fetch_pubchem=fetch_pubchem,
                                                     )
                                                     createCatalogEntryModel(
                                                         reactant_id=reactant_id,
@@ -264,6 +266,7 @@ def uploadManifoldReaction(validate_output):
                                                         reaction_id=reaction_id,
                                                         reactant_smiles=reactant_smi,
                                                         previous_reaction_product=previous_reaction_product,
+                                                        fetch_pubchem=fetch_pubchem,
                                                     )
                                                     catalog_entries = [
                                                         molecule["catalogEntries"]
@@ -289,22 +292,23 @@ def uploadManifoldReaction(validate_output):
                                         )
 
                                         for index, reaction in enumerate(
-                                            reversed(reactions)
+                                            reactions
                                         ):
                                             reaction_name = reaction["name"]
                                             reactant_smiles = reaction["reactantSmiles"]
                                             product_smiles = reaction["productSmiles"]
-                                            reaction_temperature = [
-                                                actionsession["actions"][0]["content"][
-                                                    "temperature"
-                                                ]["value"]
-                                                for actionsession in encoded_recipes[
-                                                    reaction_name
-                                                ]["recipes"]["standard"][
-                                                    "actionsessions"
-                                                ]
-                                                if actionsession["type"] == "stir"
-                                            ][0]
+                                            # reaction temp must be set from OT session!!!
+                                            # reaction_temperature = [
+                                            #     actionsession["actions"][0]["content"][
+                                            #         "temperature"
+                                            #     ]["value"]
+                                            #     for actionsession in encoded_recipes[
+                                            #         reaction_name
+                                            #     ]["recipes"]["standard"][
+                                            #         "actionsessions"
+                                            #     ]
+                                            #     if actionsession["type"] == "stir"
+                                            # ][0]
                                             intramolecular_possible = encoded_recipes[
                                                 reaction_name
                                             ]["intramolecular"]
@@ -347,13 +351,14 @@ def uploadManifoldReaction(validate_output):
                                                 reaction_number=index + 1,
                                                 intramolecular=intramolecular,
                                                 reaction_recipe="standard",  # Need to change when we get multiple recipes runnning!
-                                                reaction_temperature=reaction_temperature,
+                                                # reaction_temperature=reaction_temperature,
                                                 reaction_smarts=reaction_smarts,
                                             )
 
                                             createProductModel(
                                                 reaction_id=reaction_id,
                                                 product_smiles=product_smiles,
+                                                fetch_pubchem=fetch_pubchem,
                                             )
 
                                             for reactant_smi in reactant_smiles:
@@ -369,6 +374,7 @@ def uploadManifoldReaction(validate_output):
                                                         reaction_id=reaction_id,
                                                         reactant_smiles=reactant_smi,
                                                         previous_reaction_product=previous_reaction_product,
+                                                        fetch_pubchem=fetch_pubchem,
                                                     )
                                                     createCatalogEntryModel(
                                                         reactant_id=reactant_id,
@@ -381,6 +387,7 @@ def uploadManifoldReaction(validate_output):
                                                         reaction_id=reaction_id,
                                                         reactant_smiles=reactant_smi,
                                                         previous_reaction_product=previous_reaction_product,
+                                                        fetch_pubchem=fetch_pubchem,
                                                     )
                                                     catalog_entries = [
                                                         molecule["catalogEntries"]
@@ -404,7 +411,7 @@ def uploadManifoldReaction(validate_output):
 
 
 @shared_task
-def uploadCustomReaction(validate_output):
+def uploadCustomReaction(validate_output, fetch_pubchem=True, fetch_catalogue=True):
     (
         _,
         validate_dict,
@@ -513,6 +520,7 @@ def uploadCustomReaction(validate_output):
                     createProductModel(
                         reaction_id=reaction_id,
                         product_smiles=reaction_product_smiles,
+                        fetch_pubchem=fetch_pubchem,
                     )
 
                     for reactant_smi in reactant_pair_smiles:
@@ -525,6 +533,7 @@ def uploadCustomReaction(validate_output):
                                 reaction_id=reaction_id,
                                 reactant_smiles=reactant_smi,
                                 previous_reaction_product=True,
+                                fetch_pubchem=fetch_pubchem,
                             )
                             createCatalogEntryModel(
                                 reactant_id=reactant_id,
@@ -536,6 +545,7 @@ def uploadCustomReaction(validate_output):
                                 reaction_id=reaction_id,
                                 reactant_smiles=reactant_smi,
                                 previous_reaction_product=False,
+                                fetch_pubchem=fetch_pubchem,
                             )
                             #### Creating catalog entries takes very long!
                             createCatalogEntryModel(
@@ -543,14 +553,15 @@ def uploadCustomReaction(validate_output):
                                 previous_reaction_product=False,
                                 lab_inventory=True,
                             )
-                            catalog_entries = getExactSearch(smiles=reactant_smi)
-                            if "results" in catalog_entries:
-                                for catalog_entry in catalog_entries["results"]:
-                                    createCatalogEntryModel(
-                                        catalog_entry=catalog_entry,
-                                        reactant_id=reactant_id,
-                                        previous_reaction_product=False,
-                                    )
+                            if fetch_catalogue:
+                                catalog_entries = getExactSearch(smiles=reactant_smi)
+                                if "results" in catalog_entries:
+                                    for catalog_entry in catalog_entries["results"]:
+                                        createCatalogEntryModel(
+                                            catalog_entry=catalog_entry,
+                                            reactant_id=reactant_id,
+                                            previous_reaction_product=False,
+                                        )
 
     delete_tmp_file(csv_fp)
 
@@ -558,7 +569,7 @@ def uploadCustomReaction(validate_output):
 
 
 @shared_task
-def uploadCombiCustomReaction(validate_output):
+def uploadCombiCustomReaction(validate_output, fetch_pubchem=True, fetch_catalogue=True):
     (
         _,
         validate_dict,
@@ -660,6 +671,7 @@ def uploadCombiCustomReaction(validate_output):
                     createProductModel(
                         reaction_id=reaction_id,
                         product_smiles=reaction_product_smiles,
+                        fetch_pubchem=fetch_pubchem,
                     )
 
                     for reactant_smi in reactant_pair_smiles:
@@ -672,6 +684,7 @@ def uploadCombiCustomReaction(validate_output):
                                 reaction_id=reaction_id,
                                 reactant_smiles=reactant_smi,
                                 previous_reaction_product=True,
+                                fetch_pubchem=fetch_pubchem,
                             )
                             createCatalogEntryModel(
                                 reactant_id=reactant_id,
@@ -683,6 +696,7 @@ def uploadCombiCustomReaction(validate_output):
                                 reaction_id=reaction_id,
                                 reactant_smiles=reactant_smi,
                                 previous_reaction_product=False,
+                                fetch_pubchem=fetch_pubchem,
                             )
                             #### Creating catalog entries takes very long!
                             createCatalogEntryModel(
@@ -690,14 +704,15 @@ def uploadCombiCustomReaction(validate_output):
                                 previous_reaction_product=False,
                                 lab_inventory=True,
                             )
-                            catalog_entries = getExactSearch(smiles=reactant_smi)
-                            if "results" in catalog_entries:
-                                for catalog_entry in catalog_entries["results"]:
-                                    createCatalogEntryModel(
-                                        catalog_entry=catalog_entry,
-                                        reactant_id=reactant_id,
-                                        previous_reaction_product=False,
-                                    )
+                            if fetch_catalogue:
+                                catalog_entries = getExactSearch(smiles=reactant_smi)
+                                if "results" in catalog_entries:
+                                    for catalog_entry in catalog_entries["results"]:
+                                        createCatalogEntryModel(
+                                            catalog_entry=catalog_entry,
+                                            reactant_id=reactant_id,
+                                            previous_reaction_product=False,
+                                        )
 
     delete_tmp_file(csv_fp)
 
