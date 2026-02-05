@@ -207,7 +207,7 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                                         )
 
                                         for index, reaction in enumerate(
-                                            reversed(reactions)
+                                            reactions
                                         ):
                                             reaction_name = reaction["name"]
                                             reactant_smiles = reaction["reactantSmiles"]
@@ -292,7 +292,7 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                                         )
 
                                         for index, reaction in enumerate(
-                                            reversed(reactions)
+                                            reactions
                                         ):
                                             reaction_name = reaction["name"]
                                             reactant_smiles = reaction["reactantSmiles"]
