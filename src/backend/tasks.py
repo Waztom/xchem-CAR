@@ -297,17 +297,18 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                                             reaction_name = reaction["name"]
                                             reactant_smiles = reaction["reactantSmiles"]
                                             product_smiles = reaction["productSmiles"]
-                                            reaction_temperature = [
-                                                actionsession["actions"][0]["content"][
-                                                    "temperature"
-                                                ]["value"]
-                                                for actionsession in encoded_recipes[
-                                                    reaction_name
-                                                ]["recipes"]["standard"][
-                                                    "actionsessions"
-                                                ]
-                                                if actionsession["type"] == "stir"
-                                            ][0]
+                                            # reaction temp must be set from OT session!!!
+                                            # reaction_temperature = [
+                                            #     actionsession["actions"][0]["content"][
+                                            #         "temperature"
+                                            #     ]["value"]
+                                            #     for actionsession in encoded_recipes[
+                                            #         reaction_name
+                                            #     ]["recipes"]["standard"][
+                                            #         "actionsessions"
+                                            #     ]
+                                            #     if actionsession["type"] == "stir"
+                                            # ][0]
                                             intramolecular_possible = encoded_recipes[
                                                 reaction_name
                                             ]["intramolecular"]
@@ -350,7 +351,7 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                                                 reaction_number=index + 1,
                                                 intramolecular=intramolecular,
                                                 reaction_recipe="standard",  # Need to change when we get multiple recipes runnning!
-                                                reaction_temperature=reaction_temperature,
+                                                # reaction_temperature=reaction_temperature,
                                                 reaction_smarts=reaction_smarts,
                                             )
 
