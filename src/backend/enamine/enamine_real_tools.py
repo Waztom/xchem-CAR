@@ -6,7 +6,7 @@ This prototype script processes a CSV file of target molecules using the Enamine
 to find synthesis routes, building blocks, and reaction information.
 
 Usage:
-    python process_targets_prototype.py input_file.csv [options]
+    python enamine_real_tools.py input_file.csv [options]
 
 Requirements:
     - Input CSV with 'target-SMILES' column
@@ -24,7 +24,7 @@ from pathlib import Path
 
 # Import our Enamine API functions
 try:
-    from apicalls import search_smiles_batch, extract_building_blocks, extract_reaction_codes, ReactionType, get_synthons_by_id
+    from .apicalls import search_smiles_batch, extract_building_blocks, extract_reaction_codes, ReactionType, get_synthons_by_id
 except ImportError:
     print("Error: Could not import apicalls module. Make sure apicalls.py is in the same directory.")
     sys.exit(1)
