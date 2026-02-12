@@ -7,6 +7,8 @@ wget-log
 # Ignore documentation files
 src/docs/*
 
+src/input-files/*
+src/output-files/*
 src/staticfiles/*
 src/media/*
 .idea/
