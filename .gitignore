@@ -14,6 +14,7 @@ src/media/*
 .idea/
 /Test_DB_files/*
 *.csv
+!src/backend/enamine/enamine-real-tools-rxns.csv
 # Ignore db files including Redis (rdb)
 *.db
 *.rdb
