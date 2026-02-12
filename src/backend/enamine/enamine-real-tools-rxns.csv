@@ -1,0 +1,191 @@
+﻿reaction-ID,reaction-name,no-components,reaction-space,total-synthons,description,tags
+1,THIAZOLE,3,1051,1838,"Aminothiazole derivative from thiosemicarbazide, aldehyde and halo ketone","#heterocyclization, #thiazole"
+2,THIAZOLE2,3,0,6795,"Thiourea formation from isothiocyanate and amine, followed by cyclization to thiazole","#heterocyclization, #thiazole"
+3,THIAZOLE3,3,0,6778,"Thiourea formation from isothiocyanate and amine, followed by cyclization to thiazolidinone",#heterocyclization
+4,HYDRAZON,2,0,10163,Hydrazone formation from hydrazine or hydrazide and aldehyde or ketone.,#condensation
+6,METHYLEN,2,0,7489,Knoevenagel condensation of methylene active compound and aldehyde,#condensation
+7,ESTER-NS,2,0,27535,Alkylation of N/O/S nucleophiles using DIPEA,#alkylation
+8,THYOUREA,2,1051,37981,Thiourea formation from isothiocyanate and amine,#thiourea
+11,AMIDE,2,0,106412,Mukaiyama acylation,#acylation
+12,BIGINELLI,3,0,6624,Biginelli reaction,#heterocyclization
+20,SULFAMIDE,2,0,13558,Sulfonamide formation from a sulfonyl halide and an amine,#sulfacylation
+22,AMIDE1,2,0,136106,EDC acylation,#acylation
+26,MANNICH,2,1051,19223,,
+27,ARYLATION,2,0,82779,"N,O,S-arylation",#arylation
+28,METHYLEN1,2,0,2674,Knoevenagel condensation of methylene active compound and aldehyde,#condensation
+34,OXYME,2,0,16983,Alkylation of N/O nucleophiles using a strong base,#alkylation
+38,MA1,2,0,16433,Alkylation of aromatic amine,#alkylation
+40,SULFAMIDE1,2,0,80564,Sulfacylation with TEA,#sulfacylation
+43,THIAZOLE4,2,0,1560,Thiazole formation from thioamide or thiourea and an alpha-haloketone.,"#heterocyclization, #thiazole"
+44,MA3,2,0,29588,Alkylation of primary amines,"#alkylation, #amine"
+58,ANHYDRIDE1,2,0,17333,Acylation of an amine with an cyclic anhydride,"#acid, #acylation"
+62,SULFIDE,2,0,6939,"Alkylation of thiourea, followed by alkylation with and another alkyl halide",#alkylation
+63,EPOXYDE,2,0,4676,"Alkylation of amines, thioles, NH-compounds by epoxides","#alkylation, #amines"
+68,UREA,2,0,76799,Urea formation with isocyanates and carbamoyl chlorides,#urea
+87,SULFACYLATION-O,2,0,6667,Sulfacilation of phenole with sulfonyl halide,#sulfacylation
+88,ARYLATION60,2,0,26756,One step arylation,#arylation
+207,REDUCTION,2,0,42472,Reductive amination of aldehydes or ketones with primary amines,#reductive amination
+487,URETANE,2,0,67923,Urea/amide formation from reactive carbamates/esters,"#acylation, #urea"
+512,UREA-CDI,2,0,35332,Urea formation from two different amines using CDI,#urea
+527,AMIDE2,2,0,65822,CDI acylation,#acylation
+1458,ESTER,2,0,61442,alkylation of acid,#alkylation
+1498,SULFIDE-OX1,2,0,3359,Double alkylation of thiourea followed by oxidation to sulfoxides,"#alkylation, #oxidation"
+1500,SULFIDE-OX2,2,0,4003,Double alkylation of thiourea followed by oxidation to sulphone,"#alkylation, #oxidation"
+1626,AMIDEMSCl,2,0,74853,Acylation with MsCl,#acylation
+2230,MA2-POLY,2,0,58718,Alkylation of secondary and primary hindered amines,#alkylation
+2430,URETANE1,2,0,84885,Urea formation,#urea
+2554,URETANE2,2,0,63159,"Urea formation from stock available, moderately reactive aliphatic carbamates.",#urea
+2624,ESTER-PH,2,0,18946,"O,N-alkylation using K2CO3",#alkylation
+2708,URETANE4,2,0,91203,Urea formation,#urea
+2714,SULFONE,2,0,3390,Alkylation of tiols,#alkylation
+2718,OXAMIDE,2,0,78496,Disubstituted oxamide formation,"#acylation, #oxamide"
+2740,ACYLSULFAMIDE,2,0,35307,Acylation of NH-sulfamides.,#acylation
+188690,K-AMIDE1,2,0,105927,Two-stage: 1) EDC-acylation; 2) saponification,"#acid, #acylation"
+196680,K-SULFAMIDE1,2,0,48123,Two-stage: 1) sulfacylation with TEA; 2) saponification,"#acid, #sulfacylation"
+232682,SULFAMIDE2,2,1050,18510,Sulfonamide formation from a sulfonyl halide and an amine,#sulfacylation
+240690,Boc-AMIDE1,2,0,118542,Two-stage: 1) EDC-acylation; 2) Boc-deprotection,"#acylation, #amine"
+264724,THIOURONIUM1,3,1055,12922,,
+265282,SULFOXIDE,2,0,2595,"Alkylation of tiols, followed by oxidation to sulfoxides",#alkylation
+265764,AMIDOXIME1,2,0,39630,"Formation of 1,2,4-oxadiazoles from amidoximes and carboxylic acids","#heterocyclization, #oxadiazole"
+269862,REDUCTION-TI,2,1050,26258,Reductive amination of  sterically hindered ketones with primary amines ,#reductive amination
+269946,B-AMIDE1,2,0,103431,Two-stage: 1) EDC-acylation; 2) t-Bu ester cleavage,"#acid, #acylation"
+269956,B-MA2,2,0,30888,Two-stage: 1) sec-amine alkylation; 2) t-Bu ester cleavage,"#acid, #alkylation"
+269982,Boc-MA2,2,0,31136,Two-stage: 1) sec-amine alkylation; 2) Boc-deprotection,"#alkylation, #amine"
+270004,REDUCTION3,2,0,84923,Reductive amination of aldehydes or ketones with primary or secondary amines,#reductive amination
+270006,Boc-AMIDE2,2,0,20326,Two-stage: 1) CDI acylation; 2) N-Boc deprotection,"#acylation, #amine"
+270034,B-ESTER-NS,2,0,12250,N/S-alkylation followed by t-Bu ester cleavage,"#acid, #alkylation"
+270036,Boc-AMIDOXIME1,2,0,37196,"Formation of 1,2,4-oxadiazoles followed by Boc-deprotection","#amine, #heterocyclization, #oxadiazole"
+270062,ACETYLATION,2,0,86020,Acylation of amines with acid chlorides or anhydrides ,#acylation
+270084,Boc-SULFAMIDE1,2,0,51933,Two-stage: 1) sulfacylation with tea; 2) Boc-deprotection,"#amine, #sulfacylation"
+270112,K-AMIDE,2,1050,47373,Two-stage: 1) Mukaiyama acylation; 2) saponification,"#acid, #acylation"
+270122,K-MA2,2,0,25046,Two-stage: 1) alkylation of sec-amines; 2) saponification,"#acid, #alkylation"
+270166,Boc-ARYLATION,2,0,63813,"Two-stage: 1) N,O,S-arylation; 2) N-Boc deprotection","#amine, #arylation"
+270188,B-SULFAMIDE1,2,0,23992,Two-stage: 1) sulfacylation with TEA; 2) t-Bu ester cleavage,"#acid, #sulfacylation"
+270196,AMIDOXIME1-CN,2,1050,41829,"Formation of 1,2,4-oxadiazoles from nitriles and carboxylic acids","#heterocyclization, #oxadiazole"
+270302,REDUCTION-HET,2,0,10693,Reductive amination of aromatic aldehydes with primary aromatic amines ,#reductive amination
+270344,K-ARYLATION,2,0,19212,"Two-stage: 1) N,O,S-arylation; 2) saponification","#acid, #arylation"
+270942,ARYLATION2,3,1055,7849,,
+271082,SULFAMIDE4-ShB,2,0,4781,Sulfonamide formation from a sulfonyl halide with a free acid group and an amine,"#acid, #sulfacylation"
+271242,R003,3,1051,11560,,
+271302,Boc-REDUCTION3,2,0,70775,Reductive amination followed by Boc cleavage,#reductive amination
+271304,REDUCTION-AMINOACID,2,1050,8013,Reductive amination of aldehydes with primary amino acids,#reductive amination
+271362,Boc-AMIDOXIME1-CN,2,1050,37397,"Formation of 1,2,4-oxadiazoles followed by Boc-deprotection","#amine, #heterocyclization, #oxadiazole"
+271570,SUZUKI,2,0,24711,Suzuki coupling,"#C-C coupling, #Suzuki"
+271722,ANONYMOUS3,2,1051,20135,Cyclization of oxadiazoles,"# oxadiazole, #heterocyclization"
+271948,OXAMIDE1Pri,2,0,36286,Disubstituted oxamide formation,"#acylation, #oxamide"
+271949,OXAMIDE1Sec,2,0,21529,Disubstituted oxamide formation,"#acylation, #oxamide"
+272104,HYDANTOIN4,2,0,20942,Hydantoin formation from a primary aliphatic amine and an alpha-amino ester.,#heterocyclization
+272164,URETANE-T,2,1051,35668,,
+272212,HYDANTOIN6,2,0,14426,Hydantoin formation from a primary aromatic amine and an alpha-amino ester.,#heterocyclization
+272270,B-AMIDE,2,0,6008,Two-stage: 1) Mukaiyama acylation; 2) t-Bu ester cleavage,"#acid, #acylation"
+272430,Boc-AMIDE,2,0,65636,Two-stage: 1) Mukaiyama acylation; 2) Boc-deprotection,"#acylation, #amine"
+272610,AMINOACID1,2,1050,33592,Acylation of unprotected aminoacids,"#acid, #acylation"
+272690,Boc-REDUCTION-TI,2,1050,14874,Reductive amination followed by Boc deprotection,"#amine, #reductive amination"
+272692,Boc-OXYME,2,0,14593,Alkylation of N/O nucleophiles using a strong base followed by N-Boc deprotection,"#alkylation, #amine"
+272710,B-ARYLATION,2,0,59775,"Two-stage: 1) N,O,S-arylation; 2) t-Bu ester cleavage","#acid, #arylation"
+273170,ARYLATION3,3,1055,3835,,
+273230,R014,3,1055,22332,,
+273232,R015,3,1055,66496,,
+273270,R017-ACRYLAMIDE,2,0,83737,Acylation of amines with acryloyl chloride and close analogs.,"#acylation, #covalent binder"
+273390,B-URETANE1,2,0,5023,Urea formation followed by t-Bu ester cleavage,"#acid, #urea"
+273392,B-URETANE4,2,0,37296,Urea formation followed by t-Bu cleavage,"#acid, #urea"
+273450,BBoc-AMIDE1,2,0,5192,EDC acylation followed by Boc and t-Bu deprotection,"#acid, #acylation, #amine"
+273456,B-REDUCTION3,2,0,65827,Reductive amination followed by t-Bu cleavage,"#acid, #reductive amination"
+273458,Boc-URETANE1,2,0,22778,Urea formation followed by Boc-deprotection,"#amine, #urea"
+273460,B-OXAMIDE,2,0,1478,Disubstituted oxamide formation followed by t-Bu cleavage,"#acid, #acylation, #oxamide"
+273462,Boc-OXAMIDE,2,0,1490,Disubstituted oxamide formation followed by Boc-deprotection,"#acylation, #amine, #oxamide"
+273464,Boc-URETANE4,2,0,25963,Urea formation via aliphatic carbamates followed by Boc-deprotection,"#amine, #urea"
+273492,B-OXAMIDE1Pri,2,1050,30748,Disubstituted oxamide formation followed by t-Bu cleavage,"#acid, #acylation, #oxamide"
+273494,B-OXAMIDE1Sec,2,1051,15110,Disubstituted oxamide formation followed by t-Bu cleavage,"#acid, #acylation, #oxamide"
+273496,Boc-OXAMIDE1Pri,2,1050,33002,Disubstituted oxamide formation followed by Boc-deprotection,"#acylation, #amine, #oxamide"
+273498,Boc-OXAMIDE1Sec,2,1051,16178,Disubstituted oxamide formation followed by Boc-deprotection,"#acylation, #amine, #oxamide"
+273574,Boc-URETANE,2,0,18033,Urea formation from carbamate followed by Boc-deprotection,"#amine, #urea"
+273578,Boc-SULFAMIDE2,2,1050,1767,Sulfonamide formation followed by N-Boc deprotection,"#amine, #sulfacylation"
+273580,B-OXYME,2,1050,3587,Alkylation of N/O nucleophiles followed by t-Bu cleavage,"#acid, #alkylation"
+273584,Boc-SUZUKI,2,0,11320,Two-stage: 1) Suzuki coupling; 2) N-Boc deprotection,"#C-C coupling, #Suzuki reaction, #amine"
+273610,EPOXYDE2,2,0,20100,Alkylation of primary amines by epoxides,"#alkylation, #amine"
+273652,B-AMIDE2,2,0,19625,Two-stage: 1) CDI acylation; 2) t-Bu ester cleavage,"#acid, #acylation"
+273654,Boc-ESTER-NS,2,0,12675,N/S-alkylation followed by Boc deprotection,"#alkylation, #amine"
+273692,Boc-ACYLSULFAMIDE,2,0,28942,Two-stage: 1) Acylation of NH-sulfamides 2) Boc-deprotection.,"#acylation, #amine"
+273712,AC-SUZUKI,2,0,11712,Suzuki coupling where acid function is present,"#Suzuki, #acid"
+273790,EPOXYDE3,2,0,1179,Alkylation of phenoles by epoxides,#alkylation
+273910,R030-TRIAZOLE,2,0,6362,Triazole formation by click reaction from azide and terminal alkyne,"#click, #heterocyclization, #triazole"
+274052,R036-Lactim,2,0,1556,Triazole formation from lactim ester and hydrazide,"#heterocyclization, #triazole"
+274078,R039-Me3Si-Sac,2,0,69134,Sulfacylation of amino group of amino acids by sylfonyl chlorides,"#acid, #sulfacylation"
+274079,R039-Me3Si-Ac,2,0,4887,Acylation of amino group of amino acids by acyl chlorides,"#acid, #acylation"
+274080,R039-Me3Si-Urea,2,0,4646,Urea formation via chlorocarbamide with amino group of amino acid,"#acid, #urea"
+274081,R039-Me3Si-Uretane,2,0,4500,Urethane formation via chlorocarbamate with amino group of amino acid.,"#acid, #urethane"
+274090,R040-TRIAZOLE,2,0,12625,Triazole formation from in-situ formed azide and terminal alkyne,"#click, #heterocyclization, #triazole"
+274134,R037a-AMINOXADIAZOLE,2,1050,25708,"2-Amino-1,3,4-oxadiazole formation from hydrazides and amines with Thio-CDI","#heterocyclization, #oxadiazole"
+274310,Radd-010-DA-Ac-Boc-Ar,3,1051,8756,,
+274370,K-REDUCTION3,2,0,66905,Reductive amination followed by ester hydrolysis,"#acid, #reductive amination"
+274552,Radd-022-AA-Ac-Boc-Ac,3,1050,81825,Acylation followed by Boc-deprotection and further acylation,#acylation
+274614,B-ACYLSULFAMIDE,2,1050,23498,Two-stage: 1) Acylation of NH-sulfamides 2) t-Bu ester cleavage.,"#acid, #acylation"
+274860,Radd-036-NAc-Click,3,1050,77468,Acylation followed by triazole formation via click reaction,"#acylation, #click, #heterocyclization, #triazole"
+274952,R051-Alk-Click,3,1050,46406,Alkylation followed by triazole formation via click reaction,"#alkylation, #click, #heterocyclization, #triazole"
+275030,Radd-039-DA-Ac-Boc-Alk,3,1051,5724,Acylation of Boc-protected diamines followed by deprotection and amine alkylation,"#acylation, #alkylation"
+275054,R055,3,1050,15069,"6,9-disubstituted purine formation",#heterocyclization
+275090,Boc-R030-TRIAZOLE,2,0,5802,Triazole formation followed by Boc-deprotection,"#amine, #click, #heterocyclization, #triazole"
+275530,K-R040-TRIAZOLE,2,1050,3511,Triazole formation followed by ester cleavage,"#acid, #click, #heterocyclization, #triazole"
+275532,R070-R3-AMINOACID,2,0,8818,Reductive amination of aldehydes with secondary amino acids,#reductive amination
+275534,B-R040-TRIAZOLE,2,1050,5712,Triazole formation followed by t-Bu cleavage,"#acid, #click, #heterocyclization, #triazole"
+275536,Boc-R040-TRIAZOLE,2,1050,5904,Triazole formation followed by Boc-deprotection,"#amine, #click, #heterocyclization, #triazole"
+275550,R071-Rd-Acl,3,1050,24113,Reductive Amination followed by acylation with halogen anhydrides,"#acylation, #reductive amination"
+275592,Radd-049-DA-Ac-Boc-Ac,3,1050,66388,Acylation of monoBoc-diamine followed by Boc cleavage and amide formation,#acylation
+275650,Radd-051-SO2N-Suzuki,3,1055,35446,,
+275652,K-SUZUKI,2,0,1767,Two-stage: 1) Suzuki coupling; 2) saponification,"#C-C coupling, #Suzuki reaction, #acid"
+275730,Radd-053-Ac-Suzuki,3,1055,67457,Acylation of amines followed by Suzuki reaction,"#Suzuki reaction, #acylation"
+275732,Radd-054-Alk-Suzuki,3,1055,17027,,
+276010,Radd-058-Click-Boc-Ac,3,1050,33687,Triazole formation followed by Boc-deprotection and further acylation ,"#acylation, #heterocyclization, #triazole"
+276436,R111-ACYLATION,2,0,43082,"acylation of O,C-nucleophiles",#acylation
+276450,Radd-062-DA-Ar-Boc-Ac,3,1050,26972,Arylation of Boc-protected diamines followed by acylation with an acid,"#acylation, #arylation"
+276452,Radd-063-DA-SO2N-Boc-Ac,3,1050,27882,Boc-diamine sulfacylation followed by Boc cleavage and amide formation with an acid,"#acylation, #sulfacylation"
+276456,Radd-065-DA-Alk-Boc-Ac,3,1051,5940,Alkylation of Boc-diamines followed by Boc-deprotection and further acylation ,"#acylation, #alkylation"
+276492,R113-CyclicTHIOURONIUM,2,0,14240,Cyclic guanidine formation,#heterocyclization
+276630,Radd-068-135Subst124Triazole,3,1055,13900,Acylation of amidine followed by cyclization with hydrazine,"#heterocyclization, #triazole"
+276750,R119-ACYLATION,2,1050,13449,formation of amides containing sulfonyl fluoride group,#acylation
+277130,R142-DIHYDROURACYL,3,1050,12104,Dihydrouracyl synthesis from two amines,#heterocyclization
+277970,Radd-078-Ac-Boc-RAT,3,1051,45503,Acylation of monoBoc-diamine followed by Boc cleavage and reductive amination,"#acylation, #reductive amination"
+277990,R157-CARBAMATE,2,0,37804,"Carbamate from amine, alcohol and CDI",#urethane
+278578,R165-F-SULFAMIDE,2,0,22091,Formation of amino sulfonyl fluorides,#sulfacylation
+279130,Radd-093-Ac-Click#,3,1050,79721,Acylation followed by triazole formation via click reaction,"#acylation, #click, #heterocyclization, #triazole"
+279392,B-ESTER,2,0,48619,Alkylation of acids followed by t-Bu cleavage,"#acid, #alkylation"
+280130,T-ACYLATION,2,1050,91892,"Acylation, followed by cyclization of a nitrile into a tetrazole.","#acylation, #heterocyclization, #tetrazole"
+280150,Radd-111-Anh-Ac-Ar,3,1055,41928,,
+280176,Radd-113-Ac-SAc,3,1055,39359,,
+280178,T-MA2,2,1050,33043,Two-stage: 1) sec-amine alkylation; 2) azide cycloaddition,"#acid, #alkylation, #heterocyclization, #tetrazole"
+280190,Radd-115-NAc-Click-OH,3,1050,58437,Acylation followed by click reaction followed by ester hydrolysis,"#acid, #click, #triazole"
+280212,Radd-117-Ac-CN2Oxdzln,2,1055,41576,,
+280530,Radd-130-SO2N-Ar,3,1050,39914,Sulfacylation followed by amine arylation,"#arylation, #sulfacylation"
+280710,Radd-138-Ac-tBu-Ac,3,1050,135368,Acylation of t-Bu ester of the amino acid/diacid followed by t-Bu cleavage and another acylation,#acylation
+280750,Radd-139-T-SO2N,2,1055,28506,Sulfonamide formation followed by cyclization nitrile to tetrasole,"#heterocyclization, #sulfacylation, #tetrazole"
+281210,Radd-152-Ugi,4,1055,40199,,
+281510,Radd-158-RedAmin-Suzuki,3,1055,25556,,
+281570,Radd-159-Arylation-Suzuki,3,1055,24304,,
+281630,Radd-160-Ugi-T,3,1050,43105,Ugi-4CR reaction with TMS-azide as acid leading to 5-(aminomethyl)tetrazoles,"#heterocyclization, #isonitrile MCR, #tetrazole"
+282030,Radd-168-Ar-Ar,3,1050,39351,Amine arylation with aryl di-halide followed by arylation with another amine,#arylation
+282070,R192-CARBAMATE,2,0,64135,Carbamate formation from amines and chlorocarbonates,#acylation
+282150,R071a-Rd-Ar,3,1055,15385,Reductive amination of aldehyde followed by arylation with aryl halide,"#arylation, #reductive amination"
+282151,R071b-Rd-Ac,3,1050,57608,Reductive amination of an aldehyde followed by acylation with a carboxylic acid,"#acylation, #reductive amination"
+282152,R071c-Rd-Sac,3,1055,18732,,
+282153,R071d-Rd-Ur,3,1050,14951,Reductive amination of an aldehyde followed by urea formation,"#reductive amination, #urea"
+282154,R071e-Rd-Carbamate,3,1055,14946,,
+282155,R071f-Rd-Rd,3,1050,20784,Double reductive amination with two different aldehydes,#reductive amination
+282156,R071g-Rd-Ur1,3,1050,17400,Reductive amination of an aldehyde followed by urea formation,"#reductive amination, #urea"
+282157,R071h-Rd-Ur4,3,1055,17970,Sequential reductive amination and urea formation; High nucleophilic primary amine on second stage;,"#reductive amination, #urea"
+282270,VINYLSULFAMIDE,2,0,50540,Vinylsulfonamide formation from amine.,"#covalent binder, #sulfacylation"
+282410,Radd-173-Split-Ugi,4,1055,20743,Ugi-type MCR with symmetrical secondary diamine,#isonitrile MCR
+282490,Radd-176-Ugi-MF,3,1050,19691,Ugi-3CR reaction with sec-amines leading to the formation of alpha-aminoamides,#isonitrile MCR
+282512,Radd-178-AT-Click,2,1050,24283,Azide formation from primary amine followed by cyclization to triazole with acetylene,"#click, #triazole"
+282530,Radd-179-SAc-Alk,3,0,13113,"Acylation of NH2-sulfamide with chloroacetyl chloride, followed by alkylation of amine","#acylation, #alkylation"
+282730,Radd-190-GBB,3,0,4788,"GBB-3CR reaction between alpha-aminoheterocycle, aldehyde and isonitrile","#amine, #heterocyclization, #isonitrile MCR"
+282770,Boc-AMIDEMSCl,2,0,60825,Two-stage: 1) acylation with MsCl; 2) Boc-deprotection,"#acylation, #amine"
+282890,R194a-Lactim-Boc-Ac,3,1050,45801,"Triazole formation from lactim ester and hydrazide, followed by acylation with an acid","#acylation, #heterocyclization, #triazole"
+282910,Radd-196-Thzl-Boc-Ac,3,1050,34545,"Thiazole formation from thioamide/urea and halo ketone, followed by acylation with acid","#acylation, #thiazole"
+282970,R194b-Lactim-Boc-Ur1,3,1050,3397,"Triazole formation from lactim ester and hydrazide, followed by urea formation","#heterocyclization, #triazole, #urea"
+282971,R194c-Lactim-Boc-Alk,3,1050,2433,Triazole formation from lactim ester followed by BOC-deprotection and alkylation,"#alkylation, #heterocyclization, #triazole"
+282972,R194d-Lactim-Boc-Sac,3,1050,2595,"Triazole formation from lactim ester and hydrazide, followed by sulfacylation.","#heterocyclization, #sulfacylation, #triazole"
+283070,Radd-202-Thzl-Boc-SO2N,3,1055,4323,"Thiazole formation from thioamide/urea and alkyl ketone, followed by sulfacylation","#sulfacylation, #thiazole"
+283090,Radd-203-Ugi-3CR-CA,3,1050,21109,Ugi reaction with keto acids towards gamma- and delta-lactams,"#heterocyclization , #isonitrile MCR"
+283110,Radd-204-Ugi-3CR-AA,3,1050,6362,Ugi reaction with amino acids leading to beta-lactams,"#heterocyclization, #isonitrile MCR"
+283351,R198a-OXOISOINDOLE-Boc-Ac,3,1050,27187,Oxoisoindole formation / Boc cleavage / acylation with a carboxylic acid.,"#acylation, #heterocyclization, #reductive amination"
