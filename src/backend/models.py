@@ -132,6 +132,14 @@ class Reaction(models.Model):
     )
     reactionclass = models.CharField(max_length=255)
     recipe = models.CharField(max_length=50, default="standard")
+    recipe_id = models.ForeignKey(
+        "Recipe",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="reactions",
+        help_text="Links to the exact Recipe version used for this reaction",
+    )
     groupbycolumn = models.BooleanField(default=True)
     number = models.IntegerField()
     intramolecular = models.BooleanField(default=False)
@@ -939,3 +947,422 @@ class SolventPrep(models.Model):
         OTSession, related_name="solventpreps", on_delete=models.CASCADE
     )
     solventprepcsv = models.FileField(upload_to="solventprep/", max_length=255)
+
+
+# -------------------------------------------------------------------
+# Recipe models — normalised, versioned chemistry recipe definitions
+# -------------------------------------------------------------------
+
+
+class Recipe(models.Model):
+    """A versioned chemistry recipe for a reaction class.
+
+    Every save creates a new immutable row.  Edits produce a new row with
+    ``parent`` pointing to the original and an auto-incremented ``version``.
+    The unique key is ``(reaction_class, name, version)``.
+
+    Parameters
+    ----------
+    reaction_class : CharField
+        e.g. "Amidation", "Suzuki coupling".
+    name : CharField
+        Human-readable recipe name (e.g. "standard", "high-temp-v1").
+    version : PositiveIntegerField
+        Auto-incremented within (reaction_class, name).
+    parent : ForeignKey (self, nullable)
+        The recipe this version was derived from.  NULL for first version.
+    created_at : DateTimeField
+        Auto-populated creation timestamp.
+    created_by : CharField
+        Who created this version (optional).
+    description : TextField
+        Free-text notes.
+    intramolecular : BooleanField
+        Whether this reaction class supports an intramolecular pathway.
+    estimated_yield : PositiveIntegerField
+        Estimated yield percentage (optional).
+    reaction_smarts : JSONField
+        List of reaction SMARTS strings for product validation.
+    references : TextField
+        Literature or internal references (optional).
+    """
+
+    reaction_class = models.CharField(max_length=255, db_index=True)
+    name = models.CharField(max_length=255)
+    version = models.PositiveIntegerField(default=1)
+    parent = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="derived_versions",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=255, blank=True, default="")
+    description = models.TextField(blank=True, default="")
+    intramolecular = models.BooleanField(default=False)
+    estimated_yield = models.PositiveIntegerField(null=True, blank=True)
+    reaction_smarts = models.JSONField(default=list, blank=True)
+    references = models.TextField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ["reaction_class", "name", "version"]
+        ordering = ["reaction_class", "name", "-version"]
+
+    def __str__(self):
+        return f"{self.reaction_class} / {self.name} (v{self.version})"
+
+
+class RecipeActionSession(models.Model):
+    """A session (unit of execution) within a recipe.
+
+    Sessions group actions into logical blocks — reaction, stir, workup,
+    analyse.  Ordering is determined by position in the ``sessions`` list
+    (stored as ``session_number``).
+
+    Parameters
+    ----------
+    recipe : ForeignKey → Recipe
+        Parent recipe.
+    session_number : PositiveIntegerField
+        1-indexed execution order within the recipe.
+    session_type : CharField
+        One of reaction | stir | workup | workup1 | workup2 | analyse.
+    driver : CharField
+        One of robot | human.
+    continuation : BooleanField
+        Whether this session continues from a previous session
+        (e.g. add amine after pre-activation stir).
+    """
+
+    class SessionType(models.TextChoices):
+        REACTION = "reaction"
+        STIR = "stir"
+        WORKUP = "workup"
+        WORKUP1 = "workup1"
+        WORKUP2 = "workup2"
+        ANALYSE = "analyse"
+
+    class SessionDriver(models.TextChoices):
+        HUMAN = "human"
+        ROBOT = "robot"
+
+    recipe = models.ForeignKey(
+        Recipe, related_name="action_sessions", on_delete=models.CASCADE
+    )
+    session_number = models.PositiveIntegerField()
+    session_type = models.CharField(choices=SessionType.choices, max_length=20)
+    driver = models.CharField(
+        choices=SessionDriver.choices,
+        default=SessionDriver.ROBOT,
+        max_length=10,
+    )
+    continuation = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["session_number"]
+        unique_together = ["recipe", "session_number"]
+
+    def __str__(self):
+        return (
+            f"Session {self.session_number} ({self.session_type}) "
+            f"of {self.recipe}"
+        )
+
+
+class RecipeAddAction(models.Model):
+    """An add-material step in a recipe session.
+
+    Defines what material to add, how much, from/to which plate.
+    The ``molecular_context`` field controls whether this action applies
+    to the intermolecular pathway or intramolecular pathway.  Only relevant
+    for reaction-type sessions where some recipes define different add
+    actions depending on whether the specific reaction instance is
+    intramolecular (single reactant) or intermolecular (two reactants).
+    The consumer filters on ``Reaction.intramolecular`` at runtime.
+
+    Parameters
+    ----------
+    session : ForeignKey → RecipeActionSession
+    action_number : PositiveIntegerField
+        Execution order within the session (auto-assigned from list position).
+    molecular_context : CharField
+        intermolecular | intramolecular.
+    material_smarts : CharField
+        SMARTS pattern to match a reactant by substructure.
+    material_smiles : CharField
+        Explicit SMILES for reagents, catalysts, solvents.
+    equivalents : FloatField
+        Amount value — meaning depends on quantity_unit.
+    quantity_unit : CharField
+        moleq | ul.
+    solvent : CharField
+        Solvent used to prepare the material solution.
+    concentration : FloatField
+        Concentration of the prepared solution (mol/L).
+    density : FloatField
+        Neat density (g/mL) for liquid reagents dispensed without solvent.
+    from_plate : CharField
+        Source plate type (default: startingmaterial).
+    to_plate : CharField
+        Destination plate type (default: reaction).
+    """
+
+    class MolecularContext(models.TextChoices):
+        INTERMOLECULAR = "intermolecular"
+        INTRAMOLECULAR = "intramolecular"
+
+    class QuantityUnit(models.TextChoices):
+        MOLEQ = "moleq"
+        UL = "ul"
+        MOLARITY = "M"
+        MICROMOLARITY = "uM"
+
+    class PlateType(models.TextChoices):
+        REACTION = "reaction"
+        WORKUP1 = "workup1"
+        WORKUP2 = "workup2"
+        WORKUP3 = "workup3"
+        SPEFILTER = "spefilter"
+        LCMS = "lcms"
+        XCHEM = "xchem"
+        NMR = "nmr"
+        STARTINGMATERIAL = "startingmaterial"
+        SOLVENT = "solvent"
+
+    session = models.ForeignKey(
+        RecipeActionSession, related_name="add_actions", on_delete=models.CASCADE
+    )
+    action_number = models.PositiveIntegerField()
+    molecular_context = models.CharField(
+        choices=MolecularContext.choices,
+        default=MolecularContext.INTERMOLECULAR,
+        max_length=20,
+    )
+    material_smarts = models.CharField(max_length=500, null=True, blank=True)
+    material_smiles = models.CharField(max_length=500, null=True, blank=True)
+    equivalents = models.FloatField()
+    quantity_unit = models.CharField(
+        choices=QuantityUnit.choices,
+        default=QuantityUnit.MOLEQ,
+        max_length=10,
+    )
+    solvent = models.CharField(max_length=255, null=True, blank=True)
+    concentration = models.FloatField(null=True, blank=True)
+    density = models.FloatField(null=True, blank=True)
+    from_plate = models.CharField(
+        choices=PlateType.choices,
+        default=PlateType.STARTINGMATERIAL,
+        max_length=20,
+    )
+    to_plate = models.CharField(
+        choices=PlateType.choices,
+        default=PlateType.REACTION,
+        max_length=20,
+    )
+
+    class Meta:
+        ordering = ["action_number"]
+
+    def __str__(self):
+        material = self.material_smarts or self.material_smiles or "product"
+        return f"Add {material} (#{self.action_number}) in {self.session}"
+
+
+class RecipeStirAction(models.Model):
+    """A stir/incubation step in a recipe session.
+
+    Parameters
+    ----------
+    session : ForeignKey → RecipeActionSession
+    action_number : PositiveIntegerField
+    temperature : FloatField
+        Target temperature.
+    temperature_unit : CharField
+        Default degC.
+    duration : FloatField
+        How long to stir.
+    duration_unit : CharField
+        Default hours.
+    stirring_speed : CharField
+        gentle | normal | vigorous.
+    plate_type : CharField
+        The plate being stirred (default: reaction).
+    """
+
+    class StirSpeed(models.TextChoices):
+        GENTLE = "gentle"
+        NORMAL = "normal"
+        VIGOROUS = "vigorous"
+
+    class TemperatureUnit(models.TextChoices):
+        DEGCEL = "degC"
+        KELVIN = "K"
+    
+    class DurationUnit(models.TextChoices):
+        SECONDS = "seconds"
+        MINUTES = "minutes"
+        HOURS = "hours"
+
+    class PlateType(models.TextChoices):
+        REACTION = "reaction"
+        WORKUP1 = "workup1"
+        WORKUP2 = "workup2"
+        WORKUP3 = "workup3"
+        SPEFILTER = "spefilter"
+        LCMS = "lcms"
+        XCHEM = "xchem"
+        NMR = "nmr"
+        STARTINGMATERIAL = "startingmaterial"
+        SOLVENT = "solvent"
+
+    session = models.ForeignKey(
+        RecipeActionSession, related_name="stir_actions", on_delete=models.CASCADE
+    )
+    action_number = models.PositiveIntegerField()
+    temperature = models.FloatField(default=25)
+    temperature_unit = models.CharField(max_length=10, default="degC")
+    duration = models.FloatField()
+    duration_unit = models.CharField(max_length=10, default="hours")
+    stirring_speed = models.CharField(
+        choices=StirSpeed.choices,
+        default=StirSpeed.NORMAL,
+        max_length=10,
+    )
+    plate_type = models.CharField(
+        choices=PlateType.choices,
+        default=PlateType.REACTION,
+        max_length=20,
+    )
+
+    class Meta:
+        ordering = ["action_number"]
+
+    def __str__(self):
+        return (
+            f"Stir {self.temperature}{self.temperature_unit} "
+            f"{self.duration}{self.duration_unit} (#{self.action_number}) "
+            f"in {self.session}"
+        )
+
+
+class RecipeExtractAction(models.Model):
+    """A liquid-liquid extraction step in a recipe session.
+
+    Parameters
+    ----------
+    session : ForeignKey → RecipeActionSession
+    action_number : PositiveIntegerField
+    layer : CharField
+        Which layer to extract (top | bottom).
+    volume : FloatField
+        Volume to extract (uL).
+    bottom_layer_volume : FloatField
+        Volume of the bottom layer (uL), used for volume calculations.
+    smiles : CharField
+        Optional SMILES of the extraction solvent.
+    solvent : CharField
+        Solvent name.
+    concentration : FloatField
+        Optional concentration of extracted material.
+    from_plate : CharField
+        Source plate (default: reaction).
+    to_plate : CharField
+        Destination plate (default: workup1).
+    """
+
+    class Layer(models.TextChoices):
+        TOP = "top"
+        BOTTOM = "bottom"
+
+    class PlateType(models.TextChoices):
+        REACTION = "reaction"
+        WORKUP1 = "workup1"
+        WORKUP2 = "workup2"
+        WORKUP3 = "workup3"
+        SPEFILTER = "spefilter"
+        LCMS = "lcms"
+        XCHEM = "xchem"
+        NMR = "nmr"
+        STARTINGMATERIAL = "startingmaterial"
+        SOLVENT = "solvent"
+
+    session = models.ForeignKey(
+        RecipeActionSession, related_name="extract_actions", on_delete=models.CASCADE
+    )
+    action_number = models.PositiveIntegerField()
+    layer = models.CharField(
+        choices=Layer.choices,
+        default=Layer.BOTTOM,
+        max_length=10,
+    )
+    volume = models.FloatField()
+    bottom_layer_volume = models.FloatField(null=True, blank=True)
+    smiles = models.CharField(max_length=500, null=True, blank=True)
+    solvent = models.CharField(max_length=255, null=True, blank=True)
+    concentration = models.FloatField(null=True, blank=True)
+    from_plate = models.CharField(
+        choices=PlateType.choices,
+        default=PlateType.REACTION,
+        max_length=20,
+    )
+    to_plate = models.CharField(
+        choices=PlateType.choices,
+        default=PlateType.WORKUP1,
+        max_length=20,
+    )
+
+    class Meta:
+        ordering = ["action_number"]
+
+    def __str__(self):
+        return (
+            f"Extract {self.layer} layer {self.volume}uL "
+            f"(#{self.action_number}) in {self.session}"
+        )
+
+
+class RecipeMixAction(models.Model):
+    """A mixing step in a recipe session.
+
+    Parameters
+    ----------
+    session : ForeignKey → RecipeActionSession
+    action_number : PositiveIntegerField
+    plate_type : CharField
+        The plate to mix (default: reaction).
+    repetitions : PositiveIntegerField
+        Number of mix cycles.
+    """
+
+    class PlateType(models.TextChoices):
+        REACTION = "reaction"
+        WORKUP1 = "workup1"
+        WORKUP2 = "workup2"
+        WORKUP3 = "workup3"
+        SPEFILTER = "spefilter"
+        LCMS = "lcms"
+        XCHEM = "xchem"
+        NMR = "nmr"
+        STARTINGMATERIAL = "startingmaterial"
+        SOLVENT = "solvent"
+
+    session = models.ForeignKey(
+        RecipeActionSession, related_name="mix_actions", on_delete=models.CASCADE
+    )
+    action_number = models.PositiveIntegerField()
+    plate_type = models.CharField(
+        choices=PlateType.choices,
+        default=PlateType.REACTION,
+        max_length=20,
+    )
+    repetitions = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ["action_number"]
+
+    def __str__(self):
+        return (
+            f"Mix {self.repetitions}x on {self.plate_type} "
+            f"(#{self.action_number}) in {self.session}"
+        )
