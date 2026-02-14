@@ -1,0 +1,246 @@
+{
+    "reaction_class": "Amidation",
+    "name": "standard",
+    "description": "Standard amidation with T3P coupling, DIPEA base, DMA solvent. Supports both inter- and intramolecular pathways.",
+    "intramolecular": true,
+    "estimated_yield": 85,
+    "reaction_smarts": [
+        "[#6:1](=[#8:2])-[#8;H1].[#7;H3,H2,H1:3]>>[#6:1](=[#8:2])-[#7:3]"
+    ],
+    "references": null,
+    "action_sessions": [
+        {
+            "session_type": "reaction",
+            "driver": "robot",
+            "continuation": false,
+            "actions": [
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": "[#6:1](=[#8:2])-[#8;H1]",
+                    "material_smiles": null,
+                    "equivalents": 1.0,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 0.5,
+                    "density": null,
+                    "from_plate_role": "startingmaterial",
+                    "from_plate_index": 1,
+                    "to_plate_role": "reaction",
+                    "to_plate_index": 1
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": null,
+                    "material_smiles": "CCCP1(=O)OP(=O)(OP(=O)(O1)CCC)CCC",
+                    "equivalents": 1.2,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 0.5,
+                    "density": null,
+                    "from_plate_role": "startingmaterial",
+                    "from_plate_index": 1,
+                    "to_plate_role": "reaction",
+                    "to_plate_index": 1
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": null,
+                    "material_smiles": "CCN(C(C)C)C(C)C",
+                    "equivalents": 3.5,
+                    "quantity_unit": "moleq",
+                    "solvent": null,
+                    "concentration": null,
+                    "density": 0.74,
+                    "from_plate_role": "startingmaterial",
+                    "from_plate_index": 1,
+                    "to_plate_role": "reaction",
+                    "to_plate_index": 1
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intramolecular",
+                    "material_smarts": "[#6:1](=[#8:2])-[#8;H1]",
+                    "material_smiles": null,
+                    "equivalents": 1.0,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 0.5,
+                    "density": null,
+                    "from_plate_role": "startingmaterial",
+                    "from_plate_index": 1,
+                    "to_plate_role": "reaction",
+                    "to_plate_index": 1
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intramolecular",
+                    "material_smarts": null,
+                    "material_smiles": "CCCP1(=O)OP(=O)(OP(=O)(O1)CCC)CCC",
+                    "equivalents": 1.2,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 0.5,
+                    "density": null,
+                    "from_plate_role": "startingmaterial",
+                    "from_plate_index": 1,
+                    "to_plate_role": "reaction",
+                    "to_plate_index": 1
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intramolecular",
+                    "material_smarts": null,
+                    "material_smiles": "CCN(C(C)C)C(C)C",
+                    "equivalents": 3.5,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 10.0,
+                    "density": null,
+                    "from_plate_role": "startingmaterial",
+                    "from_plate_index": 1,
+                    "to_plate_role": "reaction",
+                    "to_plate_index": 1
+                }
+            ]
+        },
+        {
+            "session_type": "reaction",
+            "driver": "robot",
+            "continuation": true,
+            "actions": [
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": "[#7;H3,H2,H1]",
+                    "material_smiles": null,
+                    "equivalents": 1.1,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 0.5,
+                    "density": null,
+                    "from_plate_role": "startingmaterial",
+                    "from_plate_index": 1,
+                    "to_plate_role": "reaction",
+                    "to_plate_index": 1
+                }
+            ]
+        },
+        {
+            "session_type": "stir",
+            "driver": "human",
+            "continuation": false,
+            "actions": [
+                {
+                    "type": "stir",
+                    "temperature": 25.0,
+                    "temperature_unit": "degC",
+                    "duration": 12.0,
+                    "duration_unit": "hours",
+                    "stirring_speed": "normal",
+                    "plate_role": "reaction",
+                    "plate_index": 1
+                }
+            ]
+        },
+        {
+            "session_type": "workup",
+            "driver": "robot",
+            "continuation": false,
+            "actions": [
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": null,
+                    "material_smiles": "CC#N",
+                    "equivalents": 200.0,
+                    "quantity_unit": "uL",
+                    "solvent": "ACN",
+                    "concentration": null,
+                    "density": null,
+                    "from_plate_role": "solvent",
+                    "from_plate_index": 1,
+                    "to_plate_role": "reaction",
+                    "to_plate_index": 1
+                }
+            ]
+        },
+        {
+            "session_type": "stir",
+            "driver": "human",
+            "continuation": false,
+            "actions": [
+                {
+                    "type": "stir",
+                    "temperature": 25.0,
+                    "temperature_unit": "degC",
+                    "duration": 1.0,
+                    "duration_unit": "hours",
+                    "stirring_speed": "normal",
+                    "plate_role": "reaction",
+                    "plate_index": 1
+                }
+            ]
+        },
+        {
+            "session_type": "workup",
+            "driver": "robot",
+            "continuation": false,
+            "actions": [
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": null,
+                    "material_smiles": null,
+                    "equivalents": 200.0,
+                    "quantity_unit": "uL",
+                    "solvent": null,
+                    "concentration": null,
+                    "density": null,
+                    "from_plate_role": "reaction",
+                    "from_plate_index": 1,
+                    "to_plate_role": "spefilter",
+                    "to_plate_index": 1
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": null,
+                    "material_smiles": "CC#N",
+                    "equivalents": 200.0,
+                    "quantity_unit": "uL",
+                    "solvent": "ACN",
+                    "concentration": null,
+                    "density": null,
+                    "from_plate_role": "solvent",
+                    "from_plate_index": 1,
+                    "to_plate_role": "reaction",
+                    "to_plate_index": 1
+                },
+                {
+                    "type": "mix",
+                    "repetitions": 3,
+                    "plate_role": "reaction",
+                    "plate_index": 1
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": null,
+                    "material_smiles": null,
+                    "equivalents": 300.0,
+                    "quantity_unit": "uL",
+                    "solvent": null,
+                    "concentration": null,
+                    "density": null,
+                    "from_plate_role": "reaction",
+                    "from_plate_index": 1,
+                    "to_plate_role": "spefilter",
+                    "to_plate_index": 1
+                }
+            ]
+        }
+    ]
+}

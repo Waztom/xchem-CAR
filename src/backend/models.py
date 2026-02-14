@@ -819,7 +819,7 @@ class Column(models.Model):
     )
     plate_id = models.ForeignKey(Plate, on_delete=models.CASCADE)
     index = models.IntegerField()
-    role = models.CharField(choices=PlateRole.choices, max_length=20)
+    role = models.CharField(choices=PlateRole.choices, max_length=20, null=True)
     role_index = models.PositiveIntegerField(default=1)
     reactionclass = models.CharField(max_length=100)
 
@@ -874,7 +874,7 @@ class Well(models.Model):
     column_id = models.ForeignKey(Column, on_delete=models.CASCADE, null=True)
     index = models.IntegerField()
     name = models.CharField(max_length=3, null=True)
-    role = models.CharField(choices=PlateRole.choices, max_length=20)
+    role = models.CharField(choices=PlateRole.choices, max_length=20, null=True)
     role_index = models.PositiveIntegerField(default=1)
     volume = models.FloatField(null=True)
     smiles = models.CharField(max_length=255, null=True)
