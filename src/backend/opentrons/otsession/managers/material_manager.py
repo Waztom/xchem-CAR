@@ -520,7 +520,7 @@ class MaterialManager:
     def calc_mass(self, row) -> float:
         """
         Calculates the mass of material (mg) from the
-        concentration (mol/L) and volume (ul) needed.
+        concentration (mol/L) and volume (uL) needed.
 
         Parameters
         ----------

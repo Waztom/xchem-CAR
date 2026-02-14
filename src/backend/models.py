@@ -314,7 +314,7 @@ class AddAction(models.Model):
     volume: FloatField
         The volume being added
     volumeunit: CharField
-        The unit of the volume being added (default=ul)
+        The unit of the volume being added (default=uL)
     molecularweight: FloatField
         The molecular weight of the compound being added
     solvent: CharField
@@ -326,11 +326,11 @@ class AddAction(models.Model):
     class CalcUnit(models.TextChoices):
         moleq = "moleq"
         masseq = "masseq"
-        ul = "ul"
+        uL = "uL"
 
     class VolumeUnit(models.TextChoices):
-        ul = "ul"
-        ml = "ml"
+        uL = "uL"
+        mL = "mL"
 
     class MassUnit(models.TextChoices):
         mg = "mg"
@@ -361,7 +361,7 @@ class AddAction(models.Model):
     )
     volume = models.FloatField(null=True)
     volumeunit = models.CharField(
-        choices=VolumeUnit.choices, default="ul", max_length=2
+        choices=VolumeUnit.choices, default="uL", max_length=2
     )
     mass = models.FloatField(null=True)
     massunit = models.CharField(choices=MassUnit.choices, default="mg", max_length=2)
@@ -393,11 +393,11 @@ class ExtractAction(models.Model):
     volume: FloatField
         The volume to extract
     volumeunit: CharField
-        The unit of the volume being extracted (default=ul)
+        The unit of the volume being extracted (default=uL)
     molecularweight: FloatField
         The molecular weight of the compound being added
     bottomlayervolume:
-        The volume of the bottom layer (ul)
+        The volume of the bottom layer (uL)
     bottomlayervolumeunit:
         The otional unit used to calculate the volume of the bottom layer
     solvent: CharField
@@ -432,10 +432,10 @@ class ExtractAction(models.Model):
     layer = models.CharField(choices=Layer.choices, default="bottom", max_length=10)
     smiles = models.CharField(max_length=255)
     volume = models.FloatField()
-    volumeunit = models.CharField(default="ul", max_length=2)
+    volumeunit = models.CharField(default="uL", max_length=2)
     molecularweight = models.FloatField()
     bottomlayervolume = models.FloatField(null=True)
-    bottomlayervolumeunit = models.CharField(default="ul", max_length=2)
+    bottomlayervolumeunit = models.CharField(default="uL", max_length=2)
     solvent = models.CharField(max_length=255, null=True)
     concentration = models.FloatField(null=True)
 
@@ -666,7 +666,7 @@ class Pipette(models.Model):
     type: CharField
         The type of pipette could be single or multi channel
     maxvolume: FloatField
-        The maximum volume (ul) of the pipette
+        The maximum volume (uL) of the pipette
     name: CharField
         The name of the pipette - this is a combination of the OT labware name (p300_single)
         and the position of the pipette uses in the session (right) eg. right_p300_single
@@ -729,7 +729,7 @@ class Plate(models.Model):
     type: CharField
         The type of plate eg. analyse and reaction plate
     maxwellvolume: FloatField
-        The maximum plate well volume (ul)
+        The maximum plate well volume (uL)
     numberwells: IntegerField
         The number of plate wells
     wellavailable: BooleanField
@@ -841,7 +841,7 @@ class Well(models.Model):
     type: CharField
         The type of well eg. analyse and reaction well
     volume: FloatField
-        The optional volume of the contents in the well (ul)
+        The optional volume of the contents in the well (uL)
     smiles: CharField
         The optional SMILES of the well contents
     concentration: FloatField
@@ -940,7 +940,7 @@ class SolventPrep(models.Model):
     otsession_id: ForeignKey
         Foreign key linking a plate to an OT session
     solventprepcsv: FileField
-        The csv file with solvent amount (ul), plate name and well index
+        The csv file with solvent amount (uL), plate name and well index
     """
 
     otsession_id = models.ForeignKey(
@@ -1095,7 +1095,7 @@ class RecipeAddAction(models.Model):
     equivalents : FloatField
         Amount value — meaning depends on quantity_unit.
     quantity_unit : CharField
-        moleq | ul.
+        moleq | uL.
     solvent : CharField
         Solvent used to prepare the material solution.
     concentration : FloatField
@@ -1114,7 +1114,7 @@ class RecipeAddAction(models.Model):
 
     class QuantityUnit(models.TextChoices):
         MOLEQ = "moleq"
-        UL = "ul"
+        UL = "uL"
         MOLARITY = "M"
         MICROMOLARITY = "uM"
 

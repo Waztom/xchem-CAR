@@ -345,7 +345,7 @@ class CommandGenerator:
         List[str]
             Transfer fluid commands
         """
-        humanread = f"transfertype - {transfertype} - transfer - {transvolume:.1f}ul from {aspiratewellindex} to {dispensewellindex}"
+        humanread = f"transfertype - {transfertype} - transfer - {transvolume:.1f}uL from {aspiratewellindex} to {dispensewellindex}"
 
         logger.info(f"Generating single-channel fluid transfer: {transfertype}")
         logger.info(
@@ -406,7 +406,7 @@ class CommandGenerator:
         List[str]
             Transfer fluid commands
         """
-        humanread = f"transfertype - {transfertype} - transfer - {transvolume:.1f}ul from {aspiratecolumnindex} column to {dispensecolumnindex} column"
+        humanread = f"transfertype - {transfertype} - transfer - {transvolume:.1f}uL from {aspiratecolumnindex} column to {dispensecolumnindex} column"
 
         logger.info(f"Generating multi-channel fluid transfer: {transfertype}")
         logger.info(

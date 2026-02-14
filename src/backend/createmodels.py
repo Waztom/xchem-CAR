@@ -669,7 +669,7 @@ class CreateEncodedActionModels(object):
         reactant_density: float = None,
         reactant_MW: float = None,
     ) -> float:
-        """Calculates the reactant volume (ul) required for an add action step
+        """Calculates the reactant volume (uL) required for an add action step
 
         Parameters
         ----------
@@ -680,14 +680,14 @@ class CreateEncodedActionModels(object):
         conc_reagents: float
             The optional concentration of the reactant
         reactant_density: float
-            The optional density (g/ml) of the reactant
+            The optional density (g/mL) of the reactant
         reactant_MW: float
             The optional molecular weight (g/mol) of the reactant
 
         Returns
         -------
         vol_material: float
-            The volume (ul) of the material required for the add action step
+            The volume (uL) of the material required for the add action step
         """
         try:
             if calcunit == "masseq":
@@ -800,7 +800,7 @@ class CreateEncodedActionModels(object):
             add.toplatetype = toplatetype
             add.smiles = smiles
             add.molecularweight = molecular_weight
-            if calcunit == "ul":
+            if calcunit == "uL":
                 add.volume = calcvalue
                 add.solvent = solvent
             if calcunit == "masseq":
@@ -873,7 +873,7 @@ class CreateEncodedActionModels(object):
             extract.toplatetype = toplatetype
             extract.smiles = smiles
             extract.molecularweight = molecular_weight
-            if calcunit == "ul":
+            if calcunit == "uL":
                 extract.volume = calcvalue
                 extract.solvent = solvent
             if calcunit == "masseq":
