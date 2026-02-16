@@ -115,11 +115,55 @@ def ingest_recipe_from_json(data: dict) -> Recipe:
 
 # ── helpers: DB → JSON export ──────────────────────────────────────
 
+def _omit_defaults(d: dict, defaults: dict) -> dict:
+    """Return *d* with entries removed when their value equals the default.
+
+    Also strips any key whose value is ``None``.
+    """
+    return {
+        k: v
+        for k, v in d.items()
+        if v is not None and v != defaults.get(k, _SENTINEL)
+    }
+
+
+_SENTINEL = object()  # marker so we keep keys with no listed default
+
+# Defaults for each action / session / recipe level.
+_ADD_DEFAULTS = {
+    "quantity_unit": "moleq",
+    "from_plate_index": 1,
+    "to_plate_index": 1,
+}
+_STIR_DEFAULTS = {
+    "temperature": 25,
+    "temperature_unit": "degC",
+    "duration_unit": "hours",
+    "stirring_speed": "normal",
+    "plate_index": 1,
+}
+_EXTRACT_DEFAULTS = {
+    "from_plate_index": 1,
+    "to_plate_index": 1,
+}
+_MIX_DEFAULTS = {
+    "plate_index": 1,
+}
+_SESSION_DEFAULTS = {
+    "continuation": False,
+}
+_RECIPE_DEFAULTS = {
+    "description": "",
+    "references": None,
+}
+
+
 def export_recipe_to_json(recipe: Recipe) -> dict:
     """Export a Recipe and all child sessions/actions to a JSON-serialisable dict.
 
+    Produces the *lean* canonical format: keys whose values equal the
+    documented default are omitted so chemists only see what matters.
     This is the reference export implementation used by the tests.
-    The production ``to_encoded_format()`` method should produce identical output.
     """
     sessions_out = []
 
@@ -135,19 +179,25 @@ def export_recipe_to_json(recipe: Recipe) -> dict:
             }
             if add.molecular_context is not None:
                 action_dict["molecular_context"] = add.molecular_context
-            action_dict.update({
-                "material_smarts": add.material_smarts,
-                "material_smiles": add.material_smiles,
-                "equivalents": add.equivalents,
-                "quantity_unit": add.quantity_unit,
-                "solvent": add.solvent,
-                "concentration": add.concentration,
-                "density": add.density,
-                "from_plate_role": add.from_plate_role,
-                "from_plate_index": add.from_plate_index,
-                "to_plate_role": add.to_plate_role,
-                "to_plate_index": add.to_plate_index,
-            })
+            if add.material_smarts is not None:
+                action_dict["material_smarts"] = add.material_smarts
+            if add.material_smiles is not None:
+                action_dict["material_smiles"] = add.material_smiles
+            action_dict["equivalents"] = add.equivalents
+            if add.quantity_unit != "moleq":
+                action_dict["quantity_unit"] = add.quantity_unit
+            if add.solvent is not None:
+                action_dict["solvent"] = add.solvent
+            if add.concentration is not None:
+                action_dict["concentration"] = add.concentration
+            if add.density is not None:
+                action_dict["density"] = add.density
+            action_dict["from_plate_role"] = add.from_plate_role
+            if add.from_plate_index != 1:
+                action_dict["from_plate_index"] = add.from_plate_index
+            action_dict["to_plate_role"] = add.to_plate_role
+            if add.to_plate_index != 1:
+                action_dict["to_plate_index"] = add.to_plate_index
             tagged.append((
                 add.action_number,
                 add.molecular_context or "",  # NULL sorts before "inter…"
@@ -155,50 +205,60 @@ def export_recipe_to_json(recipe: Recipe) -> dict:
             ))
 
         for stir in session.stir_actions.all().order_by("action_number"):
+            stir_dict: dict = {"type": "stir"}
+            if stir.temperature != 25:
+                stir_dict["temperature"] = stir.temperature
+            if stir.temperature_unit != "degC":
+                stir_dict["temperature_unit"] = stir.temperature_unit
+            stir_dict["duration"] = stir.duration
+            if stir.duration_unit != "hours":
+                stir_dict["duration_unit"] = stir.duration_unit
+            if stir.stirring_speed != "normal":
+                stir_dict["stirring_speed"] = stir.stirring_speed
+            stir_dict["plate_role"] = stir.plate_role
+            if stir.plate_index != 1:
+                stir_dict["plate_index"] = stir.plate_index
             tagged.append((
                 stir.action_number,
                 "",  # no molecular_context — sorts first
-                {
-                    "type": "stir",
-                    "temperature": stir.temperature,
-                    "temperature_unit": stir.temperature_unit,
-                    "duration": stir.duration,
-                    "duration_unit": stir.duration_unit,
-                    "stirring_speed": stir.stirring_speed,
-                    "plate_role": stir.plate_role,
-                    "plate_index": stir.plate_index,
-                },
+                stir_dict,
             ))
 
         for extract in session.extract_actions.all().order_by("action_number"):
+            extract_dict: dict = {"type": "extract"}
+            if extract.layer is not None:
+                extract_dict["layer"] = extract.layer
+            extract_dict["volume"] = extract.volume
+            if extract.bottom_layer_volume is not None:
+                extract_dict["bottom_layer_volume"] = extract.bottom_layer_volume
+            if extract.smiles is not None:
+                extract_dict["smiles"] = extract.smiles
+            if extract.solvent is not None:
+                extract_dict["solvent"] = extract.solvent
+            if extract.concentration is not None:
+                extract_dict["concentration"] = extract.concentration
+            extract_dict["from_plate_role"] = extract.from_plate_role
+            if extract.from_plate_index != 1:
+                extract_dict["from_plate_index"] = extract.from_plate_index
+            extract_dict["to_plate_role"] = extract.to_plate_role
+            if extract.to_plate_index != 1:
+                extract_dict["to_plate_index"] = extract.to_plate_index
             tagged.append((
                 extract.action_number,
                 "",
-                {
-                    "type": "extract",
-                    "layer": extract.layer,
-                    "volume": extract.volume,
-                    "bottom_layer_volume": extract.bottom_layer_volume,
-                    "smiles": extract.smiles,
-                    "solvent": extract.solvent,
-                    "concentration": extract.concentration,
-                    "from_plate_role": extract.from_plate_role,
-                    "from_plate_index": extract.from_plate_index,
-                    "to_plate_role": extract.to_plate_role,
-                    "to_plate_index": extract.to_plate_index,
-                },
+                extract_dict,
             ))
 
         for mix in session.mix_actions.all().order_by("action_number"):
+            mix_dict: dict = {"type": "mix"}
+            mix_dict["repetitions"] = mix.repetitions
+            mix_dict["plate_role"] = mix.plate_role
+            if mix.plate_index != 1:
+                mix_dict["plate_index"] = mix.plate_index
             tagged.append((
                 mix.action_number,
                 "",
-                {
-                    "type": "mix",
-                    "plate_role": mix.plate_role,
-                    "plate_index": mix.plate_index,
-                    "repetitions": mix.repetitions,
-                },
+                mix_dict,
             ))
 
         # Sort by (action_number, molecular_context) so inter always
@@ -206,23 +266,30 @@ def export_recipe_to_json(recipe: Recipe) -> dict:
         tagged.sort(key=lambda t: (t[0], t[1]))
         actions_out = [entry[2] for entry in tagged]
 
-        sessions_out.append({
+        sess_dict: dict = {
             "session_type": session.session_type,
             "driver": session.driver,
-            "continuation": session.continuation,
-            "actions": actions_out,
-        })
+        }
+        if session.continuation:
+            sess_dict["continuation"] = True
+        sess_dict["actions"] = actions_out
+        sessions_out.append(sess_dict)
 
-    return {
+    result: dict = {
         "reaction_class": recipe.reaction_class,
         "name": recipe.name,
-        "description": recipe.description,
-        "intramolecular": recipe.intramolecular,
-        "estimated_yield": recipe.estimated_yield,
-        "reaction_smarts": recipe.reaction_smarts,
-        "references": recipe.references,
-        "action_sessions": sessions_out,
     }
+    if recipe.description:
+        result["description"] = recipe.description
+    result["intramolecular"] = recipe.intramolecular
+    if recipe.estimated_yield is not None:
+        result["estimated_yield"] = recipe.estimated_yield
+    if recipe.reaction_smarts:
+        result["reaction_smarts"] = recipe.reaction_smarts
+    if recipe.references is not None:
+        result["references"] = recipe.references
+    result["action_sessions"] = sessions_out
+    return result
 
 
 class AmidationRecipeTestCase(TestCase):
@@ -742,13 +809,20 @@ class RecipeJSONRoundTripTestCase(TestCase):
             "intramolecular",
             "estimated_yield",
             "reaction_smarts",
-            "references",
         ]:
             self.assertEqual(
-                exported[key],
-                self.source_json[key],
+                exported.get(key),
+                self.source_json.get(key),
                 f"Mismatch on recipe key '{key}'",
             )
+        # Optional keys — only compare when present in the source fixture
+        for key in ["description", "references"]:
+            if key in self.source_json:
+                self.assertEqual(
+                    exported.get(key),
+                    self.source_json[key],
+                    f"Mismatch on recipe key '{key}'",
+                )
 
     def test_round_trip_session_count(self):
         exported = export_recipe_to_json(self.recipe)
@@ -763,12 +837,18 @@ class RecipeJSONRoundTripTestCase(TestCase):
             zip(exported["action_sessions"], self.source_json["action_sessions"]),
             start=1,
         ):
-            for key in ["session_type", "driver", "continuation"]:
+            for key in ["session_type", "driver"]:
                 self.assertEqual(
                     exp_sess[key],
                     src_sess[key],
                     f"Session {idx} mismatch on '{key}'",
                 )
+            # continuation is omitted when False (the default)
+            self.assertEqual(
+                exp_sess.get("continuation", False),
+                src_sess.get("continuation", False),
+                f"Session {idx} mismatch on 'continuation'",
+            )
 
     def test_round_trip_action_counts_per_session(self):
         exported = export_recipe_to_json(self.recipe)

@@ -1,0 +1,188 @@
+{
+    "reaction_class": "Mitsunobu",
+    "name": "standard_with_extraction",
+    "description": "Mitsunobu reaction with DIAD/PPh3 activation followed by liquid-liquid extraction workup. Demonstrates multi-stage workup with explicit plate_index routing.",
+    "intramolecular": false,
+    "estimated_yield": 70,
+    "reaction_smarts": [
+        "[#8;H1:1].[#8;H1:2]>>[#8:1]-[#6]-[#8:2]"
+    ],
+    "action_sessions": [
+        {
+            "session_type": "reaction",
+            "driver": "robot",
+            "actions": [
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": "[#8;H1:1]",
+                    "equivalents": 1.0,
+                    "solvent": "THF",
+                    "concentration": 0.2,
+                    "from_plate_role": "startingmaterial",
+                    "to_plate_role": "reaction"
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smiles": "CC(C)OC(=O)/N=N/C(=O)OC(C)C",
+                    "equivalents": 1.3,
+                    "solvent": "THF",
+                    "concentration": 0.5,
+                    "from_plate_role": "startingmaterial",
+                    "to_plate_role": "reaction"
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smiles": "c1ccc(P(c2ccccc2)c2ccccc2)cc1",
+                    "equivalents": 1.3,
+                    "solvent": "THF",
+                    "concentration": 0.5,
+                    "from_plate_role": "startingmaterial",
+                    "to_plate_role": "reaction"
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": "[#8;H1:2]",
+                    "equivalents": 1.1,
+                    "solvent": "THF",
+                    "concentration": 0.5,
+                    "from_plate_role": "startingmaterial",
+                    "to_plate_role": "reaction"
+                }
+            ]
+        },
+        {
+            "session_type": "stir",
+            "driver": "human",
+            "actions": [
+                {
+                    "type": "stir",
+                    "duration": 16.0,
+                    "plate_role": "reaction"
+                }
+            ]
+        },
+        {
+            "session_type": "workup",
+            "driver": "robot",
+            "continuation": false,
+            "actions": [
+                {
+                    "type": "add",
+                    "material_smiles": "CCCCCC",
+                    "equivalents": 300.0,
+                    "quantity_unit": "uL",
+                    "solvent": "hexanes",
+                    "from_plate_role": "solvent",
+                    "to_plate_role": "reaction"
+                },
+                {
+                    "type": "add",
+                    "material_smiles": "O",
+                    "equivalents": 300.0,
+                    "quantity_unit": "uL",
+                    "solvent": "water",
+                    "from_plate_role": "solvent",
+                    "to_plate_role": "reaction"
+                }
+            ]
+        },
+        {
+            "session_type": "stir",
+            "driver": "human",
+            "actions": [
+                {
+                    "type": "stir",
+                    "duration": 0.5,
+                    "plate_role": "reaction"
+                }
+            ]
+        },
+        {
+            "session_type": "workup",
+            "driver": "robot",
+            "continuation": false,
+            "actions": [
+                {
+                    "_comment": "Extract bottom (aqueous) layer from reaction plate into workup plate 1",
+                    "type": "extract",
+                    "layer": "bottom",
+                    "volume": 300.0,
+                    "from_plate_role": "reaction",
+                    "to_plate_role": "workup",
+                    "to_plate_index": 1
+                },
+                {
+                    "_comment": "Add fresh water to the organic layer remaining in reaction plate",
+                    "type": "add",
+                    "material_smiles": "O",
+                    "equivalents": 300.0,
+                    "quantity_unit": "uL",
+                    "solvent": "water",
+                    "from_plate_role": "solvent",
+                    "to_plate_role": "reaction"
+                },
+                {
+                    "_comment": "Mix to re-partition",
+                    "type": "mix",
+                    "repetitions": 5,
+                    "plate_role": "reaction"
+                },
+                {
+                    "_comment": "Extract bottom (aqueous) layer again into workup plate 1",
+                    "type": "extract",
+                    "layer": "bottom",
+                    "volume": 300.0,
+                    "from_plate_role": "reaction",
+                    "to_plate_role": "workup",
+                    "to_plate_index": 1
+                },
+                {
+                    "_comment": "Transfer cleaned organic layer (top) to workup plate 2 for concentration",
+                    "type": "extract",
+                    "layer": "top",
+                    "volume": 300.0,
+                    "from_plate_role": "reaction",
+                    "to_plate_role": "workup",
+                    "to_plate_index": 2
+                }
+            ]
+        },
+        {
+            "session_type": "workup",
+            "driver": "robot",
+            "continuation": false,
+            "actions": [
+                {
+                    "_comment": "Dilute concentrated product with ACN for SPE filtration",
+                    "type": "add",
+                    "material_smiles": "CC#N",
+                    "equivalents": 200.0,
+                    "quantity_unit": "uL",
+                    "solvent": "ACN",
+                    "from_plate_role": "solvent",
+                    "to_plate_role": "workup",
+                    "to_plate_index": 2
+                },
+                {
+                    "type": "mix",
+                    "repetitions": 3,
+                    "plate_role": "workup",
+                    "plate_index": 2
+                },
+                {
+                    "_comment": "Load onto SPE filter plate for final purification",
+                    "type": "add",
+                    "equivalents": 400.0,
+                    "quantity_unit": "uL",
+                    "from_plate_role": "workup",
+                    "from_plate_index": 2,
+                    "to_plate_role": "spefilter"
+                }
+            ]
+        }
+    ]
+}
