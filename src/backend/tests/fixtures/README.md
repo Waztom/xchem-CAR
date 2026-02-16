@@ -44,19 +44,112 @@ To create a new recipe fixture:
         {
           "type": "add",
           "material_smarts": "[#6:1](=[#8:2])-[#8;H1]",
-          "equivalents": 1.0,
+          "amount": 1.0,
           "solvent": "DMA",
           "concentration": 0.5,
           "from_plate_role": "startingmaterial",
           "to_plate_role": "reaction"
         }
-        // ... more actions ...
+      ]
+    },
+    {
+      "session_type": "stir",
+      "driver": "human",
+      "actions": [
+        {
+          "type": "stir",
+          "temperature": 25,
+          "duration": 12.0,
+          "plate_role": "reaction"
+        }
       ]
     }
-    // ... more sessions ...
   ]
 }
 ```
+
+## Units Reference
+
+### Quantity Units (`quantity_unit`)
+
+Used with `amount` field in add actions to specify how a material quantity is measured:
+
+| Value | Description | Example Use Case |
+|-------|-------------|------------------|
+| `moleq` | Molar equivalents relative to limiting reagent | `"amount": 1.5, "quantity_unit": "moleq"` — 1.5 eq |
+| `masseq` | Mass equivalents relative to limiting reagent | `"amount": 2.0, "quantity_unit": "masseq"` — 2× mass |
+| `uL` | Microliters (absolute volume) | `"amount": 50, "quantity_unit": "uL"` — 50 µL |
+| `mL` | Milliliters (absolute volume) | `"amount": 0.5, "quantity_unit": "mL"` — 0.5 mL |
+| `mg` | Milligrams (absolute mass) | `"amount": 10, "quantity_unit": "mg"` — 10 mg |
+| `g` | Grams (absolute mass) | `"amount": 0.1, "quantity_unit": "g"` — 100 mg |
+| `M` | Molarity (moles per liter) | `"amount": 0.1, "quantity_unit": "M"` — 0.1 M |
+| `uM` | Micromolarity (µmol per liter) | `"amount": 100, "quantity_unit": "uM"` — 100 µM |
+
+**Default:** `moleq`
+
+### Duration Units (`duration_unit`)
+
+Used with `duration` field in stir actions:
+
+| Value | Description | Example |
+|-------|-------------|---------|
+| `s` | Seconds | `"duration": 30, "duration_unit": "s"` — 30 seconds |
+| `m` | Minutes | `"duration": 15, "duration_unit": "m"` — 15 minutes |
+| `h` | Hours | `"duration": 12, "duration_unit": "h"` — 12 hours |
+
+**Default:** `h`
+
+### Temperature Units (`temperature_unit`)
+
+Used with `temperature` field in stir actions:
+
+| Value | Description |
+|-------|-------------|
+| `degC` | Degrees Celsius (default) |
+| `K` | Kelvin |
+
+### Plate Roles
+
+Valid values for `plate_role`, `from_plate_role`, `to_plate_role`:
+
+| Value | Description |
+|-------|-------------|
+| `reaction` | Main reaction plate |
+| `workup` | Workup plate (use with `plate_index` for multiple: workup 1, 2, etc.) |
+| `spefilter` | SPE filter plate |
+| `lcms` | LCMS sample plate |
+| `xchem` | XChem crystallography plate |
+| `nmr` | NMR sample plate |
+| `startingmaterial` | Starting material source plate |
+| `solvent` | Solvent reservoir plate |
+
+## Field Reference
+
+### Add Actions
+
+| Field | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `amount` | Yes | — | Numeric amount — meaning depends on `quantity_unit` |
+| `quantity_unit` | No | `moleq` | Unit for amount (see Units Reference above) |
+| `solvent` | No | — | Solvent name (e.g., `DMA`, `THF`, `ACN`) |
+| `concentration` | No | — | Solution concentration (mol/L) |
+| `density` | No | — | Neat density (g/mL) for liquid reagents |
+| `from_plate_role` | No | `startingmaterial` | Source plate role |
+| `from_plate_index` | No | `1` | Source plate index (for multiple plates of same role) |
+| `to_plate_role` | No | `reaction` | Destination plate role |
+| `to_plate_index` | No | `1` | Destination plate index |
+
+### Stir Actions
+
+| Field | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `temperature` | **Recommended** | `25` | Temperature value (always include for clarity) |
+| `temperature_unit` | No | `degC` | Unit: `degC`, `K` |
+| `duration` | Yes | — | Duration value |
+| `duration_unit` | No | `h` | Unit: `s`, `m`, `h` |
+| `stirring_speed` | No | `normal` | Speed: `gentle`, `normal`, `vigorous` |
+| `plate_role` | No | `reaction` | Plate being stirred |
+| `plate_index` | No | `1` | Plate index |
 
 ## Plate Routing
 

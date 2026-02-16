@@ -16,7 +16,8 @@
                     "type": "add",
                     "molecular_context": "intermolecular",
                     "material_smarts": "[#6:1](=[#8:2])-[#8;H1]",
-                    "equivalents": 1.0,
+                    "amount": 1.0,
+                    "quantity_unit": "moleq",
                     "solvent": "DMA",
                     "concentration": 0.5,
                     "from_plate_role": "startingmaterial",
@@ -26,7 +27,8 @@
                     "type": "add",
                     "molecular_context": "intermolecular",
                     "material_smiles": "CCCP1(=O)OP(=O)(OP(=O)(O1)CCC)CCC",
-                    "equivalents": 1.2,
+                    "amount": 1.2,
+                    "quantity_unit": "moleq",
                     "solvent": "DMA",
                     "concentration": 0.5,
                     "from_plate_role": "startingmaterial",
@@ -36,7 +38,8 @@
                     "type": "add",
                     "molecular_context": "intermolecular",
                     "material_smiles": "CCN(C(C)C)C(C)C",
-                    "equivalents": 3.5,
+                    "amount": 3.5,
+                    "quantity_unit": "moleq",
                     "density": 0.74,
                     "from_plate_role": "startingmaterial",
                     "to_plate_role": "reaction"
@@ -45,7 +48,8 @@
                     "type": "add",
                     "molecular_context": "intramolecular",
                     "material_smarts": "[#6:1](=[#8:2])-[#8;H1]",
-                    "equivalents": 1.0,
+                    "amount": 1.0,
+                    "quantity_unit": "moleq",
                     "solvent": "DMA",
                     "concentration": 0.5,
                     "from_plate_role": "startingmaterial",
@@ -55,7 +59,8 @@
                     "type": "add",
                     "molecular_context": "intramolecular",
                     "material_smiles": "CCCP1(=O)OP(=O)(OP(=O)(O1)CCC)CCC",
-                    "equivalents": 1.2,
+                    "amount": 1.2,
+                    "quantity_unit": "moleq",
                     "solvent": "DMA",
                     "concentration": 0.5,
                     "from_plate_role": "startingmaterial",
@@ -65,7 +70,8 @@
                     "type": "add",
                     "molecular_context": "intramolecular",
                     "material_smiles": "CCN(C(C)C)C(C)C",
-                    "equivalents": 3.5,
+                    "amount": 3.5,
+                    "quantity_unit": "moleq",
                     "solvent": "DMA",
                     "concentration": 10.0,
                     "from_plate_role": "startingmaterial",
@@ -82,7 +88,8 @@
                     "type": "add",
                     "molecular_context": "intermolecular",
                     "material_smarts": "[#7;H3,H2,H1]",
-                    "equivalents": 1.1,
+                    "amount": 1.1,
+                    "quantity_unit": "moleq",
                     "solvent": "DMA",
                     "concentration": 0.5,
                     "from_plate_role": "startingmaterial",
@@ -96,7 +103,9 @@
             "actions": [
                 {
                     "type": "stir",
+                    "temperature": 25,
                     "duration": 12.0,
+                    "duration_unit": "h",
                     "plate_role": "reaction"
                 }
             ]
@@ -108,7 +117,7 @@
                 {
                     "type": "add",
                     "material_smiles": "CC#N",
-                    "equivalents": 200.0,
+                    "amount": 200.0,
                     "quantity_unit": "uL",
                     "solvent": "ACN",
                     "from_plate_role": "solvent",
@@ -122,7 +131,9 @@
             "actions": [
                 {
                     "type": "stir",
+                    "temperature": 25,
                     "duration": 1.0,
+                    "duration_unit": "h",
                     "plate_role": "reaction"
                 }
             ]
@@ -133,7 +144,7 @@
             "actions": [
                 {
                     "type": "add",
-                    "equivalents": 200.0,
+                    "amount": 200.0,
                     "quantity_unit": "uL",
                     "from_plate_role": "reaction",
                     "to_plate_role": "spefilter"
@@ -141,7 +152,7 @@
                 {
                     "type": "add",
                     "material_smiles": "CC#N",
-                    "equivalents": 200.0,
+                    "amount": 200.0,
                     "quantity_unit": "uL",
                     "solvent": "ACN",
                     "from_plate_role": "solvent",
@@ -154,7 +165,7 @@
                 },
                 {
                     "type": "add",
-                    "equivalents": 300.0,
+                    "amount": 300.0,
                     "quantity_unit": "uL",
                     "from_plate_role": "reaction",
                     "to_plate_role": "spefilter"

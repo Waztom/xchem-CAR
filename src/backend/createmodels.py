@@ -738,11 +738,7 @@ class CreateEncodedActionModels(object):
         recipe_add : RecipeAddAction
             The recipe add action blueprint from the DB
         """
-        from .recipe_utils import unparse_plate_type
         try:
-            fromplatetype = unparse_plate_type(recipe_add.from_plate_role, recipe_add.from_plate_index)
-            toplatetype = unparse_plate_type(recipe_add.to_plate_role, recipe_add.to_plate_index)
-
             if recipe_add.material_smarts:
                 matches = [
                     matchSMARTS(smiles=smi, smarts=recipe_add.material_smarts)
@@ -776,8 +772,10 @@ class CreateEncodedActionModels(object):
             add.reaction_id = self.reaction_obj
             add.actionsession_id = actionsession_obj
             add.number = recipe_add.action_number
-            add.fromplatetype = fromplatetype
-            add.toplatetype = toplatetype
+            add.from_plate_role = recipe_add.from_plate_role
+            add.from_plate_index = recipe_add.from_plate_index
+            add.to_plate_role = recipe_add.to_plate_role
+            add.to_plate_index = recipe_add.to_plate_index
             add.smiles = smiles
             add.molecularweight = molecular_weight
             if calcunit == "uL":
@@ -818,11 +816,7 @@ class CreateEncodedActionModels(object):
         recipe_ext : RecipeExtractAction
             The recipe extract action blueprint from the DB
         """
-        from .recipe_utils import unparse_plate_type
         try:
-            fromplatetype = unparse_plate_type(recipe_ext.from_plate_role, recipe_ext.from_plate_index)
-            toplatetype = unparse_plate_type(recipe_ext.to_plate_role, recipe_ext.to_plate_index)
-
             smiles = self.productsmiles
             mol = Chem.MolFromSmiles(smiles)
             molecular_weight = Descriptors.MolWt(mol)
@@ -831,8 +825,10 @@ class CreateEncodedActionModels(object):
             extract.reaction_id = self.reaction_obj
             extract.actionsession_id = actionsession_obj
             extract.number = recipe_ext.action_number
-            extract.fromplatetype = fromplatetype
-            extract.toplatetype = toplatetype
+            extract.from_plate_role = recipe_ext.from_plate_role
+            extract.from_plate_index = recipe_ext.from_plate_index
+            extract.to_plate_role = recipe_ext.to_plate_role
+            extract.to_plate_index = recipe_ext.to_plate_index
             extract.smiles = smiles
             extract.molecularweight = molecular_weight
             extract.volume = recipe_ext.volume
@@ -855,13 +851,13 @@ class CreateEncodedActionModels(object):
         recipe_mix : RecipeMixAction
             The recipe mix action blueprint from the DB
         """
-        from .recipe_utils import unparse_plate_type
         try:
             mix = MixAction()
             mix.reaction_id = self.reaction_obj
             mix.actionsession_id = actionsession_obj
             mix.number = recipe_mix.action_number
-            mix.platetype = unparse_plate_type(recipe_mix.plate_role, recipe_mix.plate_index)
+            mix.plate_role = recipe_mix.plate_role
+            mix.plate_index = recipe_mix.plate_index
             mix.repetitions = recipe_mix.repetitions
             mix.save()
         except Exception as e:
@@ -877,13 +873,13 @@ class CreateEncodedActionModels(object):
         recipe_stir : RecipeStirAction
             The recipe stir action blueprint from the DB
         """
-        from .recipe_utils import unparse_plate_type
         try:
             stir = StirAction()
             stir.reaction_id = self.reaction_obj
             stir.actionsession_id = actionsession_obj
             stir.number = recipe_stir.action_number
-            stir.platetype = unparse_plate_type(recipe_stir.plate_role, recipe_stir.plate_index)
+            stir.plate_role = recipe_stir.plate_role
+            stir.plate_index = recipe_stir.plate_index
             stir.duration = recipe_stir.duration
             stir.durationunit = recipe_stir.duration_unit
             stir.temperature = recipe_stir.temperature

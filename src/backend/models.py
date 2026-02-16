@@ -265,13 +265,29 @@ class CatalogEntry(models.Model):
     leadtime = models.IntegerField(null=True)
 
 
+class PlateRole(models.TextChoices):
+    """Functional role of a plate on the OT deck.
+
+    The actual plate instance is identified by combining a role with a
+    1-based ``role_index`` (default 1).  For example role='workup' +
+    role_index=2 replaces the old hardcoded 'workup2'.
+    """
+
+    REACTION = "reaction"
+    WORKUP = "workup"
+    SPEFILTER = "spefilter"
+    LCMS = "lcms"
+    XCHEM = "xchem"
+    NMR = "nmr"
+    STARTINGMATERIAL = "startingmaterial"
+    SOLVENT = "solvent"
+
+
 class ActionSession(models.Model):
     class Type(models.TextChoices):
         reaction = "reaction"
         stir = "stir"
         workup = "workup"
-        # workup2 = "workup2"
-        # workup3 = "workup3"
         analyse = "analyse"
 
     class Driver(models.TextChoices):
@@ -336,25 +352,19 @@ class AddAction(models.Model):
         mg = "mg"
         g = "g"
 
-    class PlateType(models.TextChoices):
-        reaction = "reaction"
-        workup1 = "workup1"
-        workup2 = "workup2"
-        workup3 = "workup3"
-        spefilter = "spefilter"
-        lcms = "lcms"
-        xchem = "xchem"
-        nmr = "nmr"
-        startingmaterial = "startingmaterial"
-        solvent = "solvent"
-
     actionsession_id = models.ForeignKey(ActionSession, on_delete=models.CASCADE)
     reaction_id = models.ForeignKey(
         Reaction, related_name="addactions", on_delete=models.CASCADE
     )
     number = models.IntegerField()
-    fromplatetype = models.CharField(choices=PlateType.choices, max_length=20)
-    toplatetype = models.CharField(choices=PlateType.choices, max_length=20)
+    from_plate_role = models.CharField(
+        choices=PlateRole.choices, max_length=20, default=PlateRole.STARTINGMATERIAL
+    )
+    from_plate_index = models.PositiveIntegerField(default=1)
+    to_plate_role = models.CharField(
+        choices=PlateRole.choices, max_length=20, default=PlateRole.REACTION
+    )
+    to_plate_index = models.PositiveIntegerField(default=1)
     smiles = models.CharField(max_length=255)
     calcunit = models.CharField(
         choices=CalcUnit.choices, default="moleq", max_length=10
@@ -410,25 +420,19 @@ class ExtractAction(models.Model):
         top = "top"
         bottom = "bottom"
 
-    class PlateType(models.TextChoices):
-        reaction = "reaction"
-        workup1 = "workup1"
-        workup2 = "workup2"
-        workup3 = "workup3"
-        spefilter = "spefilter"
-        lcms = "lcms"
-        xchem = "xchem"
-        nmr = "nmr"
-        startingmaterial = "startingmaterial"
-        solvent = "solvent"
-
     actionsession_id = models.ForeignKey(ActionSession, on_delete=models.CASCADE)
     reaction_id = models.ForeignKey(
         Reaction, related_name="extractactions", on_delete=models.CASCADE
     )
     number = models.IntegerField()
-    fromplatetype = models.CharField(choices=PlateType.choices, max_length=20)
-    toplatetype = models.CharField(choices=PlateType.choices, max_length=20)
+    from_plate_role = models.CharField(
+        choices=PlateRole.choices, max_length=20, default=PlateRole.REACTION
+    )
+    from_plate_index = models.PositiveIntegerField(default=1)
+    to_plate_role = models.CharField(
+        choices=PlateRole.choices, max_length=20, default=PlateRole.WORKUP
+    )
+    to_plate_index = models.PositiveIntegerField(default=1)
     layer = models.CharField(choices=Layer.choices, default="bottom", max_length=10)
     smiles = models.CharField(max_length=255)
     volume = models.FloatField()
@@ -461,24 +465,15 @@ class MixAction(models.Model):
         The volume to mix
     """
 
-    class PlateType(models.TextChoices):
-        reaction = "reaction"
-        workup1 = "workup1"
-        workup2 = "workup2"
-        workup3 = "workup3"
-        spefilter = "spefilter"
-        lcms = "lcms"
-        xchem = "xchem"
-        nmr = "nmr"
-        startingmaterial = "startingmaterial"
-        solvent = "solvent"
-
     actionsession_id = models.ForeignKey(ActionSession, on_delete=models.CASCADE)
     reaction_id = models.ForeignKey(
         Reaction, related_name="mixactions", on_delete=models.CASCADE
     )
     number = models.IntegerField()
-    platetype = models.CharField(choices=PlateType.choices, max_length=20)
+    plate_role = models.CharField(
+        choices=PlateRole.choices, max_length=20, default=PlateRole.REACTION
+    )
+    plate_index = models.PositiveIntegerField(default=1)
     repetitions = models.IntegerField()
 
 
@@ -509,26 +504,14 @@ class StirAction(models.Model):
         The speed of the stir action (default=normal)
     """
 
-    class PlateType(models.TextChoices):
-        reaction = "reaction"
-        workup1 = "workup1"
-        workup2 = "workup2"
-        workup3 = "workup3"
-        spefilter = "spefilter"
-        lcms = "lcms"
-        xchem = "xchem"
-        nmr = "nmr"
-        startingmaterial = "startingmaterial"
-        solvent = "solvent"
-
     class TemperatureUnit(models.TextChoices):
         degcel = "degC"
         kelvin = "K"
 
     class Unit(models.TextChoices):
-        seconds = "seconds"
-        minutes = "minutes"
-        hours = "hours"
+        seconds = "s"
+        minutes = "m"
+        hours = "h"
 
     class Speed(models.TextChoices):
         gentle = "gentle"
@@ -542,7 +525,10 @@ class StirAction(models.Model):
         Reaction, related_name="stiractions", on_delete=models.CASCADE
     )
     number = models.IntegerField()
-    platetype = models.CharField(choices=PlateType.choices, max_length=20)
+    plate_role = models.CharField(
+        choices=PlateRole.choices, max_length=20, default=PlateRole.REACTION
+    )
+    plate_index = models.PositiveIntegerField(default=1)
     duration = models.FloatField()
     durationunit = models.CharField(
         choices=Unit.choices, default=Unit.hours, max_length=10
@@ -709,24 +695,6 @@ class TipRack(models.Model):
     labware = models.CharField(max_length=255)
     index = models.IntegerField()
     name = models.CharField(max_length=255)
-
-
-class PlateRole(models.TextChoices):
-    """Functional role of a plate on the OT deck.
-
-    The actual plate instance is identified by combining a role with a
-    1-based ``role_index`` (default 1).  For example role='workup' +
-    role_index=2 replaces the old hardcoded 'workup2'.
-    """
-
-    REACTION = "reaction"
-    WORKUP = "workup"
-    SPEFILTER = "spefilter"
-    LCMS = "lcms"
-    XCHEM = "xchem"
-    NMR = "nmr"
-    STARTINGMATERIAL = "startingmaterial"
-    SOLVENT = "solvent"
 
 
 class Plate(models.Model):
@@ -1129,7 +1097,11 @@ class RecipeAddAction(models.Model):
 
     class QuantityUnit(models.TextChoices):
         MOLEQ = "moleq"
+        MASSEQ = "masseq"
         UL = "uL"
+        ML = "mL"
+        MG = "mg"
+        G = "g"
         MOLARITY = "M"
         MICROMOLARITY = "uM"
 
@@ -1220,9 +1192,9 @@ class RecipeStirAction(models.Model):
         KELVIN = "K"
 
     class DurationUnit(models.TextChoices):
-        SECONDS = "seconds"
-        MINUTES = "minutes"
-        HOURS = "hours"
+        SECONDS = "s"
+        MINUTES = "m"
+        HOURS = "h"
 
     session = models.ForeignKey(
         RecipeActionSession, related_name="stir_actions", on_delete=models.CASCADE
@@ -1231,7 +1203,7 @@ class RecipeStirAction(models.Model):
     temperature = models.FloatField(default=25)
     temperature_unit = models.CharField(max_length=10, default="degC")
     duration = models.FloatField()
-    duration_unit = models.CharField(max_length=10, default="hours")
+    duration_unit = models.CharField(max_length=10, default="h")
     stirring_speed = models.CharField(
         choices=StirSpeed.choices,
         default=StirSpeed.NORMAL,

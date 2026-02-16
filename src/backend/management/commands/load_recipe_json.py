@@ -167,7 +167,7 @@ VALID_PLATE_ROLES = {
     "reaction", "workup", "spefilter", "lcms", "xchem",
     "nmr", "startingmaterial", "solvent",
 }
-VALID_QUANTITY_UNITS = {"moleq", "uL", "M", "uM"}
+VALID_QUANTITY_UNITS = {"moleq", "masseq", "uL", "mL", "mg", "g", "M", "uM"}
 VALID_MOL_CONTEXTS = {"intermolecular", "intramolecular", None}
 VALID_LAYERS = {"top", "bottom"}
 
@@ -208,8 +208,8 @@ def _validate_action(action: dict, prefix: str) -> None:
         raise ValueError(f"{prefix}: invalid action type '{atype}'")
 
     if atype == "add":
-        if "equivalents" not in action:
-            raise ValueError(f"{prefix}: add action missing 'equivalents'")
+        if "amount" not in action:
+            raise ValueError(f"{prefix}: add action missing 'amount'")
         if action.get("quantity_unit") and action["quantity_unit"] not in VALID_QUANTITY_UNITS:
             raise ValueError(f"{prefix}: invalid quantity_unit")
         if action.get("molecular_context") not in VALID_MOL_CONTEXTS:
@@ -295,7 +295,7 @@ def _create_add_action(session: RecipeActionSession, action: dict) -> None:
         molecular_context=action.get("molecular_context"),
         material_smarts=action.get("material_smarts"),
         material_smiles=action.get("material_smiles"),
-        equivalents=action["equivalents"],
+        equivalents=action["amount"],
         quantity_unit=action.get("quantity_unit", "moleq"),
         solvent=action.get("solvent"),
         concentration=action.get("concentration"),
@@ -313,7 +313,7 @@ def _create_stir_action(session: RecipeActionSession, action: dict) -> None:
         temperature=action.get("temperature", 25),
         temperature_unit=action.get("temperature_unit", "degC"),
         duration=action["duration"],
-        duration_unit=action.get("duration_unit", "hours"),
+        duration_unit=action.get("duration_unit", "h"),
         stirring_speed=action.get("stirring_speed", "normal"),
         plate_role=action.get("plate_role", "reaction"),
         plate_index=action.get("plate_index", 1),

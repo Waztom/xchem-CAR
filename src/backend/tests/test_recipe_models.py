@@ -62,7 +62,7 @@ def ingest_recipe_from_json(data: dict) -> Recipe:
                     molecular_context=action.get("molecular_context"),
                     material_smarts=action.get("material_smarts"),
                     material_smiles=action.get("material_smiles"),
-                    equivalents=action["equivalents"],
+                    equivalents=action["amount"],
                     quantity_unit=action.get("quantity_unit", "moleq"),
                     solvent=action.get("solvent"),
                     concentration=action.get("concentration"),
@@ -81,7 +81,7 @@ def ingest_recipe_from_json(data: dict) -> Recipe:
                     temperature=action.get("temperature", 25),
                     temperature_unit=action.get("temperature_unit", "degC"),
                     duration=action["duration"],
-                    duration_unit=action.get("duration_unit", "hours"),
+                    duration_unit=action.get("duration_unit", "h"),
                     stirring_speed=action.get("stirring_speed", "normal"),
                     plate_role=action.get("plate_role", "reaction"),
                     plate_index=action.get("plate_index", 1),
@@ -138,7 +138,7 @@ _ADD_DEFAULTS = {
 _STIR_DEFAULTS = {
     "temperature": 25,
     "temperature_unit": "degC",
-    "duration_unit": "hours",
+    "duration_unit": "h",
     "stirring_speed": "normal",
     "plate_index": 1,
 }
@@ -183,9 +183,8 @@ def export_recipe_to_json(recipe: Recipe) -> dict:
                 action_dict["material_smarts"] = add.material_smarts
             if add.material_smiles is not None:
                 action_dict["material_smiles"] = add.material_smiles
-            action_dict["equivalents"] = add.equivalents
-            if add.quantity_unit != "moleq":
-                action_dict["quantity_unit"] = add.quantity_unit
+            action_dict["amount"] = add.equivalents
+            action_dict["quantity_unit"] = add.quantity_unit
             if add.solvent is not None:
                 action_dict["solvent"] = add.solvent
             if add.concentration is not None:
@@ -206,13 +205,17 @@ def export_recipe_to_json(recipe: Recipe) -> dict:
 
         for stir in session.stir_actions.all().order_by("action_number"):
             stir_dict: dict = {"type": "stir"}
-            if stir.temperature != 25:
-                stir_dict["temperature"] = stir.temperature
+            # Always include temperature for chemical clarity
+            # Normalize to int if it's a whole number for cleaner JSON
+            stir_dict["temperature"] = (
+                int(stir.temperature)
+                if stir.temperature == int(stir.temperature)
+                else stir.temperature
+            )
             if stir.temperature_unit != "degC":
                 stir_dict["temperature_unit"] = stir.temperature_unit
             stir_dict["duration"] = stir.duration
-            if stir.duration_unit != "hours":
-                stir_dict["duration_unit"] = stir.duration_unit
+            stir_dict["duration_unit"] = stir.duration_unit
             if stir.stirring_speed != "normal":
                 stir_dict["stirring_speed"] = stir.stirring_speed
             stir_dict["plate_role"] = stir.plate_role
@@ -229,6 +232,7 @@ def export_recipe_to_json(recipe: Recipe) -> dict:
             if extract.layer is not None:
                 extract_dict["layer"] = extract.layer
             extract_dict["volume"] = extract.volume
+            extract_dict["volume_unit"] = "uL"  # Always uL for extracts
             if extract.bottom_layer_volume is not None:
                 extract_dict["bottom_layer_volume"] = extract.bottom_layer_volume
             if extract.smiles is not None:
@@ -397,7 +401,7 @@ class AmidationRecipeTestCase(TestCase):
             temperature=25,
             temperature_unit="degC",
             duration=12,
-            duration_unit="hours",
+            duration_unit="h",
         )
 
         # ── Session 4 — workup: add ACN wash (robot) ───────────
@@ -652,7 +656,7 @@ class AmidationRecipeTestCase(TestCase):
         self.assertAlmostEqual(stir.temperature, 25)
         self.assertEqual(stir.temperature_unit, "degC")
         self.assertAlmostEqual(stir.duration, 12)
-        self.assertEqual(stir.duration_unit, "hours")
+        self.assertEqual(stir.duration_unit, "h")
 
     def test_stir_session5(self):
         stir = self.s5.stir_actions.first()
