@@ -459,7 +459,7 @@ class MaterialManager:
             # Get only custom starting material plates
             plates = Plate.objects.filter(
                 otbatchprotocol_id=self.session.otbatchprotocolobj,
-                type="startingmaterial",
+                role="startingmaterial",
                 otsession_id__in=custom_session_ids,
             )
 

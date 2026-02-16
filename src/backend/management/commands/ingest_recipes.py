@@ -7,10 +7,10 @@ models.
 
 Usage::
 
-    python manage.py ingest_recipes              # load all recipes
-    python manage.py ingest_recipes --dry-run    # report what would be loaded
-    python manage.py ingest_recipes --class "Amidation"  # one reaction class
-    python manage.py ingest_recipes --wipe       # delete ALL existing recipes + reload
+    python3 manage.py ingest_recipes              # load all recipes
+    python3 manage.py ingest_recipes --dry-run    # report what would be loaded
+    python3 manage.py ingest_recipes --class "Amidation"  # one reaction class
+    python3 manage.py ingest_recipes --wipe       # delete ALL existing recipes + reload
 
 The converter handles every quirk of the old format:
   - "starting material" (with space) → role=startingmaterial

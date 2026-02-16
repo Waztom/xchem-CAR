@@ -2,6 +2,7 @@ import logging
 from django.db.models import QuerySet
 
 from .....models import Plate, Column
+from .....recipe_utils import parse_plate_type
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +122,9 @@ class ColumnManager:
         column_obj.otsession_id = self.session.otsessionobj
         column_obj.plate_id = plate_obj
         column_obj.index = columnindex
-        column_obj.type = columntype
+        _role, _role_index = parse_plate_type(columntype)
+        column_obj.role = _role
+        column_obj.role_index = _role_index
         column_obj.reactionclass = reactionclass
         column_obj.save()
 

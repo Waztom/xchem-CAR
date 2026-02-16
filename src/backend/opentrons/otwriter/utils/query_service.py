@@ -26,6 +26,7 @@ from backend.utils import (
     getPreviousReactionQuerySets,
     getReactionQuerySet,
 )
+from backend.recipe_utils import parse_plate_type
 
 logger = logging.getLogger(__name__)
 
@@ -326,7 +327,7 @@ class QueryService:
         plate = Plate.objects.filter(id=plateid).first()
 
         if plate:
-            logger.info(f"Found plate: {plate.name} (type: {plate.type})")
+            logger.info(f"Found plate: {plate.name} (role: {plate.role}, role_index: {plate.role_index})")
         else:
             logger.warning(f"No plate found with ID {plateid}")
 
@@ -399,7 +400,8 @@ class QueryService:
             f"Querying columns of type '{columntype}' for reaction class '{reactionclass}'"
         )
         criterion1 = Q(otsession_id=self.otsession_id)
-        criterion2 = Q(type=columntype)
+        _role, _role_index = parse_plate_type(columntype)
+        criterion2 = Q(role=_role, role_index=_role_index)
         criterion3 = Q(reactionclass=reactionclass)
 
         columnqueryset = Column.objects.filter(
@@ -440,10 +442,12 @@ class QueryService:
                 f"Found product SMILES for reaction {reaction_id}: {productsmiles[:20]}..."
             )
 
+            _well_role, _well_role_index = parse_plate_type(welltype)
             wellobj = Well.objects.get(
                 otsession_id=self.otsession_id,
                 reaction_id=reaction_id,
-                type=welltype,
+                role=_well_role,
+                role_index=_well_role_index,
                 smiles=productsmiles,
             )
             logger.info(
@@ -464,7 +468,8 @@ class QueryService:
             wells = Well.objects.filter(
                 otsession_id=self.otsession_id,
                 reaction_id=reaction_id,
-                type=welltype,
+                role=_well_role,
+                role_index=_well_role_index,
                 smiles=productsmiles,
             )
             return wells.first()
@@ -495,7 +500,7 @@ class QueryService:
 
         try:
             solventplatequeryset = Plate.objects.filter(
-                otsession_id=self.otsession_id, type="solvent"
+                otsession_id=self.otsession_id, role="solvent"
             )
 
             plate_count = solventplatequeryset.count()
@@ -515,7 +520,7 @@ class QueryService:
                     wellqueryset = solventplate.well_set.all().filter(
                         solvent=solvent,
                         available=True,
-                        type="solvent",
+                        role="solvent",
                     )
 
                     well_count = wellqueryset.count()
@@ -647,7 +652,7 @@ class QueryService:
                         otsession_id=self.otsession_id,
                         smiles=smiles,
                         available=True,
-                        type="startingmaterial",
+                        role="startingmaterial",
                     ).order_by("id")
                 else:
                     logger.info(
@@ -659,7 +664,7 @@ class QueryService:
                         solvent=solvent,
                         concentration=concentration,
                         available=True,
-                        type="startingmaterial",
+                        role="startingmaterial",
                     ).order_by("id")
 
                 well_count = wellobjects.count()
@@ -690,7 +695,7 @@ class QueryService:
                         otsession_id=self.otsession_id,
                         smiles=smiles,
                         available=True,
-                        type="startingmaterial",
+                        role="startingmaterial",
                     ).order_by("id")
                 else:
                     logger.info(
@@ -702,7 +707,7 @@ class QueryService:
                         solvent=solvent,
                         concentration=concentration,
                         available=True,
-                        type="startingmaterial",
+                        role="startingmaterial",
                     ).order_by("id")
 
                 well_count = wellobjects.count()
@@ -740,7 +745,7 @@ class QueryService:
                         criterion2 = Q(reaction_id=reaction_id)
                         criterion3 = Q(reaction_id__in=previousreactionqueryset)
                         criterion4 = Q(smiles=smiles)
-                        criterion5 = Q(type__in=plates)
+                        criterion5 = Q(role__in=["reaction", "workup", "spefilter"])
                         criterion6 = Q(reactantfornextstep=True)
 
                         wellqueryset = Well.objects.filter(
@@ -783,7 +788,7 @@ class QueryService:
                 Well.objects.values_list("smiles", flat=True)
                 .filter(
                     otsession_id=self.otsession_id,
-                    type="startingmaterial",
+                    role="startingmaterial",
                     available=True,
                 )
                 .distinct()

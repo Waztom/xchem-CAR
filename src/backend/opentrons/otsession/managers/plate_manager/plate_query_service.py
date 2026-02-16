@@ -45,7 +45,7 @@ class PlateQueryService:
         # Get only custom starting material plates
         plates = Plate.objects.filter(
             otbatchprotocol_id=self.session.otbatchprotocolobj,
-            type="startingmaterial",
+            role="startingmaterial",
             otsession_id__in=custom_session_ids,
         )
 
@@ -129,9 +129,7 @@ class PlateQueryService:
             The plates used for all previous reaction and workup sessions
         """
         criterion1 = Q(otbatchprotocol_id=otbatchprotocol_id)
-        criterion2 = Q(
-            type__in=["reaction", "workup1", "workup2", "workup3", "spefilter"]
-        )
+        criterion2 = Q(role__in=["reaction", "workup", "spefilter"])
 
         otbatchprotocol_plate_queryset = Plate.objects.filter(criterion1 & criterion2)
         return otbatchprotocol_plate_queryset
@@ -184,9 +182,7 @@ class PlateQueryService:
 
         criterion2 = Q(reactantfornextstep=True)
         criterion3 = Q(smiles__in=searchsmiles)
-        criterion4 = Q(
-            type__in=["reaction", "workup1", "workup2", "workup3", "spefilter"]
-        )
+        criterion4 = Q(role__in=["reaction", "workup", "spefilter"])
 
         # Find plates with wells matching our criteria
         for plate in otbatchprotocol_plates:

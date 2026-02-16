@@ -5,6 +5,7 @@ Implements workup session functionality for OpenTrons protocols.
 import logging
 
 from .base_session import BaseSession
+from ....recipe_utils import parse_plate_type
 
 logger = logging.getLogger(__name__)
 
@@ -171,7 +172,11 @@ class WorkupSession(BaseSession):
         )
 
         # Filter for the correct type
-        source_plates = [plate for plate in all_plates if plate.type == plate_type]
+        _role, _role_index = parse_plate_type(plate_type)
+        source_plates = [
+            plate for plate in all_plates
+            if plate.role == _role and plate.role_index == _role_index
+        ]
 
         if not source_plates:
             logger.warning(

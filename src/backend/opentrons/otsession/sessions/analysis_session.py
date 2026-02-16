@@ -122,7 +122,7 @@ class AnalysisSession(BaseSession):
         """
         # Determine source plate types
         # Analysis typically comes from workup3 -> workup2 -> workup1 -> reaction in that order of preference
-        source_plate_types = ["workup3", "workup2", "workup1", "reaction"]
+        source_plate_types = [("workup", 3), ("workup", 2), ("workup", 1), ("reaction", 1)]
 
         # Find all plates from previous steps in this batch protocol
         all_plates = self.plate_manager.get_all_ot_batch_protocol_plates(
@@ -132,12 +132,15 @@ class AnalysisSession(BaseSession):
         source_plates = []
 
         # Try to find plates of each type in order of preference
-        for plate_type in source_plate_types:
-            plates_of_type = [plate for plate in all_plates if plate.type == plate_type]
+        for plate_role, plate_role_index in source_plate_types:
+            plates_of_type = [
+                plate for plate in all_plates
+                if plate.role == plate_role and plate.role_index == plate_role_index
+            ]
             if plates_of_type:
                 # Found plates of this type, use them
                 logger.info(
-                    f"Using {len(plates_of_type)} plates of type {plate_type} for analysis"
+                    f"Using {len(plates_of_type)} plates of role {plate_role} (index {plate_role_index}) for analysis"
                 )
                 source_plates.extend(plates_of_type)
                 break

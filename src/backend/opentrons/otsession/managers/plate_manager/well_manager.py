@@ -3,6 +3,7 @@ from django.db.models import QuerySet
 
 from .....models import Plate, Well, Reaction, Column
 from .....utils import wellIndexToWellName
+from .....recipe_utils import parse_plate_type
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +149,9 @@ class WellManager:
         if columnobj:
             well_obj.column_id = columnobj
 
-        well_obj.type = welltype
+        _role, _role_index = parse_plate_type(welltype)
+        well_obj.role = _role
+        well_obj.role_index = _role_index
         well_obj.index = wellindex
         well_obj.name = wellIndexToWellName(
             wellindex=wellindex, platesize=plate_obj.numberwells

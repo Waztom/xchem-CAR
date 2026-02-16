@@ -5,6 +5,7 @@ from rdkit.Chem import Descriptors
 
 from .....models import Plate
 from .....utils import sanitize_for_python_var
+from .....recipe_utils import parse_plate_type
 from ....labwareavailable import labware_plates
 
 logger = logging.getLogger(__name__)
@@ -50,7 +51,9 @@ class PlateFactory:
             plate_obj.deck_id = self.session.deckobj
             plate_obj.labware = labwaretype
             plate_obj.index = plate_index
-            plate_obj.type = platetype
+            _role, _role_index = parse_plate_type(platetype)
+            plate_obj.role = _role
+            plate_obj.role_index = _role_index
             plate_obj.maxwellvolume = max_well_volume
             plate_obj.numberwells = number_wells
             plate_obj.numberwellsincolumn = number_wells_in_column
@@ -194,7 +197,7 @@ class PlateFactory:
             # Create a solvent plate (or reuse existing one)
             plate_obj = None
             existing_solvent_plates = Plate.objects.filter(
-                otsession_id=self.session.otsessionobj, type="solvent"
+                otsession_id=self.session.otsessionobj, role="solvent"
             )
 
             if existing_solvent_plates.exists():
@@ -786,7 +789,7 @@ class PlateFactory:
                 column_queryset = self.session.column_manager.get_plate_columns(
                     plate_obj=plate_obj
                 )
-                previous_type = plate_obj.type
+                previous_type = plate_obj.role
                 plate_obj.deck_id = self.session.deckobj
                 plate_obj.otsession_id = self.session.otsessionobj
                 if previous_type == "spefilter":
