@@ -4,7 +4,6 @@ Unit tests for the recipegenerator module.
 
 from unittest import TestCase
 import tempfile
-import json
 import os
 import pandas as pd
 
@@ -12,7 +11,6 @@ from backend.recipegenerator import (
     RecipeTemplate,
     RecipeGenerator,
     DesignMatrixParser,
-    RecipeGeneratorError,
     TemplateValidationError,
     ActionNotFoundError,
 )
