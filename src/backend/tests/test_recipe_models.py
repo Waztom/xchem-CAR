@@ -48,7 +48,6 @@ def ingest_recipe_from_json(data: dict) -> Recipe:
     for sess_idx, sess_data in enumerate(data["action_sessions"], start=1):
         session = RecipeActionSession.objects.create(
             recipe=recipe,
-            session_number=sess_idx,
             session_type=sess_data["session_type"],
             driver=sess_data.get("driver", "robot"),
             continuation=sess_data.get("continuation", False),
@@ -60,10 +59,7 @@ def ingest_recipe_from_json(data: dict) -> Recipe:
             if action_type == "add":
                 RecipeAddAction.objects.create(
                     session=session,
-                    action_number=act_idx,
-                    molecular_context=action.get(
-                        "molecular_context", "intermolecular"
-                    ),
+                    molecular_context=action.get("molecular_context"),
                     material_smarts=action.get("material_smarts"),
                     material_smiles=action.get("material_smiles"),
                     equivalents=action["equivalents"],
@@ -82,7 +78,6 @@ def ingest_recipe_from_json(data: dict) -> Recipe:
             elif action_type == "stir":
                 RecipeStirAction.objects.create(
                     session=session,
-                    action_number=act_idx,
                     temperature=action.get("temperature", 25),
                     temperature_unit=action.get("temperature_unit", "degC"),
                     duration=action["duration"],
@@ -95,7 +90,6 @@ def ingest_recipe_from_json(data: dict) -> Recipe:
             elif action_type == "extract":
                 RecipeExtractAction.objects.create(
                     session=session,
-                    action_number=act_idx,
                     layer=action.get("layer", "bottom"),
                     volume=action["volume"],
                     bottom_layer_volume=action.get("bottom_layer_volume"),
@@ -111,7 +105,6 @@ def ingest_recipe_from_json(data: dict) -> Recipe:
             elif action_type == "mix":
                 RecipeMixAction.objects.create(
                     session=session,
-                    action_number=act_idx,
                     plate_role=action.get("plate_role", "reaction"),
                     plate_index=action.get("plate_index", 1),
                     repetitions=action["repetitions"],
@@ -137,24 +130,28 @@ def export_recipe_to_json(recipe: Recipe) -> dict:
         #   (action_number, context_sort_key, action_dict)
 
         for add in session.add_actions.all().order_by("action_number"):
+            action_dict: dict = {
+                "type": "add",
+            }
+            if add.molecular_context is not None:
+                action_dict["molecular_context"] = add.molecular_context
+            action_dict.update({
+                "material_smarts": add.material_smarts,
+                "material_smiles": add.material_smiles,
+                "equivalents": add.equivalents,
+                "quantity_unit": add.quantity_unit,
+                "solvent": add.solvent,
+                "concentration": add.concentration,
+                "density": add.density,
+                "from_plate_role": add.from_plate_role,
+                "from_plate_index": add.from_plate_index,
+                "to_plate_role": add.to_plate_role,
+                "to_plate_index": add.to_plate_index,
+            })
             tagged.append((
                 add.action_number,
-                add.molecular_context,  # "inter…" < "intra…" alphabetically
-                {
-                    "type": "add",
-                    "molecular_context": add.molecular_context,
-                    "material_smarts": add.material_smarts,
-                    "material_smiles": add.material_smiles,
-                    "equivalents": add.equivalents,
-                    "quantity_unit": add.quantity_unit,
-                    "solvent": add.solvent,
-                    "concentration": add.concentration,
-                    "density": add.density,
-                    "from_plate_role": add.from_plate_role,
-                    "from_plate_index": add.from_plate_index,
-                    "to_plate_role": add.to_plate_role,
-                    "to_plate_index": add.to_plate_index,
-                },
+                add.molecular_context or "",  # NULL sorts before "inter…"
+                action_dict,
             ))
 
         for stir in session.stir_actions.all().order_by("action_number"):
@@ -249,7 +246,6 @@ class AmidationRecipeTestCase(TestCase):
         # ── Session 1 — reaction (robot) ────────────────────────
         cls.s1 = RecipeActionSession.objects.create(
             recipe=cls.recipe,
-            session_number=1,
             session_type="reaction",
             driver="robot",
         )
@@ -257,7 +253,6 @@ class AmidationRecipeTestCase(TestCase):
         # Intermolecular actions (3 adds)
         RecipeAddAction.objects.create(
             session=cls.s1,
-            action_number=1,
             molecular_context="intermolecular",
             material_smarts="[#6:1](=[#8:2])-[#8;H1]",
             equivalents=1.0,
@@ -266,7 +261,6 @@ class AmidationRecipeTestCase(TestCase):
         )
         RecipeAddAction.objects.create(
             session=cls.s1,
-            action_number=2,
             molecular_context="intermolecular",
             material_smiles="CCCP1(=O)OP(=O)(OP(=O)(O1)CCC)CCC",
             equivalents=1.2,
@@ -275,7 +269,6 @@ class AmidationRecipeTestCase(TestCase):
         )
         RecipeAddAction.objects.create(
             session=cls.s1,
-            action_number=3,
             molecular_context="intermolecular",
             material_smiles="CCN(C(C)C)C(C)C",
             equivalents=3.5,
@@ -285,7 +278,6 @@ class AmidationRecipeTestCase(TestCase):
         # Intramolecular actions (3 adds — different amounts / solvent)
         RecipeAddAction.objects.create(
             session=cls.s1,
-            action_number=1,
             molecular_context="intramolecular",
             material_smarts="[#6:1](=[#8:2])-[#8;H1]",
             equivalents=1.0,
@@ -294,7 +286,6 @@ class AmidationRecipeTestCase(TestCase):
         )
         RecipeAddAction.objects.create(
             session=cls.s1,
-            action_number=2,
             molecular_context="intramolecular",
             material_smiles="CCCP1(=O)OP(=O)(OP(=O)(O1)CCC)CCC",
             equivalents=1.2,
@@ -303,7 +294,6 @@ class AmidationRecipeTestCase(TestCase):
         )
         RecipeAddAction.objects.create(
             session=cls.s1,
-            action_number=3,
             molecular_context="intramolecular",
             material_smiles="CCN(C(C)C)C(C)C",
             equivalents=3.5,
@@ -314,7 +304,6 @@ class AmidationRecipeTestCase(TestCase):
         # ── Session 2 — reaction continuation (robot) ───────────
         cls.s2 = RecipeActionSession.objects.create(
             recipe=cls.recipe,
-            session_number=2,
             session_type="reaction",
             driver="robot",
             continuation=True,
@@ -322,7 +311,6 @@ class AmidationRecipeTestCase(TestCase):
 
         RecipeAddAction.objects.create(
             session=cls.s2,
-            action_number=1,
             molecular_context="intermolecular",
             material_smarts="[#7;H3,H2,H1]",
             equivalents=1.1,
@@ -333,14 +321,12 @@ class AmidationRecipeTestCase(TestCase):
         # ── Session 3 — stir (human) ───────────────────────────
         cls.s3 = RecipeActionSession.objects.create(
             recipe=cls.recipe,
-            session_number=3,
             session_type="stir",
             driver="human",
         )
 
         RecipeStirAction.objects.create(
             session=cls.s3,
-            action_number=1,
             temperature=25,
             temperature_unit="degC",
             duration=12,
@@ -350,14 +336,12 @@ class AmidationRecipeTestCase(TestCase):
         # ── Session 4 — workup: add ACN wash (robot) ───────────
         cls.s4 = RecipeActionSession.objects.create(
             recipe=cls.recipe,
-            session_number=4,
             session_type="workup",
             driver="robot",
         )
 
         RecipeAddAction.objects.create(
             session=cls.s4,
-            action_number=1,
             material_smiles="CC#N",
             equivalents=200,
             quantity_unit="uL",
@@ -369,14 +353,12 @@ class AmidationRecipeTestCase(TestCase):
         # ── Session 5 — stir (human) ───────────────────────────
         cls.s5 = RecipeActionSession.objects.create(
             recipe=cls.recipe,
-            session_number=5,
             session_type="stir",
             driver="human",
         )
 
         RecipeStirAction.objects.create(
             session=cls.s5,
-            action_number=1,
             temperature=25,
             duration=1,
         )
@@ -384,7 +366,6 @@ class AmidationRecipeTestCase(TestCase):
         # ── Session 6 — workup: SPE filter (robot) ─────────────
         cls.s6 = RecipeActionSession.objects.create(
             recipe=cls.recipe,
-            session_number=6,
             session_type="workup",
             driver="robot",
         )
@@ -392,7 +373,6 @@ class AmidationRecipeTestCase(TestCase):
         # Move reaction mix → SPE filter
         RecipeAddAction.objects.create(
             session=cls.s6,
-            action_number=1,
             equivalents=200,
             quantity_unit="uL",
             from_plate_role=PlateRole.REACTION,
@@ -401,7 +381,6 @@ class AmidationRecipeTestCase(TestCase):
         # ACN wash → reaction plate
         RecipeAddAction.objects.create(
             session=cls.s6,
-            action_number=2,
             material_smiles="CC#N",
             equivalents=200,
             quantity_unit="uL",
@@ -412,13 +391,11 @@ class AmidationRecipeTestCase(TestCase):
         # Mix reaction plate
         RecipeMixAction.objects.create(
             session=cls.s6,
-            action_number=3,
             repetitions=3,
         )
         # Move reaction mix → SPE filter (second pass)
         RecipeAddAction.objects.create(
             session=cls.s6,
-            action_number=4,
             equivalents=300,
             quantity_unit="uL",
             from_plate_role=PlateRole.REACTION,
@@ -491,6 +468,31 @@ class AmidationRecipeTestCase(TestCase):
         self.assertEqual(self.s1.driver, "robot")
         self.assertEqual(self.s3.driver, "human")
 
+    def test_session_auto_numbering(self):
+        """session_number is auto-assigned from creation order."""
+        self.assertEqual(self.s1.session_number, 1)
+        self.assertEqual(self.s2.session_number, 2)
+        self.assertEqual(self.s6.session_number, 6)
+
+    def test_action_auto_numbering_session1(self):
+        """Session 1 has 6 add actions; each gets a sequential number."""
+        numbers = list(
+            self.s1.add_actions.values_list("action_number", flat=True)
+        )
+        self.assertEqual(sorted(numbers), [1, 2, 3, 4, 5, 6])
+
+    def test_action_auto_numbering_cross_type(self):
+        """Session 6 interleaves add/mix, numbering spans all types."""
+        adds = list(
+            self.s6.add_actions.order_by("action_number")
+            .values_list("action_number", flat=True)
+        )
+        mixes = list(
+            self.s6.mix_actions.values_list("action_number", flat=True)
+        )
+        self.assertEqual(adds, [1, 2, 4])
+        self.assertEqual(mixes, [3])
+
     # ── Add-action tests ────────────────────────────────────────
 
     def test_intermolecular_add_count_session1(self):
@@ -501,10 +503,10 @@ class AmidationRecipeTestCase(TestCase):
         intra = self.s1.add_actions.filter(molecular_context="intramolecular")
         self.assertEqual(intra.count(), 3)
 
-    def test_intermolecular_default(self):
-        """Workup add actions default to intermolecular context."""
+    def test_workup_add_has_null_context(self):
+        """Workup add actions have NULL molecular_context (applies to all pathways)."""
         workup_add = self.s4.add_actions.first()
-        self.assertEqual(workup_add.molecular_context, "intermolecular")
+        self.assertIsNone(workup_add.molecular_context)
 
     def test_add_action_smarts_vs_smiles(self):
         """First action uses SMARTS (reactant match), second uses SMILES (reagent)."""
@@ -517,9 +519,10 @@ class AmidationRecipeTestCase(TestCase):
         self.assertIsNotNone(actions[1].material_smiles)
 
     def test_add_action_density_field(self):
-        """DIPEA (action 3 intermolecular) is neat liquid — has density, no solvent."""
+        """DIPEA (intermolecular) is neat liquid — has density, no solvent."""
         dipea = self.s1.add_actions.filter(
-            molecular_context="intermolecular", action_number=3
+            molecular_context="intermolecular",
+            material_smiles="CCN(C(C)C)C(C)C",
         ).first()
         self.assertAlmostEqual(dipea.density, 0.74)
         self.assertIsNone(dipea.solvent)
@@ -527,7 +530,8 @@ class AmidationRecipeTestCase(TestCase):
     def test_intramolecular_dipea_uses_solvent(self):
         """Intramolecular DIPEA is dissolved in DMA instead of neat."""
         dipea = self.s1.add_actions.filter(
-            molecular_context="intramolecular", action_number=3
+            molecular_context="intramolecular",
+            material_smiles="CCN(C(C)C)C(C)C",
         ).first()
         self.assertIsNone(dipea.density)
         self.assertEqual(dipea.solvent, "DMA")
@@ -544,7 +548,8 @@ class AmidationRecipeTestCase(TestCase):
     def test_default_plates_reaction_add(self):
         """Reaction adds default to SM → reaction."""
         add = self.s1.add_actions.filter(
-            molecular_context="intermolecular", action_number=1
+            molecular_context="intermolecular",
+            material_smarts="[#6:1](=[#8:2])-[#8;H1]",
         ).first()
         self.assertEqual(add.from_plate_role, PlateRole.STARTINGMATERIAL)
         self.assertEqual(add.to_plate_role, PlateRole.REACTION)

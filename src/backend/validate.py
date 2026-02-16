@@ -7,7 +7,6 @@ from rdkit import Chem
 
 from .recipebuilder.encodedrecipes import encoded_recipes
 from .utils import (
-    getAddtionOrder,
     checkReactantSMARTS,
     combiChem,
 )
@@ -164,10 +163,6 @@ class ValidateFile(object):
                         reaction_recipes=reaction_recipes,
                         product_smiles=product_smiles,
                     )
-                    # print(
-                    #     "The reactant pair smiles ordered are: ",
-                    #     reactant_pair_smiles_ordered,
-                    # )
                     if reaction_number == max_no_steps:
                         self.target_smiles = self.target_smiles + product_smiles
                     reaction_info[
@@ -637,13 +632,7 @@ class ValidateFile(object):
                     else:
                         product_mol = product_mols[-1]
                     product_smi = Chem.MolToSmiles(product_mol)
-                    # reactant_smis = getAddtionOrder(
-                    #     product_smi=product_smi,
-                    #     reactant_SMILES=reactant_pair,
-                    #     reaction_SMARTS=smarts,
-                    # )
                     product_created_smiles.append(product_smi)
-                    # reactant_pair_smiles_ordered.append(reactant_smis)
             return product_created_smiles
 
         except Exception as e:

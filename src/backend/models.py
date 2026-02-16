@@ -1046,7 +1046,7 @@ class RecipeActionSession(models.Model):
     recipe = models.ForeignKey(
         Recipe, related_name="action_sessions", on_delete=models.CASCADE
     )
-    session_number = models.PositiveIntegerField()
+    session_number = models.PositiveIntegerField(default=0)
     session_type = models.CharField(choices=SessionType.choices, max_length=20)
     driver = models.CharField(
         choices=SessionDriver.choices,
@@ -1058,6 +1058,17 @@ class RecipeActionSession(models.Model):
     class Meta:
         ordering = ["session_number"]
         unique_together = ["recipe", "session_number"]
+
+    def save(self, *args, **kwargs):
+        if not self.session_number:
+            last = (
+                RecipeActionSession.objects.filter(recipe=self.recipe)
+                .order_by("-session_number")
+                .values_list("session_number", flat=True)
+                .first()
+            )
+            self.session_number = (last or 0) + 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return (
@@ -1077,13 +1088,17 @@ class RecipeAddAction(models.Model):
     intramolecular (single reactant) or intermolecular (two reactants).
     The consumer filters on ``Reaction.intramolecular`` at runtime.
 
+    When ``molecular_context`` is NULL the action applies to **all**
+    pathways (typical for workup / non-reaction sessions).
+
     Parameters
     ----------
     session : ForeignKey → RecipeActionSession
     action_number : PositiveIntegerField
         Execution order within the session (auto-assigned from list position).
-    molecular_context : CharField
-        intermolecular | intramolecular.
+    molecular_context : CharField or None
+        intermolecular | intramolecular | NULL (applies to all pathways).
+        Only relevant for reaction sessions.
     material_smarts : CharField
         SMARTS pattern to match a reactant by substructure.
     material_smiles : CharField
@@ -1121,11 +1136,12 @@ class RecipeAddAction(models.Model):
     session = models.ForeignKey(
         RecipeActionSession, related_name="add_actions", on_delete=models.CASCADE
     )
-    action_number = models.PositiveIntegerField()
+    action_number = models.PositiveIntegerField(default=0)
     molecular_context = models.CharField(
         choices=MolecularContext.choices,
-        default=MolecularContext.INTERMOLECULAR,
         max_length=20,
+        null=True,
+        blank=True,
     )
     material_smarts = models.CharField(max_length=500, null=True, blank=True)
     material_smiles = models.CharField(max_length=500, null=True, blank=True)
@@ -1153,6 +1169,18 @@ class RecipeAddAction(models.Model):
 
     class Meta:
         ordering = ["action_number"]
+
+    def save(self, *args, **kwargs):
+        if not self.action_number:
+            from django.db.models import Max
+            candidates = [
+                self.session.add_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.stir_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.extract_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.mix_actions.aggregate(m=Max("action_number"))["m"] or 0,
+            ]
+            self.action_number = max(candidates) + 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         material = self.material_smarts or self.material_smiles or "product"
@@ -1199,7 +1227,7 @@ class RecipeStirAction(models.Model):
     session = models.ForeignKey(
         RecipeActionSession, related_name="stir_actions", on_delete=models.CASCADE
     )
-    action_number = models.PositiveIntegerField()
+    action_number = models.PositiveIntegerField(default=0)
     temperature = models.FloatField(default=25)
     temperature_unit = models.CharField(max_length=10, default="degC")
     duration = models.FloatField()
@@ -1218,6 +1246,18 @@ class RecipeStirAction(models.Model):
 
     class Meta:
         ordering = ["action_number"]
+
+    def save(self, *args, **kwargs):
+        if not self.action_number:
+            from django.db.models import Max
+            candidates = [
+                self.session.add_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.stir_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.extract_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.mix_actions.aggregate(m=Max("action_number"))["m"] or 0,
+            ]
+            self.action_number = max(candidates) + 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return (
@@ -1264,7 +1304,7 @@ class RecipeExtractAction(models.Model):
     session = models.ForeignKey(
         RecipeActionSession, related_name="extract_actions", on_delete=models.CASCADE
     )
-    action_number = models.PositiveIntegerField()
+    action_number = models.PositiveIntegerField(default=0)
     layer = models.CharField(
         choices=Layer.choices,
         default=Layer.BOTTOM,
@@ -1290,6 +1330,18 @@ class RecipeExtractAction(models.Model):
 
     class Meta:
         ordering = ["action_number"]
+
+    def save(self, *args, **kwargs):
+        if not self.action_number:
+            from django.db.models import Max
+            candidates = [
+                self.session.add_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.stir_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.extract_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.mix_actions.aggregate(m=Max("action_number"))["m"] or 0,
+            ]
+            self.action_number = max(candidates) + 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return (
@@ -1318,7 +1370,7 @@ class RecipeMixAction(models.Model):
     session = models.ForeignKey(
         RecipeActionSession, related_name="mix_actions", on_delete=models.CASCADE
     )
-    action_number = models.PositiveIntegerField()
+    action_number = models.PositiveIntegerField(default=0)
     plate_role = models.CharField(
         choices=PlateRole.choices,
         default=PlateRole.REACTION,
@@ -1329,6 +1381,18 @@ class RecipeMixAction(models.Model):
 
     class Meta:
         ordering = ["action_number"]
+
+    def save(self, *args, **kwargs):
+        if not self.action_number:
+            from django.db.models import Max
+            candidates = [
+                self.session.add_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.stir_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.extract_actions.aggregate(m=Max("action_number"))["m"] or 0,
+                self.session.mix_actions.aggregate(m=Max("action_number"))["m"] or 0,
+            ]
+            self.action_number = max(candidates) + 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return (

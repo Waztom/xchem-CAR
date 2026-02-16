@@ -297,43 +297,18 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                                             reaction_name = reaction["name"]
                                             reactant_smiles = reaction["reactantSmiles"]
                                             product_smiles = reaction["productSmiles"]
-                                            # reaction temp must be set from OT session!!!
-                                            # reaction_temperature = [
-                                            #     actionsession["actions"][0]["content"][
-                                            #         "temperature"
-                                            #     ]["value"]
-                                            #     for actionsession in encoded_recipes[
-                                            #         reaction_name
-                                            #     ]["recipes"]["standard"][
-                                            #         "actionsessions"
-                                            #     ]
-                                            #     if actionsession["type"] == "stir"
-                                            # ][0]
+                        
                                             intramolecular_possible = encoded_recipes[
                                                 reaction_name
                                             ]["intramolecular"]
-
-                                            # recipe_rxn_smarts = encoded_recipes[
-                                            #     reaction_name
-                                            # ]["recipes"]["standard"]["reactionSMARTS"]
 
                                             if (
                                                 len(reactant_smiles) == 1
                                                 and intramolecular_possible
                                             ):
-                                                # reactant_smiles_ordered = (
-                                                #     reactant_smiles
-                                                # )
                                                 intramolecular = True
                                             else:
-                                                # reactant_smiles_ordered = getAddtionOrder(
-                                                #     product_smi=product_smiles,
-                                                #     reactant_SMILES=reactant_smiles,
-                                                #     reaction_SMARTS=recipe_rxn_smarts,
-                                                # )
                                                 intramolecular = False
-                                                # if not reactant_smiles_ordered:
-                                                #     continue
 
                                             reaction_smarts = (
                                                 AllChem.ReactionFromSmarts(
@@ -351,7 +326,6 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                                                 reaction_number=index + 1,
                                                 intramolecular=intramolecular,
                                                 reaction_recipe="standard",  # Need to change when we get multiple recipes runnning!
-                                                # reaction_temperature=reaction_temperature,
                                                 reaction_smarts=reaction_smarts,
                                             )
 

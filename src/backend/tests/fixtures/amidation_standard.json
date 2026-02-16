@@ -152,7 +152,6 @@
             "actions": [
                 {
                     "type": "add",
-                    "molecular_context": "intermolecular",
                     "material_smarts": null,
                     "material_smiles": "CC#N",
                     "equivalents": 200.0,
@@ -191,7 +190,6 @@
             "actions": [
                 {
                     "type": "add",
-                    "molecular_context": "intermolecular",
                     "material_smarts": null,
                     "material_smiles": null,
                     "equivalents": 200.0,
@@ -206,7 +204,6 @@
                 },
                 {
                     "type": "add",
-                    "molecular_context": "intermolecular",
                     "material_smarts": null,
                     "material_smiles": "CC#N",
                     "equivalents": 200.0,
@@ -227,7 +224,6 @@
                 },
                 {
                     "type": "add",
-                    "molecular_context": "intermolecular",
                     "material_smarts": null,
                     "material_smiles": null,
                     "equivalents": 300.0,
