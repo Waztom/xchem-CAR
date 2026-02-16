@@ -41,7 +41,11 @@ from .manifold.apicalls import (
     getExactSearch,
     getManifoldRetrosynthesisBatch,
 )
-from .recipebuilder.encodedrecipes import encoded_recipes
+from .recipe_utils import (
+    recipe_exists,
+    get_recipe_intramolecular,
+    get_recipe_stir_temperature,
+)
 from .utils import (
     checkPreviousReactionProducts,
     getActionSessionQuerySet,
@@ -194,7 +198,7 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                                     encoded_reactions_found = [
                                         reaction
                                         for reaction in reactions
-                                        if reaction["name"] in encoded_recipes
+                                        if recipe_exists(reaction["name"])
                                     ]
 
                                     if len(encoded_reactions_found) != no_steps:
@@ -298,9 +302,9 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                                             reactant_smiles = reaction["reactantSmiles"]
                                             product_smiles = reaction["productSmiles"]
                         
-                                            intramolecular_possible = encoded_recipes[
+                                            intramolecular_possible = get_recipe_intramolecular(
                                                 reaction_name
-                                            ]["intramolecular"]
+                                            )
 
                                             if (
                                                 len(reactant_smiles) == 1
@@ -472,13 +476,9 @@ def uploadCustomReaction(validate_output, fetch_pubchem=True, fetch_catalogue=Tr
                     )
                     # Need to move this to OT session - this will enable changing reaction temps in recipes
                     # and not have to upload again...
-                    reaction_temperature = [
-                        actionsession["actions"][0]["content"]["temperature"]["value"]
-                        for actionsession in encoded_recipes[reaction_name]["recipes"][
-                            reaction_recipe
-                        ]["actionsessions"]
-                        if actionsession["type"] == "stir"
-                    ][0]
+                    reaction_temperature = get_recipe_stir_temperature(
+                        reaction_name, reaction_recipe
+                    )
 
                     reaction_id = createReactionModel(
                         method_id=method_id,
@@ -624,13 +624,9 @@ def uploadCombiCustomReaction(validate_output, fetch_pubchem=True, fetch_catalog
                     )
                     # Need to move this to OT session - this will enable changing reaction temps in recipes
                     # and not have to upload again...
-                    reaction_temperature = [
-                        actionsession["actions"][0]["content"]["temperature"]["value"]
-                        for actionsession in encoded_recipes[reaction_name]["recipes"][
-                            reaction_recipe
-                        ]["actionsessions"]
-                        if actionsession["type"] == "stir"
-                    ][0]
+                    reaction_temperature = get_recipe_stir_temperature(
+                        reaction_name, reaction_recipe
+                    )
 
                     reaction_id = createReactionModel(
                         method_id=method_id,
@@ -728,25 +724,22 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
                 reactant_pair_smiles = reactionobj.reactants.all().values_list(
                     "smiles", flat=True
                 )
-                recipe = encoded_recipes[reactionclass]["recipes"][reactionrecipe]
-                intramolecular_possible = encoded_recipes[reactionclass][
-                    "intramolecular"
-                ]
+                intramolecular_possible = get_recipe_intramolecular(
+                    reactionclass, reactionrecipe
+                )
 
                 if intramolecular_possible and len(reactant_pair_smiles) == 1:
                     intramolecular_possible = True
                 else:
                     intramolecular_possible = False
 
-                actionsessions = recipe["actionsessions"]
-
                 CreateEncodedActionModels(
+                    reaction_class=reactionclass,
+                    recipe_name=reactionrecipe,
                     intramolecular=intramolecular_possible,
-                    actionsessions=actionsessions,
                     target_id=target_id,
                     reaction_id=reaction_id,
                     reactant_pair_smiles=list(reactant_pair_smiles),
-                    reaction_name=reactionclass,
                 )
 
         batchtag = getBatchTag(batchid=batchid)

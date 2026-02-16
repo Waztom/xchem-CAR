@@ -5,7 +5,7 @@ import inspect
 import pandas as pd
 from rdkit import Chem
 
-from .recipebuilder.encodedrecipes import encoded_recipes
+from .recipe_utils import get_recipe_smarts
 from .utils import (
     checkReactantSMARTS,
     combiChem,
@@ -602,9 +602,7 @@ class ValidateFile(object):
             for index, (reactant_pair, reaction_name, reaction_recipe) in enumerate(
                 zip(reactant_pair_smiles, reaction_names, reaction_recipes)
             ):
-                smarts = encoded_recipes[reaction_name]["recipes"][reaction_recipe][
-                    "reactionSMARTS"
-                ]
+                smarts = get_recipe_smarts(reaction_name, reaction_recipe)
                 if not all(smarts):
                     print(
                         "Warning ignoring smarts pattern for reaction: ", reaction_name

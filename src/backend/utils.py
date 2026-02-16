@@ -31,7 +31,7 @@ from .models import (
     Plate,
 )
 
-from .recipebuilder.encodedrecipes import encoded_recipes
+from .recipe_utils import get_recipe_yield, get_recipe_smarts
 
 logger = logging.getLogger(__name__)
 
@@ -947,7 +947,7 @@ def getReactionYields(reactionclasslist: list, recipelist) -> list[int]:
         Returns the reaction yields eg. 0.80
     """
     reactionyields = [
-        (encoded_recipes[reactionclass]["recipes"][recipe]["yield"] / 100)
+        get_recipe_yield(reactionclass, recipe)
         for reactionclass, recipe in zip(reactionclasslist, recipelist)
     ]
     return reactionyields
@@ -1207,9 +1207,9 @@ def createCombiChemCSV(csv_input_file: str, out_dir: str):
             reaction_recipes = group[1]["reaction_recipe"].tolist()
             reactant_1_SMILES = group[1]["reactant_1"].tolist()
             reactant_2_SMILES = group[1]["reactant_2"].tolist()
-            reaction_SMARTS = encoded_recipes[reaction_classes[0]][reaction_recipes[0]][
-                "reactionSMARTS"
-            ]
+            reaction_SMARTS = get_recipe_smarts(
+                reaction_classes[0], reaction_recipes[0]
+            )
 
             all_possible_combinations = combiChem(reactant_1_SMILES, reactant_2_SMILES)
             product_smiles = []

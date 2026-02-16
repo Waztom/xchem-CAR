@@ -219,28 +219,18 @@ class RecipeGenerator:
         """Find an action in the recipe by its location."""
         # Find session
         session = None
-        for s in recipe.get("actionsessions", []):
-            if s.get("sessionnumber") == location.session:
+        for s in recipe.get("sessions", []):
+            if s.get("session_number") == location.session:
                 session = s
                 break
         
         if session is None:
             return None
         
-        # Find action in session (check all possible action containers)
-        for actions_key in ["intermolecular", "Intramolecular", "actions"]:
-            if actions_key in session:
-                actions_container = session[actions_key]
-                # Handle nested "actions" key
-                if isinstance(actions_container, dict) and "actions" in actions_container:
-                    actions = actions_container["actions"]
-                else:
-                    actions = actions_container
-                
-                if isinstance(actions, list):
-                    for action in actions:
-                        if action.get("actionnumber") == location.actionnumber:
-                            return action
+        # Find action in the flat actions list
+        for action in session.get("actions", []):
+            if action.get("action_number") == location.actionnumber:
+                return action
         
         return None
     
@@ -340,29 +330,18 @@ class RecipeGenerator:
         
         # Find session
         session = None
-        for s in recipe.get("actionsessions", []):
-            if s.get("sessionnumber") == session_num:
+        for s in recipe.get("sessions", []):
+            if s.get("session_number") == session_num:
                 session = s
                 break
         
         if session is None:
             raise OrderingError(f"Session {session_num} not found in recipe")
         
-        # Find the actions container
-        actions_key = None
-        actions_container = None
-        for key in ["intermolecular", "Intramolecular", "actions"]:
-            if key in session:
-                if isinstance(session[key], dict) and "actions" in session[key]:
-                    actions_key = key
-                    actions_container = session[key]["actions"]
-                elif isinstance(session[key], list):
-                    actions_key = key
-                    actions_container = session[key]
-                if actions_container:
-                    break
+        # Actions are in a flat list
+        actions_container = session.get("actions", [])
         
-        if actions_container is None:
+        if not actions_container:
             raise OrderingError(f"No actions found in session {session_num}")
         
         # Build map of action_id -> action
@@ -370,7 +349,7 @@ class RecipeGenerator:
         for action_id, loc in self.template.action_ids.items():
             if loc["session"] == session_num:
                 for action in actions_container:
-                    if action.get("actionnumber") == loc["actionnumber"]:
+                    if action.get("action_number") == loc["actionnumber"]:
                         action_id_to_action[action_id] = action
                         break
         
@@ -392,13 +371,10 @@ class RecipeGenerator:
         
         # Renumber actions sequentially
         for i, action in enumerate(reordered, 1):
-            action["actionnumber"] = i
+            action["action_number"] = i
         
         # Update recipe
-        if actions_key in ["intermolecular", "Intramolecular"]:
-            session[actions_key]["actions"] = reordered
-        else:
-            session["actions"] = reordered
+        session["actions"] = reordered
     
     def _reorder_sessions(self, recipe: dict, new_order: list[str]) -> None:
         """
@@ -408,13 +384,13 @@ class RecipeGenerator:
             recipe: Recipe to modify
             new_order: List of session_ids in desired order
         """
-        current_sessions = recipe.get("actionsessions", [])
+        current_sessions = recipe.get("sessions", [])
         
         # Build map of session_id -> session
         session_id_to_session = {}
         for session_id, session_num in self.template.session_ids.items():
             for session in current_sessions:
-                if session.get("sessionnumber") == session_num:
+                if session.get("session_number") == session_num:
                     session_id_to_session[session_id] = session
                     break
         
@@ -435,15 +411,15 @@ class RecipeGenerator:
         # Also include any sessions not in session_ids mapping
         mapped_session_nums = set(self.template.session_ids.values())
         for session in current_sessions:
-            if session.get("sessionnumber") not in mapped_session_nums:
+            if session.get("session_number") not in mapped_session_nums:
                 if session not in reordered:
                     reordered.append(session)
         
         # Renumber sessions sequentially
         for i, session in enumerate(reordered, 1):
-            session["sessionnumber"] = i
+            session["session_number"] = i
         
-        recipe["actionsessions"] = reordered
+        recipe["sessions"] = reordered
     
     def get_variable_names(self) -> list[str]:
         """Get list of all variable names defined in the template."""

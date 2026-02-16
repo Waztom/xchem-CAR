@@ -14,7 +14,11 @@ from typing import Any, Optional
 import copy
 import logging
 
-from backend.recipebuilder.encodedrecipes import encoded_recipes
+from backend.recipe_utils import (
+    recipe_exists,
+    get_latest_recipe,
+    recipe_to_dict,
+)
 from .exceptions import (
     TemplateValidationError,
     ActionNotFoundError,
@@ -136,14 +140,17 @@ class RecipeTemplate:
             reaction_class = self.base
             recipe_name = "standard"
         
-        # Validate reaction class exists
-        if reaction_class not in encoded_recipes:
+        # Validate reaction class exists in Recipe DB
+        if not recipe_exists(reaction_class):
             raise TemplateValidationError(
-                f"Reaction class '{reaction_class}' not found in encoded_recipes"
+                f"Reaction class '{reaction_class}' not found in Recipe DB"
             )
         
         # Validate recipe exists
-        if recipe_name not in encoded_recipes[reaction_class]["recipes"]:
+        from backend.models import Recipe
+        if not Recipe.objects.filter(
+            reaction_class=reaction_class, name=recipe_name
+        ).exists():
             raise TemplateValidationError(
                 f"Recipe '{recipe_name}' not found in reaction class '{reaction_class}'"
             )
@@ -151,9 +158,21 @@ class RecipeTemplate:
         return reaction_class, recipe_name
     
     def get_base_recipe(self) -> dict:
-        """Get a deep copy of the base recipe."""
+        """Get a deep copy of the base recipe as a clean dict.
+
+        The structure mirrors the DB schema (not the legacy encoded format)::
+
+            {"sessions": [{..."actions": [{...}]}], "estimated_yield": ..., ...}
+        """
         reaction_class, recipe_name = self._parse_base()
-        return copy.deepcopy(encoded_recipes[reaction_class]["recipes"][recipe_name])
+        return copy.deepcopy(
+            recipe_to_dict(reaction_class, recipe_name)
+        )
+    
+    def get_recipe(self):
+        """Get the Recipe model instance for this template's base recipe."""
+        reaction_class, recipe_name = self._parse_base()
+        return get_latest_recipe(reaction_class, recipe_name)
     
     def get_reaction_class(self) -> str:
         """Get the reaction class name."""
@@ -166,43 +185,29 @@ class RecipeTemplate:
         return recipe_name
     
     def _validate_action_exists(self, action_id: str, location: dict) -> None:
-        """Validate that an action exists at the specified location."""
-        recipe = self.get_base_recipe()
+        """Validate that an action exists at the specified location in the DB."""
+        recipe = self.get_recipe()
         session_num = location["session"]
         action_num = location["actionnumber"]
         
-        # Find session
-        session = None
-        for s in recipe.get("actionsessions", []):
-            if s.get("sessionnumber") == session_num:
-                session = s
-                break
-        
+        session = recipe.action_sessions.filter(session_number=session_num).first()
         if session is None:
             raise ActionNotFoundError(action_id, session_num, action_num)
         
-        # Find action - check both "intermolecular" and "actions" keys
-        actions = []
-        if "intermolecular" in session and "actions" in session["intermolecular"]:
-            actions.extend(session["intermolecular"]["actions"])
-        if "Intramolecular" in session and "actions" in session["Intramolecular"]:
-            actions.extend(session["Intramolecular"]["actions"])
-        if "actions" in session:
-            actions.extend(session["actions"])
-        
-        action_found = any(a.get("actionnumber") == action_num for a in actions)
-        if not action_found:
+        # Check all action types for this action_number
+        found = (
+            session.add_actions.filter(action_number=action_num).exists()
+            or session.stir_actions.filter(action_number=action_num).exists()
+            or session.extract_actions.filter(action_number=action_num).exists()
+            or session.mix_actions.filter(action_number=action_num).exists()
+        )
+        if not found:
             raise ActionNotFoundError(action_id, session_num, action_num)
     
     def _validate_session_exists(self, session_id: str, sessionnumber: int) -> None:
-        """Validate that a session exists at the specified number."""
-        recipe = self.get_base_recipe()
-        
-        session_found = any(
-            s.get("sessionnumber") == sessionnumber 
-            for s in recipe.get("actionsessions", [])
-        )
-        if not session_found:
+        """Validate that a session exists at the specified number in the DB."""
+        recipe = self.get_recipe()
+        if not recipe.action_sessions.filter(session_number=sessionnumber).exists():
             raise SessionNotFoundError(session_id, sessionnumber)
     
     def get_action_location(self, action_id: str) -> ActionLocation:

@@ -8,9 +8,9 @@ involve extract and mix operations.
 import logging
 from django.db.models import QuerySet
 
-from backend.models import ExtractAction, MixAction
+from backend.models import ExtractAction, MixAction, RecipeExtractAction, RecipeMixAction
 from backend.utils import getReaction
-from backend.recipebuilder.encodedrecipes import encoded_recipes
+from backend.recipe_utils import get_session_recipe_actions
 
 from .base_handler import SessionHandler
 
@@ -87,44 +87,37 @@ class WorkupSessionHandler(SessionHandler):
         )
         logger.info(f"Using {reaction_action_search} workup actions")
 
-        # Get actions from encoded recipes
+        # Get actions from Recipe DB
         try:
-            action_sessions = encoded_recipes[reaction_class]["recipes"][recipe_type][
-                "actionsessions"
-            ]
-            workup_actions = None
+            workup_actions = get_session_recipe_actions(
+                reaction_class=reaction_class,
+                name=recipe_type,
+                session_type="workup",
+                session_number=session_number,
+                molecular_context=reaction_action_search,
+            )
 
-            try:
-                workup_actions = [
-                    actionsession[reaction_action_search]["actions"]
-                    for actionsession in action_sessions
-                    if actionsession["type"] == "workup"
-                    and actionsession["sessionnumber"] == session_number
-                ][0]
-
-                action_count = len(workup_actions)
-                logger.info(
-                    f"Found {action_count} workup actions for reaction {reaction_id}"
-                )
-            except (IndexError, KeyError) as e:
+            if not workup_actions:
                 logger.warning(
-                    f"No workup actions defined for reaction {reaction_id}, recipe {recipe_type}: {str(e)}"
+                    f"No workup actions defined for reaction {reaction_id}, recipe {recipe_type}"
                 )
                 self.add_command(
                     f"\n\t# No workup actions found for reaction {reaction_id}"
                 )
                 return
 
+            action_count = len(workup_actions)
+            logger.info(
+                f"Found {action_count} workup actions for reaction {reaction_id}"
+            )
+
             # Process each workup action
             for index, workup_action in enumerate(workup_actions):
-                action_type = workup_action["type"]
-                action_number = workup_action["actionnumber"]
-
-                logger.info(
-                    f"Processing workup action {index+1}/{len(workup_actions)}: {action_type} {action_number}"
-                )
-
-                if action_type == "extract":
+                if isinstance(workup_action, RecipeExtractAction):
+                    action_number = workup_action.action_number
+                    logger.info(
+                        f"Processing workup action {index+1}/{len(workup_actions)}: extract {action_number}"
+                    )
                     self.process_extract_action(
                         workup_action,
                         action_number,
@@ -135,12 +128,16 @@ class WorkupSessionHandler(SessionHandler):
                         reaction_id,
                     )
 
-                elif action_type == "mix":
+                elif isinstance(workup_action, RecipeMixAction):
+                    action_number = workup_action.action_number
+                    logger.info(
+                        f"Processing workup action {index+1}/{len(workup_actions)}: mix {action_number}"
+                    )
                     self.process_mix_action(
                         action_number, actionsession_obj, reaction_obj, reaction_id
                     )
                 else:
-                    logger.warning(f"Unknown workup action type: {action_type}")
+                    logger.warning(f"Unknown workup action type: {type(workup_action).__name__}")
 
         except (KeyError, IndexError) as e:
             logger.error(
@@ -281,9 +278,9 @@ class WorkupSessionHandler(SessionHandler):
             )
 
             # Drop tip if this isn't the action before a mix step
-            next_action_is_mix = (index + 1 < len(workup_actions)) and workup_actions[
-                index + 1
-            ]["type"] == "mix"
+            next_action_is_mix = (index + 1 < len(workup_actions)) and isinstance(
+                workup_actions[index + 1], RecipeMixAction
+            )
             if not next_action_is_mix:
                 logger.info("No mix action follows, dropping tip")
                 self.add_command(self.command_generator.drop_tip())

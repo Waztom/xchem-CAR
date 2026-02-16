@@ -255,50 +255,44 @@ def create_template_from_recipe(
     Returns:
         RecipeTemplate with auto-generated mappings
     """
-    from backend.recipebuilder.encodedrecipes import encoded_recipes
+    from backend.recipe_utils import (
+        recipe_exists,
+        recipe_to_dict,
+    )
     
-    if reaction_class not in encoded_recipes:
+    if not recipe_exists(reaction_class):
         raise TemplateValidationError(f"Reaction class '{reaction_class}' not found")
     
-    if recipe_name not in encoded_recipes[reaction_class]["recipes"]:
+    from backend.models import Recipe
+    if not Recipe.objects.filter(
+        reaction_class=reaction_class, name=recipe_name
+    ).exists():
         raise TemplateValidationError(
             f"Recipe '{recipe_name}' not found in '{reaction_class}'"
         )
     
-    recipe = encoded_recipes[reaction_class]["recipes"][recipe_name]
+    recipe = recipe_to_dict(reaction_class, recipe_name)
     
     action_ids = {}
     session_ids = {}
     variables = {}
     
     if auto_map_actions:
-        for session in recipe.get("actionsessions", []):
-            session_num = session.get("sessionnumber")
-            session_type = session.get("type", "unknown")
+        for session in recipe.get("sessions", []):
+            session_num = session.get("session_number")
+            session_type = session.get("session_type", "unknown")
             session_id = f"{session_type}_{session_num}"
             session_ids[session_id] = session_num
             
-            # Find actions in this session
-            actions_list = []
-            for key in ["intermolecular", "Intramolecular", "actions"]:
-                if key in session:
-                    container = session[key]
-                    if isinstance(container, dict) and "actions" in container:
-                        actions_list.extend(container["actions"])
-                    elif isinstance(container, list):
-                        actions_list.extend(container)
-            
-            for action in actions_list:
-                action_num = action.get("actionnumber")
+            for action in session.get("actions", []):
+                action_num = action.get("action_number")
                 action_type = action.get("type", "unknown")
                 
                 # Generate descriptive action_id
                 if action_type == "add":
-                    # Try to identify what's being added
-                    material = action.get("content", {}).get("material", {})
-                    if material.get("SMARTS"):
+                    if action.get("material_smarts"):
                         action_id = f"add_reactant_{action_num}"
-                    elif material.get("SMILES"):
+                    elif action.get("material_smiles"):
                         action_id = f"add_reagent_{action_num}"
                     else:
                         action_id = f"add_{action_num}"
@@ -312,36 +306,32 @@ def create_template_from_recipe(
                 
                 # Auto-generate common variable mappings
                 if action_type == "add":
-                    content = action.get("content", {})
-                    material = content.get("material", {})
-                    
-                    if "solvent" in material and material["solvent"]:
+                    if action.get("solvent"):
                         variables[f"{action_id}_solvent"] = {
                             "action_id": action_id,
-                            "path": "content.material.solvent"
+                            "path": "solvent"
                         }
-                    if "concentration" in material and material["concentration"]:
+                    if action.get("concentration"):
                         variables[f"{action_id}_concentration"] = {
                             "action_id": action_id,
-                            "path": "content.material.concentration"
+                            "path": "concentration"
                         }
-                    if "quantity" in material:
+                    if action.get("equivalents") is not None:
                         variables[f"{action_id}_equiv"] = {
                             "action_id": action_id,
-                            "path": "content.material.quantity.value"
+                            "path": "equivalents"
                         }
                 
                 elif action_type == "stir":
-                    content = action.get("content", {})
-                    if "temperature" in content:
+                    if action.get("temperature") is not None:
                         variables[f"{action_id}_temperature"] = {
                             "action_id": action_id,
-                            "path": "content.temperature.value"
+                            "path": "temperature"
                         }
-                    if "duration" in content:
+                    if action.get("duration") is not None:
                         variables[f"{action_id}_duration"] = {
                             "action_id": action_id,
-                            "path": "content.duration.value"
+                            "path": "duration"
                         }
     
     return RecipeTemplate(

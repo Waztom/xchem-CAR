@@ -7,9 +7,9 @@ This module provides methods for handling reaction sessions.
 import logging
 from django.db.models import QuerySet
 
-from backend.models import AddAction, MixAction
+from backend.models import AddAction, MixAction, RecipeAddAction, RecipeMixAction
 from backend.utils import getReaction, getPreviousReactionQuerySets, getReactionQuerySet
-from backend.recipebuilder.encodedrecipes import encoded_recipes
+from backend.recipe_utils import get_session_recipe_actions, unparse_plate_type
 
 from .base_handler import SessionHandler
 
@@ -204,17 +204,15 @@ class ReactionSessionHandler(SessionHandler):
                     f"Using {reaction_action_search} actions for recipe {recipe_type}"
                 )
 
-                # Get actions from encoded recipes
+                # Get actions from Recipe DB
                 try:
-                    action_sessions = encoded_recipes[reaction_class]["recipes"][
-                        recipe_type
-                    ]["actionsessions"]
-                    reaction_actions = [
-                        actionsession[reaction_action_search]["actions"]
-                        for actionsession in action_sessions
-                        if actionsession["type"] == action_session_type
-                        and actionsession["sessionnumber"] == session_number
-                    ][0]
+                    reaction_actions = get_session_recipe_actions(
+                        reaction_class=reaction_class,
+                        name=recipe_type,
+                        session_type=action_session_type,
+                        session_number=session_number,
+                        molecular_context=reaction_action_search,
+                    )
 
                     action_count = len(reaction_actions)
                     logger.info(
@@ -225,7 +223,7 @@ class ReactionSessionHandler(SessionHandler):
                     reaction_add_actions = [
                         action
                         for action in reaction_actions
-                        if action["content"]["material"]["SMARTS"] != None
+                        if isinstance(action, RecipeAddAction) and action.material_smarts
                     ]
 
                     add_action_count = len(reaction_add_actions)
@@ -264,17 +262,15 @@ class ReactionSessionHandler(SessionHandler):
                 f"Using {reaction_action_search} actions for recipe {recipe_type}"
             )
 
-            # Get actions from encoded recipes
+            # Get actions from Recipe DB
             try:
-                action_sessions = encoded_recipes[reaction_class]["recipes"][
-                    recipe_type
-                ]["actionsessions"]
-                reaction_actions = [
-                    actionsession[reaction_action_search]["actions"]
-                    for actionsession in action_sessions
-                    if actionsession["type"] == action_session_type
-                    and actionsession["sessionnumber"] == session_number
-                ][0]
+                reaction_actions = get_session_recipe_actions(
+                    reaction_class=reaction_class,
+                    name=recipe_type,
+                    session_type=action_session_type,
+                    session_number=session_number,
+                    molecular_context=reaction_action_search,
+                )
 
                 action_count = len(reaction_actions)
                 logger.info(
@@ -285,7 +281,7 @@ class ReactionSessionHandler(SessionHandler):
                 reaction_add_actions = [
                     action
                     for action in reaction_actions
-                    if action["content"]["material"]["SMARTS"] != None
+                    if isinstance(action, RecipeAddAction) and action.material_smarts
                 ]
 
                 add_action_count = len(reaction_add_actions)
@@ -312,7 +308,7 @@ class ReactionSessionHandler(SessionHandler):
         logger.info(f"Processing {add_action_count} add actions for dilution")
 
         for i, reaction_add_action in enumerate(reaction_add_actions):
-            action_number = reaction_add_action["actionnumber"]
+            action_number = reaction_add_action.action_number
             logger.info(
                 f"Processing add action {i+1}/{add_action_count}, number {action_number}"
             )
@@ -492,30 +488,25 @@ class ReactionSessionHandler(SessionHandler):
         logger.info(f"Using {reaction_action_search} actions")
 
         try:
-            # Get actions from encoded recipes
-            action_sessions = encoded_recipes[reaction_class]["recipes"][recipe_type][
-                "actionsessions"
-            ]
-            reaction_actions = [
-                actionsession[reaction_action_search]["actions"]
-                for actionsession in action_sessions
-                if actionsession["type"] == "reaction"
-                and actionsession["sessionnumber"] == session_number
-            ][0]
+            # Get actions from Recipe DB
+            reaction_actions = get_session_recipe_actions(
+                reaction_class=reaction_class,
+                name=recipe_type,
+                session_type="reaction",
+                session_number=session_number,
+                molecular_context=reaction_action_search,
+            )
 
             action_count = len(reaction_actions)
             logger.info(f"Found {action_count} actions for reaction")
 
             # Process each action
             for index, reaction_action in enumerate(reaction_actions):
-                action_type = reaction_action["type"]
-                action_number = reaction_action["actionnumber"]
-
-                logger.info(
-                    f"Processing action {index+1}/{action_count}: {action_type} {action_number}"
-                )
-
-                if action_type == "add":
+                if isinstance(reaction_action, RecipeAddAction):
+                    action_number = reaction_action.action_number
+                    logger.info(
+                        f"Processing action {index+1}/{action_count}: add {action_number}"
+                    )
                     self.process_add_action(
                         reaction_action,
                         action_number,
@@ -526,12 +517,16 @@ class ReactionSessionHandler(SessionHandler):
                         reaction_id,
                     )
 
-                elif action_type == "mix":
+                elif isinstance(reaction_action, RecipeMixAction):
+                    action_number = reaction_action.action_number
+                    logger.info(
+                        f"Processing action {index+1}/{action_count}: mix {action_number}"
+                    )
                     self.process_mix_action(
                         action_number, actionsession_obj, reaction_obj, reaction_id
                     )
                 else:
-                    logger.warning(f"Unknown action type: {action_type}")
+                    logger.warning(f"Unknown action type: {type(reaction_action).__name__}")
         except (KeyError, IndexError) as e:
             logger.error(
                 f"Error accessing recipe data for reaction {reaction_id}: {str(e)}"
@@ -553,8 +548,8 @@ class ReactionSessionHandler(SessionHandler):
                 f"Processing add action {action_number} for reaction {reaction_id}"
             )
 
-            to_plate_type = reaction_action["content"]["plates"]["toplatetype"]
-            from_plate_type = reaction_action["content"]["plates"]["fromplatetype"]
+            to_plate_type = unparse_plate_type(reaction_action.to_plate_role, reaction_action.to_plate_index)
+            from_plate_type = unparse_plate_type(reaction_action.from_plate_role, reaction_action.from_plate_index)
             logger.info(f"Transfer plates: {from_plate_type} → {to_plate_type}")
 
             # Get the add action object
@@ -651,7 +646,7 @@ class ReactionSessionHandler(SessionHandler):
                 # Drop tip if this isn't the action before a mix step
                 next_action_is_mix = (
                     index + 1 < len(reaction_actions)
-                ) and reaction_actions[index + 1]["type"] == "mix"
+                ) and isinstance(reaction_actions[index + 1], RecipeMixAction)
                 if not next_action_is_mix:
                     logger.info("No mix action follows, dropping tip")
                     self.add_command(self.command_generator.drop_tip())
