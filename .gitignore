@@ -39,6 +39,7 @@ boilerplatenotes.txt
 src/logs/*
     
 # Django / React / Webpack stuff
+# TODO: Remove before production - migrations should be tracked
 src/backend/migrations/*
 venv/*
 db.sqlite3
