@@ -6,10 +6,7 @@ import pandas as pd
 from rdkit import Chem
 
 from .recipe_utils import get_recipe_smarts
-from .utils import (
-    checkReactantSMARTS,
-    combiChem,
-)
+from .chem_utils import checkReactantSMARTS, combiChem
 
 import logging
 

@@ -2,7 +2,7 @@ from pycule import MCuleWrapper
 import os
 import inspect
 
-from ..utils import canonSmiles
+from ..chem_utils import canonSmiles
 
 import logging
 

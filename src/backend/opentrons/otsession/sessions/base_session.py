@@ -15,7 +15,7 @@ from ..managers.pipette_manager import PipetteManager
 from ..managers.material_manager import MaterialManager
 from ..managers.data_manager import DataManager
 from ....models import OTSession
-from ....utils import getReactionQuerySet
+from ....db_utils import getReactionQuerySet
 
 logger = logging.getLogger(__name__)
 

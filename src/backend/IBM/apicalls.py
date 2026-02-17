@@ -14,7 +14,7 @@ from .commonsolvents import common_solvents
 sys.path.append("..")
 
 
-from ..utils import canonSmiles
+from ..chem_utils import canonSmiles
 
 
 class IBMAPI(object):

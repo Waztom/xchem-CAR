@@ -21,7 +21,7 @@ from backend.models import (
     Plate,
     Well,
 )
-from backend.utils import (
+from backend.db_utils import (
     getProductSmiles,
     getPreviousReactionQuerySets,
     getReactionQuerySet,

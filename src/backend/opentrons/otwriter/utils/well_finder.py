@@ -9,7 +9,7 @@ from typing import List
 from django.db.models import Q
 
 from backend.models import Well, Plate
-from backend.utils import getPreviousReactionQuerySets, getProductSmiles
+from backend.db_utils import getPreviousReactionQuerySets, getProductSmiles
 from backend.recipe_utils import parse_plate_type
 
 logger = logging.getLogger(__name__)

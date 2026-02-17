@@ -4,7 +4,7 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 
 from .....models import Plate
-from .....utils import sanitize_for_python_var
+from .....conversions import sanitize_for_python_var
 from .....recipe_utils import parse_plate_type
 from ....labwareavailable import labware_plates
 

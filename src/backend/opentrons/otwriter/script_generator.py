@@ -11,9 +11,7 @@ from typing import List, Union
 from backend.models import (
     OTSession,
 )
-from backend.utils import (
-    getReactionQuerySet,
-)
+from backend.db_utils import getReactionQuerySet
 
 from .file_manager import FileManager
 from .command_generator import CommandGenerator

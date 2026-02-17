@@ -2,7 +2,7 @@ import logging
 from django.db.models import QuerySet
 
 from .....models import Plate, Well, Reaction, Column
-from .....utils import wellIndexToWellName
+from .....conversions import wellIndexToWellName
 from .....recipe_utils import parse_plate_type
 
 logger = logging.getLogger(__name__)

@@ -12,12 +12,8 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 
 from ....models import AddAction, Plate, Well, CompoundOrder, SolventPrep, Product
-from ....utils import (
-    canonSmiles,
-    stripSalts,
-    checkPreviousReactionProducts,
-    are_equivalent_structures,
-)
+from ....chem_utils import canonSmiles, stripSalts, are_equivalent_structures
+from ....db_utils import checkPreviousReactionProducts
 
 logger = logging.getLogger(__name__)
 

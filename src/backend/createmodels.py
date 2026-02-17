@@ -33,22 +33,21 @@ from .models import (
     StirAction,
 )
 
-from .utils import (
+from .db_utils import (
     getProduct,
     getProductSmiles,
-    canonSmiles,
-    calculateMassFromMols,
     checkProceedingReactions,
-    calculateMolsFromConc,
-    calculateMassFromMols,
+    getReactionYields,
+)
+from .chem_utils import (
+    canonSmiles,
     createSVGString,
     createReactionSVGString,
-    getPubChemCAS,
-    getPubChemCompound,
-    getReactionYields,
     getInchiKey,
     matchSMARTS,
 )
+from .conversions import calculateMolsFromConc, calculateMassFromMols
+from .pubchem_utils import getPubChemCAS, getPubChemCompound
 
 import logging
 

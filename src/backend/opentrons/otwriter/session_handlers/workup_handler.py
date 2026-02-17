@@ -9,7 +9,7 @@ import logging
 from django.db.models import QuerySet
 
 from backend.models import ExtractAction, MixAction, RecipeExtractAction, RecipeMixAction
-from backend.utils import getReaction
+from backend.db_utils import getReaction
 from backend.recipe_utils import get_session_recipe_actions
 
 from .base_handler import SessionHandler

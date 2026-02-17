@@ -46,12 +46,11 @@ from .recipe_utils import (
     get_recipe_intramolecular,
     get_recipe_stir_temperature,
 )
-from .utils import (
+from .db_utils import (
     checkPreviousReactionProducts,
     getActionSessionQuerySet,
     getActionSessionSequenceNumbers,
     getActionSessionTypes,
-    canonSmiles,
     getBatchReactions,
     getBatchTag,
     getGroupedActionSessionSequences,
@@ -61,6 +60,7 @@ from .utils import (
     getReactionsToDo,
     groupReactions,
 )
+from .chem_utils import canonSmiles
 
 from .opentrons.otsession import SessionOrchestrator
 from .opentrons.otwriter import ScriptGenerator
