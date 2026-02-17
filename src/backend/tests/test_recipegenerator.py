@@ -1,11 +1,18 @@
 """
 Unit tests for the recipegenerator module.
+
+Uses Django TestCase for tests that need database access (recipe lookups).
 """
 
 from unittest import TestCase
+import json
 import tempfile
 import os
+from pathlib import Path
+
 import pandas as pd
+
+from django.test import TestCase as DjangoTestCase
 
 from backend.recipegenerator import (
     RecipeTemplate,
@@ -16,9 +23,21 @@ from backend.recipegenerator import (
 )
 from backend.recipegenerator.parsers import create_template_from_recipe
 
+# Re-use fixture ingest helper from test_recipe_models
+from .test_recipe_models import ingest_recipe_from_json
 
-class RecipeTemplateTestCase(TestCase):
+FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
+
+
+class RecipeTemplateTestCase(DjangoTestCase):
     """Tests for RecipeTemplate class."""
+    
+    @classmethod
+    def setUpTestData(cls):
+        """Load amidation fixture into test DB."""
+        fixture_path = FIXTURES_DIR / "amidation_standard.json"
+        cls.amidation_data = json.loads(fixture_path.read_text())
+        cls.recipe = ingest_recipe_from_json(cls.amidation_data)
     
     def setUp(self):
         """Set up test fixtures."""
@@ -39,11 +58,11 @@ class RecipeTemplateTestCase(TestCase):
             "variables": {
                 "acid_solvent": {
                     "action_id": "add_acid",
-                    "path": "content.material.solvent"
+                    "path": "solvent"
                 },
                 "acid_equiv": {
                     "action_id": "add_acid",
-                    "path": "content.material.quantity.value"
+                    "path": "equivalents"
                 },
             },
         }
@@ -62,8 +81,8 @@ class RecipeTemplateTestCase(TestCase):
         template = RecipeTemplate.from_dict(self.valid_template_data)
         recipe = template.get_base_recipe()
         
-        self.assertIn("actionsessions", recipe)
-        self.assertIsInstance(recipe["actionsessions"], list)
+        self.assertIn("sessions", recipe)
+        self.assertIsInstance(recipe["sessions"], list)
     
     def test_template_invalid_reaction_class(self):
         """Test that invalid reaction class raises error."""
@@ -94,7 +113,7 @@ class RecipeTemplateTestCase(TestCase):
         data = self.valid_template_data.copy()
         data["variables"]["bad_var"] = {
             "action_id": "nonexistent_action",
-            "path": "content.material.solvent"
+            "path": "solvent"
         }
         
         with self.assertRaises(TemplateValidationError):
@@ -111,8 +130,15 @@ class RecipeTemplateTestCase(TestCase):
         self.assertEqual(template.action_ids, restored.action_ids)
 
 
-class RecipeGeneratorTestCase(TestCase):
+class RecipeGeneratorTestCase(DjangoTestCase):
     """Tests for RecipeGenerator class."""
+    
+    @classmethod
+    def setUpTestData(cls):
+        """Load amidation fixture into test DB."""
+        fixture_path = FIXTURES_DIR / "amidation_standard.json"
+        cls.amidation_data = json.loads(fixture_path.read_text())
+        cls.recipe = ingest_recipe_from_json(cls.amidation_data)
     
     def setUp(self):
         """Set up test fixtures."""
@@ -132,11 +158,11 @@ class RecipeGeneratorTestCase(TestCase):
             variables={
                 "solvent": {
                     "action_id": "add_acid",
-                    "path": "content.material.solvent"
+                    "path": "solvent"
                 },
                 "acid_equiv": {
                     "action_id": "add_acid",
-                    "path": "content.material.quantity.value"
+                    "path": "equivalents"
                 },
             },
         )
@@ -155,9 +181,9 @@ class RecipeGeneratorTestCase(TestCase):
         
         # Verify the solvent was changed
         recipe = result["recipe"]
-        action = self._find_action(recipe, session=1, actionnumber=1)
-        self.assertEqual(action["content"]["material"]["solvent"], "DMF")
-        self.assertEqual(action["content"]["material"]["quantity"]["value"], 1.5)
+        action = self._find_action(recipe, session=1, action_number=1)
+        self.assertEqual(action["solvent"], "DMF")
+        self.assertEqual(action["equivalents"], 1.5)
     
     def test_generate_from_dataframe(self):
         """Test generating recipes from a DataFrame."""
@@ -173,13 +199,13 @@ class RecipeGeneratorTestCase(TestCase):
         
         # Check first recipe
         recipe_1 = recipes[0]["recipe"]
-        action_1 = self._find_action(recipe_1, session=1, actionnumber=1)
-        self.assertEqual(action_1["content"]["material"]["solvent"], "DMF")
+        action_1 = self._find_action(recipe_1, session=1, action_number=1)
+        self.assertEqual(action_1["solvent"], "DMF")
         
         # Check third recipe
         recipe_3 = recipes[2]["recipe"]
-        action_3 = self._find_action(recipe_3, session=1, actionnumber=1)
-        self.assertEqual(action_3["content"]["material"]["solvent"], "NMP")
+        action_3 = self._find_action(recipe_3, session=1, action_number=1)
+        self.assertEqual(action_3["solvent"], "NMP")
     
     def test_generate_from_csv(self):
         """Test generating recipes from a CSV file."""
@@ -196,9 +222,9 @@ class RecipeGeneratorTestCase(TestCase):
             
             # Verify values
             recipe_2 = recipes[1]["recipe"]
-            action = self._find_action(recipe_2, session=1, actionnumber=1)
-            self.assertEqual(action["content"]["material"]["solvent"], "DMSO")
-            self.assertEqual(action["content"]["material"]["quantity"]["value"], 2.0)
+            action = self._find_action(recipe_2, session=1, action_number=1)
+            self.assertEqual(action["solvent"], "DMSO")
+            self.assertEqual(action["equivalents"], 2.0)
         finally:
             os.unlink(csv_path)
     
@@ -210,11 +236,11 @@ class RecipeGeneratorTestCase(TestCase):
         )
         
         recipe = result["recipe"]
-        session_1 = next(s for s in recipe["actionsessions"] if s["sessionnumber"] == 1)
+        session_1 = next(s for s in recipe["sessions"] if s["session_number"] == 1)
         
         # Get actions in order
-        actions = session_1["intermolecular"]["actions"]
-        action_nums = [a["actionnumber"] for a in actions]
+        actions = session_1["actions"]
+        action_nums = [a["action_number"] for a in actions]
         
         # Actions should be renumbered sequentially
         self.assertEqual(action_nums, [1, 2, 3])
@@ -233,22 +259,13 @@ class RecipeGeneratorTestCase(TestCase):
         self.assertIn("solvent", df.columns)
         self.assertIn("acid_equiv", df.columns)
     
-    def _find_action(self, recipe: dict, session: int, actionnumber: int) -> dict:
-        """Helper to find an action in a recipe."""
-        for s in recipe.get("actionsessions", []):
-            if s.get("sessionnumber") == session:
-                for key in ["intermolecular", "Intramolecular", "actions"]:
-                    if key in s:
-                        container = s[key]
-                        if isinstance(container, dict) and "actions" in container:
-                            actions = container["actions"]
-                        else:
-                            actions = container
-                        
-                        if isinstance(actions, list):
-                            for action in actions:
-                                if action.get("actionnumber") == actionnumber:
-                                    return action
+    def _find_action(self, recipe: dict, session: int, action_number: int) -> dict:
+        """Helper to find an action in a recipe (new format)."""
+        for s in recipe.get("sessions", []):
+            if s.get("session_number") == session:
+                for action in s.get("actions", []):
+                    if action.get("action_number") == action_number:
+                        return action
         return None
 
 
@@ -289,8 +306,15 @@ class DesignMatrixParserTestCase(TestCase):
             os.unlink(csv_path)
 
 
-class CreateTemplateFromRecipeTestCase(TestCase):
+class CreateTemplateFromRecipeTestCase(DjangoTestCase):
     """Tests for create_template_from_recipe helper function."""
+    
+    @classmethod
+    def setUpTestData(cls):
+        """Load amidation fixture into test DB."""
+        fixture_path = FIXTURES_DIR / "amidation_standard.json"
+        cls.amidation_data = json.loads(fixture_path.read_text())
+        cls.recipe = ingest_recipe_from_json(cls.amidation_data)
     
     def test_create_template_basic(self):
         """Test creating a template from an existing recipe."""
@@ -331,8 +355,15 @@ class CreateTemplateFromRecipeTestCase(TestCase):
         self.assertGreater(len(solvent_vars), 0)
 
 
-class IntegrationTestCase(TestCase):
+class IntegrationTestCase(DjangoTestCase):
     """Integration tests for full workflow."""
+    
+    @classmethod
+    def setUpTestData(cls):
+        """Load amidation fixture into test DB."""
+        fixture_path = FIXTURES_DIR / "amidation_standard.json"
+        cls.amidation_data = json.loads(fixture_path.read_text())
+        cls.recipe = ingest_recipe_from_json(cls.amidation_data)
     
     def test_full_workflow(self):
         """Test complete workflow from template creation to recipe generation."""
