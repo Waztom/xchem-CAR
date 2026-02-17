@@ -9,7 +9,7 @@ from django.db.models import QuerySet
 
 from backend.models import AddAction, MixAction, RecipeAddAction, RecipeMixAction
 from backend.db_utils import getReaction, getPreviousReactionQuerySets, getReactionQuerySet
-from backend.recipe_utils import get_session_recipe_actions, unparse_plate_type
+from backend.recipe_utils import get_session_recipe_actions
 
 from .base_handler import SessionHandler
 
@@ -548,9 +548,11 @@ class ReactionSessionHandler(SessionHandler):
                 f"Processing add action {action_number} for reaction {reaction_id}"
             )
 
-            to_plate_type = unparse_plate_type(reaction_action.to_plate_role, reaction_action.to_plate_index)
-            from_plate_type = unparse_plate_type(reaction_action.from_plate_role, reaction_action.from_plate_index)
-            logger.info(f"Transfer plates: {from_plate_type} → {to_plate_type}")
+            to_plate_role = reaction_action.to_plate_role
+            to_plate_index = reaction_action.to_plate_index
+            from_plate_role = reaction_action.from_plate_role
+            from_plate_index = reaction_action.from_plate_index
+            logger.info(f"Transfer plates: {from_plate_role}{from_plate_index} → {to_plate_role}{to_plate_index}")
 
             # Get the add action object
             add_action_obj = AddAction.objects.get(
@@ -600,11 +602,12 @@ class ReactionSessionHandler(SessionHandler):
 
                 # Get destination well
                 logger.info(
-                    f"Finding destination well for reaction {reaction_id}, type {to_plate_type}"
+                    f"Finding destination well for reaction {reaction_id}, role={to_plate_role}, index={to_plate_index}"
                 )
                 to_well_obj = self.well_finder.find_reaction_well(
                     reaction_id=reaction_id,
-                    well_type=to_plate_type,
+                    role=to_plate_role,
+                    role_index=to_plate_index,
                 )
 
                 to_well_index = to_well_obj.index
@@ -676,17 +679,18 @@ class ReactionSessionHandler(SessionHandler):
                 number=action_number,
             )
 
-            plate_type = mix_action_obj.platetype
+            plate_role = mix_action_obj.plate_role
+            plate_index = mix_action_obj.plate_index
             repetitions = mix_action_obj.repetitions
 
             logger.info(
-                f"Mix parameters: plate type={plate_type}, repetitions={repetitions}"
+                f"Mix parameters: role={plate_role}, index={plate_index}, repetitions={repetitions}"
             )
 
             # Find the well to mix
             logger.info(f"Finding well to mix for reaction {reaction_id}")
             mix_well_obj = self.well_finder.find_reaction_well(
-                reaction_id=reaction_id, well_type=plate_type
+                reaction_id=reaction_id, role=plate_role, role_index=plate_index
             )
 
             mix_well_index = mix_well_obj.index

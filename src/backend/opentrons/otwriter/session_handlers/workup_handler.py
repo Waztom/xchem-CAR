@@ -189,23 +189,26 @@ class WorkupSessionHandler(SessionHandler):
                 number=action_number,
             )
 
-            from_plate_type = extract_action_obj.fromplatetype
-            to_plate_type = extract_action_obj.toplatetype
-            extract_layer = extract_action_obj.extractlayer
+            from_plate_role = extract_action_obj.from_plate_role
+            from_plate_index = extract_action_obj.from_plate_index
+            to_plate_role = extract_action_obj.to_plate_role
+            to_plate_index = extract_action_obj.to_plate_index
+            extract_layer = extract_action_obj.layer
             bottom_layer_volume = extract_action_obj.bottomlayervolume
 
             logger.info(
-                f"Extract parameters: from={from_plate_type}, to={to_plate_type}, "
+                f"Extract parameters: from={from_plate_role}{from_plate_index}, to={to_plate_role}{to_plate_index}, "
                 + f"layer={extract_layer}, bottom_volume={bottom_layer_volume} µL"
             )
 
             # Find source well
             logger.info(
-                f"Finding source well for reaction {reaction_id}, type {from_plate_type}"
+                f"Finding source well for reaction {reaction_id}, role={from_plate_role}, index={from_plate_index}"
             )
             from_well_obj = self.well_finder.find_reaction_well(
                 reaction_id=reaction_id,
-                well_type=from_plate_type,
+                role=from_plate_role,
+                role_index=from_plate_index,
             )
 
             from_well_index = from_well_obj.index
@@ -216,11 +219,12 @@ class WorkupSessionHandler(SessionHandler):
 
             # Find destination well
             logger.info(
-                f"Finding destination well for reaction {reaction_id}, type {to_plate_type}"
+                f"Finding destination well for reaction {reaction_id}, role={to_plate_role}, index={to_plate_index}"
             )
             to_well_obj = self.well_finder.find_reaction_well(
                 reaction_id=reaction_id,
-                well_type=to_plate_type,
+                role=to_plate_role,
+                role_index=to_plate_index,
             )
 
             to_well_index = to_well_obj.index
@@ -331,19 +335,20 @@ class WorkupSessionHandler(SessionHandler):
                 number=action_number,
             )
 
-            plate_type = mix_action_obj.platetype
+            plate_role = mix_action_obj.plate_role
+            plate_index = mix_action_obj.plate_index
             repetitions = mix_action_obj.repetitions
 
             logger.info(
-                f"Mix parameters: plate type={plate_type}, repetitions={repetitions}"
+                f"Mix parameters: role={plate_role}, index={plate_index}, repetitions={repetitions}"
             )
 
             # Find the well to mix
             logger.info(
-                f"Finding well to mix for reaction {reaction_id}, type {plate_type}"
+                f"Finding well to mix for reaction {reaction_id}, role={plate_role}, index={plate_index}"
             )
             mix_well_obj = self.well_finder.find_reaction_well(
-                reaction_id=reaction_id, well_type=plate_type
+                reaction_id=reaction_id, role=plate_role, role_index=plate_index
             )
 
             mix_well_index = mix_well_obj.index

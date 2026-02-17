@@ -11,7 +11,7 @@ from django.db.models import QuerySet, Q
 
 from backend.models import ActionSession, AddAction, RecipeAddAction
 from backend.db_utils import getReaction, getReactionQuerySet
-from backend.recipe_utils import get_session_recipe_actions, unparse_plate_type
+from backend.recipe_utils import get_session_recipe_actions
 
 from .base_handler import SessionHandler
 
@@ -185,20 +185,23 @@ class AnalysisSessionHandler(SessionHandler):
                 number=action_number,
             )
 
-            from_plate_type = unparse_plate_type(analysis_action.from_plate_role, analysis_action.from_plate_index)
-            to_plate_type = unparse_plate_type(analysis_action.to_plate_role, analysis_action.to_plate_index)
+            from_plate_role = analysis_action.from_plate_role
+            from_plate_index = analysis_action.from_plate_index
+            to_plate_role = analysis_action.to_plate_role
+            to_plate_index = analysis_action.to_plate_index
 
             logger.info(
-                f"Analysis transfer: from={from_plate_type}, to={to_plate_type}"
+                f"Analysis transfer: from={from_plate_role}{from_plate_index}, to={to_plate_role}{to_plate_index}"
             )
 
             # Find source well (reaction/workup well)
             logger.info(
-                f"Finding source well for reaction {reaction_id}, type {from_plate_type}"
+                f"Finding source well for reaction {reaction_id}, role={from_plate_role}, index={from_plate_index}"
             )
             from_well_obj = self.well_finder.find_reaction_well(
                 reaction_id=reaction_id,
-                well_type=from_plate_type,
+                role=from_plate_role,
+                role_index=from_plate_index,
             )
 
             from_well_index = from_well_obj.index
@@ -209,11 +212,12 @@ class AnalysisSessionHandler(SessionHandler):
 
             # Find destination well (analysis well)
             logger.info(
-                f"Finding destination well for reaction {reaction_id}, type {to_plate_type}"
+                f"Finding destination well for reaction {reaction_id}, role={to_plate_role}, index={to_plate_index}"
             )
             to_well_obj = self.well_finder.find_reaction_well(
                 reaction_id=reaction_id,
-                well_type=to_plate_type,
+                role=to_plate_role,
+                role_index=to_plate_index,
             )
 
             to_well_index = to_well_obj.index

@@ -56,17 +56,6 @@ def parse_plate_type(raw: str) -> tuple[str, int]:
     return role, idx
 
 
-def unparse_plate_type(role: str, index: int) -> str:
-    """Reverse of :func:`parse_plate_type`.
-
-    Produces old-style flat string for backward-compat with consumers
-    that still use plate-type strings (e.g. OT session runtime models).
-    """
-    if index == 1:
-        return role
-    return f"{role}{index}"
-
-
 # ── Recipe lookups ─────────────────────────────────────────────────
 
 
@@ -307,3 +296,115 @@ def recipe_to_dict(reaction_class: str, name: str = "standard") -> dict:
         "reaction_smarts": recipe.reaction_smarts,
         "sessions": sessions,
     }
+
+
+# ── Plate role extraction from recipe actions ──────────────────────
+
+
+def get_session_destination_plates(
+    reaction_class: str,
+    name: str,
+    session_type: str,
+    session_number: int,
+    molecular_context: str = None,
+) -> list[tuple[str, int]]:
+    """Extract unique destination plate (role, index) pairs from a recipe session.
+
+    Scans all actions in the session and collects the ``to_plate_role`` /
+    ``to_plate_index`` (for add/extract actions) or ``plate_role`` /
+    ``plate_index`` (for stir/mix actions) values.
+
+    Returns a sorted list of unique ``(role, index)`` tuples representing
+    all plates that need to be created for this session.
+
+    Parameters
+    ----------
+    reaction_class : str
+        The reaction class (e.g., "amide-coupling").
+    name : str
+        Recipe name (e.g., "standard").
+    session_type : str
+        Session type (e.g., "reaction", "workup", "analyse").
+    session_number : int
+        The session number within the recipe.
+    molecular_context : str, optional
+        Filter for intermolecular/intramolecular (reaction sessions only).
+
+    Returns
+    -------
+    list[tuple[str, int]]
+        Sorted list of (plate_role, plate_index) pairs.
+    """
+    actions = get_session_recipe_actions(
+        reaction_class=reaction_class,
+        name=name,
+        session_type=session_type,
+        session_number=session_number,
+        molecular_context=molecular_context,
+    )
+
+    plates: set[tuple[str, int]] = set()
+
+    for action in actions:
+        if isinstance(action, RecipeAddAction):
+            plates.add((action.to_plate_role, action.to_plate_index))
+        elif isinstance(action, RecipeExtractAction):
+            plates.add((action.to_plate_role, action.to_plate_index))
+        elif isinstance(action, RecipeStirAction):
+            plates.add((action.plate_role, action.plate_index))
+        elif isinstance(action, RecipeMixAction):
+            plates.add((action.plate_role, action.plate_index))
+
+    return sorted(plates, key=lambda p: (p[0], p[1]))
+
+
+def get_session_source_plates(
+    reaction_class: str,
+    name: str,
+    session_type: str,
+    session_number: int,
+    molecular_context: str = None,
+) -> list[tuple[str, int]]:
+    """Extract unique source plate (role, index) pairs from a recipe session.
+
+    Scans add/extract actions and collects their ``from_plate_role`` /
+    ``from_plate_index`` values.
+
+    Returns a sorted list of unique ``(role, index)`` tuples representing
+    all source plates referenced by this session's actions.
+
+    Parameters
+    ----------
+    reaction_class : str
+        The reaction class (e.g., "amide-coupling").
+    name : str
+        Recipe name (e.g., "standard").
+    session_type : str
+        Session type (e.g., "reaction", "workup", "analyse").
+    session_number : int
+        The session number within the recipe.
+    molecular_context : str, optional
+        Filter for intermolecular/intramolecular (reaction sessions only).
+
+    Returns
+    -------
+    list[tuple[str, int]]
+        Sorted list of (plate_role, plate_index) pairs.
+    """
+    actions = get_session_recipe_actions(
+        reaction_class=reaction_class,
+        name=name,
+        session_type=session_type,
+        session_number=session_number,
+        molecular_context=molecular_context,
+    )
+
+    plates: set[tuple[str, int]] = set()
+
+    for action in actions:
+        if isinstance(action, RecipeAddAction):
+            plates.add((action.from_plate_role, action.from_plate_index))
+        elif isinstance(action, RecipeExtractAction):
+            plates.add((action.from_plate_role, action.from_plate_index))
+
+    return sorted(plates, key=lambda p: (p[0], p[1]))
