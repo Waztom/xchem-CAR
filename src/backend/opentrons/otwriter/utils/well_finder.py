@@ -286,7 +286,6 @@ class WellFinder:
                     "This is a later reaction step - searching for wells in reaction/workup plates"
                 )
                 try:
-                    plates = ["reaction", "workup1", "workup2", "workup3", "spefilter"]
                     criterion1 = Q(otsession_id=self.script_generator.otsession_id)
                     criterion2 = Q(reaction_id=reaction_id)
                     criterion3 = Q(reaction_id__in=previous_reaction_queryset)

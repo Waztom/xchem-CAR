@@ -26,7 +26,6 @@ from backend.db_utils import (
     getPreviousReactionQuerySets,
     getReactionQuerySet,
 )
-from backend.recipe_utils import parse_plate_type
 
 logger = logging.getLogger(__name__)
 
@@ -380,28 +379,29 @@ class QueryService:
             return Pipette.objects.filter(otsession_id=self.otsession_id).first()
 
     def get_column_query_set(
-        self, columntype: str, reactionclass: str
+        self, role: str, role_index: int, reactionclass: str
     ) -> QuerySet[Column]:
-        """Get column queryset for column type and reactionclass
+        """Get column queryset for role/index and reactionclass
 
         Parameters
         ----------
-        columntype: str
-            The type of plate the column is on eg. reaction, workup1, workup2, analyse
+        role: str
+            The plate role (e.g., "reaction", "workup").
+        role_index: int
+            The plate role index.
         reactionclass: str
             The reaction class that occupy the columns
 
         Returns
         -------
         QuerySet[Column]
-            The columns related to the column type and reaction class
+            The columns related to the role and reaction class
         """
         logger.info(
-            f"Querying columns of type '{columntype}' for reaction class '{reactionclass}'"
+            f"Querying columns with role='{role}', index={role_index} for reaction class '{reactionclass}'"
         )
         criterion1 = Q(otsession_id=self.otsession_id)
-        _role, _role_index = parse_plate_type(columntype)
-        criterion2 = Q(role=_role, role_index=_role_index)
+        criterion2 = Q(role=role, role_index=role_index)
         criterion3 = Q(reactionclass=reactionclass)
 
         columnqueryset = Column.objects.filter(
@@ -411,43 +411,46 @@ class QueryService:
         count = columnqueryset.count()
         if count == 0:
             logger.warning(
-                f"No columns found for type '{columntype}' and reaction class '{reactionclass}'"
+                f"No columns found for role='{role}', index={role_index} and reaction class '{reactionclass}'"
             )
         else:
             logger.info(
-                f"Found {count} column(s) for type '{columntype}' and reaction class '{reactionclass}'"
+                f"Found {count} column(s) for role='{role}', index={role_index} and reaction class '{reactionclass}'"
             )
 
         return columnqueryset
 
-    def get_well_by_reaction_id(self, reaction_id: int, welltype: str) -> Well:
+    def get_well_by_reaction_id(
+        self, reaction_id: int, role: str, role_index: int
+    ) -> Well:
         """Find the reaction plate well
 
         Parameters
         ----------
         reaction_id: int
             The reaction's id linked to the well on the reaction plate
-        welltype: str
-            The type of well eg. reaction, workup, lcms
+        role: str
+            The plate role (e.g., "reaction", "workup").
+        role_index: int
+            The plate role index.
 
         Returns
         -------
         Well
             The well used in the reaction
         """
-        logger.info(f"Finding well for reaction ID {reaction_id}, type '{welltype}'")
+        logger.info(f"Finding well for reaction ID {reaction_id}, role='{role}', index={role_index}")
         try:
             productsmiles = getProductSmiles(reaction_ids=[reaction_id])[0]
             logger.info(
                 f"Found product SMILES for reaction {reaction_id}: {productsmiles[:20]}..."
             )
 
-            _well_role, _well_role_index = parse_plate_type(welltype)
             wellobj = Well.objects.get(
                 otsession_id=self.otsession_id,
                 reaction_id=reaction_id,
-                role=_well_role,
-                role_index=_well_role_index,
+                role=role,
+                role_index=role_index,
                 smiles=productsmiles,
             )
             logger.info(
@@ -732,14 +735,8 @@ class QueryService:
                         "No starting material wells found, checking reaction and workup plates"
                     )
                     try:
-                        plates = [
-                            "reaction",
-                            "workup1",
-                            "workup2",
-                            "workup3",
-                            "spefilter",
-                        ]
-                        logger.info(f"Searching in plate types: {', '.join(plates)}")
+                        roles_to_search = ["reaction", "workup", "spefilter"]
+                        logger.info(f"Searching in plate roles: {', '.join(roles_to_search)}")
 
                         criterion1 = Q(otsession_id=self.otsession_id)
                         criterion2 = Q(reaction_id=reaction_id)

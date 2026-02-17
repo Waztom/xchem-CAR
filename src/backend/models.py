@@ -281,6 +281,7 @@ class PlateRole(models.TextChoices):
     NMR = "nmr"
     STARTINGMATERIAL = "startingmaterial"
     SOLVENT = "solvent"
+    ANALYSE = "analyse"
 
 
 class ActionSession(models.Model):

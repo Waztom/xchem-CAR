@@ -30,13 +30,17 @@ logger = logging.getLogger(__name__)
 
 _PLATE_TYPE_RE = re.compile(
     r"^(reaction|workup|spefilter|lcms|xchem|nmr|startingmaterial|"
-    r"starting material|solvent)(\d*)$",
+    r"starting material|solvent|analyse)(\d*)$",
     re.IGNORECASE,
 )
 
 
 def parse_plate_type(raw: str) -> tuple[str, int]:
     """Convert a legacy plate-type string to ``(role, role_index)``.
+
+    This function is primarily used for ingesting legacy recipe data from
+    JSON files that use the old string-based plate type format. New code
+    should work with ``(role, role_index)`` tuples directly.
 
     Examples::
 
@@ -54,6 +58,27 @@ def parse_plate_type(raw: str) -> tuple[str, int]:
     role = m.group(1).lower().replace(" ", "")
     idx = int(m.group(2)) if m.group(2) else 1
     return role, idx
+
+
+def unparse_plate_type(role: str, role_index: int = 1) -> str:
+    """Convert a ``(role, role_index)`` pair back to a legacy plate-type string.
+
+    This is the inverse of :func:`parse_plate_type`.  It is primarily
+    used for logging, display names, and backward-compatibility layers
+    that still expect the old string format.
+
+    Examples::
+
+        ("workup", 2)         → "workup2"
+        ("reaction", 1)       → "reaction"
+        ("startingmaterial", 1) → "startingmaterial"
+
+    DEPRECATED: Prefer passing role/role_index directly to new APIs.
+    """
+    # For index 1, omit the number (matches legacy convention)
+    if role_index == 1:
+        return role
+    return f"{role}{role_index}"
 
 
 # ── Recipe lookups ─────────────────────────────────────────────────

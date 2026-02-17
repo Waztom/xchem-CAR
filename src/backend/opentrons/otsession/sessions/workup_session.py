@@ -5,7 +5,6 @@ Implements workup session functionality for OpenTrons protocols.
 import logging
 
 from .base_session import BaseSession
-from ....recipe_utils import parse_plate_type
 
 logger = logging.getLogger(__name__)
 
@@ -70,26 +69,15 @@ class WorkupSession(BaseSession):
         # Find source reaction plates
         source_plates = self.get_source_plates_for_workup()
         if source_plates:
-            self.plate_manager.update_plate_deck_ot_session_ids(
+            self.plate_factory.update_plate_deck_ot_session_ids(
                 plate_queryset=source_plates
             )
 
         # Create workup plates based on stage
-        workup_plate_type = f"workup{workup_stage}"
-        volumes = self.data_manager.get_rounded_reaction_volumes(
-            reactionqueryset=self.groupreactionqueryset
-        )
-
-        # Get appropriate labware type for this workup
-        labware_type = self.plate_manager.get_plate_type(
-            platetype="workup", volumes=volumes
-        )
-
-        # Create the workup plate
-        workup_plates = self.plate_manager.create_workup_plate(
-            reaction_queryset=self.groupreactionqueryset,
-            labware_platetype=labware_type,
-            platetype=workup_plate_type,
+        # Create the workup plate using role and role_index
+        workup_plates = self.plate_factory.create_workup_plate(
+            role="workup",
+            role_index=workup_stage,
         )
 
         # Create pipette model
@@ -103,8 +91,8 @@ class WorkupSession(BaseSession):
                 )
             )
             if not self.solventmaterialsdf.empty:
-                self.plate_manager.create_solvent_plate(
-                    materialsdf=self.solventmaterialsdf
+                self.plate_factory.create_solvent_plate(
+                    materials_df=self.solventmaterialsdf
                 )
 
         logger.info(
@@ -116,32 +104,34 @@ class WorkupSession(BaseSession):
         """
         Determine the workup stage number for this session.
 
+        Extracts the workup stage from the to_plate_role and to_plate_index
+        fields of the session's add/extract actions.
+
         Returns
         -------
         workup_stage: int
             The workup stage number (1, 2, or 3)
         """
-        # Check to plates this workup targets
-        to_plate_types = set()
+        # Get workup role indices from actions
+        workup_indices = set()
 
         if self.addactionqueryset.exists():
-            to_plate_types.update(
-                self.addactionqueryset.values_list("toplatetype", flat=True).distinct()
+            # Get only workup destinations
+            workup_add = self.addactionqueryset.filter(to_plate_role="workup")
+            workup_indices.update(
+                workup_add.values_list("to_plate_index", flat=True).distinct()
             )
 
         if self.extractactionqueryset.exists():
-            to_plate_types.update(
-                self.extractactionqueryset.values_list(
-                    "toplatetype", flat=True
-                ).distinct()
+            # Get only workup destinations
+            workup_extract = self.extractactionqueryset.filter(to_plate_role="workup")
+            workup_indices.update(
+                workup_extract.values_list("to_plate_index", flat=True).distinct()
             )
 
-        if "workup1" in to_plate_types:
-            return 1
-        elif "workup2" in to_plate_types:
-            return 2
-        elif "workup3" in to_plate_types:
-            return 3
+        if workup_indices:
+            # Use the max index if multiple stages are targeted
+            return max(workup_indices)
         else:
             # Default to stage 1 if not explicitly specified
             logger.warning("Could not determine workup stage, defaulting to 1")
@@ -156,31 +146,33 @@ class WorkupSession(BaseSession):
         source_plates: QuerySet
             The plates containing material to be worked up
         """
-        # For first workup stage, get reaction plates
+        # Determine source plate role/index based on workup stage
         workup_stage = self.determine_workup_stage()
 
         if workup_stage == 1:
             # Source is reaction plates
-            plate_type = "reaction"
+            source_role = "reaction"
+            source_role_index = 1
         else:
             # Source is previous workup stage
-            plate_type = f"workup{workup_stage - 1}"
+            source_role = "workup"
+            source_role_index = workup_stage - 1
 
         # Find all plates from previous steps in this batch protocol
-        all_plates = self.plate_manager.get_all_ot_batch_protocol_plates(
+        all_plates = self.plate_query_service.get_all_ot_batch_protocol_plates(
             otbatchprotocol_id=self.otbatchprotocolobj
         )
 
-        # Filter for the correct type
-        _role, _role_index = parse_plate_type(plate_type)
+        # Filter for the correct role and index
         source_plates = [
             plate for plate in all_plates
-            if plate.role == _role and plate.role_index == _role_index
+            if plate.role == source_role and plate.role_index == source_role_index
         ]
 
         if not source_plates:
             logger.warning(
-                f"No source plates found of type {plate_type} for workup stage {workup_stage}"
+                f"No source plates found with role={source_role}, index={source_role_index} "
+                f"for workup stage {workup_stage}"
             )
 
         return source_plates

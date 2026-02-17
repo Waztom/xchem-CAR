@@ -51,25 +51,27 @@ class PlateQueryService:
 
         return plates
 
-    def get_action_session_by_plate_type(
-        self, platetype: str
+    def get_action_session_by_plate_role(
+        self, role: str, role_index: int = 1
     ) -> QuerySet[ActionSession]:
         """
-        Get action sessions that use a specific plate type.
+        Get action sessions that target a specific plate role and index.
 
         Parameters
         ----------
-        platetype: str
-            The plate type to look for in action sessions
+        role: str
+            The plate role to look for (e.g., "workup", "reaction")
+        role_index: int, optional
+            The plate role index (default 1)
 
         Returns
         -------
         action_session_queryset: QuerySet[ActionSession]
-            Action sessions using the specified plate type
+            Action sessions targeting the specified role/index
         """
         criterion1 = Q(id__in=self.session.actionsessionqueryset)
-        criterion2 = Q(addaction__toplatetype=platetype)
-        criterion3 = Q(extractaction__toplatetype=platetype)
+        criterion2 = Q(addaction__to_plate_role=role, addaction__to_plate_index=role_index)
+        criterion3 = Q(extractaction__to_plate_role=role, extractaction__to_plate_index=role_index)
 
         action_session_queryset = ActionSession.objects.filter(
             criterion1 & (criterion2 | criterion3)
