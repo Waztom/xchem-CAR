@@ -70,9 +70,9 @@ def ingest_recipe_from_json(data: dict) -> Recipe:
                     from_plate_role=action.get(
                         "from_plate_role", "startingmaterial"
                     ),
-                    from_plate_index=action.get("from_plate_index", 1),
+                    from_plate_role_index=action.get("from_plate_role_index", 1),
                     to_plate_role=action.get("to_plate_role", "reaction"),
-                    to_plate_index=action.get("to_plate_index", 1),
+                    to_plate_role_index=action.get("to_plate_role_index", 1),
                 )
 
             elif action_type == "stir":
@@ -84,7 +84,7 @@ def ingest_recipe_from_json(data: dict) -> Recipe:
                     duration_unit=action.get("duration_unit", "h"),
                     stirring_speed=action.get("stirring_speed", "normal"),
                     plate_role=action.get("plate_role", "reaction"),
-                    plate_index=action.get("plate_index", 1),
+                    plate_role_index=action.get("plate_role_index", 1),
                 )
 
             elif action_type == "extract":
@@ -97,16 +97,16 @@ def ingest_recipe_from_json(data: dict) -> Recipe:
                     solvent=action.get("solvent"),
                     concentration=action.get("concentration"),
                     from_plate_role=action.get("from_plate_role", "reaction"),
-                    from_plate_index=action.get("from_plate_index", 1),
+                    from_plate_role_index=action.get("from_plate_role_index", 1),
                     to_plate_role=action.get("to_plate_role", "workup"),
-                    to_plate_index=action.get("to_plate_index", 1),
+                    to_plate_role_index=action.get("to_plate_role_index", 1),
                 )
 
             elif action_type == "mix":
                 RecipeMixAction.objects.create(
                     session=session,
                     plate_role=action.get("plate_role", "reaction"),
-                    plate_index=action.get("plate_index", 1),
+                    plate_role_index=action.get("plate_role_index", 1),
                     repetitions=action["repetitions"],
                 )
 
@@ -132,22 +132,22 @@ _SENTINEL = object()  # marker so we keep keys with no listed default
 # Defaults for each action / session / recipe level.
 _ADD_DEFAULTS = {
     "quantity_unit": "moleq",
-    "from_plate_index": 1,
-    "to_plate_index": 1,
+    "from_plate_role_index": 1,
+    "to_plate_role_index": 1,
 }
 _STIR_DEFAULTS = {
     "temperature": 25,
     "temperature_unit": "degC",
     "duration_unit": "h",
     "stirring_speed": "normal",
-    "plate_index": 1,
+    "plate_role_index": 1,
 }
 _EXTRACT_DEFAULTS = {
-    "from_plate_index": 1,
-    "to_plate_index": 1,
+    "from_plate_role_index": 1,
+    "to_plate_role_index": 1,
 }
 _MIX_DEFAULTS = {
-    "plate_index": 1,
+    "plate_role_index": 1,
 }
 _SESSION_DEFAULTS = {
     "continuation": False,
@@ -192,11 +192,11 @@ def export_recipe_to_json(recipe: Recipe) -> dict:
             if add.density is not None:
                 action_dict["density"] = add.density
             action_dict["from_plate_role"] = add.from_plate_role
-            if add.from_plate_index != 1:
-                action_dict["from_plate_index"] = add.from_plate_index
+            if add.from_plate_role_index != 1:
+                action_dict["from_plate_role_index"] = add.from_plate_role_index
             action_dict["to_plate_role"] = add.to_plate_role
-            if add.to_plate_index != 1:
-                action_dict["to_plate_index"] = add.to_plate_index
+            if add.to_plate_role_index != 1:
+                action_dict["to_plate_role_index"] = add.to_plate_role_index
             tagged.append((
                 add.action_number,
                 add.molecular_context or "",  # NULL sorts before "inter…"
@@ -219,8 +219,8 @@ def export_recipe_to_json(recipe: Recipe) -> dict:
             if stir.stirring_speed != "normal":
                 stir_dict["stirring_speed"] = stir.stirring_speed
             stir_dict["plate_role"] = stir.plate_role
-            if stir.plate_index != 1:
-                stir_dict["plate_index"] = stir.plate_index
+            if stir.plate_role_index != 1:
+                stir_dict["plate_role_index"] = stir.plate_role_index
             tagged.append((
                 stir.action_number,
                 "",  # no molecular_context — sorts first
@@ -242,11 +242,11 @@ def export_recipe_to_json(recipe: Recipe) -> dict:
             if extract.concentration is not None:
                 extract_dict["concentration"] = extract.concentration
             extract_dict["from_plate_role"] = extract.from_plate_role
-            if extract.from_plate_index != 1:
-                extract_dict["from_plate_index"] = extract.from_plate_index
+            if extract.from_plate_role_index != 1:
+                extract_dict["from_plate_role_index"] = extract.from_plate_role_index
             extract_dict["to_plate_role"] = extract.to_plate_role
-            if extract.to_plate_index != 1:
-                extract_dict["to_plate_index"] = extract.to_plate_index
+            if extract.to_plate_role_index != 1:
+                extract_dict["to_plate_role_index"] = extract.to_plate_role_index
             tagged.append((
                 extract.action_number,
                 "",
@@ -257,8 +257,8 @@ def export_recipe_to_json(recipe: Recipe) -> dict:
             mix_dict: dict = {"type": "mix"}
             mix_dict["repetitions"] = mix.repetitions
             mix_dict["plate_role"] = mix.plate_role
-            if mix.plate_index != 1:
-                mix_dict["plate_index"] = mix.plate_index
+            if mix.plate_role_index != 1:
+                mix_dict["plate_role_index"] = mix.plate_role_index
             tagged.append((
                 mix.action_number,
                 "",
@@ -624,8 +624,8 @@ class AmidationRecipeTestCase(TestCase):
         ).first()
         self.assertEqual(add.from_plate_role, PlateRole.STARTINGMATERIAL)
         self.assertEqual(add.to_plate_role, PlateRole.REACTION)
-        self.assertEqual(add.from_plate_index, 1)
-        self.assertEqual(add.to_plate_index, 1)
+        self.assertEqual(add.from_plate_role_index, 1)
+        self.assertEqual(add.to_plate_role_index, 1)
 
     def test_workup_wash_plates(self):
         """Workup wash: solvent → reaction."""
@@ -643,11 +643,11 @@ class AmidationRecipeTestCase(TestCase):
             self.assertEqual(add.from_plate_role, PlateRole.REACTION)
             self.assertEqual(add.to_plate_role, PlateRole.SPEFILTER)
 
-    def test_plate_index_defaults(self):
+    def test_plate_role_index_defaults(self):
         """All plate indices in this recipe should be 1 (no multi-plate workups)."""
         for add in RecipeAddAction.objects.filter(session__recipe=self.recipe):
-            self.assertEqual(add.from_plate_index, 1)
-            self.assertEqual(add.to_plate_index, 1)
+            self.assertEqual(add.from_plate_role_index, 1)
+            self.assertEqual(add.to_plate_role_index, 1)
 
     # ── Stir-action tests ──────────────────────────────────────
 
@@ -665,7 +665,7 @@ class AmidationRecipeTestCase(TestCase):
     def test_stir_plate_defaults(self):
         stir = self.s3.stir_actions.first()
         self.assertEqual(stir.plate_role, PlateRole.REACTION)
-        self.assertEqual(stir.plate_index, 1)
+        self.assertEqual(stir.plate_role_index, 1)
 
     # ── Mix-action tests ────────────────────────────────────────
 

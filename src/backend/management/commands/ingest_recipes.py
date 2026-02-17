@@ -247,9 +247,9 @@ def _create_add_action(
         concentration=material.get("concentration"),
         density=material.get("density"),
         from_plate_role=from_role,
-        from_plate_index=from_idx,
+        from_plate_role_index=from_idx,
         to_plate_role=to_role,
-        to_plate_index=to_idx,
+        to_plate_role_index=to_idx,
     )
 
 
@@ -268,7 +268,7 @@ def _create_stir_action(session: RecipeActionSession, action: dict) -> None:
         duration=dur.get("value", 1),
         duration_unit=dur.get("unit", "hours"),
         plate_role=role,
-        plate_index=idx,
+        plate_role_index=idx,
     )
 
 
@@ -294,9 +294,9 @@ def _create_extract_action(session: RecipeActionSession, action: dict) -> None:
         solvent=material.get("solvent"),
         concentration=material.get("concentration"),
         from_plate_role=from_role,
-        from_plate_index=from_idx,
+        from_plate_role_index=from_idx,
         to_plate_role=to_role,
-        to_plate_index=to_idx,
+        to_plate_role_index=to_idx,
     )
 
 
@@ -309,7 +309,7 @@ def _create_mix_action(session: RecipeActionSession, action: dict) -> None:
     RecipeMixAction.objects.create(
         session=session,
         plate_role=role,
-        plate_index=idx,
+        plate_role_index=idx,
         repetitions=reps.get("value", 1) if isinstance(reps, dict) else reps,
     )
 

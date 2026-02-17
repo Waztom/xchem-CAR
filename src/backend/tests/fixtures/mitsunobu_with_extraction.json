@@ -1,7 +1,7 @@
 {
     "reaction_class": "Mitsunobu",
     "name": "standard_with_extraction",
-    "description": "Mitsunobu reaction with DIAD/PPh3 activation followed by liquid-liquid extraction workup. Demonstrates multi-stage workup with explicit plate_index routing.",
+    "description": "Mitsunobu reaction with DIAD/PPh3 activation followed by liquid-liquid extraction workup. Demonstrates multi-stage workup with explicit plate_role_index routing.",
     "intramolecular": false,
     "estimated_yield": 70,
     "reaction_smarts": [
@@ -120,7 +120,7 @@
                     "volume_unit": "uL",
                     "from_plate_role": "reaction",
                     "to_plate_role": "workup",
-                    "to_plate_index": 1
+                    "to_plate_role_index": 1
                 },
                 {
                     "_comment": "Add fresh water to the organic layer remaining in reaction plate",
@@ -146,7 +146,7 @@
                     "volume_unit": "uL",
                     "from_plate_role": "reaction",
                     "to_plate_role": "workup",
-                    "to_plate_index": 1
+                    "to_plate_role_index": 1
                 },
                 {
                     "_comment": "Transfer cleaned organic layer (top) to workup plate 2 for concentration",
@@ -156,7 +156,7 @@
                     "volume_unit": "uL",
                     "from_plate_role": "reaction",
                     "to_plate_role": "workup",
-                    "to_plate_index": 2
+                    "to_plate_role_index": 2
                 }
             ]
         },
@@ -173,13 +173,13 @@
                     "solvent": "ACN",
                     "from_plate_role": "solvent",
                     "to_plate_role": "workup",
-                    "to_plate_index": 2
+                    "to_plate_role_index": 2
                 },
                 {
                     "type": "mix",
                     "repetitions": 3,
                     "plate_role": "workup",
-                    "plate_index": 2
+                    "plate_role_index": 2
                 },
                 {
                     "_comment": "Load onto SPE filter plate for final purification",
@@ -187,7 +187,7 @@
                     "amount": 400.0,
                     "quantity_unit": "uL",
                     "from_plate_role": "workup",
-                    "from_plate_index": 2,
+                    "from_plate_role_index": 2,
                     "to_plate_role": "spefilter"
                 }
             ]

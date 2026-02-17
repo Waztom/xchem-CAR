@@ -70,8 +70,8 @@ class PlateQueryService:
             Action sessions targeting the specified role/index
         """
         criterion1 = Q(id__in=self.session.actionsessionqueryset)
-        criterion2 = Q(addaction__to_plate_role=role, addaction__to_plate_index=role_index)
-        criterion3 = Q(extractaction__to_plate_role=role, extractaction__to_plate_index=role_index)
+        criterion2 = Q(addaction__to_plate_role=role, addaction__to_plate_role_index=role_index)
+        criterion3 = Q(extractaction__to_plate_role=role, extractaction__to_plate_role_index=role_index)
 
         action_session_queryset = ActionSession.objects.filter(
             criterion1 & (criterion2 | criterion3)

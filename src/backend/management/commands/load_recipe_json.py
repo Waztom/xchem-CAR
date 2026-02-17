@@ -301,9 +301,9 @@ def _create_add_action(session: RecipeActionSession, action: dict) -> None:
         concentration=action.get("concentration"),
         density=action.get("density"),
         from_plate_role=action.get("from_plate_role", "startingmaterial"),
-        from_plate_index=action.get("from_plate_index", 1),
+        from_plate_role_index=action.get("from_plate_role_index", action.get("from_plate_index", 1)),
         to_plate_role=action.get("to_plate_role", "reaction"),
-        to_plate_index=action.get("to_plate_index", 1),
+        to_plate_role_index=action.get("to_plate_role_index", action.get("to_plate_index", 1)),
     )
 
 
@@ -316,7 +316,7 @@ def _create_stir_action(session: RecipeActionSession, action: dict) -> None:
         duration_unit=action.get("duration_unit", "h"),
         stirring_speed=action.get("stirring_speed", "normal"),
         plate_role=action.get("plate_role", "reaction"),
-        plate_index=action.get("plate_index", 1),
+        plate_role_index=action.get("plate_role_index", action.get("plate_index", 1)),
     )
 
 
@@ -330,9 +330,9 @@ def _create_extract_action(session: RecipeActionSession, action: dict) -> None:
         solvent=action.get("solvent"),
         concentration=action.get("concentration"),
         from_plate_role=action.get("from_plate_role", "reaction"),
-        from_plate_index=action.get("from_plate_index", 1),
+        from_plate_role_index=action.get("from_plate_role_index", action.get("from_plate_index", 1)),
         to_plate_role=action.get("to_plate_role", "workup"),
-        to_plate_index=action.get("to_plate_index", 1),
+        to_plate_role_index=action.get("to_plate_role_index", action.get("to_plate_index", 1)),
     )
 
 
@@ -340,6 +340,6 @@ def _create_mix_action(session: RecipeActionSession, action: dict) -> None:
     RecipeMixAction.objects.create(
         session=session,
         plate_role=action.get("plate_role", "reaction"),
-        plate_index=action.get("plate_index", 1),
+        plate_role_index=action.get("plate_role_index", action.get("plate_index", 1)),
         repetitions=action["repetitions"],
     )

@@ -104,7 +104,7 @@ class WorkupSession(BaseSession):
         """
         Determine the workup stage number for this session.
 
-        Extracts the workup stage from the to_plate_role and to_plate_index
+        Extracts the workup stage from the to_plate_role and to_plate_role_index
         fields of the session's add/extract actions.
 
         Returns
@@ -119,14 +119,14 @@ class WorkupSession(BaseSession):
             # Get only workup destinations
             workup_add = self.addactionqueryset.filter(to_plate_role="workup")
             workup_indices.update(
-                workup_add.values_list("to_plate_index", flat=True).distinct()
+                workup_add.values_list("to_plate_role_index", flat=True).distinct()
             )
 
         if self.extractactionqueryset.exists():
             # Get only workup destinations
             workup_extract = self.extractactionqueryset.filter(to_plate_role="workup")
             workup_indices.update(
-                workup_extract.values_list("to_plate_index", flat=True).distinct()
+                workup_extract.values_list("to_plate_role_index", flat=True).distinct()
             )
 
         if workup_indices:

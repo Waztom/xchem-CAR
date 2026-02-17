@@ -772,9 +772,9 @@ class CreateEncodedActionModels(object):
             add.actionsession_id = actionsession_obj
             add.number = recipe_add.action_number
             add.from_plate_role = recipe_add.from_plate_role
-            add.from_plate_index = recipe_add.from_plate_index
+            add.from_plate_role_index = recipe_add.from_plate_role_index
             add.to_plate_role = recipe_add.to_plate_role
-            add.to_plate_index = recipe_add.to_plate_index
+            add.to_plate_role_index = recipe_add.to_plate_role_index
             add.smiles = smiles
             add.molecularweight = molecular_weight
             if calcunit == "uL":
@@ -825,9 +825,9 @@ class CreateEncodedActionModels(object):
             extract.actionsession_id = actionsession_obj
             extract.number = recipe_ext.action_number
             extract.from_plate_role = recipe_ext.from_plate_role
-            extract.from_plate_index = recipe_ext.from_plate_index
+            extract.from_plate_role_index = recipe_ext.from_plate_role_index
             extract.to_plate_role = recipe_ext.to_plate_role
-            extract.to_plate_index = recipe_ext.to_plate_index
+            extract.to_plate_role_index = recipe_ext.to_plate_role_index
             extract.smiles = smiles
             extract.molecularweight = molecular_weight
             extract.volume = recipe_ext.volume
@@ -856,7 +856,7 @@ class CreateEncodedActionModels(object):
             mix.actionsession_id = actionsession_obj
             mix.number = recipe_mix.action_number
             mix.plate_role = recipe_mix.plate_role
-            mix.plate_index = recipe_mix.plate_index
+            mix.plate_role_index = recipe_mix.plate_role_index
             mix.repetitions = recipe_mix.repetitions
             mix.save()
         except Exception as e:
@@ -878,7 +878,7 @@ class CreateEncodedActionModels(object):
             stir.actionsession_id = actionsession_obj
             stir.number = recipe_stir.action_number
             stir.plate_role = recipe_stir.plate_role
-            stir.plate_index = recipe_stir.plate_index
+            stir.plate_role_index = recipe_stir.plate_role_index
             stir.duration = recipe_stir.duration
             stir.durationunit = recipe_stir.duration_unit
             stir.temperature = recipe_stir.temperature

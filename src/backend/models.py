@@ -361,11 +361,11 @@ class AddAction(models.Model):
     from_plate_role = models.CharField(
         choices=PlateRole.choices, max_length=20, default=PlateRole.STARTINGMATERIAL
     )
-    from_plate_index = models.PositiveIntegerField(default=1)
+    from_plate_role_index = models.PositiveIntegerField(default=1)
     to_plate_role = models.CharField(
         choices=PlateRole.choices, max_length=20, default=PlateRole.REACTION
     )
-    to_plate_index = models.PositiveIntegerField(default=1)
+    to_plate_role_index = models.PositiveIntegerField(default=1)
     smiles = models.CharField(max_length=255)
     calcunit = models.CharField(
         choices=CalcUnit.choices, default="moleq", max_length=10
@@ -429,11 +429,11 @@ class ExtractAction(models.Model):
     from_plate_role = models.CharField(
         choices=PlateRole.choices, max_length=20, default=PlateRole.REACTION
     )
-    from_plate_index = models.PositiveIntegerField(default=1)
+    from_plate_role_index = models.PositiveIntegerField(default=1)
     to_plate_role = models.CharField(
         choices=PlateRole.choices, max_length=20, default=PlateRole.WORKUP
     )
-    to_plate_index = models.PositiveIntegerField(default=1)
+    to_plate_role_index = models.PositiveIntegerField(default=1)
     layer = models.CharField(choices=Layer.choices, default="bottom", max_length=10)
     smiles = models.CharField(max_length=255)
     volume = models.FloatField()
@@ -474,7 +474,7 @@ class MixAction(models.Model):
     plate_role = models.CharField(
         choices=PlateRole.choices, max_length=20, default=PlateRole.REACTION
     )
-    plate_index = models.PositiveIntegerField(default=1)
+    plate_role_index = models.PositiveIntegerField(default=1)
     repetitions = models.IntegerField()
 
 
@@ -529,7 +529,7 @@ class StirAction(models.Model):
     plate_role = models.CharField(
         choices=PlateRole.choices, max_length=20, default=PlateRole.REACTION
     )
-    plate_index = models.PositiveIntegerField(default=1)
+    plate_role_index = models.PositiveIntegerField(default=1)
     duration = models.FloatField()
     durationunit = models.CharField(
         choices=Unit.choices, default=Unit.hours, max_length=10
@@ -1084,11 +1084,11 @@ class RecipeAddAction(models.Model):
         Neat density (g/mL) for liquid reagents dispensed without solvent.
     from_plate_role : CharField
         Functional role of the source plate (default: startingmaterial).
-    from_plate_index : PositiveIntegerField
+    from_plate_role_index : PositiveIntegerField
         Instance number of the source plate (default: 1).
     to_plate_role : CharField
         Functional role of the destination plate (default: reaction).
-    to_plate_index : PositiveIntegerField
+    to_plate_role_index : PositiveIntegerField
         Instance number of the destination plate (default: 1).
     """
 
@@ -1132,13 +1132,13 @@ class RecipeAddAction(models.Model):
         default=PlateRole.STARTINGMATERIAL,
         max_length=20,
     )
-    from_plate_index = models.PositiveIntegerField(default=1)
+    from_plate_role_index = models.PositiveIntegerField(default=1)
     to_plate_role = models.CharField(
         choices=PlateRole.choices,
         default=PlateRole.REACTION,
         max_length=20,
     )
-    to_plate_index = models.PositiveIntegerField(default=1)
+    to_plate_role_index = models.PositiveIntegerField(default=1)
 
     class Meta:
         ordering = ["action_number"]
@@ -1179,7 +1179,7 @@ class RecipeStirAction(models.Model):
         gentle | normal | vigorous.
     plate_role : CharField
         Functional role of the plate being stirred (default: reaction).
-    plate_index : PositiveIntegerField
+    plate_role_index : PositiveIntegerField
         Instance number of the plate (default: 1).
     """
 
@@ -1215,7 +1215,7 @@ class RecipeStirAction(models.Model):
         default=PlateRole.REACTION,
         max_length=20,
     )
-    plate_index = models.PositiveIntegerField(default=1)
+    plate_role_index = models.PositiveIntegerField(default=1)
 
     class Meta:
         ordering = ["action_number"]
@@ -1236,7 +1236,7 @@ class RecipeStirAction(models.Model):
         return (
             f"Stir {self.temperature}{self.temperature_unit} "
             f"{self.duration}{self.duration_unit} on "
-            f"{self.plate_role}{self.plate_index} "
+            f"{self.plate_role}{self.plate_role_index} "
             f"(#{self.action_number}) in {self.session}"
         )
 
@@ -1262,11 +1262,11 @@ class RecipeExtractAction(models.Model):
         Optional concentration of extracted material.
     from_plate_role : CharField
         Functional role of the source plate (default: reaction).
-    from_plate_index : PositiveIntegerField
+    from_plate_role_index : PositiveIntegerField
         Instance number of the source plate (default: 1).
     to_plate_role : CharField
         Functional role of the destination plate (default: workup).
-    to_plate_index : PositiveIntegerField
+    to_plate_role_index : PositiveIntegerField
         Instance number of the destination plate (default: 1).
     """
 
@@ -1293,13 +1293,13 @@ class RecipeExtractAction(models.Model):
         default=PlateRole.REACTION,
         max_length=20,
     )
-    from_plate_index = models.PositiveIntegerField(default=1)
+    from_plate_role_index = models.PositiveIntegerField(default=1)
     to_plate_role = models.CharField(
         choices=PlateRole.choices,
         default=PlateRole.WORKUP,
         max_length=20,
     )
-    to_plate_index = models.PositiveIntegerField(default=1)
+    to_plate_role_index = models.PositiveIntegerField(default=1)
 
     class Meta:
         ordering = ["action_number"]
@@ -1319,8 +1319,8 @@ class RecipeExtractAction(models.Model):
     def __str__(self):
         return (
             f"Extract {self.layer} layer {self.volume}uL "
-            f"{self.from_plate_role}{self.from_plate_index}→"
-            f"{self.to_plate_role}{self.to_plate_index} "
+            f"{self.from_plate_role}{self.from_plate_role_index}→"
+            f"{self.to_plate_role}{self.to_plate_role_index} "
             f"(#{self.action_number}) in {self.session}"
         )
 
@@ -1334,7 +1334,7 @@ class RecipeMixAction(models.Model):
     action_number : PositiveIntegerField
     plate_role : CharField
         Functional role of the plate to mix (default: reaction).
-    plate_index : PositiveIntegerField
+    plate_role_index : PositiveIntegerField
         Instance number of the plate (default: 1).
     repetitions : PositiveIntegerField
         Number of mix cycles.
@@ -1349,7 +1349,7 @@ class RecipeMixAction(models.Model):
         default=PlateRole.REACTION,
         max_length=20,
     )
-    plate_index = models.PositiveIntegerField(default=1)
+    plate_role_index = models.PositiveIntegerField(default=1)
     repetitions = models.PositiveIntegerField()
 
     class Meta:
@@ -1369,6 +1369,6 @@ class RecipeMixAction(models.Model):
 
     def __str__(self):
         return (
-            f"Mix {self.repetitions}x on {self.plate_role}{self.plate_index} "
+            f"Mix {self.repetitions}x on {self.plate_role}{self.plate_role_index} "
             f"(#{self.action_number}) in {self.session}"
         )

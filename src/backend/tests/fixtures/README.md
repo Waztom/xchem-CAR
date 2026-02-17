@@ -11,9 +11,9 @@ To create a new recipe fixture:
    - Use `mitsunobu_with_extraction.json` for a multi-stage workup example (liquid-liquid extraction, explicit plate routing).
 
 2. **Edit the JSON:**
-   - Only include fields that differ from the documented defaults. Omit `plate_index`, `from_plate_index`, `to_plate_index`, `quantity_unit`, `continuation`, etc. unless needed for multi-stage routing or non-default values.
+   - Only include fields that differ from the documented defaults. Omit `plate_role_index`, `from_plate_role_index`, `to_plate_role_index`, `quantity_unit`, `continuation`, etc. unless needed for multi-stage routing or non-default values.
    - Use `from_plate_role` and `to_plate_role` to specify plate types (e.g., `reaction`, `workup`, `spefilter`, `solvent`).
-   - For multi-stage workup, set `to_plate_index` or `from_plate_index` explicitly (e.g., `workup1`, `workup2`).
+   - For multi-stage workup, set `to_plate_role_index` or `from_plate_role_index` explicitly (e.g., index 1 for first workup plate, index 2 for second).
    - Add comments (with `_comment` key) for clarity, but these are ignored by the loader.
 
 3. **Validate the JSON:**
@@ -115,7 +115,7 @@ Valid values for `plate_role`, `from_plate_role`, `to_plate_role`:
 | Value | Description |
 |-------|-------------|
 | `reaction` | Main reaction plate |
-| `workup` | Workup plate (use with `plate_index` for multiple: workup 1, 2, etc.) |
+| `workup` | Workup plate (use with `plate_role_index` for multiple: workup 1, 2, etc.) |
 | `spefilter` | SPE filter plate |
 | `lcms` | LCMS sample plate |
 | `xchem` | XChem crystallography plate |
@@ -135,9 +135,9 @@ Valid values for `plate_role`, `from_plate_role`, `to_plate_role`:
 | `concentration` | No | — | Solution concentration (mol/L) |
 | `density` | No | — | Neat density (g/mL) for liquid reagents |
 | `from_plate_role` | No | `startingmaterial` | Source plate role |
-| `from_plate_index` | No | `1` | Source plate index (for multiple plates of same role) |
+| `from_plate_role_index` | No | `1` | Source plate index (for multiple plates of same role) |
 | `to_plate_role` | No | `reaction` | Destination plate role |
-| `to_plate_index` | No | `1` | Destination plate index |
+| `to_plate_role_index` | No | `1` | Destination plate index |
 
 ### Stir Actions
 
@@ -149,15 +149,15 @@ Valid values for `plate_role`, `from_plate_role`, `to_plate_role`:
 | `duration_unit` | No | `h` | Unit: `s`, `m`, `h` |
 | `stirring_speed` | No | `normal` | Speed: `gentle`, `normal`, `vigorous` |
 | `plate_role` | No | `reaction` | Plate being stirred |
-| `plate_index` | No | `1` | Plate index |
+| `plate_role_index` | No | `1` | Plate role index |
 
 ## Plate Routing
 
-- For simple recipes, omit all `*_plate_index` fields (default is 1).
-- For multi-stage workup, specify `to_plate_index` or `from_plate_index` as needed:
-  - `extract: reaction → workup1`
-  - `extract: reaction → workup2`
-  - `add: workup2 → spefilter`
+- For simple recipes, omit all `*_plate_role_index` fields (default is 1).
+- For multi-stage workup, specify `to_plate_role_index` or `from_plate_role_index` as needed:
+  - `extract: reaction → workup (index 1)`
+  - `extract: reaction → workup (index 2)`
+  - `add: workup (index 2) → spefilter`
 
 ## Management Command Reference
 
@@ -168,8 +168,8 @@ Valid values for `plate_role`, `from_plate_role`, `to_plate_role`:
 
 ## Canonical Examples
 
-- `amidation_standard.json`: Standard amidation, no explicit plate_index
-- `mitsunobu_with_extraction.json`: Mitsunobu with multi-stage extraction, explicit plate_index routing
+- `amidation_standard.json`: Standard amidation, no explicit plate_role_index
+- `mitsunobu_with_extraction.json`: Mitsunobu with multi-stage extraction, explicit plate_role_index routing
 
 ## See Also
 - [../README.md](../README.md) for project overview

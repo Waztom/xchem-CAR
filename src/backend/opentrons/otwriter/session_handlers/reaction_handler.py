@@ -549,10 +549,10 @@ class ReactionSessionHandler(SessionHandler):
             )
 
             to_plate_role = reaction_action.to_plate_role
-            to_plate_index = reaction_action.to_plate_index
+            to_plate_role_index = reaction_action.to_plate_role_index
             from_plate_role = reaction_action.from_plate_role
-            from_plate_index = reaction_action.from_plate_index
-            logger.info(f"Transfer plates: {from_plate_role}{from_plate_index} → {to_plate_role}{to_plate_index}")
+            from_plate_role_index = reaction_action.from_plate_role_index
+            logger.info(f"Transfer plates: {from_plate_role}{from_plate_role_index} → {to_plate_role}{to_plate_role_index}")
 
             # Get the add action object
             add_action_obj = AddAction.objects.get(
@@ -602,12 +602,12 @@ class ReactionSessionHandler(SessionHandler):
 
                 # Get destination well
                 logger.info(
-                    f"Finding destination well for reaction {reaction_id}, role={to_plate_role}, index={to_plate_index}"
+                    f"Finding destination well for reaction {reaction_id}, role={to_plate_role}, index={to_plate_role_index}"
                 )
                 to_well_obj = self.well_finder.find_reaction_well(
                     reaction_id=reaction_id,
                     role=to_plate_role,
-                    role_index=to_plate_index,
+                    role_index=to_plate_role_index,
                 )
 
                 to_well_index = to_well_obj.index
@@ -680,17 +680,17 @@ class ReactionSessionHandler(SessionHandler):
             )
 
             plate_role = mix_action_obj.plate_role
-            plate_index = mix_action_obj.plate_index
+            plate_role_index = mix_action_obj.plate_role_index
             repetitions = mix_action_obj.repetitions
 
             logger.info(
-                f"Mix parameters: role={plate_role}, index={plate_index}, repetitions={repetitions}"
+                f"Mix parameters: role={plate_role}, index={plate_role_index}, repetitions={repetitions}"
             )
 
             # Find the well to mix
             logger.info(f"Finding well to mix for reaction {reaction_id}")
             mix_well_obj = self.well_finder.find_reaction_well(
-                reaction_id=reaction_id, role=plate_role, role_index=plate_index
+                reaction_id=reaction_id, role=plate_role, role_index=plate_role_index
             )
 
             mix_well_index = mix_well_obj.index

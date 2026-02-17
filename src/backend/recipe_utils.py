@@ -240,9 +240,9 @@ def action_to_dict(action: RecipeAction) -> dict:
             "concentration": action.concentration,
             "density": action.density,
             "from_plate_role": action.from_plate_role,
-            "from_plate_index": action.from_plate_index,
+            "from_plate_role_index": action.from_plate_role_index,
             "to_plate_role": action.to_plate_role,
-            "to_plate_index": action.to_plate_index,
+            "to_plate_role_index": action.to_plate_role_index,
         }
     if isinstance(action, RecipeStirAction):
         return {
@@ -253,7 +253,7 @@ def action_to_dict(action: RecipeAction) -> dict:
             "duration": action.duration,
             "duration_unit": action.duration_unit,
             "plate_role": action.plate_role,
-            "plate_index": action.plate_index,
+            "plate_role_index": action.plate_role_index,
         }
     if isinstance(action, RecipeExtractAction):
         return {
@@ -266,16 +266,16 @@ def action_to_dict(action: RecipeAction) -> dict:
             "solvent": action.solvent,
             "concentration": action.concentration,
             "from_plate_role": action.from_plate_role,
-            "from_plate_index": action.from_plate_index,
+            "from_plate_role_index": action.from_plate_role_index,
             "to_plate_role": action.to_plate_role,
-            "to_plate_index": action.to_plate_index,
+            "to_plate_role_index": action.to_plate_role_index,
         }
     if isinstance(action, RecipeMixAction):
         return {
             "type": "mix",
             "action_number": action.action_number,
             "plate_role": action.plate_role,
-            "plate_index": action.plate_index,
+            "plate_role_index": action.plate_role_index,
             "repetitions": action.repetitions,
         }
     raise TypeError(f"Unknown recipe action type: {type(action)}")
@@ -336,8 +336,8 @@ def get_session_destination_plates(
     """Extract unique destination plate (role, index) pairs from a recipe session.
 
     Scans all actions in the session and collects the ``to_plate_role`` /
-    ``to_plate_index`` (for add/extract actions) or ``plate_role`` /
-    ``plate_index`` (for stir/mix actions) values.
+    ``to_plate_role_index`` (for add/extract actions) or ``plate_role`` /
+    ``plate_role_index`` (for stir/mix actions) values.
 
     Returns a sorted list of unique ``(role, index)`` tuples representing
     all plates that need to be created for this session.
@@ -358,7 +358,7 @@ def get_session_destination_plates(
     Returns
     -------
     list[tuple[str, int]]
-        Sorted list of (plate_role, plate_index) pairs.
+        Sorted list of (plate_role, plate_role_index) pairs.
     """
     actions = get_session_recipe_actions(
         reaction_class=reaction_class,
@@ -372,13 +372,13 @@ def get_session_destination_plates(
 
     for action in actions:
         if isinstance(action, RecipeAddAction):
-            plates.add((action.to_plate_role, action.to_plate_index))
+            plates.add((action.to_plate_role, action.to_plate_role_index))
         elif isinstance(action, RecipeExtractAction):
-            plates.add((action.to_plate_role, action.to_plate_index))
+            plates.add((action.to_plate_role, action.to_plate_role_index))
         elif isinstance(action, RecipeStirAction):
-            plates.add((action.plate_role, action.plate_index))
+            plates.add((action.plate_role, action.plate_role_index))
         elif isinstance(action, RecipeMixAction):
-            plates.add((action.plate_role, action.plate_index))
+            plates.add((action.plate_role, action.plate_role_index))
 
     return sorted(plates, key=lambda p: (p[0], p[1]))
 
@@ -393,7 +393,7 @@ def get_session_source_plates(
     """Extract unique source plate (role, index) pairs from a recipe session.
 
     Scans add/extract actions and collects their ``from_plate_role`` /
-    ``from_plate_index`` values.
+    ``from_plate_role_index`` values.
 
     Returns a sorted list of unique ``(role, index)`` tuples representing
     all source plates referenced by this session's actions.
@@ -414,7 +414,7 @@ def get_session_source_plates(
     Returns
     -------
     list[tuple[str, int]]
-        Sorted list of (plate_role, plate_index) pairs.
+        Sorted list of (plate_role, plate_role_index) pairs.
     """
     actions = get_session_recipe_actions(
         reaction_class=reaction_class,
@@ -428,8 +428,8 @@ def get_session_source_plates(
 
     for action in actions:
         if isinstance(action, RecipeAddAction):
-            plates.add((action.from_plate_role, action.from_plate_index))
+            plates.add((action.from_plate_role, action.from_plate_role_index))
         elif isinstance(action, RecipeExtractAction):
-            plates.add((action.from_plate_role, action.from_plate_index))
+            plates.add((action.from_plate_role, action.from_plate_role_index))
 
     return sorted(plates, key=lambda p: (p[0], p[1]))
