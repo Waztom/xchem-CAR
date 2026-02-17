@@ -9,7 +9,7 @@ from django.core.files.base import ContentFile
 from django.db.models import QuerySet, Q
 
 from ....models import AddAction, ExtractAction, Reaction, CompoundOrder
-from ....utils import (
+from ....db_utils import (
     getReactionTemperature,
     getReactionClass,
     getReactionRecipe,

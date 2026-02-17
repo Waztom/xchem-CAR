@@ -9,7 +9,7 @@ from typing import List
 from django.db.models import Q
 
 from backend.models import Well, Plate
-from backend.utils import getPreviousReactionQuerySets, getProductSmiles
+from backend.db_utils import getPreviousReactionQuerySets, getProductSmiles
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class WellFinder:
         self.script_generator = script_generator
         logger.info("WellFinder initialized")
 
-    def find_reaction_well(self, reaction_id: int, well_type: str) -> Well:
+    def find_reaction_well(self, reaction_id: int, role: str, role_index: int = 1) -> Well:
         """
         Find the reaction plate well for a given reaction.
 
@@ -42,8 +42,10 @@ class WellFinder:
         ----------
         reaction_id : int
             The reaction's ID
-        well_type : str
-            Type of well (e.g., "reaction", "workup", "lcms")
+        role : str
+            The plate role (e.g., "reaction", "workup", "lcms")
+        role_index : int
+            The role index (default 1)
 
         Returns
         -------
@@ -51,7 +53,7 @@ class WellFinder:
             The well used in the reaction
         """
         logger.info(
-            f"Finding reaction well for reaction ID {reaction_id}, type {well_type}"
+            f"Finding reaction well for reaction ID {reaction_id}, role={role}, index={role_index}"
         )
         product_smiles = getProductSmiles(reaction_ids=[reaction_id])[0]
         logger.info(f"Looking for well with product SMILES: {product_smiles[:20]}...")
@@ -60,7 +62,8 @@ class WellFinder:
             well_obj = Well.objects.get(
                 otsession_id=self.script_generator.otsession_id,
                 reaction_id=reaction_id,
-                type=well_type,
+                role=role,
+                role_index=role_index,
                 smiles=product_smiles,
             )
             logger.info(
@@ -69,10 +72,10 @@ class WellFinder:
             return well_obj
         except Well.DoesNotExist:
             logger.error(
-                f"Could not find well for reaction {reaction_id}, type {well_type}"
+                f"Could not find well for reaction {reaction_id}, role={role}, index={role_index}"
             )
             logger.error(
-                f"Searched with params: otsession_id={self.script_generator.otsession_id}, reaction_id={reaction_id}, type={well_type}"
+                f"Searched with params: otsession_id={self.script_generator.otsession_id}, reaction_id={reaction_id}, role={role}, index={role_index}"
             )
             raise
 
@@ -103,7 +106,7 @@ class WellFinder:
 
         try:
             solvent_plate_queryset = Plate.objects.filter(
-                otsession_id=self.script_generator.otsession_id, type="solvent"
+                otsession_id=self.script_generator.otsession_id, role="solvent"
             )
 
             if not solvent_plate_queryset.exists():
@@ -120,7 +123,7 @@ class WellFinder:
                 well_queryset = solvent_plate.well_set.all().filter(
                     solvent=solvent,
                     available=True,
-                    type="solvent",
+                    role="solvent",
                 )
 
                 if not well_queryset.exists():
@@ -245,7 +248,7 @@ class WellFinder:
                     otsession_id=self.script_generator.otsession_id,
                     smiles=smiles,
                     available=True,
-                    type="startingmaterial",
+                    role="startingmaterial",
                 ).order_by("id")
             else:
                 logger.info(
@@ -257,7 +260,7 @@ class WellFinder:
                     solvent=solvent,
                     concentration=concentration,
                     available=True,
-                    type="startingmaterial",
+                    role="startingmaterial",
                 ).order_by("id")
 
             if not well_objects.exists():
@@ -283,12 +286,11 @@ class WellFinder:
                     "This is a later reaction step - searching for wells in reaction/workup plates"
                 )
                 try:
-                    plates = ["reaction", "workup1", "workup2", "workup3", "spefilter"]
                     criterion1 = Q(otsession_id=self.script_generator.otsession_id)
                     criterion2 = Q(reaction_id=reaction_id)
                     criterion3 = Q(reaction_id__in=previous_reaction_queryset)
                     criterion4 = Q(smiles=smiles)
-                    criterion5 = Q(type__in=plates)
+                    criterion5 = Q(role__in=["reaction", "workup", "spefilter"])
                     criterion6 = Q(reactantfornextstep=True)
 
                     well_queryset = Well.objects.filter(
@@ -303,7 +305,7 @@ class WellFinder:
                     if well_queryset.exists():
                         well_obj = well_queryset[0]
                         logger.info(
-                            f"Found material in {well_obj.type} plate, well {well_obj.index}"
+                            f"Found material in {well_obj.role} plate, well {well_obj.index}"
                         )
                         well_info.append(
                             [previous_reaction_queryset, well_obj, transfer_volume]
@@ -323,7 +325,7 @@ class WellFinder:
                 Well.objects.values_list("smiles", flat=True)
                 .filter(
                     otsession_id=self.script_generator.otsession_id,
-                    type="startingmaterial",
+                    role="startingmaterial",
                     available=True,
                 )
                 .distinct()

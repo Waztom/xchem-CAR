@@ -78,7 +78,7 @@ labware_plates = {
         "reflux": False,
     },
     "plateone_96_wellplate_2500ul": {
-        "type": ["workup1", "workup2", "workup3", "reaction"],
+        "type": ["workup", "reaction"],
         "no_wells_in_column": 8,
         "no_wells": 96,
         "no_columns": 12,

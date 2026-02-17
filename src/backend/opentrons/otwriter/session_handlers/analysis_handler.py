@@ -9,9 +9,9 @@ import logging
 from typing import List, Dict, Any, Optional, Union, Tuple
 from django.db.models import QuerySet, Q
 
-from backend.models import ActionSession, AddAction
-from backend.utils import getReaction, getReactionQuerySet
-from backend.recipebuilder.encodedrecipes import encoded_recipes
+from backend.models import ActionSession, AddAction, RecipeAddAction
+from backend.db_utils import getReaction, getReactionQuerySet
+from backend.recipe_utils import get_session_recipe_actions
 
 from .base_handler import SessionHandler
 
@@ -92,44 +92,37 @@ class AnalysisSessionHandler(SessionHandler):
         )
         logger.info(f"Using {reaction_action_search} analysis actions")
 
-        # Get actions from encoded recipes
+        # Get actions from Recipe DB
         try:
-            action_sessions = encoded_recipes[reaction_class]["recipes"][recipe_type][
-                "actionsessions"
-            ]
-            analysis_actions = None
+            analysis_actions = get_session_recipe_actions(
+                reaction_class=reaction_class,
+                name=recipe_type,
+                session_type="analyse",
+                session_number=session_number,
+                molecular_context=reaction_action_search,
+            )
 
-            try:
-                analysis_actions = [
-                    actionsession[reaction_action_search]["actions"]
-                    for actionsession in action_sessions
-                    if actionsession["type"] == "analyse"
-                    and actionsession["sessionnumber"] == session_number
-                ][0]
-
-                action_count = len(analysis_actions)
-                logger.info(
-                    f"Found {action_count} analysis actions for reaction {reaction_id}"
-                )
-            except (IndexError, KeyError) as e:
+            if not analysis_actions:
                 logger.warning(
-                    f"No analysis actions defined for reaction {reaction_id}, recipe {recipe_type}: {str(e)}"
+                    f"No analysis actions defined for reaction {reaction_id}, recipe {recipe_type}"
                 )
                 self.add_command(
                     f"\n\t# No analysis actions found for reaction {reaction_id}"
                 )
                 return
 
+            action_count = len(analysis_actions)
+            logger.info(
+                f"Found {action_count} analysis actions for reaction {reaction_id}"
+            )
+
             # Process each analysis action
             for index, analysis_action in enumerate(analysis_actions):
-                action_type = analysis_action["type"]
-                action_number = analysis_action["actionnumber"]
-
-                logger.info(
-                    f"Processing analysis action {index+1}/{len(analysis_actions)}: {action_type} {action_number}"
-                )
-
-                if action_type == "add":
+                if isinstance(analysis_action, RecipeAddAction):
+                    action_number = analysis_action.action_number
+                    logger.info(
+                        f"Processing analysis action {index+1}/{len(analysis_actions)}: add {action_number}"
+                    )
                     self.process_add_action(
                         analysis_action,
                         action_number,
@@ -140,7 +133,7 @@ class AnalysisSessionHandler(SessionHandler):
                         reaction_id,
                     )
                 else:
-                    logger.warning(f"Unknown analysis action type: {action_type}")
+                    logger.warning(f"Unknown analysis action type: {type(analysis_action).__name__}")
 
         except (KeyError, IndexError) as e:
             logger.error(
@@ -192,30 +185,23 @@ class AnalysisSessionHandler(SessionHandler):
                 number=action_number,
             )
 
-            try:
-                from_plate_type = analysis_action["content"]["plates"]["fromplatetype"]
-                to_plate_type = analysis_action["content"]["plates"]["toplatetype"]
-            except (KeyError, TypeError) as e:
-                logger.error(
-                    f"Error accessing plate types in analysis action: {str(e)}"
-                )
-                from_plate_type = add_action_obj.fromplatetype
-                to_plate_type = add_action_obj.toplatetype
-                logger.info(
-                    f"Using plate types from database: from={from_plate_type}, to={to_plate_type}"
-                )
+            from_plate_role = analysis_action.from_plate_role
+            from_plate_role_index = analysis_action.from_plate_role_index
+            to_plate_role = analysis_action.to_plate_role
+            to_plate_role_index = analysis_action.to_plate_role_index
 
             logger.info(
-                f"Analysis transfer: from={from_plate_type}, to={to_plate_type}"
+                f"Analysis transfer: from={from_plate_role}{from_plate_role_index}, to={to_plate_role}{to_plate_role_index}"
             )
 
             # Find source well (reaction/workup well)
             logger.info(
-                f"Finding source well for reaction {reaction_id}, type {from_plate_type}"
+                f"Finding source well for reaction {reaction_id}, role={from_plate_role}, index={from_plate_role_index}"
             )
             from_well_obj = self.well_finder.find_reaction_well(
                 reaction_id=reaction_id,
-                well_type=from_plate_type,
+                role=from_plate_role,
+                role_index=from_plate_role_index,
             )
 
             from_well_index = from_well_obj.index
@@ -226,11 +212,12 @@ class AnalysisSessionHandler(SessionHandler):
 
             # Find destination well (analysis well)
             logger.info(
-                f"Finding destination well for reaction {reaction_id}, type {to_plate_type}"
+                f"Finding destination well for reaction {reaction_id}, role={to_plate_role}, index={to_plate_role_index}"
             )
             to_well_obj = self.well_finder.find_reaction_well(
                 reaction_id=reaction_id,
-                well_type=to_plate_type,
+                role=to_plate_role,
+                role_index=to_plate_role_index,
             )
 
             to_well_index = to_well_obj.index

@@ -45,31 +45,33 @@ class PlateQueryService:
         # Get only custom starting material plates
         plates = Plate.objects.filter(
             otbatchprotocol_id=self.session.otbatchprotocolobj,
-            type="startingmaterial",
+            role="startingmaterial",
             otsession_id__in=custom_session_ids,
         )
 
         return plates
 
-    def get_action_session_by_plate_type(
-        self, platetype: str
+    def get_action_session_by_plate_role(
+        self, role: str, role_index: int = 1
     ) -> QuerySet[ActionSession]:
         """
-        Get action sessions that use a specific plate type.
+        Get action sessions that target a specific plate role and index.
 
         Parameters
         ----------
-        platetype: str
-            The plate type to look for in action sessions
+        role: str
+            The plate role to look for (e.g., "workup", "reaction")
+        role_index: int, optional
+            The plate role index (default 1)
 
         Returns
         -------
         action_session_queryset: QuerySet[ActionSession]
-            Action sessions using the specified plate type
+            Action sessions targeting the specified role/index
         """
         criterion1 = Q(id__in=self.session.actionsessionqueryset)
-        criterion2 = Q(addaction__toplatetype=platetype)
-        criterion3 = Q(extractaction__toplatetype=platetype)
+        criterion2 = Q(addaction__to_plate_role=role, addaction__to_plate_role_index=role_index)
+        criterion3 = Q(extractaction__to_plate_role=role, extractaction__to_plate_role_index=role_index)
 
         action_session_queryset = ActionSession.objects.filter(
             criterion1 & (criterion2 | criterion3)
@@ -129,9 +131,7 @@ class PlateQueryService:
             The plates used for all previous reaction and workup sessions
         """
         criterion1 = Q(otbatchprotocol_id=otbatchprotocol_id)
-        criterion2 = Q(
-            type__in=["reaction", "workup1", "workup2", "workup3", "spefilter"]
-        )
+        criterion2 = Q(role__in=["reaction", "workup", "spefilter"])
 
         otbatchprotocol_plate_queryset = Plate.objects.filter(criterion1 & criterion2)
         return otbatchprotocol_plate_queryset
@@ -184,9 +184,7 @@ class PlateQueryService:
 
         criterion2 = Q(reactantfornextstep=True)
         criterion3 = Q(smiles__in=searchsmiles)
-        criterion4 = Q(
-            type__in=["reaction", "workup1", "workup2", "workup3", "spefilter"]
-        )
+        criterion4 = Q(role__in=["reaction", "workup", "spefilter"])
 
         # Find plates with wells matching our criteria
         for plate in otbatchprotocol_plates:

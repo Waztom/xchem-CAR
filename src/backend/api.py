@@ -124,7 +124,7 @@ def getOTBatchProductSmiles(batch_obj: Batch) -> list:
     targetqs = Batch.objects.get(id=batch_obj).targets.all()
     methodqs = Method.objects.filter(target_id__in=targetqs)
     wellsqs = (
-        Well.objects.filter(method_id__in=methodqs, type="reaction")
+        Well.objects.filter(method_id__in=methodqs, role="reaction")
         .order_by("index")
         .distinct()
     )

@@ -4,7 +4,8 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 
 from .....models import Plate
-from .....utils import sanitize_for_python_var
+from .....conversions import sanitize_for_python_var
+from .....recipe_utils import unparse_plate_type
 from ....labwareavailable import labware_plates
 
 logger = logging.getLogger(__name__)
@@ -17,24 +18,34 @@ class PlateFactory:
         """Initialize with session reference."""
         self.session = session
 
-    def create_plate_model(self, platetype: str, platename: str, labwaretype: str):
+    def create_plate_model(
+        self,
+        platename: str,
+        labwaretype: str,
+        *,
+        role: str,
+        role_index: int = 1,
+    ):
         """
         Creates Plate model if Deck index is available.
 
         Parameters
         ----------
-        platetype: str
-            The type of plate (e.g., reaction, startingmaterial)
         platename: str
             The name of the plate
         labwaretype: str
             The labware type (e.g., plateone_96_wellplate_2500ul)
+        role: str
+            The plate role (e.g., "reaction", "workup").
+        role_index: int, optional
+            The plate role index (default 1).
 
         Returns
         -------
         plate_obj: Plate or None
             The created plate object, or None if no deck slots available
         """
+
         index_slot = self.session.deck_manager.check_deck_slot_available()
         if index_slot:
             plate_index = index_slot
@@ -50,7 +61,8 @@ class PlateFactory:
             plate_obj.deck_id = self.session.deckobj
             plate_obj.labware = labwaretype
             plate_obj.index = plate_index
-            plate_obj.type = platetype
+            plate_obj.role = role
+            plate_obj.role_index = role_index
             plate_obj.maxwellvolume = max_well_volume
             plate_obj.numberwells = number_wells
             plate_obj.numberwellsincolumn = number_wells_in_column
@@ -66,29 +78,40 @@ class PlateFactory:
             return None
 
    
-    def create_workup_plate(self, platetype: str):
+    def create_workup_plate(
+        self,
+        *,
+        role: str = "workup",
+        role_index: int = 1,
+    ):
         """
         Creates a workup plate.
 
         Parameters
         ----------
-        platetype: str
-            The type of workup plate (e.g., "workup1", "workup2")
+        role: str
+            The plate role (default "workup").
+        role_index: int
+            The workup stage index (1, 2, or 3). Default 1.
 
         Returns
         -------
         plate_objs: list
             List of created plate objects
         """
+        # Generate platetype string for display/logging
+        platetype_str = unparse_plate_type(role, role_index)
+
         # Check if we need this plate type for the current actions
         action_session_queryset = (
-            self.session.plate_query_service.get_action_session_by_plate_type(
-                platetype=platetype
+            self.session.plate_query_service.get_action_session_by_plate_role(
+                role=role,
+                role_index=role_index,
             )
         )
 
         if not action_session_queryset.exists():
-            logger.info(f"No action sessions require {platetype} plate")
+            logger.info(f"No action sessions require {platetype_str} plate")
             return []
 
         # Get volumes for determining plate type
@@ -103,22 +126,23 @@ class PlateFactory:
 
         # Determine best labware type
         labware_type = self.session.labware_selector.get_plate_type(
-            platetype="reaction",  # Use reaction type for labware compatibility
+            role="reaction",  # Use reaction type for labware compatibility
             volumes=rounded_volumes,
             temperature=25,
         )
 
         # Create the plate
         plate_obj = self.create_plate_model(
-            platetype=platetype,
-            platename=f"{platetype}-plate",
+            role=role,
+            role_index=role_index,
+            platename=f"{platetype_str}-plate",
             labwaretype=labware_type,
         )
 
         if plate_obj:
             return [plate_obj]
         else:
-            logger.warning(f"Could not create {platetype} plate")
+            logger.warning(f"Could not create {platetype_str} plate")
             return []
 
     def create_analyse_plate(self):
@@ -144,12 +168,15 @@ class PlateFactory:
 
         # Determine best labware type - analysis plates often use smaller volumes
         labware_type = self.session.labware_selector.get_plate_type(
-            platetype="analyse", volumes=rounded_volumes, temperature=25
+            role="analyse", volumes=rounded_volumes, temperature=25
         )
 
-        # Create the plate
+        # Create the plate using role/role_index
         plate_obj = self.create_plate_model(
-            platetype="analyse", platename="analyse-plate", labwaretype=labware_type
+            role="analyse",
+            role_index=1,
+            platename="analyse-plate",
+            labwaretype=labware_type,
         )
 
         if plate_obj:
@@ -188,13 +215,13 @@ class PlateFactory:
 
             # Create or use existing plate based on volume
             labware_type = self.session.labware_selector.get_plate_type(
-                platetype="startingmaterial", volumes=[total_volume], temperature=25
+                role="startingmaterial", volumes=[total_volume], temperature=25
             )
 
             # Create a solvent plate (or reuse existing one)
             plate_obj = None
             existing_solvent_plates = Plate.objects.filter(
-                otsession_id=self.session.otsessionobj, type="solvent"
+                otsession_id=self.session.otsessionobj, role="solvent"
             )
 
             if existing_solvent_plates.exists():
@@ -205,7 +232,8 @@ class PlateFactory:
 
             if not plate_obj:
                 plate_obj = self.create_plate_model(
-                    platetype="solvent",
+                    role="solvent",
+                    role_index=1,
                     platename=f"solvent-{solvent_group}",
                     labwaretype=labware_type,
                 )
@@ -227,7 +255,8 @@ class PlateFactory:
             # Create well for this solvent
             well_obj = self.session.well_manager.create_well_model(
                 plate_obj=plate_obj,
-                welltype="solvent",
+                role="solvent",
+                role_index=1,
                 wellindex=index_well_available,
                 volume=total_volume,
                 solvent=solvent_group,
@@ -316,7 +345,8 @@ class PlateFactory:
                     
                 # Create the plate
                 plate_obj = self.create_plate_model(
-                    platetype="startingmaterial",
+                    role="startingmaterial",
+                    role_index=1,
                     platename=f"custom-starting-materials-{plate_id}",
                     labwaretype=labware_type,
                 )
@@ -341,7 +371,8 @@ class PlateFactory:
                     # Create well for this material
                     well_obj = self.session.well_manager.create_well_model(
                         plate_obj=plate_obj,
-                        welltype="startingmaterial",
+                        role="startingmaterial",
+                        role_index=1,
                         wellindex=well_idx,
                         volume=row["amount-uL"],
                         smiles=row["SMILES"],
@@ -400,12 +431,13 @@ class PlateFactory:
 
         # Determine best labware type
         labware_type = self.session.labware_selector.get_plate_type(
-            platetype="startingmaterial", volumes=volumes, temperature=25
+            role="startingmaterial", volumes=volumes, temperature=25
         )
 
         # Create the plate
         plate_obj = self.create_plate_model(
-            platetype="startingmaterial",
+            role="startingmaterial",
+            role_index=1,
             platename="reaction-starting-materials",
             labwaretype=labware_type,
         )
@@ -449,7 +481,8 @@ class PlateFactory:
             # If no well is available, create a new plate
             if well_idx is False:
                 plate_obj = self.create_plate_model(
-                    platetype="startingmaterial",
+                    role="startingmaterial",
+                    role_index=1,
                     platename="reaction-starting-materials",
                     labwaretype=labware_type,
                 )
@@ -481,7 +514,8 @@ class PlateFactory:
                     # Create well
                     well_obj = self.session.well_manager.create_well_model(
                         plate_obj=plate_obj,
-                        welltype="startingmaterial",
+                        role="startingmaterial",
+                        role_index=1,
                         wellindex=well_idx,
                         volume=volume_this_well,
                         smiles=row["smiles"],
@@ -527,7 +561,8 @@ class PlateFactory:
                         )
                         if well_idx is False:
                             plate_obj = self.create_plate_model(
-                                platetype="startingmaterial",
+                                role="startingmaterial",
+                                role_index=1,
                                 platename="reaction-starting-materials",
                                 labwaretype=labware_type,
                             )
@@ -544,7 +579,8 @@ class PlateFactory:
                 # Create a single well for this material
                 well_obj = self.session.well_manager.create_well_model(
                     plate_obj=plate_obj,
-                    welltype="startingmaterial",
+                    role="startingmaterial",
+                    role_index=1,
                     wellindex=well_idx,
                     volume=total_volume_needed,
                     smiles=row["smiles"],
@@ -617,7 +653,11 @@ class PlateFactory:
         return plate_obj
 
     def create_plates_by_temperature(
-        self, grouped_reaction_temperature_querysets, platetype="reaction"
+        self,
+        grouped_reaction_temperature_querysets,
+        *,
+        role: str,
+        role_index: int = 1,
     ):
         """
         Creates reaction plates for each temperature group using appropriate labware types.
@@ -629,16 +669,21 @@ class PlateFactory:
         ----------
         grouped_reaction_temperature_querysets: dict
             Dictionary mapping temperature to QuerySets of reactions at that temperature
-        platetype: str
-            Type of plate to create (e.g. "reaction", "workup1", etc.)
+        role: str
+            The plate role (e.g., "reaction", "workup").
+        role_index: int
+            The plate role index (default 1).
 
         Returns
         -------
         created_plates: list
             List of created plate objects
         """
+        # Generate platetype string for logging/naming
+        platetype_str = unparse_plate_type(role, role_index)
+
         logger.info(
-            f"Creating {platetype} plates for {len(grouped_reaction_temperature_querysets)} temperature groups"
+            f"Creating {platetype_str} plates for {len(grouped_reaction_temperature_querysets)} temperature groups"
         )
         created_plates = []
 
@@ -656,21 +701,22 @@ class PlateFactory:
 
             # Determine appropriate labware based on volumes and temperature
             labware_platetype = self.session.labware_selector.get_plate_type(
-                platetype=platetype,
+                role=role,
                 volumes=volumes,
                 temperature=reaction_temperature,
             )
 
             logger.info(
-                f"Creating {platetype} plate for temperature {reaction_temperature}°C using {labware_platetype}"
+                f"Creating {platetype_str} plate for temperature {reaction_temperature}°C using {labware_platetype}"
             )
 
             # CREATE PLATE DIRECTLY BY TEMPERATURE - NOT by class/recipe
-            plate_name = f"{platetype}-{reaction_temperature}C"
+            plate_name = f"{platetype_str}-{reaction_temperature}C"
             
             # Create the plate
             plate_obj = self.create_plate_model(
-                platetype=platetype,
+                role=role,
+                role_index=role_index,
                 platename=plate_name,
                 labwaretype=labware_platetype,
             )
@@ -698,7 +744,8 @@ class PlateFactory:
                         column_obj = self.session.column_manager.create_column_model(
                             plate_obj=plate_obj,
                             columnindex=column_index,
-                            columntype=platetype,
+                            role=role,
+                            role_index=role_index,
                             reactionclass=reaction_class,
                         )
 
@@ -732,7 +779,8 @@ class PlateFactory:
                                 # Create a new plate for the same temperature
                                 new_plate_name = f"{plate_name}-continued"
                                 plate_obj = self.create_plate_model(
-                                    platetype=platetype,
+                                    role=role,
+                                    role_index=role_index,
                                     platename=new_plate_name,
                                     labwaretype=labware_platetype,
                                 )
@@ -753,7 +801,8 @@ class PlateFactory:
                             # Create well directly (you may want to add column management here)
                             well_obj = self.session.well_manager.create_well_model(
                                 plate_obj=plate_obj,
-                                welltype=platetype,
+                                role=role,
+                                role_index=role_index,
                                 wellindex=well_index,
                                 reactionobj=reaction,
                                 smiles=product_smiles,
@@ -765,7 +814,7 @@ class PlateFactory:
                                 plate_obj=plate_obj, wellindexupdate=well_index + 1
                             )
 
-        logger.info(f"Created {len(created_plates)} {platetype} plates by temperature")
+        logger.info(f"Created {len(created_plates)} {platetype_str} plates by temperature")
         # return created_plates
 
     def update_plate_deck_ot_session_ids(self, plate_queryset):
@@ -786,7 +835,7 @@ class PlateFactory:
                 column_queryset = self.session.column_manager.get_plate_columns(
                     plate_obj=plate_obj
                 )
-                previous_type = plate_obj.type
+                previous_type = plate_obj.role
                 plate_obj.deck_id = self.session.deckobj
                 plate_obj.otsession_id = self.session.otsessionobj
                 if previous_type == "spefilter":

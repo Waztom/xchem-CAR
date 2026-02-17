@@ -44484,7 +44484,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -44525,7 +44525,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -44543,7 +44543,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -44569,7 +44569,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -44594,7 +44594,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -44612,7 +44612,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -44637,7 +44637,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -44678,7 +44678,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -44696,11 +44696,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 380, "unit": "ul"},
+                    #                     "quantity": {"value": 380, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -44718,7 +44718,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -44744,11 +44744,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 380, "unit": "ul"},
+                    #                     "quantity": {"value": 380, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -44774,7 +44774,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "C[S](C)=O",
-                    #                     "quantity": {"value": 40, "unit": "ul"},
+                    #                     "quantity": {"value": 40, "unit": "uL"},
                     #                     "solvent": "DMSO",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -44801,7 +44801,7 @@ encoded_recipes = {
                     #                     "SMILES": "C[S](C)=O",
                     #                     "quantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },  # Check conc for XChem
                     #                     "solvent": "DMSO",
                     #                     "density": None,
@@ -44843,7 +44843,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 10, "unit": "ul"},
+                    #                     "quantity": {"value": 10, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -44861,7 +44861,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -44879,7 +44879,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 150, "unit": "ul"},
+                    #                     "quantity": {"value": 150, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -61509,7 +61509,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -61535,7 +61535,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -61553,7 +61553,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -61571,7 +61571,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -61702,7 +61702,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -61728,7 +61728,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -61746,7 +61746,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -61764,7 +61764,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -61895,7 +61895,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -61921,7 +61921,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -61939,7 +61939,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -61957,7 +61957,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62088,7 +62088,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -62114,7 +62114,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62132,7 +62132,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62150,7 +62150,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62281,7 +62281,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -62307,7 +62307,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62325,7 +62325,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62343,7 +62343,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62474,7 +62474,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -62500,7 +62500,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62518,7 +62518,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62536,7 +62536,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62667,7 +62667,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -62693,7 +62693,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62711,7 +62711,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62729,7 +62729,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62860,7 +62860,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -62886,7 +62886,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62904,7 +62904,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -62922,7 +62922,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63053,7 +63053,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -63079,7 +63079,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63097,7 +63097,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63115,7 +63115,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63246,7 +63246,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -63272,7 +63272,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63290,7 +63290,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63308,7 +63308,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63439,7 +63439,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -63465,7 +63465,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63483,7 +63483,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63501,7 +63501,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63632,7 +63632,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -63658,7 +63658,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63676,7 +63676,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63694,7 +63694,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63825,7 +63825,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -63851,7 +63851,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63869,7 +63869,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -63887,7 +63887,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64018,7 +64018,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -64044,7 +64044,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64062,7 +64062,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64080,7 +64080,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64211,7 +64211,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -64237,7 +64237,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64255,7 +64255,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64273,7 +64273,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64404,7 +64404,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -64430,7 +64430,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64448,7 +64448,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64466,7 +64466,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64597,7 +64597,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -64623,7 +64623,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64641,7 +64641,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64659,7 +64659,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64790,7 +64790,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -64816,7 +64816,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64834,7 +64834,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64852,7 +64852,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -64983,7 +64983,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -65009,7 +65009,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65027,7 +65027,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65045,7 +65045,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65176,7 +65176,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -65202,7 +65202,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65220,7 +65220,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65238,7 +65238,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65369,7 +65369,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -65395,7 +65395,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65413,7 +65413,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65431,7 +65431,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65562,7 +65562,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -65588,7 +65588,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65606,7 +65606,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65624,7 +65624,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65755,7 +65755,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -65781,7 +65781,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65799,7 +65799,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65817,7 +65817,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65948,7 +65948,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -65974,7 +65974,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -65992,7 +65992,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66010,7 +66010,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66141,7 +66141,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -66167,7 +66167,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66185,7 +66185,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66203,7 +66203,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66334,7 +66334,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -66360,7 +66360,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66378,7 +66378,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66396,7 +66396,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66527,7 +66527,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -66553,7 +66553,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66571,7 +66571,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66589,7 +66589,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66720,7 +66720,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -66746,7 +66746,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66764,7 +66764,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66782,7 +66782,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66913,7 +66913,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -66939,7 +66939,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66957,7 +66957,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -66975,7 +66975,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67106,7 +67106,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -67132,7 +67132,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67150,7 +67150,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67168,7 +67168,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67299,7 +67299,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -67325,7 +67325,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67343,7 +67343,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67361,7 +67361,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67492,7 +67492,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -67518,7 +67518,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67536,7 +67536,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67554,7 +67554,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67685,7 +67685,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -67711,7 +67711,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67729,7 +67729,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67747,7 +67747,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67943,7 +67943,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -67969,7 +67969,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -67987,7 +67987,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -68005,7 +68005,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -68208,7 +68208,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -68234,7 +68234,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -68252,7 +68252,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -68270,7 +68270,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -68466,7 +68466,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -68492,7 +68492,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -68510,7 +68510,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -68528,7 +68528,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -68724,7 +68724,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -68750,7 +68750,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -68768,7 +68768,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -68786,7 +68786,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -75846,7 +75846,7 @@ encoded_recipes = {
                     #                                        "SMILES": "C[S](C)=O",
                     #                                        "quantity": {
                     #                                            "value": 200,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -75888,7 +75888,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 10, "unit": "ul"},
+                    #                                        "quantity": {"value": 10, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -75906,7 +75906,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 80, "unit": "ul"},
+                    #                                        "quantity": {"value": 80, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -75924,7 +75924,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 150, "unit": "ul"},
+                    #                                        "quantity": {"value": 150, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -79711,7 +79711,7 @@ encoded_recipes = {
                     #                     "quantity": {
                     #                     ### this should be tied to CAR!
                     #                         "value": 40,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },  # Check conc for XChem
                     #                     "solvent": "DMSO",
                     #                     "density": None,
@@ -79737,7 +79737,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 1, "unit": "ul"},
+                    #                     "quantity": {"value": 1, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -79778,7 +79778,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -79796,7 +79796,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 40, "unit": "ul"},
+                    #                     "quantity": {"value": 40, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -79916,7 +79916,7 @@ encoded_recipes = {
                     #                                        "SMILES": "C[S](C)=O",
                     #                                        "quantity": {
                     #                                            "value": 200,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -79958,7 +79958,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 10, "unit": "ul"},
+                    #                                        "quantity": {"value": 10, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -79976,7 +79976,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 80, "unit": "ul"},
+                    #                                        "quantity": {"value": 80, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -79994,7 +79994,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 150, "unit": "ul"},
+                    #                                        "quantity": {"value": 150, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -80269,7 +80269,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -80295,7 +80295,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -80313,7 +80313,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -80331,7 +80331,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -80601,7 +80601,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -80627,7 +80627,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -80645,7 +80645,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -80663,7 +80663,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -80933,7 +80933,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -80959,7 +80959,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -80977,7 +80977,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -80995,7 +80995,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -81265,7 +81265,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -81291,7 +81291,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -81309,7 +81309,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -81327,7 +81327,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -81597,7 +81597,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -81623,7 +81623,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -81641,7 +81641,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -81659,7 +81659,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -81929,7 +81929,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -81955,7 +81955,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -81973,7 +81973,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -81991,7 +81991,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -82261,7 +82261,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -82287,7 +82287,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -82305,7 +82305,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -82323,7 +82323,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -82593,7 +82593,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -82619,7 +82619,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -82637,7 +82637,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -82655,7 +82655,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -82925,7 +82925,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -82951,7 +82951,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -82969,7 +82969,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -82987,7 +82987,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -83257,7 +83257,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -83283,7 +83283,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -83301,7 +83301,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -83319,7 +83319,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -83589,7 +83589,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -83615,7 +83615,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -83633,7 +83633,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -83651,7 +83651,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -83921,7 +83921,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -83947,7 +83947,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -83965,7 +83965,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -83983,7 +83983,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -84253,7 +84253,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -84279,7 +84279,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -84297,7 +84297,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -84315,7 +84315,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -84585,7 +84585,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -84611,7 +84611,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -84629,7 +84629,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -84647,7 +84647,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -84917,7 +84917,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -84943,7 +84943,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -84961,7 +84961,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -84979,7 +84979,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -85249,7 +85249,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -85275,7 +85275,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -85293,7 +85293,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -85311,7 +85311,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -85581,7 +85581,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -85607,7 +85607,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -85625,7 +85625,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -85643,7 +85643,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -85913,7 +85913,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -85939,7 +85939,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -85957,7 +85957,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -85975,7 +85975,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -86245,7 +86245,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -86271,7 +86271,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -86289,7 +86289,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -86307,7 +86307,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -86577,7 +86577,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -86603,7 +86603,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -86621,7 +86621,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -86639,7 +86639,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -86909,7 +86909,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -86935,7 +86935,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -86953,7 +86953,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -86971,7 +86971,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -90168,7 +90168,7 @@ encoded_recipes = {
                                     "material": {
                                         "layer": "bottom",
                                         "SMILES": "C",
-                                        "quantity": {"value": 56, "unit": "ul"},
+                                        "quantity": {"value": 56, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -90964,7 +90964,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -91005,7 +91005,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -91023,7 +91023,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -91049,7 +91049,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -91074,7 +91074,7 @@ encoded_recipes = {
                     # #                 "material": {
                     # #                     "SMARTS": None,
                     # #                     "SMILES": None,  # Product of reaction
-                    # #                     "quantity": {"value": 10, "unit": "ul"},
+                    # #                     "quantity": {"value": 10, "unit": "uL"},
                     # #                     "solvent": None,
                     # #                     "density": None,
                     # #                     "concentration": None,
@@ -91092,7 +91092,7 @@ encoded_recipes = {
                     # #                 "material": {
                     # #                     "SMARTS": None,
                     # #                     "SMILES": "CC#N",
-                    # #                     "quantity": {"value": 80, "unit": "ul"},
+                    # #                     "quantity": {"value": 80, "unit": "uL"},
                     # #                     "solvent": "ACN",
                     # #                     "density": None,
                     # #                     "concentration": None,
@@ -91223,7 +91223,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -91264,7 +91264,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -91282,7 +91282,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -91308,7 +91308,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -91333,7 +91333,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 10, "unit": "ul"},
+                    #                     "quantity": {"value": 10, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -91351,7 +91351,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -92493,7 +92493,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -92534,7 +92534,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -92552,7 +92552,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -92578,7 +92578,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -92603,7 +92603,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 10, "unit": "ul"},
+                    #                     "quantity": {"value": 10, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -92621,7 +92621,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -92757,7 +92757,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -92798,7 +92798,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -92816,7 +92816,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -92842,7 +92842,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -92867,7 +92867,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 10, "unit": "ul"},
+                    #                     "quantity": {"value": 10, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -92885,7 +92885,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -93016,7 +93016,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -93057,7 +93057,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -93075,7 +93075,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -93101,7 +93101,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -93126,7 +93126,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 10, "unit": "ul"},
+                    #                     "quantity": {"value": 10, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -93144,7 +93144,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -93306,7 +93306,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 10, "unit": "ul"},
+                    #                                        "quantity": {"value": 10, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -93324,7 +93324,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 80, "unit": "ul"},
+                    #                                        "quantity": {"value": 80, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -93342,7 +93342,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 150, "unit": "ul"},
+                    #                                        "quantity": {"value": 150, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -93540,7 +93540,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 10, "unit": "ul"},
+                    #                                        "quantity": {"value": 10, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -93558,7 +93558,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 80, "unit": "ul"},
+                    #                                        "quantity": {"value": 80, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -93576,7 +93576,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 150, "unit": "ul"},
+                    #                                        "quantity": {"value": 150, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -93733,7 +93733,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 10, "unit": "ul"},
+                    #                                        "quantity": {"value": 10, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -93751,7 +93751,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 80, "unit": "ul"},
+                    #                                        "quantity": {"value": 80, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -93769,7 +93769,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 150, "unit": "ul"},
+                    #                                        "quantity": {"value": 150, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -93926,7 +93926,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 10, "unit": "ul"},
+                    #                                        "quantity": {"value": 10, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -93944,7 +93944,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 80, "unit": "ul"},
+                    #                                        "quantity": {"value": 80, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -93962,7 +93962,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 150, "unit": "ul"},
+                    #                                        "quantity": {"value": 150, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -94119,7 +94119,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 10, "unit": "ul"},
+                    #                                        "quantity": {"value": 10, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -94137,7 +94137,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 80, "unit": "ul"},
+                    #                                        "quantity": {"value": 80, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -94155,7 +94155,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 150, "unit": "ul"},
+                    #                                        "quantity": {"value": 150, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -94290,7 +94290,7 @@ encoded_recipes = {
                     #                                        "SMILES": "C[S](C)=O",
                     #                                        "quantity": {
                     #                                            "value": 200,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -94332,7 +94332,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 10, "unit": "ul"},
+                    #                                        "quantity": {"value": 10, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -94350,7 +94350,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 80, "unit": "ul"},
+                    #                                        "quantity": {"value": 80, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -94368,7 +94368,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 150, "unit": "ul"},
+                    #                                        "quantity": {"value": 150, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -94484,7 +94484,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -94525,7 +94525,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -94543,7 +94543,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -94569,7 +94569,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -94680,7 +94680,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -94721,7 +94721,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -94739,7 +94739,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -94765,7 +94765,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -94876,7 +94876,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -94917,7 +94917,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -94935,7 +94935,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -94961,7 +94961,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -95072,7 +95072,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -95113,7 +95113,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -95131,7 +95131,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -95157,7 +95157,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -95390,7 +95390,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CCOC(C)=O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "EtOAc",
                                         "density": None,
                                         "concentration": None,
@@ -95408,7 +95408,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "water",
                                         "density": None,
                                         "concentration": None,
@@ -95453,7 +95453,7 @@ encoded_recipes = {
                                         },
                                         "layer": "top",
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -95471,7 +95471,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CCOC(C)=O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "EtOAc",
                                         "density": None,
                                         "concentration": None,
@@ -95501,7 +95501,7 @@ encoded_recipes = {
                                         },
                                         "layer": "top",
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -95526,7 +95526,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -95544,7 +95544,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -95777,7 +95777,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CCOC(C)=O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "EtOAc",
                                         "density": None,
                                         "concentration": None,
@@ -95795,7 +95795,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "water",
                                         "density": None,
                                         "concentration": None,
@@ -95840,7 +95840,7 @@ encoded_recipes = {
                                         },
                                         "layer": "top",
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -95858,7 +95858,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CCOC(C)=O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "EtOAc",
                                         "density": None,
                                         "concentration": None,
@@ -95888,7 +95888,7 @@ encoded_recipes = {
                                         },
                                         "layer": "top",
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -95913,7 +95913,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 10, "unit": "ul"},
+                    #                     "quantity": {"value": 10, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -95931,7 +95931,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96047,7 +96047,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96065,7 +96065,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96106,11 +96106,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96128,7 +96128,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96154,11 +96154,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96176,7 +96176,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96202,11 +96202,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96231,7 +96231,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96249,7 +96249,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96360,7 +96360,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96378,7 +96378,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96419,11 +96419,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96441,7 +96441,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96467,11 +96467,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96489,7 +96489,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96515,11 +96515,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96544,7 +96544,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96562,7 +96562,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96673,7 +96673,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96691,7 +96691,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96732,11 +96732,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96754,7 +96754,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96780,11 +96780,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96802,7 +96802,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96828,11 +96828,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96857,7 +96857,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96875,7 +96875,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -96986,7 +96986,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97004,7 +97004,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97045,11 +97045,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97067,7 +97067,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97093,11 +97093,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97115,7 +97115,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97141,11 +97141,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97170,7 +97170,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97188,7 +97188,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97299,7 +97299,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97317,7 +97317,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97358,11 +97358,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97380,7 +97380,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97406,11 +97406,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97428,7 +97428,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97454,11 +97454,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97483,7 +97483,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97501,7 +97501,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97612,7 +97612,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97630,7 +97630,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97671,11 +97671,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97693,7 +97693,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97719,11 +97719,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97741,7 +97741,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97767,11 +97767,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97796,7 +97796,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97814,7 +97814,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97925,7 +97925,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97943,7 +97943,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -97984,11 +97984,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98006,7 +98006,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98032,11 +98032,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98054,7 +98054,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98080,11 +98080,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98109,7 +98109,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98127,7 +98127,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98238,7 +98238,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98256,7 +98256,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98297,11 +98297,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98319,7 +98319,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98345,11 +98345,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98367,7 +98367,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98393,11 +98393,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98422,7 +98422,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98440,7 +98440,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98551,7 +98551,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98569,7 +98569,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98610,11 +98610,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98632,7 +98632,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98658,11 +98658,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98680,7 +98680,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98706,11 +98706,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98735,7 +98735,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98753,7 +98753,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98864,7 +98864,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98882,7 +98882,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98923,11 +98923,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98945,7 +98945,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98971,11 +98971,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -98993,7 +98993,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99019,11 +99019,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99048,7 +99048,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99066,7 +99066,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99177,7 +99177,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99195,7 +99195,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99236,11 +99236,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99258,7 +99258,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99284,11 +99284,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99306,7 +99306,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99332,11 +99332,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99361,7 +99361,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99379,7 +99379,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99490,7 +99490,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99508,7 +99508,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99549,11 +99549,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99571,7 +99571,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99597,11 +99597,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99619,7 +99619,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99645,11 +99645,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99674,7 +99674,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99692,7 +99692,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99803,7 +99803,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99821,7 +99821,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99862,11 +99862,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99884,7 +99884,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99910,11 +99910,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99932,7 +99932,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99958,11 +99958,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -99987,7 +99987,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100005,7 +100005,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100119,7 +100119,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100137,7 +100137,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100178,11 +100178,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100200,7 +100200,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100226,11 +100226,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100248,7 +100248,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100274,11 +100274,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100303,7 +100303,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100321,7 +100321,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100435,7 +100435,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100453,7 +100453,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100494,11 +100494,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100516,7 +100516,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100542,11 +100542,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100564,7 +100564,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100590,11 +100590,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100619,7 +100619,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100637,7 +100637,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100751,7 +100751,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100769,7 +100769,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100810,11 +100810,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100832,7 +100832,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100858,11 +100858,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100880,7 +100880,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100906,11 +100906,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100935,7 +100935,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -100953,7 +100953,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101067,7 +101067,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101085,7 +101085,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101126,11 +101126,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101148,7 +101148,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101174,11 +101174,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101196,7 +101196,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101222,11 +101222,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101251,7 +101251,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101269,7 +101269,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101380,7 +101380,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101398,7 +101398,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101439,11 +101439,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101461,7 +101461,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101487,11 +101487,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101509,7 +101509,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101535,11 +101535,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101564,7 +101564,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101582,7 +101582,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101693,7 +101693,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101711,7 +101711,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101752,11 +101752,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101774,7 +101774,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101800,11 +101800,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101822,7 +101822,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101848,11 +101848,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101877,7 +101877,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -101895,7 +101895,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102006,7 +102006,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102024,7 +102024,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102065,11 +102065,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102087,7 +102087,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102113,11 +102113,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102135,7 +102135,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102161,11 +102161,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102190,7 +102190,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102208,7 +102208,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102319,7 +102319,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102337,7 +102337,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102378,11 +102378,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102400,7 +102400,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102426,11 +102426,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102448,7 +102448,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102474,11 +102474,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102503,7 +102503,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102521,7 +102521,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102632,7 +102632,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102650,7 +102650,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102691,11 +102691,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102713,7 +102713,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102739,11 +102739,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102761,7 +102761,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102787,11 +102787,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102816,7 +102816,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102834,7 +102834,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102945,7 +102945,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -102963,7 +102963,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103004,11 +103004,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103026,7 +103026,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103052,11 +103052,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103074,7 +103074,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103100,11 +103100,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103129,7 +103129,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103147,7 +103147,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103258,7 +103258,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103276,7 +103276,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103317,11 +103317,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103339,7 +103339,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103365,11 +103365,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103387,7 +103387,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103413,11 +103413,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103442,7 +103442,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103460,7 +103460,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103571,7 +103571,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103589,7 +103589,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103630,11 +103630,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103652,7 +103652,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103678,11 +103678,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103700,7 +103700,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103726,11 +103726,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103755,7 +103755,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103773,7 +103773,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103884,7 +103884,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103902,7 +103902,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103943,11 +103943,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103965,7 +103965,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -103991,11 +103991,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104013,7 +104013,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104039,11 +104039,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104068,7 +104068,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104086,7 +104086,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104197,7 +104197,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104215,7 +104215,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104256,11 +104256,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104278,7 +104278,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104304,11 +104304,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104326,7 +104326,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104352,11 +104352,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104381,7 +104381,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104399,7 +104399,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104510,7 +104510,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104528,7 +104528,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104569,11 +104569,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104591,7 +104591,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104617,11 +104617,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104639,7 +104639,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104665,11 +104665,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104694,7 +104694,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104712,7 +104712,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104823,7 +104823,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104841,7 +104841,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104882,11 +104882,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104904,7 +104904,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104930,11 +104930,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104952,7 +104952,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -104978,11 +104978,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105007,7 +105007,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105025,7 +105025,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105139,7 +105139,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105157,7 +105157,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105198,11 +105198,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105220,7 +105220,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105246,11 +105246,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105268,7 +105268,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105294,11 +105294,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105323,7 +105323,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105341,7 +105341,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105455,7 +105455,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105473,7 +105473,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105514,11 +105514,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105536,7 +105536,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105562,11 +105562,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105584,7 +105584,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105610,11 +105610,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105639,7 +105639,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105657,7 +105657,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105771,7 +105771,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105789,7 +105789,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105830,11 +105830,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105852,7 +105852,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105878,11 +105878,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105900,7 +105900,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105926,11 +105926,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105955,7 +105955,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -105973,7 +105973,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106087,7 +106087,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106105,7 +106105,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106146,11 +106146,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106168,7 +106168,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106194,11 +106194,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106216,7 +106216,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106242,11 +106242,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106271,7 +106271,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106289,7 +106289,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106400,7 +106400,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106418,7 +106418,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106459,11 +106459,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106481,7 +106481,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106507,11 +106507,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106529,7 +106529,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106555,11 +106555,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106584,7 +106584,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106602,7 +106602,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106713,7 +106713,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106731,7 +106731,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106772,11 +106772,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106794,7 +106794,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106820,11 +106820,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106842,7 +106842,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106868,11 +106868,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106897,7 +106897,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -106915,7 +106915,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107026,7 +107026,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107044,7 +107044,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107085,11 +107085,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107107,7 +107107,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107133,11 +107133,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107155,7 +107155,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107181,11 +107181,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107210,7 +107210,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107228,7 +107228,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107339,7 +107339,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107357,7 +107357,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107398,11 +107398,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107420,7 +107420,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107446,11 +107446,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107468,7 +107468,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107494,11 +107494,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107523,7 +107523,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107541,7 +107541,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107652,7 +107652,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107670,7 +107670,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107711,11 +107711,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107733,7 +107733,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107759,11 +107759,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107781,7 +107781,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107807,11 +107807,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107836,7 +107836,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107854,7 +107854,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107965,7 +107965,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -107983,7 +107983,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108024,11 +108024,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108046,7 +108046,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108072,11 +108072,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108094,7 +108094,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108120,11 +108120,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108149,7 +108149,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108167,7 +108167,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108277,7 +108277,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108295,7 +108295,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108336,11 +108336,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108358,7 +108358,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108384,11 +108384,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108406,7 +108406,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108432,11 +108432,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108461,7 +108461,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108479,7 +108479,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108587,7 +108587,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108605,7 +108605,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108646,11 +108646,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108668,7 +108668,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108694,11 +108694,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108716,7 +108716,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108742,11 +108742,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108771,7 +108771,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108789,7 +108789,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108902,7 +108902,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108920,7 +108920,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108961,11 +108961,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -108983,7 +108983,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109009,11 +109009,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109031,7 +109031,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109057,11 +109057,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109086,7 +109086,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109104,7 +109104,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109214,7 +109214,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109232,7 +109232,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109273,11 +109273,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109295,7 +109295,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109321,11 +109321,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109343,7 +109343,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109369,11 +109369,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109398,7 +109398,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109416,7 +109416,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109529,7 +109529,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109547,7 +109547,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109588,11 +109588,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109610,7 +109610,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109636,11 +109636,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109658,7 +109658,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109684,11 +109684,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109713,7 +109713,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109731,7 +109731,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -109935,7 +109935,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CCOC(C)=O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "EtOAc",
                                         "density": None,
                                         "concentration": None,
@@ -109953,7 +109953,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "water",
                                         "density": None,
                                         "concentration": None,
@@ -109994,11 +109994,11 @@ encoded_recipes = {
                                     "material": {
                                         "bottomlayerquantity": {
                                             "value": 200,
-                                            "unit": "ul",
+                                            "unit": "uL",
                                         },
                                         "layer": "top",
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -110016,7 +110016,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CCOC(C)=O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "EtOAc",
                                         "density": None,
                                         "concentration": None,
@@ -110042,11 +110042,11 @@ encoded_recipes = {
                                     "material": {
                                         "bottomlayerquantity": {
                                             "value": 200,
-                                            "unit": "ul",
+                                            "unit": "uL",
                                         },
                                         "layer": "top",
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -110071,7 +110071,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 10, "unit": "ul"},
+                    #                     "quantity": {"value": 10, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110089,7 +110089,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110219,7 +110219,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110237,7 +110237,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110278,11 +110278,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110300,7 +110300,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110326,11 +110326,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110355,7 +110355,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110373,7 +110373,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110498,7 +110498,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110516,7 +110516,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110557,11 +110557,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110579,7 +110579,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110605,11 +110605,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110634,7 +110634,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110652,7 +110652,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110777,7 +110777,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110795,7 +110795,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110836,11 +110836,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110858,7 +110858,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110884,11 +110884,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110913,7 +110913,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -110931,7 +110931,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -111759,7 +111759,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -111777,7 +111777,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -111818,11 +111818,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -111840,7 +111840,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -111866,11 +111866,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -111895,7 +111895,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -111913,7 +111913,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -112064,7 +112064,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -112082,7 +112082,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -112123,11 +112123,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -112145,7 +112145,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -112171,11 +112171,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 200,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -112200,7 +112200,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -112218,7 +112218,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -112556,7 +112556,7 @@ encoded_recipes = {
                     #                                        "SMILES": "C[S](C)=O",
                     #                                        "quantity": {
                     #                                            "value": 200,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -112598,7 +112598,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 10, "unit": "ul"},
+                    #                                        "quantity": {"value": 10, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -112616,7 +112616,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 80, "unit": "ul"},
+                    #                                        "quantity": {"value": 80, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -112634,7 +112634,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 150, "unit": "ul"},
+                    #                                        "quantity": {"value": 150, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -112796,7 +112796,7 @@ encoded_recipes = {
                                             "SMILES": "C[S](C)=O",
                                             "quantity": {
                                                 "value": 200,
-                                                "unit": "ul",
+                                                "unit": "uL",
                                             },  # Check conc for XChem
                                             "solvent": "DMSO",
                                             "density": None,
@@ -112838,7 +112838,7 @@ encoded_recipes = {
                         #                                        "material": {
                         #                                            "layer": "bottom",
                         #                                            "SMILES": None,  # Product of reaction
-                        #                                            "quantity": {"value": 10, "unit": "ul"},
+                        #                                            "quantity": {"value": 10, "unit": "uL"},
                         #                                            "solvent": None,
                         #                                            "density": None,
                         #                                            "concentration": None,
@@ -112856,7 +112856,7 @@ encoded_recipes = {
                         #                                        "material": {
                         #                                            "SMARTS": None,
                         #                                            "SMILES": "CC#N",
-                        #                                            "quantity": {"value": 80, "unit": "ul"},
+                        #                                            "quantity": {"value": 80, "unit": "uL"},
                         #                                            "solvent": "ACN",
                         #                                            "density": None,
                         #                                            "concentration": None,
@@ -112874,7 +112874,7 @@ encoded_recipes = {
                         #                                        "material": {
                         #                                            "layer": "bottom",
                         #                                            "SMILES": None,  # Product of reaction
-                        #                                            "quantity": {"value": 150, "unit": "ul"},
+                        #                                            "quantity": {"value": 150, "unit": "uL"},
                         #                                            "solvent": None,
                         #                                            "density": None,
                         #                                            "concentration": None,
@@ -113009,7 +113009,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -113050,7 +113050,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -113068,7 +113068,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -113094,7 +113094,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -113119,7 +113119,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -113137,7 +113137,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -113266,7 +113266,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -113307,7 +113307,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -113325,7 +113325,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -113351,7 +113351,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -113376,7 +113376,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -113394,7 +113394,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -113695,7 +113695,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -113736,7 +113736,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -113754,7 +113754,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -113780,7 +113780,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -113805,7 +113805,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 10, "unit": "ul"},
+                    #                     "quantity": {"value": 10, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -113823,7 +113823,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -113954,7 +113954,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -113995,7 +113995,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -114013,7 +114013,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -114039,7 +114039,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -114064,7 +114064,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -114082,7 +114082,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -114213,7 +114213,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -114254,7 +114254,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -114272,7 +114272,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -114298,7 +114298,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -114323,7 +114323,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 1, "unit": "ul"},
+                    #                     "quantity": {"value": 1, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -114341,7 +114341,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -114472,7 +114472,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -114513,7 +114513,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -114531,7 +114531,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -114557,7 +114557,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -114582,7 +114582,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -114600,7 +114600,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -114731,7 +114731,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -114772,7 +114772,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -114790,7 +114790,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -114816,7 +114816,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -114841,7 +114841,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -114859,7 +114859,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -114990,7 +114990,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -115031,7 +115031,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -115049,7 +115049,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -115075,7 +115075,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -115100,7 +115100,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -115118,7 +115118,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -115249,7 +115249,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -115290,7 +115290,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -115308,7 +115308,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -115334,7 +115334,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -115359,7 +115359,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -115377,7 +115377,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -115508,7 +115508,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -115549,7 +115549,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -115567,7 +115567,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -115593,7 +115593,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -115618,7 +115618,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -115636,7 +115636,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -115767,7 +115767,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -115808,7 +115808,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -115826,7 +115826,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -115852,7 +115852,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -115877,7 +115877,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -115895,7 +115895,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -116026,7 +116026,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -116067,7 +116067,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -116085,7 +116085,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -116111,7 +116111,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -116136,7 +116136,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -116154,7 +116154,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -116285,7 +116285,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -116326,7 +116326,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -116344,7 +116344,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -116370,7 +116370,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -116395,7 +116395,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -116413,7 +116413,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -116544,7 +116544,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -116585,7 +116585,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -116603,7 +116603,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -116629,7 +116629,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -116654,7 +116654,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -116672,7 +116672,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -116803,7 +116803,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -116844,7 +116844,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -116862,7 +116862,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -116888,7 +116888,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -116913,7 +116913,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -116931,7 +116931,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -117065,7 +117065,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -117106,7 +117106,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -117124,7 +117124,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -117150,7 +117150,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -117279,7 +117279,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -117320,7 +117320,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -117338,7 +117338,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -117364,7 +117364,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -117389,7 +117389,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -117407,7 +117407,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -117536,7 +117536,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -117577,7 +117577,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -117595,7 +117595,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -117621,7 +117621,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -117646,7 +117646,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -117664,7 +117664,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -117793,7 +117793,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -117834,7 +117834,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -117852,7 +117852,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -117878,7 +117878,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -117903,7 +117903,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -117921,7 +117921,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -118050,7 +118050,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -118091,7 +118091,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -118109,7 +118109,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -118135,7 +118135,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -118160,7 +118160,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -118178,7 +118178,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -118307,7 +118307,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -118348,7 +118348,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -118366,7 +118366,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -118392,7 +118392,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -118417,7 +118417,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -118435,7 +118435,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -118564,7 +118564,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -118605,7 +118605,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -118623,7 +118623,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -118649,7 +118649,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -118674,7 +118674,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -118692,7 +118692,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -118821,7 +118821,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -118862,7 +118862,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -118880,7 +118880,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -118906,7 +118906,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -118931,7 +118931,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -118949,7 +118949,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -119078,7 +119078,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -119119,7 +119119,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -119137,7 +119137,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -119163,7 +119163,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -119188,7 +119188,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -119206,7 +119206,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -119335,7 +119335,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -119376,7 +119376,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -119394,7 +119394,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -119420,7 +119420,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -119445,7 +119445,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -119463,7 +119463,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -119592,7 +119592,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -119633,7 +119633,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -119651,7 +119651,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -119677,7 +119677,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -119702,7 +119702,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -119720,7 +119720,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -119849,7 +119849,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -119890,7 +119890,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -119908,7 +119908,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -119934,7 +119934,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -119959,7 +119959,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -119977,7 +119977,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -120106,7 +120106,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -120147,7 +120147,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -120165,7 +120165,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -120191,7 +120191,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -120216,7 +120216,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -120234,7 +120234,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -120363,7 +120363,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -120404,7 +120404,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -120422,7 +120422,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -120448,7 +120448,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -120473,7 +120473,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -120491,7 +120491,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -120620,7 +120620,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -120661,7 +120661,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -120679,7 +120679,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -120705,7 +120705,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -120730,7 +120730,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -120748,7 +120748,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -120877,7 +120877,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -120918,7 +120918,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -120936,7 +120936,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -120962,7 +120962,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -120987,7 +120987,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -121005,7 +121005,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -121134,7 +121134,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -121175,7 +121175,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -121193,7 +121193,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CC#N",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "ACN",
                                         "density": None,
                                         "concentration": None,
@@ -121219,7 +121219,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": None,
-                                        "quantity": {"value": 300, "unit": "ul"},
+                                        "quantity": {"value": 300, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -121244,7 +121244,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -121262,7 +121262,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -126273,7 +126273,7 @@ encoded_recipes = {
                                     "material": {
                                         "layer": "bottom",
                                         "SMILES": "C",
-                                        "quantity": {"value": 56, "unit": "ul"},
+                                        "quantity": {"value": 56, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -129404,7 +129404,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CCOC(C)=O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "EtOAc",
                                         "density": None,
                                         "concentration": None,
@@ -129422,7 +129422,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "water",
                                         "density": None,
                                         "concentration": None,
@@ -129463,11 +129463,11 @@ encoded_recipes = {
                                     "material": {
                                         "bottomlayerquantity": {
                                             "value": 200,
-                                            "unit": "ul",
+                                            "unit": "uL",
                                         },
                                         "layer": "top",
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -129485,7 +129485,7 @@ encoded_recipes = {
                                     "material": {
                                         "SMARTS": None,
                                         "SMILES": "CCOC(C)=O",
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": "EtOAc",
                                         "density": None,
                                         "concentration": None,
@@ -129511,11 +129511,11 @@ encoded_recipes = {
                                     "material": {
                                         "bottomlayerquantity": {
                                             "value": 200,
-                                            "unit": "ul",
+                                            "unit": "uL",
                                         },
                                         "layer": "top",
                                         "SMILES": None,
-                                        "quantity": {"value": 200, "unit": "ul"},
+                                        "quantity": {"value": 200, "unit": "uL"},
                                         "solvent": None,
                                         "density": None,
                                         "concentration": None,
@@ -129540,7 +129540,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -129558,7 +129558,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 100, "unit": "ul"},
+                    #                     "quantity": {"value": 100, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -129773,7 +129773,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -129799,7 +129799,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -129817,7 +129817,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -129835,7 +129835,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -129962,7 +129962,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -129988,7 +129988,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130006,7 +130006,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130024,7 +130024,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130151,7 +130151,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -130177,7 +130177,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130195,7 +130195,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130213,7 +130213,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130340,7 +130340,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -130366,7 +130366,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130384,7 +130384,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130402,7 +130402,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130529,7 +130529,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -130555,7 +130555,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130573,7 +130573,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130591,7 +130591,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130735,7 +130735,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -130761,7 +130761,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130779,7 +130779,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130797,7 +130797,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -130972,7 +130972,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -130998,7 +130998,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -131016,7 +131016,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -131034,7 +131034,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -131151,7 +131151,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -131177,7 +131177,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -131195,7 +131195,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -131213,7 +131213,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -131361,7 +131361,7 @@ encoded_recipes = {
                     #                                        "quantity": {
                     #                                            ### this should be tied to CAR!
                     #                                            "value": 40,
-                    #                                            "unit": "ul",
+                    #                                            "unit": "uL",
                     #                                        },  # Check conc for XChem
                     #                                        "solvent": "DMSO",
                     #                                        "density": None,
@@ -131387,7 +131387,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 1, "unit": "ul"},
+                    #                                        "quantity": {"value": 1, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -131405,7 +131405,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "SMARTS": None,
                     #                                        "SMILES": "CC#N",
-                    #                                        "quantity": {"value": 100, "unit": "ul"},
+                    #                                        "quantity": {"value": 100, "unit": "uL"},
                     #                                        "solvent": "ACN",
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -131423,7 +131423,7 @@ encoded_recipes = {
                     #                                    "material": {
                     #                                        "layer": "bottom",
                     #                                        "SMILES": None,  # Product of reaction
-                    #                                        "quantity": {"value": 40, "unit": "ul"},
+                    #                                        "quantity": {"value": 40, "unit": "uL"},
                     #                                        "solvent": None,
                     #                                        "density": None,
                     #                                        "concentration": None,
@@ -135897,7 +135897,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -135915,7 +135915,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -135956,11 +135956,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -135978,7 +135978,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136004,11 +136004,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136026,7 +136026,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136052,11 +136052,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136081,7 +136081,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136099,7 +136099,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136215,7 +136215,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136233,7 +136233,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "water",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136274,11 +136274,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136296,7 +136296,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CCOC(C)=O",
-                    #                     "quantity": {"value": 300, "unit": "ul"},
+                    #                     "quantity": {"value": 300, "unit": "uL"},
                     #                     "solvent": "EtOAc",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136322,11 +136322,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 200, "unit": "ul"},
+                    #                     "quantity": {"value": 200, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136344,7 +136344,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "O.[Na+].[Cl-]",
-                    #                     "quantity": {"value": 250, "unit": "ul"},
+                    #                     "quantity": {"value": 250, "unit": "uL"},
                     #                     "solvent": "Brine",
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136370,11 +136370,11 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "bottomlayerquantity": {
                     #                         "value": 250,
-                    #                         "unit": "ul",
+                    #                         "unit": "uL",
                     #                     },
                     #                     "layer": "top",
                     #                     "SMILES": None,
-                    #                     "quantity": {"value": 400, "unit": "ul"},
+                    #                     "quantity": {"value": 400, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136399,7 +136399,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "layer": "bottom",
                     #                     "SMILES": None,  # Product of reaction
-                    #                     "quantity": {"value": 5, "unit": "ul"},
+                    #                     "quantity": {"value": 5, "unit": "uL"},
                     #                     "solvent": None,
                     #                     "density": None,
                     #                     "concentration": None,
@@ -136417,7 +136417,7 @@ encoded_recipes = {
                     #                 "material": {
                     #                     "SMARTS": None,
                     #                     "SMILES": "CC#N",
-                    #                     "quantity": {"value": 80, "unit": "ul"},
+                    #                     "quantity": {"value": 80, "unit": "uL"},
                     #                     "solvent": "ACN",
                     #                     "density": None,
                     #                     "concentration": None,

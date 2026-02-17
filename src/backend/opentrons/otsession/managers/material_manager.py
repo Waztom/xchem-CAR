@@ -12,12 +12,8 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 
 from ....models import AddAction, Plate, Well, CompoundOrder, SolventPrep, Product
-from ....utils import (
-    canonSmiles,
-    stripSalts,
-    checkPreviousReactionProducts,
-    are_equivalent_structures,
-)
+from ....chem_utils import canonSmiles, stripSalts, are_equivalent_structures
+from ....db_utils import checkPreviousReactionProducts
 
 logger = logging.getLogger(__name__)
 
@@ -459,7 +455,7 @@ class MaterialManager:
             # Get only custom starting material plates
             plates = Plate.objects.filter(
                 otbatchprotocol_id=self.session.otbatchprotocolobj,
-                type="startingmaterial",
+                role="startingmaterial",
                 otsession_id__in=custom_session_ids,
             )
 
@@ -520,7 +516,7 @@ class MaterialManager:
     def calc_mass(self, row) -> float:
         """
         Calculates the mass of material (mg) from the
-        concentration (mol/L) and volume (ul) needed.
+        concentration (mol/L) and volume (uL) needed.
 
         Parameters
         ----------

@@ -41,13 +41,16 @@ from .manifold.apicalls import (
     getExactSearch,
     getManifoldRetrosynthesisBatch,
 )
-from .recipebuilder.encodedrecipes import encoded_recipes
-from .utils import (
+from .recipe_utils import (
+    recipe_exists,
+    get_recipe_intramolecular,
+    get_recipe_stir_temperature,
+)
+from .db_utils import (
     checkPreviousReactionProducts,
     getActionSessionQuerySet,
     getActionSessionSequenceNumbers,
     getActionSessionTypes,
-    canonSmiles,
     getBatchReactions,
     getBatchTag,
     getGroupedActionSessionSequences,
@@ -57,6 +60,7 @@ from .utils import (
     getReactionsToDo,
     groupReactions,
 )
+from .chem_utils import canonSmiles
 
 from .opentrons.otsession import SessionOrchestrator
 from .opentrons.otwriter import ScriptGenerator
@@ -194,7 +198,7 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                                     encoded_reactions_found = [
                                         reaction
                                         for reaction in reactions
-                                        if reaction["name"] in encoded_recipes
+                                        if recipe_exists(reaction["name"])
                                     ]
 
                                     if len(encoded_reactions_found) != no_steps:
@@ -297,43 +301,18 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                                             reaction_name = reaction["name"]
                                             reactant_smiles = reaction["reactantSmiles"]
                                             product_smiles = reaction["productSmiles"]
-                                            # reaction temp must be set from OT session!!!
-                                            # reaction_temperature = [
-                                            #     actionsession["actions"][0]["content"][
-                                            #         "temperature"
-                                            #     ]["value"]
-                                            #     for actionsession in encoded_recipes[
-                                            #         reaction_name
-                                            #     ]["recipes"]["standard"][
-                                            #         "actionsessions"
-                                            #     ]
-                                            #     if actionsession["type"] == "stir"
-                                            # ][0]
-                                            intramolecular_possible = encoded_recipes[
+                        
+                                            intramolecular_possible = get_recipe_intramolecular(
                                                 reaction_name
-                                            ]["intramolecular"]
-
-                                            # recipe_rxn_smarts = encoded_recipes[
-                                            #     reaction_name
-                                            # ]["recipes"]["standard"]["reactionSMARTS"]
+                                            )
 
                                             if (
                                                 len(reactant_smiles) == 1
                                                 and intramolecular_possible
                                             ):
-                                                # reactant_smiles_ordered = (
-                                                #     reactant_smiles
-                                                # )
                                                 intramolecular = True
                                             else:
-                                                # reactant_smiles_ordered = getAddtionOrder(
-                                                #     product_smi=product_smiles,
-                                                #     reactant_SMILES=reactant_smiles,
-                                                #     reaction_SMARTS=recipe_rxn_smarts,
-                                                # )
                                                 intramolecular = False
-                                                # if not reactant_smiles_ordered:
-                                                #     continue
 
                                             reaction_smarts = (
                                                 AllChem.ReactionFromSmarts(
@@ -351,7 +330,6 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                                                 reaction_number=index + 1,
                                                 intramolecular=intramolecular,
                                                 reaction_recipe="standard",  # Need to change when we get multiple recipes runnning!
-                                                # reaction_temperature=reaction_temperature,
                                                 reaction_smarts=reaction_smarts,
                                             )
 
@@ -498,13 +476,9 @@ def uploadCustomReaction(validate_output, fetch_pubchem=True, fetch_catalogue=Tr
                     )
                     # Need to move this to OT session - this will enable changing reaction temps in recipes
                     # and not have to upload again...
-                    reaction_temperature = [
-                        actionsession["actions"][0]["content"]["temperature"]["value"]
-                        for actionsession in encoded_recipes[reaction_name]["recipes"][
-                            reaction_recipe
-                        ]["actionsessions"]
-                        if actionsession["type"] == "stir"
-                    ][0]
+                    reaction_temperature = get_recipe_stir_temperature(
+                        reaction_name, reaction_recipe
+                    )
 
                     reaction_id = createReactionModel(
                         method_id=method_id,
@@ -650,13 +624,9 @@ def uploadCombiCustomReaction(validate_output, fetch_pubchem=True, fetch_catalog
                     )
                     # Need to move this to OT session - this will enable changing reaction temps in recipes
                     # and not have to upload again...
-                    reaction_temperature = [
-                        actionsession["actions"][0]["content"]["temperature"]["value"]
-                        for actionsession in encoded_recipes[reaction_name]["recipes"][
-                            reaction_recipe
-                        ]["actionsessions"]
-                        if actionsession["type"] == "stir"
-                    ][0]
+                    reaction_temperature = get_recipe_stir_temperature(
+                        reaction_name, reaction_recipe
+                    )
 
                     reaction_id = createReactionModel(
                         method_id=method_id,
@@ -754,25 +724,22 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
                 reactant_pair_smiles = reactionobj.reactants.all().values_list(
                     "smiles", flat=True
                 )
-                recipe = encoded_recipes[reactionclass]["recipes"][reactionrecipe]
-                intramolecular_possible = encoded_recipes[reactionclass][
-                    "intramolecular"
-                ]
+                intramolecular_possible = get_recipe_intramolecular(
+                    reactionclass, reactionrecipe
+                )
 
                 if intramolecular_possible and len(reactant_pair_smiles) == 1:
                     intramolecular_possible = True
                 else:
                     intramolecular_possible = False
 
-                actionsessions = recipe["actionsessions"]
-
                 CreateEncodedActionModels(
+                    reaction_class=reactionclass,
+                    recipe_name=reactionrecipe,
                     intramolecular=intramolecular_possible,
-                    actionsessions=actionsessions,
                     target_id=target_id,
                     reaction_id=reaction_id,
                     reactant_pair_smiles=list(reactant_pair_smiles),
-                    reaction_name=reactionclass,
                 )
 
         batchtag = getBatchTag(batchid=batchid)

@@ -74,7 +74,7 @@ class PipetteManager:
 
     def get_tip_rack_type(self, rounded_volumes: list) -> str:
         """
-        Gets OT tiprack best suited for transferring volumes (ul)
+        Gets OT tiprack best suited for transferring volumes (uL)
         that minimises the number of transfers required.
 
         Parameters
@@ -113,7 +113,7 @@ class PipetteManager:
     ) -> dict:
         """
         Gets the type of pipette that minimizes the number of transfers
-        needed for transferring volumes (ul).
+        needed for transferring volumes (uL).
 
         Parameters
         ----------
@@ -247,7 +247,7 @@ class PipetteManager:
         Parameters
         ----------
         pipette_volume: int
-            The pipette's maximum transfer volume (ul)
+            The pipette's maximum transfer volume (uL)
         rounded_volumes: list
             The list of rounded volumes that need to be transferred
 

@@ -71,8 +71,8 @@ const SetQuantity = ({ action, updateAction, name }) => {
         value={Unit}
       >
         <option>moleq</option>
-        <option>ml</option>
-        <option>ul</option>
+        <option>mL</option>
+        <option>uL</option>
         <option>mmol</option>
       </Form.Control>
     </InputGroup>
