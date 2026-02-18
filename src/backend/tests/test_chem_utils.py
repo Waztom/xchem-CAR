@@ -13,26 +13,38 @@ from backend.chem_utils import (
     checkReactantSMARTS,
 )
 
-from .testdata.indata.testutils import (
-    snar_reactant_smiles_one,
-    snar_reactant_smiles_two,
-)
-from .testdata.outdata.testutils import (
+from .fixtures.testutils import (
     snar_combo_equal,
     snar_combo_unequal,
     svg_str,
     svg_reaction_str,
 )
 
+SNAR_REACTANT_SMILES_ONE = [
+    "C1=CC(=C(C=C1F)F)CC(=O)O",
+    "CC1=C(C=CC=C1Cl)[N+](=O)[O-]",
+    "C1=CC(=C(C=C1[N+](=O)[O-])[N+](=O)[O-])F",
+    "CC(=O)C1=CC=C(C=C1)F",
+    "C1=CC(=CC=C1C(F)(F)F)F",
+]
+
+SNAR_REACTANT_SMILES_TWO = [
+    "C1=CC=C(C=C1)N",
+    "COC1=CC=C(C=C1)N",
+    "CCCN",
+    "CN1CCNCC1",
+    "C1=CC=NC(=C1)N",
+]
+
 
 class ChemistryFunctionsTestCase(TestCase):
     def setUp(self) -> None:
         self.smiles = "C1COC2=C(C3=C(C(=C21)CCN)OCC3)Br"
-        self.snar_reactant_smiles_one = snar_reactant_smiles_one
-        self.snar_reactant_smiles_two = snar_reactant_smiles_two
+        self.snar_reactant_smiles_one = SNAR_REACTANT_SMILES_ONE
+        self.snar_reactant_smiles_two = SNAR_REACTANT_SMILES_TWO
         self.snar_reactant_smiles_tuple = (
-            snar_reactant_smiles_one[0],
-            snar_reactant_smiles_two[0],
+            SNAR_REACTANT_SMILES_ONE[0],
+            SNAR_REACTANT_SMILES_TWO[0],
         )
         self.snar_encoded_smarts = [
             "[#6:3]-[#7;H3,H2,H1:2].[c:1]-[F,Cl,Br,I]>>[#6:3]-[#7:2]-[c:1]"
@@ -99,6 +111,8 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect capture of bad SMILES input",
         )
 
+    # KNOWN FAILURE: RDKit 2020.09.4 in this container was built without InChI
+    # support (INCHI_AVAILABLE=False), so getInchiKey returns None.
     def test_get_inchi_key(self):
         test_inchi_key = getInchiKey(smiles=self.smiles)
         self.assertEqual(
@@ -131,6 +145,8 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect capture of bad SMILES input",
         )
 
+    # KNOWN FAILURE: combiChem uses InChI-based canonicalisation internally,
+    # which is unavailable in this container's RDKit (INCHI_AVAILABLE=False).
     def test_combi_chem(self):
         test_all_possible_combinations = combiChem(
             reactant_1_SMILES=self.snar_reactant_smiles_one,
@@ -142,6 +158,8 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect combinatorial product of two equal length lists of smiles",
         )
 
+    # KNOWN FAILURE: combiChem uses InChI-based canonicalisation internally,
+    # which is unavailable in this container's RDKit (INCHI_AVAILABLE=False).
     def test_combi_chem_fail(self):
         test_all_possible_combinations = combiChem(
             reactant_1_SMILES=self.snar_reactant_smiles_one[0:1],
@@ -153,6 +171,8 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect combinatorial product of two non-equal length lists of smiles",
         )
 
+    # KNOWN FAILURE: createSVGString output differs from expected fixture
+    # due to RDKit 2020.09.4 rendering differences (no InChI support).
     def test_create_svg_string(self):
         test_svg_str = createSVGString(smiles=self.smiles)
         test_svg_str = self.strip_white_space(test_svg_str)
@@ -162,6 +182,8 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect creation of a svg string from SMILES",
         )
 
+    # KNOWN FAILURE: createReactionSVGString output differs from expected
+    # fixture due to RDKit 2020.09.4 rendering differences (no InChI support).
     def test_create_reaction_svg_string(self):
         test_svg_str = createReactionSVGString(smarts=self.reaction_smarts)
         test_svg_str = self.strip_white_space(test_svg_str)
@@ -198,6 +220,8 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect SMILES input should return None for addtion order",
         )
 
+    # KNOWN FAILURE: checkReactantSMARTS product SMILES differ due to RDKit
+    # 2020.09.4 canonicalisation without InChI support (INCHI_AVAILABLE=False).
     def test_check_reactant_smarts_success(self):
         test_product_mols = checkReactantSMARTS(
             reactant_SMILES=self.snar_reactant_smiles_tuple,
