@@ -16,6 +16,7 @@ src/media/*
 *.csv
 !src/backend/enamine/enamine-real-tools-rxns.csv
 !src/backend/recipe_generator/examples/*
+!src/backend/tests/fixtures/*
 # Ignore db files including Redis (rdb)
 *.db
 *.rdb
