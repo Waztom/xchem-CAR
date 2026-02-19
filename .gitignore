@@ -6,7 +6,6 @@ wget-log
 
 # Ignore documentation files
 src/docs/*
-
 src/input-files/*
 src/output-files/*
 src/staticfiles/*
@@ -98,3 +97,4 @@ docs/_templates/
 *.doctree
 *.pickle
 docs/generated/
+src/2026-02(feb)-19-CAR technical report.txt

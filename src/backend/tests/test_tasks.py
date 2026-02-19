@@ -229,26 +229,26 @@ def _make_combi_validate_output(
 
 # All patches target backend.tasks where the names are imported
 MANIFOLD_PATCHES = [
-    "backend.tasks.delete_tmp_file",
-    "backend.tasks.create_catalog_entry_model",
-    "backend.tasks.create_reactant_model",
-    "backend.tasks.create_product_model",
-    "backend.tasks.create_reaction_model",
-    "backend.tasks.create_method_model",
-    "backend.tasks.create_target_model",
-    "backend.tasks.create_batch_model",
-    "backend.tasks.create_project_model",
-    "backend.tasks.check_previous_reaction_products",
-    "backend.tasks.recipe_exists",
-    "backend.tasks.get_recipe_intramolecular",
-    "backend.tasks.get_manifold_retrosynthesis_batch",
+    "backend.tasks.upload.delete_tmp_file",
+    "backend.tasks.upload.create_catalog_entry_model",
+    "backend.tasks.upload.create_reactant_model",
+    "backend.tasks.upload.create_product_model",
+    "backend.tasks.upload.create_reaction_model",
+    "backend.tasks.upload.create_method_model",
+    "backend.tasks.upload.create_target_model",
+    "backend.tasks.upload.create_batch_model",
+    "backend.tasks.upload.create_project_model",
+    "backend.tasks.upload.check_previous_reaction_products",
+    "backend.tasks.upload.recipe_exists",
+    "backend.tasks.upload.get_recipe_intramolecular",
+    "backend.tasks.upload.get_manifold_retrosynthesis_batch",
 ]
 
 
 class TestUploadManifoldNotValidated(TestCase):
     """When validated=False the task should short-circuit."""
 
-    @patch("backend.tasks.delete_tmp_file")
+    @patch("backend.tasks.upload.delete_tmp_file")
     def test_returns_early_and_deletes_file(self, mock_del):
         validate_output = _make_retro_validate_output(validated=False)
         result = upload_manifold_reaction(validate_output)
@@ -257,8 +257,8 @@ class TestUploadManifoldNotValidated(TestCase):
         self.assertFalse(validated)
         mock_del.assert_called_once_with("/tmp/test.csv")
 
-    @patch("backend.tasks.delete_tmp_file")
-    @patch("backend.tasks.create_project_model")
+    @patch("backend.tasks.upload.delete_tmp_file")
+    @patch("backend.tasks.upload.create_project_model")
     def test_no_models_created(self, mock_project, mock_del):
         validate_output = _make_retro_validate_output(validated=False)
         upload_manifold_reaction(validate_output)
@@ -269,34 +269,34 @@ class TestUploadManifoldHappyPath(TestCase):
     """Happy path: one target, one route, all reactions encoded → otchem=True."""
 
     def setUp(self):
-        self.patcher_del = patch("backend.tasks.delete_tmp_file")
+        self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.create_project_model", return_value=1
+            "backend.tasks.upload.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
+        self.patcher_batch = patch("backend.tasks.upload.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.create_target_model", return_value=100
+            "backend.tasks.upload.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.create_method_model", return_value=1000
+            "backend.tasks.upload.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.create_reaction_model", return_value=5000
+            "backend.tasks.upload.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.create_product_model")
+        self.patcher_product = patch("backend.tasks.upload.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.create_reactant_model", return_value=9000
+            "backend.tasks.upload.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
+        self.patcher_catalog = patch("backend.tasks.upload.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.check_previous_reaction_products", return_value=None
+            "backend.tasks.upload.check_previous_reaction_products", return_value=None
         )
-        self.patcher_recipe = patch("backend.tasks.recipe_exists", return_value=True)
+        self.patcher_recipe = patch("backend.tasks.upload.recipe_exists", return_value=True)
         self.patcher_intra = patch(
-            "backend.tasks.get_recipe_intramolecular", return_value=False
+            "backend.tasks.upload.get_recipe_intramolecular", return_value=False
         )
         self.patcher_manifold = patch(
-            "backend.tasks.get_manifold_retrosynthesis_batch"
+            "backend.tasks.upload.get_manifold_retrosynthesis_batch"
         )
 
         self.mock_del = self.patcher_del.start()
@@ -448,35 +448,35 @@ class TestUploadManifoldNotEncoded(TestCase):
     """When NOT all reactions are encoded → otchem=False path."""
 
     def setUp(self):
-        self.patcher_del = patch("backend.tasks.delete_tmp_file")
+        self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.create_project_model", return_value=1
+            "backend.tasks.upload.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
+        self.patcher_batch = patch("backend.tasks.upload.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.create_target_model", return_value=100
+            "backend.tasks.upload.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.create_method_model", return_value=1000
+            "backend.tasks.upload.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.create_reaction_model", return_value=5000
+            "backend.tasks.upload.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.create_product_model")
+        self.patcher_product = patch("backend.tasks.upload.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.create_reactant_model", return_value=9000
+            "backend.tasks.upload.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
+        self.patcher_catalog = patch("backend.tasks.upload.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.check_previous_reaction_products", return_value=None
+            "backend.tasks.upload.check_previous_reaction_products", return_value=None
         )
         # recipe_exists returns False → not encoded
-        self.patcher_recipe = patch("backend.tasks.recipe_exists", return_value=False)
+        self.patcher_recipe = patch("backend.tasks.upload.recipe_exists", return_value=False)
         self.patcher_intra = patch(
-            "backend.tasks.get_recipe_intramolecular", return_value=False
+            "backend.tasks.upload.get_recipe_intramolecular", return_value=False
         )
         self.patcher_manifold = patch(
-            "backend.tasks.get_manifold_retrosynthesis_batch"
+            "backend.tasks.upload.get_manifold_retrosynthesis_batch"
         )
 
         self.mock_del = self.patcher_del.start()
@@ -572,34 +572,34 @@ class TestUploadManifoldEdgeCases(TestCase):
     """Edge cases for Manifold upload."""
 
     def setUp(self):
-        self.patcher_del = patch("backend.tasks.delete_tmp_file")
+        self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.create_project_model", return_value=1
+            "backend.tasks.upload.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
+        self.patcher_batch = patch("backend.tasks.upload.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.create_target_model", return_value=100
+            "backend.tasks.upload.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.create_method_model", return_value=1000
+            "backend.tasks.upload.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.create_reaction_model", return_value=5000
+            "backend.tasks.upload.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.create_product_model")
+        self.patcher_product = patch("backend.tasks.upload.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.create_reactant_model", return_value=9000
+            "backend.tasks.upload.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
+        self.patcher_catalog = patch("backend.tasks.upload.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.check_previous_reaction_products", return_value=None
+            "backend.tasks.upload.check_previous_reaction_products", return_value=None
         )
-        self.patcher_recipe = patch("backend.tasks.recipe_exists", return_value=True)
+        self.patcher_recipe = patch("backend.tasks.upload.recipe_exists", return_value=True)
         self.patcher_intra = patch(
-            "backend.tasks.get_recipe_intramolecular", return_value=False
+            "backend.tasks.upload.get_recipe_intramolecular", return_value=False
         )
         self.patcher_manifold = patch(
-            "backend.tasks.get_manifold_retrosynthesis_batch"
+            "backend.tasks.upload.get_manifold_retrosynthesis_batch"
         )
 
         self.mock_del = self.patcher_del.start()
@@ -833,7 +833,7 @@ class TestUploadManifoldEdgeCases(TestCase):
 class TestUploadCustomNotValidated(TestCase):
     """When validated=False the custom upload task should short-circuit."""
 
-    @patch("backend.tasks.delete_tmp_file")
+    @patch("backend.tasks.upload.delete_tmp_file")
     def test_returns_early_and_deletes_file(self, mock_del):
         validate_output = _make_custom_chem_validate_output(validated=False)
         result = upload_custom_reaction(validate_output)
@@ -842,8 +842,8 @@ class TestUploadCustomNotValidated(TestCase):
         self.assertFalse(validated)
         mock_del.assert_called_once_with("/tmp/test_custom.csv")
 
-    @patch("backend.tasks.delete_tmp_file")
-    @patch("backend.tasks.create_project_model")
+    @patch("backend.tasks.upload.delete_tmp_file")
+    @patch("backend.tasks.upload.create_project_model")
     def test_no_models_created(self, mock_project, mock_del):
         validate_output = _make_custom_chem_validate_output(validated=False)
         upload_custom_reaction(validate_output)
@@ -854,32 +854,32 @@ class TestUploadCustomHappyPath(TestCase):
     """Happy path for custom-chem upload: single target, single step."""
 
     def setUp(self):
-        self.patcher_del = patch("backend.tasks.delete_tmp_file")
+        self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.create_project_model", return_value=1
+            "backend.tasks.upload.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
+        self.patcher_batch = patch("backend.tasks.upload.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.create_target_model", return_value=100
+            "backend.tasks.upload.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.create_method_model", return_value=1000
+            "backend.tasks.upload.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.create_reaction_model", return_value=5000
+            "backend.tasks.upload.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.create_product_model")
+        self.patcher_product = patch("backend.tasks.upload.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.create_reactant_model", return_value=9000
+            "backend.tasks.upload.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
+        self.patcher_catalog = patch("backend.tasks.upload.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.check_previous_reaction_products", return_value=None
+            "backend.tasks.upload.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
-            "backend.tasks.get_recipe_stir_temperature", return_value=25.0
+            "backend.tasks.upload.get_recipe_stir_temperature", return_value=25.0
         )
-        self.patcher_exact = patch("backend.tasks.get_exact_search")
+        self.patcher_exact = patch("backend.tasks.upload.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -1033,7 +1033,7 @@ class TestUploadCustomHappyPath(TestCase):
 class TestUploadCombiNotValidated(TestCase):
     """When validated=False the combi upload task should short-circuit."""
 
-    @patch("backend.tasks.delete_tmp_file")
+    @patch("backend.tasks.upload.delete_tmp_file")
     def test_returns_early_and_deletes_file(self, mock_del):
         validate_output = _make_combi_validate_output(validated=False)
         result = upload_combi_custom_reaction(validate_output)
@@ -1042,8 +1042,8 @@ class TestUploadCombiNotValidated(TestCase):
         self.assertFalse(validated)
         mock_del.assert_called_once_with("/tmp/test_combi.csv")
 
-    @patch("backend.tasks.delete_tmp_file")
-    @patch("backend.tasks.create_project_model")
+    @patch("backend.tasks.upload.delete_tmp_file")
+    @patch("backend.tasks.upload.create_project_model")
     def test_no_models_created(self, mock_project, mock_del):
         validate_output = _make_combi_validate_output(validated=False)
         upload_combi_custom_reaction(validate_output)
@@ -1054,32 +1054,32 @@ class TestUploadCombiHappyPath(TestCase):
     """Happy path for combi-custom-chem upload."""
 
     def setUp(self):
-        self.patcher_del = patch("backend.tasks.delete_tmp_file")
+        self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.create_project_model", return_value=1
+            "backend.tasks.upload.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
+        self.patcher_batch = patch("backend.tasks.upload.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.create_target_model", return_value=100
+            "backend.tasks.upload.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.create_method_model", return_value=1000
+            "backend.tasks.upload.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.create_reaction_model", return_value=5000
+            "backend.tasks.upload.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.create_product_model")
+        self.patcher_product = patch("backend.tasks.upload.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.create_reactant_model", return_value=9000
+            "backend.tasks.upload.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
+        self.patcher_catalog = patch("backend.tasks.upload.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.check_previous_reaction_products", return_value=None
+            "backend.tasks.upload.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
-            "backend.tasks.get_recipe_stir_temperature", return_value=80.0
+            "backend.tasks.upload.get_recipe_stir_temperature", return_value=80.0
         )
-        self.patcher_exact = patch("backend.tasks.get_exact_search")
+        self.patcher_exact = patch("backend.tasks.upload.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -1279,32 +1279,32 @@ class TestUploadCustomMultiStep(TestCase):
     """Verify 2-step custom-chem upload creates correct reactions per step."""
 
     def setUp(self):
-        self.patcher_del = patch("backend.tasks.delete_tmp_file")
+        self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.create_project_model", return_value=1
+            "backend.tasks.upload.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
+        self.patcher_batch = patch("backend.tasks.upload.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.create_target_model", return_value=100
+            "backend.tasks.upload.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.create_method_model", return_value=1000
+            "backend.tasks.upload.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.create_reaction_model", side_effect=[5001, 5002]
+            "backend.tasks.upload.create_reaction_model", side_effect=[5001, 5002]
         )
-        self.patcher_product = patch("backend.tasks.create_product_model")
+        self.patcher_product = patch("backend.tasks.upload.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.create_reactant_model", return_value=9000
+            "backend.tasks.upload.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
+        self.patcher_catalog = patch("backend.tasks.upload.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.check_previous_reaction_products", return_value=None
+            "backend.tasks.upload.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
-            "backend.tasks.get_recipe_stir_temperature", return_value=25.0
+            "backend.tasks.upload.get_recipe_stir_temperature", return_value=25.0
         )
-        self.patcher_exact = patch("backend.tasks.get_exact_search")
+        self.patcher_exact = patch("backend.tasks.upload.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -1400,32 +1400,32 @@ class TestUploadCombiMultiStep(TestCase):
     """Verify 2-step combi-custom-chem upload creates correct reactions per step."""
 
     def setUp(self):
-        self.patcher_del = patch("backend.tasks.delete_tmp_file")
+        self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.create_project_model", return_value=1
+            "backend.tasks.upload.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
+        self.patcher_batch = patch("backend.tasks.upload.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.create_target_model", return_value=100
+            "backend.tasks.upload.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.create_method_model", return_value=1000
+            "backend.tasks.upload.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.create_reaction_model", side_effect=[5001, 5002]
+            "backend.tasks.upload.create_reaction_model", side_effect=[5001, 5002]
         )
-        self.patcher_product = patch("backend.tasks.create_product_model")
+        self.patcher_product = patch("backend.tasks.upload.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.create_reactant_model", return_value=9000
+            "backend.tasks.upload.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
+        self.patcher_catalog = patch("backend.tasks.upload.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.check_previous_reaction_products", return_value=None
+            "backend.tasks.upload.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
-            "backend.tasks.get_recipe_stir_temperature", return_value=80.0
+            "backend.tasks.upload.get_recipe_stir_temperature", return_value=80.0
         )
-        self.patcher_exact = patch("backend.tasks.get_exact_search")
+        self.patcher_exact = patch("backend.tasks.upload.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -1571,34 +1571,34 @@ class TestUploadCustomMultiBatch(TestCase):
     """Custom-chem with targets across different batch tags."""
 
     def setUp(self):
-        self.patcher_del = patch("backend.tasks.delete_tmp_file")
+        self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.create_project_model", return_value=1
+            "backend.tasks.upload.create_project_model", return_value=1
         )
         self.patcher_batch = patch(
-            "backend.tasks.create_batch_model", side_effect=[10, 20]
+            "backend.tasks.upload.create_batch_model", side_effect=[10, 20]
         )
         self.patcher_target = patch(
-            "backend.tasks.create_target_model", side_effect=[100, 200]
+            "backend.tasks.upload.create_target_model", side_effect=[100, 200]
         )
         self.patcher_method = patch(
-            "backend.tasks.create_method_model", return_value=1000
+            "backend.tasks.upload.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.create_reaction_model", return_value=5000
+            "backend.tasks.upload.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.create_product_model")
+        self.patcher_product = patch("backend.tasks.upload.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.create_reactant_model", return_value=9000
+            "backend.tasks.upload.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
+        self.patcher_catalog = patch("backend.tasks.upload.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.check_previous_reaction_products", return_value=None
+            "backend.tasks.upload.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
-            "backend.tasks.get_recipe_stir_temperature", return_value=25.0
+            "backend.tasks.upload.get_recipe_stir_temperature", return_value=25.0
         )
-        self.patcher_exact = patch("backend.tasks.get_exact_search")
+        self.patcher_exact = patch("backend.tasks.upload.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -1643,34 +1643,34 @@ class TestUploadCombiMultiBatch(TestCase):
     """Combi-custom-chem with targets across different batch tags."""
 
     def setUp(self):
-        self.patcher_del = patch("backend.tasks.delete_tmp_file")
+        self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.create_project_model", return_value=1
+            "backend.tasks.upload.create_project_model", return_value=1
         )
         self.patcher_batch = patch(
-            "backend.tasks.create_batch_model", side_effect=[10, 20]
+            "backend.tasks.upload.create_batch_model", side_effect=[10, 20]
         )
         self.patcher_target = patch(
-            "backend.tasks.create_target_model", side_effect=[100, 200]
+            "backend.tasks.upload.create_target_model", side_effect=[100, 200]
         )
         self.patcher_method = patch(
-            "backend.tasks.create_method_model", return_value=1000
+            "backend.tasks.upload.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.create_reaction_model", return_value=5000
+            "backend.tasks.upload.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.create_product_model")
+        self.patcher_product = patch("backend.tasks.upload.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.create_reactant_model", return_value=9000
+            "backend.tasks.upload.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
+        self.patcher_catalog = patch("backend.tasks.upload.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.check_previous_reaction_products", return_value=None
+            "backend.tasks.upload.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
-            "backend.tasks.get_recipe_stir_temperature", return_value=80.0
+            "backend.tasks.upload.get_recipe_stir_temperature", return_value=80.0
         )
-        self.patcher_exact = patch("backend.tasks.get_exact_search")
+        self.patcher_exact = patch("backend.tasks.upload.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -1719,35 +1719,35 @@ class TestManifoldCatalogWiring(TestCase):
     """Verify catalog entries from route['molecules'] are wired to the correct reactant."""
 
     def setUp(self):
-        self.patcher_del = patch("backend.tasks.delete_tmp_file")
+        self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.create_project_model", return_value=1
+            "backend.tasks.upload.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
+        self.patcher_batch = patch("backend.tasks.upload.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.create_target_model", return_value=100
+            "backend.tasks.upload.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.create_method_model", return_value=1000
+            "backend.tasks.upload.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.create_reaction_model", return_value=5000
+            "backend.tasks.upload.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.create_product_model")
+        self.patcher_product = patch("backend.tasks.upload.create_product_model")
         # Return distinct IDs per reactant so we can tell them apart
         self.patcher_reactant = patch(
-            "backend.tasks.create_reactant_model", side_effect=[9001, 9002]
+            "backend.tasks.upload.create_reactant_model", side_effect=[9001, 9002]
         )
-        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
+        self.patcher_catalog = patch("backend.tasks.upload.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.check_previous_reaction_products", return_value=None
+            "backend.tasks.upload.check_previous_reaction_products", return_value=None
         )
-        self.patcher_recipe = patch("backend.tasks.recipe_exists", return_value=True)
+        self.patcher_recipe = patch("backend.tasks.upload.recipe_exists", return_value=True)
         self.patcher_intra = patch(
-            "backend.tasks.get_recipe_intramolecular", return_value=False
+            "backend.tasks.upload.get_recipe_intramolecular", return_value=False
         )
         self.patcher_manifold = patch(
-            "backend.tasks.get_manifold_retrosynthesis_batch"
+            "backend.tasks.upload.get_manifold_retrosynthesis_batch"
         )
 
         self.mock_del = self.patcher_del.start()
@@ -1855,35 +1855,35 @@ class TestManifoldCatalogWiringNotEncoded(TestCase):
     """Same catalog wiring test for the not-encoded branch."""
 
     def setUp(self):
-        self.patcher_del = patch("backend.tasks.delete_tmp_file")
+        self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.create_project_model", return_value=1
+            "backend.tasks.upload.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
+        self.patcher_batch = patch("backend.tasks.upload.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.create_target_model", return_value=100
+            "backend.tasks.upload.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.create_method_model", return_value=1000
+            "backend.tasks.upload.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.create_reaction_model", return_value=5000
+            "backend.tasks.upload.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.create_product_model")
+        self.patcher_product = patch("backend.tasks.upload.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.create_reactant_model", side_effect=[9001, 9002]
+            "backend.tasks.upload.create_reactant_model", side_effect=[9001, 9002]
         )
-        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
+        self.patcher_catalog = patch("backend.tasks.upload.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.check_previous_reaction_products", return_value=None
+            "backend.tasks.upload.check_previous_reaction_products", return_value=None
         )
         # Not encoded
-        self.patcher_recipe = patch("backend.tasks.recipe_exists", return_value=False)
+        self.patcher_recipe = patch("backend.tasks.upload.recipe_exists", return_value=False)
         self.patcher_intra = patch(
-            "backend.tasks.get_recipe_intramolecular", return_value=False
+            "backend.tasks.upload.get_recipe_intramolecular", return_value=False
         )
         self.patcher_manifold = patch(
-            "backend.tasks.get_manifold_retrosynthesis_batch"
+            "backend.tasks.upload.get_manifold_retrosynthesis_batch"
         )
 
         self.mock_del = self.patcher_del.start()
@@ -1990,12 +1990,12 @@ class TestManifoldCatalogWiringNotEncoded(TestCase):
 class TestCanonicalizeSmilesList(TestCase):
     """Test canonicalize_smiles with a list of SMILES (no CSV)."""
 
-    @patch("backend.tasks.canon_smiles", side_effect=lambda s: s)
+    @patch("backend.tasks.validation.canon_smiles", side_effect=lambda s: s)
     def test_valid_smiles_returns_validated_true(self, mock_canon):
         validated, result = canonicalize_smiles(smiles=["CCO", "CC"])
         self.assertTrue(validated)
 
-    @patch("backend.tasks.canon_smiles", side_effect=lambda s: s)
+    @patch("backend.tasks.validation.canon_smiles", side_effect=lambda s: s)
     def test_valid_smiles_returns_canonicalized_list(self, mock_canon):
         validated, result = canonicalize_smiles(smiles=["CCO", "CC"])
         self.assertIsInstance(result, list)
@@ -2009,7 +2009,7 @@ class TestCanonicalizeSmilesList(TestCase):
         validated, result = canonicalize_smiles(smiles=["CCO", "INVALID_SMILES_XYZ"])
         self.assertIn("1", str(result))  # index 1 is the bad one
 
-    @patch("backend.tasks.canon_smiles", side_effect=lambda s: s)
+    @patch("backend.tasks.validation.canon_smiles", side_effect=lambda s: s)
     def test_single_smiles_valid(self, mock_canon):
         validated, result = canonicalize_smiles(smiles=["CCO"])
         self.assertTrue(validated)
@@ -2027,9 +2027,9 @@ class TestCanonicalizeSmilesList(TestCase):
 class TestCanonicalizeSmilesCSV(TestCase):
     """Test canonicalize_smiles reading from a CSV file."""
 
-    @patch("backend.tasks.canon_smiles", side_effect=lambda s: s)
-    @patch("backend.tasks.delete_tmp_file")
-    @patch("backend.tasks.pd.read_csv")
+    @patch("backend.tasks.validation.canon_smiles", side_effect=lambda s: s)
+    @patch("backend.tasks.validation.delete_tmp_file")
+    @patch("backend.tasks.validation.pd.read_csv")
     def test_reads_csv_and_deletes_file(self, mock_csv, mock_del, mock_canon):
         import pandas as pd
 
@@ -2040,9 +2040,9 @@ class TestCanonicalizeSmilesCSV(TestCase):
         mock_csv.assert_called_once_with("/tmp/test_smiles.csv", encoding="utf8")
         mock_del.assert_called_once_with("/tmp/test_smiles.csv")
 
-    @patch("backend.tasks.canon_smiles", side_effect=lambda s: s)
-    @patch("backend.tasks.delete_tmp_file")
-    @patch("backend.tasks.pd.read_csv")
+    @patch("backend.tasks.validation.canon_smiles", side_effect=lambda s: s)
+    @patch("backend.tasks.validation.delete_tmp_file")
+    @patch("backend.tasks.validation.pd.read_csv")
     def test_csv_with_invalid_smiles(self, mock_csv, mock_del, mock_canon):
         import pandas as pd
 
@@ -2083,12 +2083,12 @@ class TestGetCustomSmCsvPath(TestCase):
 # ===========================================================================
 
 OT_STEP_PATCHES = [
-    "backend.tasks.create_multiple_ot_sessions",
-    "backend.tasks.get_grouped_action_session_types",
-    "backend.tasks.get_action_session_types",
-    "backend.tasks.get_grouped_action_session_sequences",
-    "backend.tasks.get_action_session_sequence_numbers",
-    "backend.tasks.get_action_session_query_set",
+    "backend.tasks.ot_protocol.create_multiple_ot_sessions",
+    "backend.tasks.ot_protocol.get_grouped_action_session_types",
+    "backend.tasks.ot_protocol.get_action_session_types",
+    "backend.tasks.ot_protocol.get_grouped_action_session_sequences",
+    "backend.tasks.ot_protocol.get_action_session_sequence_numbers",
+    "backend.tasks.ot_protocol.get_action_session_query_set",
 ]
 
 
@@ -2176,22 +2176,22 @@ class TestProcessReactionStepSessions(TestCase):
 
 # Common patches for create_ot_script tests
 OT_SCRIPT_PATCHES = [
-    "backend.tasks.ZipOTBatchProtocol",
-    "backend.tasks._process_reaction_step_sessions",
-    "backend.tasks.group_reactions",
-    "backend.tasks.get_max_reaction_number",
-    "backend.tasks._get_custom_sm_csv_path",
-    "backend.tasks.get_ot_batch_protocol_query_set",
-    "backend.tasks.get_batch_tag",
-    "backend.tasks.CreateEncodedActionModels",
-    "backend.tasks.get_recipe_intramolecular",
-    "backend.tasks.get_action_session_query_set",
-    "backend.tasks.get_batch_reactions",
-    "backend.tasks.get_reactions_to_do",
-    "backend.tasks.current_task",
-    "backend.tasks.Batch",
-    "backend.tasks.OTProject",
-    "backend.tasks.OTBatchProtocol",
+    "backend.tasks.ot_protocol.ZipOTBatchProtocol",
+    "backend.tasks.ot_protocol._process_reaction_step_sessions",
+    "backend.tasks.ot_protocol.group_reactions",
+    "backend.tasks.ot_protocol.get_max_reaction_number",
+    "backend.tasks.ot_protocol._get_custom_sm_csv_path",
+    "backend.tasks.ot_protocol.get_ot_batch_protocol_query_set",
+    "backend.tasks.ot_protocol.get_batch_tag",
+    "backend.tasks.ot_protocol.CreateEncodedActionModels",
+    "backend.tasks.ot_protocol.get_recipe_intramolecular",
+    "backend.tasks.ot_protocol.get_action_session_query_set",
+    "backend.tasks.ot_protocol.get_batch_reactions",
+    "backend.tasks.ot_protocol.get_reactions_to_do",
+    "backend.tasks.ot_protocol.current_task",
+    "backend.tasks.ot_protocol.Batch",
+    "backend.tasks.ot_protocol.OTProject",
+    "backend.tasks.ot_protocol.OTBatchProtocol",
 ]
 
 
@@ -2216,22 +2216,22 @@ def _make_reaction_obj(
     return obj
 
 
-@patch("backend.tasks.OTBatchProtocol")
-@patch("backend.tasks.OTProject")
-@patch("backend.tasks.Batch")
-@patch("backend.tasks.current_task")
-@patch("backend.tasks.get_reactions_to_do")
-@patch("backend.tasks.get_batch_reactions")
-@patch("backend.tasks.get_action_session_query_set")
-@patch("backend.tasks.get_recipe_intramolecular")
-@patch("backend.tasks.CreateEncodedActionModels")
-@patch("backend.tasks.get_batch_tag")
-@patch("backend.tasks.get_ot_batch_protocol_query_set")
-@patch("backend.tasks._get_custom_sm_csv_path")
-@patch("backend.tasks.get_max_reaction_number")
-@patch("backend.tasks.group_reactions")
-@patch("backend.tasks._process_reaction_step_sessions")
-@patch("backend.tasks.ZipOTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTProject")
+@patch("backend.tasks.ot_protocol.Batch")
+@patch("backend.tasks.ot_protocol.current_task")
+@patch("backend.tasks.ot_protocol.get_reactions_to_do")
+@patch("backend.tasks.ot_protocol.get_batch_reactions")
+@patch("backend.tasks.ot_protocol.get_action_session_query_set")
+@patch("backend.tasks.ot_protocol.get_recipe_intramolecular")
+@patch("backend.tasks.ot_protocol.CreateEncodedActionModels")
+@patch("backend.tasks.ot_protocol.get_batch_tag")
+@patch("backend.tasks.ot_protocol.get_ot_batch_protocol_query_set")
+@patch("backend.tasks.ot_protocol._get_custom_sm_csv_path")
+@patch("backend.tasks.ot_protocol.get_max_reaction_number")
+@patch("backend.tasks.ot_protocol.group_reactions")
+@patch("backend.tasks.ot_protocol._process_reaction_step_sessions")
+@patch("backend.tasks.ot_protocol.ZipOTBatchProtocol")
 class TestCreateOTScriptHappyPath(TestCase):
     """Single-batch, single-step, action sessions already exist."""
 
@@ -2339,22 +2339,22 @@ class TestCreateOTScriptHappyPath(TestCase):
         self.assertTrue(result[0][1])
 
 
-@patch("backend.tasks.OTBatchProtocol")
-@patch("backend.tasks.OTProject")
-@patch("backend.tasks.Batch")
-@patch("backend.tasks.current_task")
-@patch("backend.tasks.get_reactions_to_do")
-@patch("backend.tasks.get_batch_reactions")
-@patch("backend.tasks.get_action_session_query_set")
-@patch("backend.tasks.get_recipe_intramolecular")
-@patch("backend.tasks.CreateEncodedActionModels")
-@patch("backend.tasks.get_batch_tag")
-@patch("backend.tasks.get_ot_batch_protocol_query_set")
-@patch("backend.tasks._get_custom_sm_csv_path")
-@patch("backend.tasks.get_max_reaction_number")
-@patch("backend.tasks.group_reactions")
-@patch("backend.tasks._process_reaction_step_sessions")
-@patch("backend.tasks.ZipOTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTProject")
+@patch("backend.tasks.ot_protocol.Batch")
+@patch("backend.tasks.ot_protocol.current_task")
+@patch("backend.tasks.ot_protocol.get_reactions_to_do")
+@patch("backend.tasks.ot_protocol.get_batch_reactions")
+@patch("backend.tasks.ot_protocol.get_action_session_query_set")
+@patch("backend.tasks.ot_protocol.get_recipe_intramolecular")
+@patch("backend.tasks.ot_protocol.CreateEncodedActionModels")
+@patch("backend.tasks.ot_protocol.get_batch_tag")
+@patch("backend.tasks.ot_protocol.get_ot_batch_protocol_query_set")
+@patch("backend.tasks.ot_protocol._get_custom_sm_csv_path")
+@patch("backend.tasks.ot_protocol.get_max_reaction_number")
+@patch("backend.tasks.ot_protocol.group_reactions")
+@patch("backend.tasks.ot_protocol._process_reaction_step_sessions")
+@patch("backend.tasks.ot_protocol.ZipOTBatchProtocol")
 class TestCreateOTScriptNoActionSessions(TestCase):
     """When action sessions don't exist, CreateEncodedActionModels is called."""
 
@@ -2453,22 +2453,22 @@ class TestCreateOTScriptNoActionSessions(TestCase):
         self.assertTrue(enc_call.kwargs["intramolecular"])
 
 
-@patch("backend.tasks.OTBatchProtocol")
-@patch("backend.tasks.OTProject")
-@patch("backend.tasks.Batch")
-@patch("backend.tasks.current_task")
-@patch("backend.tasks.get_reactions_to_do")
-@patch("backend.tasks.get_batch_reactions")
-@patch("backend.tasks.get_action_session_query_set")
-@patch("backend.tasks.get_recipe_intramolecular")
-@patch("backend.tasks.CreateEncodedActionModels")
-@patch("backend.tasks.get_batch_tag")
-@patch("backend.tasks.get_ot_batch_protocol_query_set")
-@patch("backend.tasks._get_custom_sm_csv_path")
-@patch("backend.tasks.get_max_reaction_number")
-@patch("backend.tasks.group_reactions")
-@patch("backend.tasks._process_reaction_step_sessions")
-@patch("backend.tasks.ZipOTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTProject")
+@patch("backend.tasks.ot_protocol.Batch")
+@patch("backend.tasks.ot_protocol.current_task")
+@patch("backend.tasks.ot_protocol.get_reactions_to_do")
+@patch("backend.tasks.ot_protocol.get_batch_reactions")
+@patch("backend.tasks.ot_protocol.get_action_session_query_set")
+@patch("backend.tasks.ot_protocol.get_recipe_intramolecular")
+@patch("backend.tasks.ot_protocol.CreateEncodedActionModels")
+@patch("backend.tasks.ot_protocol.get_batch_tag")
+@patch("backend.tasks.ot_protocol.get_ot_batch_protocol_query_set")
+@patch("backend.tasks.ot_protocol._get_custom_sm_csv_path")
+@patch("backend.tasks.ot_protocol.get_max_reaction_number")
+@patch("backend.tasks.ot_protocol.group_reactions")
+@patch("backend.tasks.ot_protocol._process_reaction_step_sessions")
+@patch("backend.tasks.ot_protocol.ZipOTBatchProtocol")
 class TestCreateOTScriptExistingProtocol(TestCase):
     """When a completed protocol already exists, it should be re-used."""
 
@@ -2562,22 +2562,22 @@ class TestCreateOTScriptExistingProtocol(TestCase):
         mock_OTBatchProtocol.assert_not_called()
 
 
-@patch("backend.tasks.OTBatchProtocol")
-@patch("backend.tasks.OTProject")
-@patch("backend.tasks.Batch")
-@patch("backend.tasks.current_task")
-@patch("backend.tasks.get_reactions_to_do")
-@patch("backend.tasks.get_batch_reactions")
-@patch("backend.tasks.get_action_session_query_set")
-@patch("backend.tasks.get_recipe_intramolecular")
-@patch("backend.tasks.CreateEncodedActionModels")
-@patch("backend.tasks.get_batch_tag")
-@patch("backend.tasks.get_ot_batch_protocol_query_set")
-@patch("backend.tasks._get_custom_sm_csv_path")
-@patch("backend.tasks.get_max_reaction_number")
-@patch("backend.tasks.group_reactions")
-@patch("backend.tasks._process_reaction_step_sessions")
-@patch("backend.tasks.ZipOTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTProject")
+@patch("backend.tasks.ot_protocol.Batch")
+@patch("backend.tasks.ot_protocol.current_task")
+@patch("backend.tasks.ot_protocol.get_reactions_to_do")
+@patch("backend.tasks.ot_protocol.get_batch_reactions")
+@patch("backend.tasks.ot_protocol.get_action_session_query_set")
+@patch("backend.tasks.ot_protocol.get_recipe_intramolecular")
+@patch("backend.tasks.ot_protocol.CreateEncodedActionModels")
+@patch("backend.tasks.ot_protocol.get_batch_tag")
+@patch("backend.tasks.ot_protocol.get_ot_batch_protocol_query_set")
+@patch("backend.tasks.ot_protocol._get_custom_sm_csv_path")
+@patch("backend.tasks.ot_protocol.get_max_reaction_number")
+@patch("backend.tasks.ot_protocol.group_reactions")
+@patch("backend.tasks.ot_protocol._process_reaction_step_sessions")
+@patch("backend.tasks.ot_protocol.ZipOTBatchProtocol")
 class TestCreateOTScriptMultiStep(TestCase):
     """Two-step reaction: step 1 always runs, step 2 uses QC filter."""
 
@@ -2698,27 +2698,27 @@ class TestCreateOTScriptMultiStep(TestCase):
         self.assertEqual(mock_process_step.call_count, 1)
 
 
-@patch("backend.tasks.OTBatchProtocol")
-@patch("backend.tasks.OTProject")
-@patch("backend.tasks.Batch")
-@patch("backend.tasks.current_task")
-@patch("backend.tasks.get_reactions_to_do")
-@patch("backend.tasks.get_batch_reactions")
-@patch("backend.tasks.get_action_session_query_set")
-@patch("backend.tasks.get_recipe_intramolecular")
-@patch("backend.tasks.CreateEncodedActionModels")
-@patch("backend.tasks.get_batch_tag")
-@patch("backend.tasks.get_ot_batch_protocol_query_set")
-@patch("backend.tasks._get_custom_sm_csv_path")
-@patch("backend.tasks.get_max_reaction_number")
-@patch("backend.tasks.group_reactions")
-@patch("backend.tasks._process_reaction_step_sessions")
-@patch("backend.tasks.ZipOTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTProject")
+@patch("backend.tasks.ot_protocol.Batch")
+@patch("backend.tasks.ot_protocol.current_task")
+@patch("backend.tasks.ot_protocol.get_reactions_to_do")
+@patch("backend.tasks.ot_protocol.get_batch_reactions")
+@patch("backend.tasks.ot_protocol.get_action_session_query_set")
+@patch("backend.tasks.ot_protocol.get_recipe_intramolecular")
+@patch("backend.tasks.ot_protocol.CreateEncodedActionModels")
+@patch("backend.tasks.ot_protocol.get_batch_tag")
+@patch("backend.tasks.ot_protocol.get_ot_batch_protocol_query_set")
+@patch("backend.tasks.ot_protocol._get_custom_sm_csv_path")
+@patch("backend.tasks.ot_protocol.get_max_reaction_number")
+@patch("backend.tasks.ot_protocol.group_reactions")
+@patch("backend.tasks.ot_protocol._process_reaction_step_sessions")
+@patch("backend.tasks.ot_protocol.ZipOTBatchProtocol")
 class TestCreateOTScriptTempFileCleanup(TestCase):
     """Custom SM files should be deleted after the transaction."""
 
-    @patch("backend.tasks.os.path.exists", return_value=True)
-    @patch("backend.tasks.os.remove")
+    @patch("backend.tasks.ot_protocol.os.path.exists", return_value=True)
+    @patch("backend.tasks.ot_protocol.os.remove")
     def test_custom_sm_files_cleaned_up(
         self,
         mock_remove,
@@ -2764,8 +2764,8 @@ class TestCreateOTScriptTempFileCleanup(TestCase):
 
         mock_remove.assert_called_once_with("/tmp/custom.csv")
 
-    @patch("backend.tasks.os.path.exists", return_value=False)
-    @patch("backend.tasks.os.remove")
+    @patch("backend.tasks.ot_protocol.os.path.exists", return_value=False)
+    @patch("backend.tasks.ot_protocol.os.remove")
     def test_no_remove_when_file_missing(
         self,
         mock_remove,
@@ -2812,22 +2812,22 @@ class TestCreateOTScriptTempFileCleanup(TestCase):
         mock_remove.assert_not_called()
 
 
-@patch("backend.tasks.OTBatchProtocol")
-@patch("backend.tasks.OTProject")
-@patch("backend.tasks.Batch")
-@patch("backend.tasks.current_task")
-@patch("backend.tasks.get_reactions_to_do")
-@patch("backend.tasks.get_batch_reactions")
-@patch("backend.tasks.get_action_session_query_set")
-@patch("backend.tasks.get_recipe_intramolecular")
-@patch("backend.tasks.CreateEncodedActionModels")
-@patch("backend.tasks.get_batch_tag")
-@patch("backend.tasks.get_ot_batch_protocol_query_set")
-@patch("backend.tasks._get_custom_sm_csv_path")
-@patch("backend.tasks.get_max_reaction_number")
-@patch("backend.tasks.group_reactions")
-@patch("backend.tasks._process_reaction_step_sessions")
-@patch("backend.tasks.ZipOTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTBatchProtocol")
+@patch("backend.tasks.ot_protocol.OTProject")
+@patch("backend.tasks.ot_protocol.Batch")
+@patch("backend.tasks.ot_protocol.current_task")
+@patch("backend.tasks.ot_protocol.get_reactions_to_do")
+@patch("backend.tasks.ot_protocol.get_batch_reactions")
+@patch("backend.tasks.ot_protocol.get_action_session_query_set")
+@patch("backend.tasks.ot_protocol.get_recipe_intramolecular")
+@patch("backend.tasks.ot_protocol.CreateEncodedActionModels")
+@patch("backend.tasks.ot_protocol.get_batch_tag")
+@patch("backend.tasks.ot_protocol.get_ot_batch_protocol_query_set")
+@patch("backend.tasks.ot_protocol._get_custom_sm_csv_path")
+@patch("backend.tasks.ot_protocol.get_max_reaction_number")
+@patch("backend.tasks.ot_protocol.group_reactions")
+@patch("backend.tasks.ot_protocol._process_reaction_step_sessions")
+@patch("backend.tasks.ot_protocol.ZipOTBatchProtocol")
 class TestCreateOTScriptZipErrors(TestCase):
     """When ZipOTBatchProtocol reports errors, task_summary should be False."""
 
@@ -2896,14 +2896,14 @@ def _make_artifact_obj(field_name, file_path):
     return obj
 
 
-@patch("backend.tasks.os.remove")
+@patch("backend.tasks.ot_protocol.os.remove")
 @patch("builtins.open", MagicMock())
-@patch("backend.tasks.ZipFile")
-@patch("backend.tasks.OTScript.objects.filter")
-@patch("backend.tasks.CompoundOrder.objects.filter")
-@patch("backend.tasks.SolventPrep.objects.filter")
-@patch("backend.tasks.OTSession.objects.filter")
-@patch("backend.tasks.settings")
+@patch("backend.tasks.ot_protocol.ZipFile")
+@patch("backend.tasks.ot_protocol.OTScript.objects.filter")
+@patch("backend.tasks.ot_protocol.CompoundOrder.objects.filter")
+@patch("backend.tasks.ot_protocol.SolventPrep.objects.filter")
+@patch("backend.tasks.ot_protocol.OTSession.objects.filter")
+@patch("backend.tasks.ot_protocol.settings")
 class TestZipOTBatchProtocolHappyPath(TestCase):
     """Full construction with one session that has one of each artifact type."""
 
@@ -2983,14 +2983,14 @@ class TestZipOTBatchProtocolHappyPath(TestCase):
         mock_remove.assert_called_once_with("/media/tmp/batchprotocoltmp.zip")
 
 
-@patch("backend.tasks.os.remove")
+@patch("backend.tasks.ot_protocol.os.remove")
 @patch("builtins.open", MagicMock())
-@patch("backend.tasks.ZipFile")
-@patch("backend.tasks.OTScript.objects.filter")
-@patch("backend.tasks.CompoundOrder.objects.filter")
-@patch("backend.tasks.SolventPrep.objects.filter")
-@patch("backend.tasks.OTSession.objects.filter")
-@patch("backend.tasks.settings")
+@patch("backend.tasks.ot_protocol.ZipFile")
+@patch("backend.tasks.ot_protocol.OTScript.objects.filter")
+@patch("backend.tasks.ot_protocol.CompoundOrder.objects.filter")
+@patch("backend.tasks.ot_protocol.SolventPrep.objects.filter")
+@patch("backend.tasks.ot_protocol.OTSession.objects.filter")
+@patch("backend.tasks.ot_protocol.settings")
 class TestZipOTBatchProtocolNoSessions(TestCase):
     """When no OT sessions exist, zip is not created and a warning is logged."""
 
@@ -3029,14 +3029,14 @@ class TestZipOTBatchProtocolNoSessions(TestCase):
         mock_remove.assert_not_called()
 
 
-@patch("backend.tasks.os.remove")
+@patch("backend.tasks.ot_protocol.os.remove")
 @patch("builtins.open", MagicMock())
-@patch("backend.tasks.ZipFile")
-@patch("backend.tasks.OTScript.objects.filter")
-@patch("backend.tasks.CompoundOrder.objects.filter")
-@patch("backend.tasks.SolventPrep.objects.filter")
-@patch("backend.tasks.OTSession.objects.filter")
-@patch("backend.tasks.settings")
+@patch("backend.tasks.ot_protocol.ZipFile")
+@patch("backend.tasks.ot_protocol.OTScript.objects.filter")
+@patch("backend.tasks.ot_protocol.CompoundOrder.objects.filter")
+@patch("backend.tasks.ot_protocol.SolventPrep.objects.filter")
+@patch("backend.tasks.ot_protocol.OTSession.objects.filter")
+@patch("backend.tasks.ot_protocol.settings")
 class TestZipOTBatchProtocolMissingArtifacts(TestCase):
     """When some artifact types are missing, warnings are logged but
     other artifacts still get zipped."""
@@ -3095,14 +3095,14 @@ class TestZipOTBatchProtocolMissingArtifacts(TestCase):
         zip_instance.write.assert_not_called()
 
 
-@patch("backend.tasks.os.remove")
+@patch("backend.tasks.ot_protocol.os.remove")
 @patch("builtins.open", MagicMock())
-@patch("backend.tasks.ZipFile")
-@patch("backend.tasks.OTScript.objects.filter")
-@patch("backend.tasks.CompoundOrder.objects.filter")
-@patch("backend.tasks.SolventPrep.objects.filter")
-@patch("backend.tasks.OTSession.objects.filter")
-@patch("backend.tasks.settings")
+@patch("backend.tasks.ot_protocol.ZipFile")
+@patch("backend.tasks.ot_protocol.OTScript.objects.filter")
+@patch("backend.tasks.ot_protocol.CompoundOrder.objects.filter")
+@patch("backend.tasks.ot_protocol.SolventPrep.objects.filter")
+@patch("backend.tasks.ot_protocol.OTSession.objects.filter")
+@patch("backend.tasks.ot_protocol.settings")
 class TestZipOTBatchProtocolMultipleSessions(TestCase):
     """Multiple OT sessions each contribute their own artifacts."""
 
@@ -3158,14 +3158,14 @@ class TestZipOTBatchProtocolMultipleSessions(TestCase):
         self.assertEqual(zip_instance.write.call_count, 2)
 
 
-@patch("backend.tasks.os.remove")
+@patch("backend.tasks.ot_protocol.os.remove")
 @patch("builtins.open", MagicMock())
-@patch("backend.tasks.ZipFile")
-@patch("backend.tasks.OTScript.objects.filter")
-@patch("backend.tasks.CompoundOrder.objects.filter")
-@patch("backend.tasks.SolventPrep.objects.filter")
-@patch("backend.tasks.OTSession.objects.filter")
-@patch("backend.tasks.settings")
+@patch("backend.tasks.ot_protocol.ZipFile")
+@patch("backend.tasks.ot_protocol.OTScript.objects.filter")
+@patch("backend.tasks.ot_protocol.CompoundOrder.objects.filter")
+@patch("backend.tasks.ot_protocol.SolventPrep.objects.filter")
+@patch("backend.tasks.ot_protocol.OTSession.objects.filter")
+@patch("backend.tasks.ot_protocol.settings")
 class TestZipOTBatchProtocolAddWarning(TestCase):
     """Test the add_warning method directly."""
 

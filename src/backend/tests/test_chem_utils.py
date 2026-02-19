@@ -13,7 +13,6 @@ from backend.chem_utils import (
     combi_chem,
     create_svg_string,
     create_reaction_svg_string,
-    get_addtion_order,
     get_addition_order,
     check_reactant_smarts,
     atom_remover,

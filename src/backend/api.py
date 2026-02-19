@@ -1,7 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from django.http import JsonResponse
-from django.core.files.base import ContentFile
 from django.conf import settings
 import os
 import json
@@ -18,7 +17,6 @@ from .tasks import (
     upload_manifold_reaction,
     upload_custom_reaction,
     upload_combi_custom_reaction,
-    create_ot_script,
     canonicalize_smiles,
 )
 
@@ -103,108 +101,18 @@ from .serializers import (
     OTScriptSerializer,
 )
 
-from django.core.files.storage import default_storage
 
-
-def get_ot_batch_product_smiles(batch_obj: Batch) -> list:
-    """Gets the product SMILES for a batch
-
-    Parameters
-    ----------
-    batch_obj: Batch
-        The batch to search for product smiles
-
-    Returns
-    -------
-    productsmiles: list
-        The list of product SMILES in execution order, this will also follow
-        an increasing well index pattern
-    """
-
-    targetqs = Batch.objects.get(id=batch_obj).targets.all()
-    methodqs = Method.objects.filter(target_id__in=targetqs)
-    wellsqs = (
-        Well.objects.filter(method_id__in=methodqs, role="reaction")
-        .order_by("index")
-        .distinct()
-    )
-    productsmiles = wellsqs.values_list("smiles", flat=True)
-
-    return productsmiles
-
-
-def clone_target(target_obj: Target, batch_obj: Batch) -> Target:
-    """Clone a target"""
-    related_catalogentry_queryset = target_obj.catalogentries.all().order_by("id")
-
-    # Store original image path
-    original_image_path = target_obj.image.name if target_obj.image else None
-
-    # Create new target object
-    target_obj.pk = None
-    target_obj.batch_id = batch_obj
-
-    # Reuse the same image path without reading/duplicating the file
-    if original_image_path:
-        target_obj.image.name = original_image_path
-
-    target_obj.save()
-
-    for catalogentry_obj in related_catalogentry_queryset:
-        catalogentry_obj.pk = None
-        catalogentry_obj.target_id = target_obj
-        catalogentry_obj.save()
-
-    return target_obj
-
-
-def clone_method(method_obj: Method, target_obj: Target):
-    """Clone a synthesis method"""
-    related_reaction_queryset = method_obj.reactions.all().order_by("id")
-    method_obj.pk = None
-    method_obj.target_id = target_obj
-    method_obj.save()
-
-    for reaction_obj in related_reaction_queryset:
-        product_obj = reaction_obj.products.all()[0]
-        related_reactant_objs = reaction_obj.reactants.all().order_by("id")
-
-        # Store original image paths
-        original_reaction_image = (
-            reaction_obj.image.name if reaction_obj.image else None
-        )
-        original_product_image = product_obj.image.name if product_obj.image else None
-
-        # Clone reaction with same image path
-        reaction_obj.pk = None
-        reaction_obj.method_id = method_obj
-        if original_reaction_image:
-            reaction_obj.image.name = original_reaction_image
-        reaction_obj.save()
-
-        # Clone product with same image path
-        product_obj.pk = None
-        product_obj.reaction_id = reaction_obj
-        if original_product_image:
-            product_obj.image.name = original_product_image
-        product_obj.save()
-
-        for reactant_obj in related_reactant_objs:
-            related_catalogentry_objs = reactant_obj.catalogentries.all().order_by("id")
-            reactant_obj.pk = None
-            reactant_obj.reaction_id = reaction_obj
-            reactant_obj.save()
-            for catalog_obj in related_catalogentry_objs:
-                catalog_obj.pk = None
-                catalog_obj.reactant_id = reactant_obj
-                catalog_obj.save()
-
-
-def save_tmp_file(myfile):
-    name = myfile.name
-    path = default_storage.save("tmp/" + name, ContentFile(myfile.read()))
-    tmp_file = str(os.path.join(settings.MEDIA_ROOT, path))
-    return tmp_file
+from .services.batch_service import (
+    clone_batch,
+    clone_target,
+    clone_method,
+    mark_reactions_failed,
+)
+from .services.chemistry_service import get_ot_batch_product_smiles
+from .services.protocol_service import (
+    initiate_ot_project,
+    save_tmp_file,
+)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -400,7 +308,7 @@ class BatchViewSet(viewsets.ModelViewSet):
         return batch_obj
 
     def create(self, request, **kwargs):
-        """Post method to create a new batch
+        """Post method to create a new batch by cloning selected methods.
 
         Parameters
         ----------
@@ -414,31 +322,10 @@ class BatchViewSet(viewsets.ModelViewSet):
         The methodids are the methods selected for the new batch
         The batchtag is the name of the new batch to be created
         """
-
         method_ids = request.data["methodids"]
         batchtag = request.data["batchtag"]
         try:
-            target_query_set = (
-                Target.objects.filter(methods__id__in=method_ids)
-                .distinct()
-                .order_by("id")
-            )
-            batch_obj = target_query_set[0].batch_id
-            project_obj = batch_obj.project_id
-            batch_obj_new = self.createBatch(
-                project_obj=project_obj, batch_node_obj=batch_obj, batchtag=batchtag
-            )
-            for target_obj in target_query_set:
-                method_query_set_to_clone = (
-                    Method.objects.filter(target_id=target_obj)
-                    .filter(pk__in=method_ids)
-                    .order_by("id")
-                )
-                target_obj_clone = clone_target(
-                    target_obj=target_obj, batch_obj=batch_obj_new
-                )
-                for method_obj in method_query_set_to_clone:
-                    clone_method(method_obj=method_obj, target_obj=target_obj_clone)
+            batch_obj_new = clone_batch(method_ids=method_ids, batchtag=batchtag)
             serialized_data = BatchSerializer(batch_obj_new).data
             if serialized_data:
                 return JsonResponse(data=serialized_data)
@@ -503,11 +390,7 @@ class BatchViewSet(viewsets.ModelViewSet):
         if len(request.FILES) != 0:
             csvfile = request.FILES["csv_file"]
             reaction_ids = pd.read_csv(csvfile)["reaction_id"]
-        if Reaction.objects.filter(id__in=reaction_ids).exists():
-            Reaction.objects.filter(id__in=reaction_ids).update(success=False)
-            data = {"reaction_ids": reaction_ids}
-        else:
-            data = {"reaction_ids": None}
+        data = mark_reactions_failed(reaction_ids)
         return JsonResponse(data=data)
 
 
@@ -606,22 +489,11 @@ class OTProjectViewSet(viewsets.ModelViewSet):
 
     @action(methods=["post"], detail=False)
     def createotproject(self, request, pk=None):
-        """Post method to create an OT project
+        """Post method to create an OT project.
 
-        Parameters
-        ----------
-        request: JSON or FormData
-            Will have structure:
-
-            {"batchids": list,
-             "protocol_name": str,
-             "has_custom_starting_materials": "true" or "false" (optional),
-             "custom_starting_materials_batch_{batch_id}": file (optional)
-            }
-
-        The batch ids that the OT project will be created for
-        The project name of the OT project
-        Optional custom starting materials CSV files for each batch
+        Parses the request, extracts batch IDs, protocol name, and any
+        custom starting-material CSVs, then delegates to
+        ``protocol_service.initiate_ot_project``.
         """
         logger.info("The data is: %s", request.data)
         logger.info("The files are: %s", request.FILES)
@@ -630,40 +502,30 @@ class OTProjectViewSet(viewsets.ModelViewSet):
             request.data.get("has_custom_starting_materials"),
         )
 
-        # check_services()
         batch_ids = json.loads(request.data["batchids"])
         protocol_name = request.data["protocol_name"]
-
-        # Check if custom starting materials are provided
         has_custom_materials = request.data["has_custom_starting_materials"] == "true"
-
-        # Dictionary to store file paths for each batch
-        starting_material_files = {}
 
         logger.info(
             "The OT project has been custom starting materials set to %s",
             has_custom_materials,
         )
 
+        custom_files = None
         if has_custom_materials:
-            # Process each batch's starting material file
+            custom_files = {}
             for batch_id in batch_ids:
                 file_key = f"starting_materials_batch_{batch_id}"
                 if file_key in request.FILES:
-                    # Save the file to a temporary location
-                    csv_file = request.FILES[file_key]
-                    tmp_file_path = save_tmp_file(csv_file)
-                    starting_material_files[str(batch_id)] = tmp_file_path
+                    custom_files[str(batch_id)] = request.FILES[file_key]
 
-        # Start the task with the optional starting material files
-        task = create_ot_script.delay(
-            batchids=batch_ids,
+        task_id = initiate_ot_project(
+            batch_ids=batch_ids,
             protocol_name=protocol_name,
-            custom_SM_files=starting_material_files if has_custom_materials else None,
+            custom_files=custom_files,
         )
 
-        data = {"task_id": task.id}
-        return JsonResponse(data=data)
+        return JsonResponse(data={"task_id": task_id})
 
     @action(detail=False, methods=["get"])
     def gettaskstatus(self, request, pk=None):
