@@ -1725,6 +1725,9 @@ class TestManifoldCatalogWiring(TestCase):
     """Verify catalog entries from route['molecules'] are wired to the correct reactant."""
 
     def setUp(self):
+        self.patcher_transaction = patch("backend.tasks.upload.transaction")
+        self.mock_transaction = self.patcher_transaction.start()
+        self.addCleanup(self.patcher_transaction.stop)
         self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
             "backend.tasks.upload.create_project_model", return_value=1
@@ -1861,6 +1864,9 @@ class TestManifoldCatalogWiringNotEncoded(TestCase):
     """Same catalog wiring test for the not-encoded branch."""
 
     def setUp(self):
+        self.patcher_transaction = patch("backend.tasks.upload.transaction")
+        self.mock_transaction = self.patcher_transaction.start()
+        self.addCleanup(self.patcher_transaction.stop)
         self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
             "backend.tasks.upload.create_project_model", return_value=1
