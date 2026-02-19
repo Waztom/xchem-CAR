@@ -1,0 +1,224 @@
+# ─────────────────────────────────────────────────────────────
+# CAR – Continuous Integration
+#
+# Triggers: push / PR to master and staging
+#
+# Jobs:
+#   1. unit-tests    – fast, no DB, pure unittest.TestCase tests
+#   2. django-tests  – needs Postgres, runs django.test.TestCase tests
+#   3. lint          – flake8 style checks
+#   4. build-push    – Docker build + push to Docker Hub (only on push, not PRs)
+# ─────────────────────────────────────────────────────────────
+name: CI
+
+on:
+  push:
+    branches: [master, staging]
+  pull_request:
+    branches: [master, staging]
+
+# Cancel in-progress runs for the same branch/PR
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# ============================================================
+# JOBS
+# ============================================================
+jobs:
+
+  # ----------------------------------------------------------
+  # 1. Unit tests (no database required)
+  #    Covers: chem_utils, conversions, validate, otsession,
+  #            otwriter, tasks, pubchem_utils, enamine,
+  #            db_utils, createmodels, signals, serializers
+  # ----------------------------------------------------------
+  unit-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bullseye-slim
+
+    steps:
+      - name: Install system dependencies
+        run: |
+          apt-get update -qq
+          apt-get install --no-install-recommends -y \
+            git python3-rdkit python3-pip python3-pandas python3-psycopg2
+          apt-get clean
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python dependencies
+        working-directory: src
+        run: |
+          pip3 install --no-cache-dir -r requirements.txt
+          pip3 install --no-cache-dir -r requirements-dev.txt
+
+      - name: Run unit tests
+        working-directory: src
+        env:
+          DJANGO_SETTINGS_MODULE: CAR.settings
+          # Provide dummy env vars so settings.py can import without error.
+          # These are NOT used — unit tests mock all DB/service calls.
+          SECRET_KEY: ci-test-secret-key-not-real
+          SENDGRID_API_KEY: SG.dummy
+          POSTGRES_NAME: ci
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: "5432"
+          CELERY_BROKER_URL: redis://localhost:6379/0
+          CELERY_RESULT_BACKEND: redis://localhost:6379/0
+        run: |
+          python3 -m django test backend.tests.test_chem_utils \
+                                  backend.tests.test_conversions \
+                                  backend.tests.test_validate \
+                                  backend.tests.test_otsession \
+                                  backend.tests.test_otwriter \
+                                  backend.tests.test_tasks \
+                                  backend.tests.test_pubchem_utils \
+                                  backend.tests.test_enamine \
+                                  backend.tests.test_db_utils \
+                                  backend.tests.test_createmodels \
+                                  backend.tests.test_signals \
+                                  backend.tests.test_serializers \
+                                  --verbosity 2 --no-input
+
+  # ----------------------------------------------------------
+  # 2. Django integration tests (requires Postgres)
+  #    Covers: test_api, test_recipe_models, test_recipe_utils,
+  #            test_recipegenerator
+  # ----------------------------------------------------------
+  django-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bullseye-slim
+
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_DB: car_test
+          POSTGRES_USER: car_ci
+          POSTGRES_PASSWORD: car_ci_password
+        options: >-
+          --health-cmd "pg_isready -U car_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Install system dependencies
+        run: |
+          apt-get update -qq
+          apt-get install --no-install-recommends -y \
+            git python3-rdkit python3-pip python3-pandas python3-psycopg2
+          apt-get clean
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python dependencies
+        working-directory: src
+        run: |
+          pip3 install --no-cache-dir -r requirements.txt
+          pip3 install --no-cache-dir -r requirements-dev.txt
+
+      - name: Run Django integration tests
+        working-directory: src
+        env:
+          DJANGO_SETTINGS_MODULE: CAR.settings
+          SECRET_KEY: ci-test-secret-key-not-real
+          SENDGRID_API_KEY: SG.dummy
+          POSTGRES_NAME: car_test
+          POSTGRES_USER: car_ci
+          POSTGRES_PASSWORD: car_ci_password
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: "5432"
+          CELERY_BROKER_URL: redis://localhost:6379/0
+          CELERY_RESULT_BACKEND: redis://localhost:6379/0
+        run: |
+          python3 -m django test backend.tests.test_api \
+                                  backend.tests.test_recipe_models \
+                                  backend.tests.test_recipe_utils \
+                                  backend.tests.test_recipegenerator \
+                                  --verbosity 2 --no-input
+
+  # ----------------------------------------------------------
+  # 3. Lint (flake8)
+  # ----------------------------------------------------------
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install flake8
+        run: pip install flake8==3.9.1
+
+      - name: Run flake8
+        working-directory: src
+        run: |
+          flake8 backend/ \
+            --max-line-length 120 \
+            --exclude '__pycache__,migrations,encodedrecipes.py' \
+            --count --statistics \
+            --extend-ignore E501,W503,E203
+
+  # ----------------------------------------------------------
+  # 4. Build & push Docker image
+  #    Only runs on push (not PRs) and only after tests pass.
+  #    Tags:
+  #      - latest         (master only)
+  #      - staging        (staging only)
+  #      - sha-<commit>   (always)
+  # ----------------------------------------------------------
+  build-push:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: [unit-tests, django-tests]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Determine image tags
+        id: tags
+        run: |
+          REPO="${{ secrets.DOCKER_HUB_USERNAME }}/car"
+          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAGS="${REPO}:sha-${SHA_SHORT}"
+
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            TAGS="${TAGS},${REPO}:latest"
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            TAGS="${TAGS},${REPO}:staging"
+          fi
+
+          echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: src
+          file: src/Dockerfile.prod
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
