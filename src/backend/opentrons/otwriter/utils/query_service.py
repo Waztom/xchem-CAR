@@ -462,17 +462,17 @@ class QueryService:
             logger.error(f"No product SMILES found for reaction {reaction_id}")
             raise
         except Well.DoesNotExist:
-            logger.error(f"No well found for reaction {reaction_id}, type '{welltype}'")
+            logger.error(f"No well found for reaction {reaction_id}, role='{role}'")
             raise
         except Well.MultipleObjectsReturned:
             logger.warning(
-                f"Multiple wells found for reaction {reaction_id}, type '{welltype}', using first one"
+                f"Multiple wells found for reaction {reaction_id}, role='{role}', using first one"
             )
             wells = Well.objects.filter(
                 otsession_id=self.otsession_id,
                 reaction_id=reaction_id,
-                role=_well_role,
-                role_index=_well_role_index,
+                role=role,
+                role_index=role_index,
                 smiles=productsmiles,
             )
             return wells.first()

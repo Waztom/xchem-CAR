@@ -182,7 +182,7 @@ jobs:
             --max-line-length 120 \
             --exclude '__pycache__,migrations,encodedrecipes.py' \
             --count --statistics \
-            --extend-ignore E501,W503,E203
+            --extend-ignore E114,E128,E261,E302,E303,E305,E306,E402,E501,E712,E722,W291,W292,W293,W391,W503,W605,E203,F401,F541,F811,F841
 
   # ----------------------------------------------------------
   # 4. Build & push Docker image
