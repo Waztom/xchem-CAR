@@ -10,9 +10,12 @@ does only request parsing and JSON response assembly.
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from celery.result import AsyncResult
+
+if TYPE_CHECKING:
+    from django.core.files.uploadedfile import UploadedFile
 
 logger = logging.getLogger(__name__)
 

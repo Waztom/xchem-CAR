@@ -332,6 +332,8 @@ class ValidateFile(object):
                 self.concentrations = self.concentrations + concentrations
                 self.amounts = self.amounts + amounts
                 self.nosteps = self.nosteps + no_steps
+                product_smiles = []
+                number_reactant_pair_smiles = 0
                 for reaction_number in reaction_numbers_group:
                     reaction_combi_group_info = {}
                     if reaction_number == 1:

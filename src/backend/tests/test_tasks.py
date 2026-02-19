@@ -269,6 +269,8 @@ class TestUploadManifoldHappyPath(TestCase):
     """Happy path: one target, one route, all reactions encoded → otchem=True."""
 
     def setUp(self):
+        self.patcher_transaction = patch("backend.tasks.upload.transaction")
+        self.mock_transaction = self.patcher_transaction.start()
         self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
             "backend.tasks.upload.create_project_model", return_value=1
@@ -448,6 +450,8 @@ class TestUploadManifoldNotEncoded(TestCase):
     """When NOT all reactions are encoded → otchem=False path."""
 
     def setUp(self):
+        self.patcher_transaction = patch("backend.tasks.upload.transaction")
+        self.mock_transaction = self.patcher_transaction.start()
         self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
             "backend.tasks.upload.create_project_model", return_value=1
@@ -572,6 +576,8 @@ class TestUploadManifoldEdgeCases(TestCase):
     """Edge cases for Manifold upload."""
 
     def setUp(self):
+        self.patcher_transaction = patch("backend.tasks.upload.transaction")
+        self.mock_transaction = self.patcher_transaction.start()
         self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
             "backend.tasks.upload.create_project_model", return_value=1
@@ -1719,6 +1725,9 @@ class TestManifoldCatalogWiring(TestCase):
     """Verify catalog entries from route['molecules'] are wired to the correct reactant."""
 
     def setUp(self):
+        self.patcher_transaction = patch("backend.tasks.upload.transaction")
+        self.mock_transaction = self.patcher_transaction.start()
+        self.addCleanup(self.patcher_transaction.stop)
         self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
             "backend.tasks.upload.create_project_model", return_value=1
@@ -1855,6 +1864,9 @@ class TestManifoldCatalogWiringNotEncoded(TestCase):
     """Same catalog wiring test for the not-encoded branch."""
 
     def setUp(self):
+        self.patcher_transaction = patch("backend.tasks.upload.transaction")
+        self.mock_transaction = self.patcher_transaction.start()
+        self.addCleanup(self.patcher_transaction.stop)
         self.patcher_del = patch("backend.tasks.upload.delete_tmp_file")
         self.patcher_project = patch(
             "backend.tasks.upload.create_project_model", return_value=1
@@ -2235,6 +2247,11 @@ def _make_reaction_obj(
 class TestCreateOTScriptHappyPath(TestCase):
     """Single-batch, single-step, action sessions already exist."""
 
+    def setUp(self):
+        patcher = patch("backend.tasks.ot_protocol.transaction")
+        self.mock_transaction = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def _setup_mocks(
         self,
         mock_zip,
@@ -2358,6 +2375,11 @@ class TestCreateOTScriptHappyPath(TestCase):
 class TestCreateOTScriptNoActionSessions(TestCase):
     """When action sessions don't exist, CreateEncodedActionModels is called."""
 
+    def setUp(self):
+        patcher = patch("backend.tasks.ot_protocol.transaction")
+        self.mock_transaction = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_creates_encoded_action_models(
         self,
         mock_zip,
@@ -2472,6 +2494,11 @@ class TestCreateOTScriptNoActionSessions(TestCase):
 class TestCreateOTScriptExistingProtocol(TestCase):
     """When a completed protocol already exists, it should be re-used."""
 
+    def setUp(self):
+        patcher = patch("backend.tasks.ot_protocol.transaction")
+        self.mock_transaction = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_reuses_existing_protocol(
         self,
         mock_zip,
@@ -2580,6 +2607,11 @@ class TestCreateOTScriptExistingProtocol(TestCase):
 @patch("backend.tasks.ot_protocol.ZipOTBatchProtocol")
 class TestCreateOTScriptMultiStep(TestCase):
     """Two-step reaction: step 1 always runs, step 2 uses QC filter."""
+
+    def setUp(self):
+        patcher = patch("backend.tasks.ot_protocol.transaction")
+        self.mock_transaction = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def _setup(
         self,
@@ -2717,6 +2749,11 @@ class TestCreateOTScriptMultiStep(TestCase):
 class TestCreateOTScriptTempFileCleanup(TestCase):
     """Custom SM files should be deleted after the transaction."""
 
+    def setUp(self):
+        patcher = patch("backend.tasks.ot_protocol.transaction")
+        self.mock_transaction = patcher.start()
+        self.addCleanup(patcher.stop)
+
     @patch("backend.tasks.ot_protocol.os.path.exists", return_value=True)
     @patch("backend.tasks.ot_protocol.os.remove")
     def test_custom_sm_files_cleaned_up(
@@ -2830,6 +2867,11 @@ class TestCreateOTScriptTempFileCleanup(TestCase):
 @patch("backend.tasks.ot_protocol.ZipOTBatchProtocol")
 class TestCreateOTScriptZipErrors(TestCase):
     """When ZipOTBatchProtocol reports errors, task_summary should be False."""
+
+    def setUp(self):
+        patcher = patch("backend.tasks.ot_protocol.transaction")
+        self.mock_transaction = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_task_summary_false_on_zip_errors(
         self,

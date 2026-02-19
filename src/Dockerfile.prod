@@ -1,0 +1,60 @@
+# ─────────────────────────────────────────────────────────────
+# CAR – Production multi-stage Dockerfile
+#
+# Stage 1 (frontend-build): Build the Vite/React frontend
+# Stage 2 (production):     Python app with pre-built static assets
+# ─────────────────────────────────────────────────────────────
+
+# ── Stage 1: Build frontend ─────────────────────────────────
+FROM node:18-bullseye-slim AS frontend-build
+
+WORKDIR /build
+
+COPY frontend/package.json frontend/package-lock.json* ./
+RUN npm install --quiet --legacy-peer-deps
+
+COPY frontend/ ./
+RUN npm run build
+
+
+# ── Stage 2: Production image ───────────────────────────────
+FROM debian:bullseye-slim AS production
+
+# Prevent Python from writing .pyc files and enable unbuffered stdout/stderr
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# System dependencies (rdkit only available as system package on Debian)
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      python3-rdkit \
+      python3-pip \
+      python3-pandas \
+      python3-psycopg2 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Python dependencies
+COPY requirements.txt ./
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Create log directory
+RUN mkdir -p logs && touch logs/logfile.log
+
+# Copy application source
+COPY manage.py ./
+COPY CAR/ CAR/
+COPY backend/ backend/
+
+# Copy pre-built frontend assets
+COPY --from=frontend-build /build/dist/ frontend/dist/
+
+# Collect static files (optional – uncomment when STATIC_ROOT is configured)
+# RUN python3 manage.py collectstatic --noinput
+
+EXPOSE 8000
+
+# Default command – override in docker-compose / k8s as needed
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
