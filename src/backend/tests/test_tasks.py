@@ -2868,6 +2868,11 @@ class TestCreateOTScriptTempFileCleanup(TestCase):
 class TestCreateOTScriptZipErrors(TestCase):
     """When ZipOTBatchProtocol reports errors, task_summary should be False."""
 
+    def setUp(self):
+        patcher = patch("backend.tasks.ot_protocol.transaction")
+        self.mock_transaction = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_task_summary_false_on_zip_errors(
         self,
         mock_zip,
