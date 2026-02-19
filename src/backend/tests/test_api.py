@@ -193,7 +193,7 @@ class TestProjectCRUD(APITestBase):
     def test_list_projects(self):
         resp = self.client.get("/api/projects/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertGreaterEqual(len(resp.json()), 1)
+        self.assertGreaterEqual(resp.json()["count"], 1)
 
     def test_retrieve_project(self):
         resp = self.client.get(f"/api/projects/{self.project.pk}/")
@@ -244,7 +244,7 @@ class TestBatchCRUD(APITestBase):
     def test_filter_by_project(self):
         resp = self.client.get(f"/api/batches/?project_id={self.project.pk}")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        for item in resp.json():
+        for item in resp.json()["results"]:
             self.assertEqual(item["project_id"], self.project.pk)
 
     def test_retrieve_with_fetchall(self):
@@ -268,7 +268,7 @@ class TestTargetCRUD(APITestBase):
     def test_filter_by_batch(self):
         resp = self.client.get(f"/api/targets/?batch_id={self.batch.pk}")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        for item in resp.json():
+        for item in resp.json()["results"]:
             self.assertEqual(item["batch_id"], self.batch.pk)
 
     def test_retrieve_with_fetchall(self):
@@ -427,7 +427,7 @@ class TestOTBatchProtocolCRUD(APITestBase):
             "/api/otbatchprotocols/?celery_taskid=abc-123"
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(resp.json()), 1)
+        self.assertEqual(resp.json()["count"], 1)
 
 
 class TestOTSessionCRUD(APITestBase):
@@ -707,14 +707,11 @@ class TestProjectGetTaskStatus(APITestBase):
         self.assertFalse(data["validated"])
         self.assertIn("validation_errors", data)
 
-    def test_no_task_id_returns_server_error(self):
-        """When no task_id param is provided, view returns None (bug).
-
-        The view falls through all branches and implicitly returns None,
-        which DRF rejects with an AssertionError (expected Response).
-        """
-        with self.assertRaises(AssertionError):
-            self.client.get("/api/projects/gettaskstatus/")
+    def test_no_task_id_returns_400(self):
+        """When no task_id param is provided, returns 400 with error message."""
+        resp = self.client.get("/api/projects/gettaskstatus/")
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", resp.json())
 
 
 # ===================================================================
@@ -749,20 +746,17 @@ class TestBatchCreateAction(APITestBase):
 
     @patch("backend.api.clone_batch")
     def test_create_batch_clone_exception(self, mock_clone):
-        """Exception in clone_batch triggers a TypeError in the view.
-
-        The view has a bug: it passes the raw Exception object into
-        JsonResponse(data={... "error": e}), which is not JSON-serializable.
-        Django's test client re-raises such internal errors as TypeError.
-        """
+        """Exception in clone_batch returns a 500 JSON response with error detail."""
         mock_clone.side_effect = Exception("clone failed")
 
-        with self.assertRaises(TypeError):
-            self.client.post(
-                "/api/batches/",
-                {"methodids": [1], "batchtag": "fail"},
-                format="json",
-            )
+        resp = self.client.post(
+            "/api/batches/",
+            {"methodids": [1], "batchtag": "fail"},
+            format="json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertIn("error", resp.json())
+        self.assertEqual(resp.json()["error"], "clone failed")
 
 
 class TestBatchCanonicalizeSmiles(APITestBase):

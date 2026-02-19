@@ -270,6 +270,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 data = {"task_status": task.status}
                 return JsonResponse(data)
 
+            # Unknown / intermediate status (e.g. STARTED, RETRY)
+            return JsonResponse(data={"task_status": task.status})
+
+        return JsonResponse(
+            data={"error": "task_id query parameter is required"},
+            status=400,
+        )
+
 
 class BatchViewSet(viewsets.ModelViewSet):
     queryset = Batch.objects.all()
@@ -328,9 +336,16 @@ class BatchViewSet(viewsets.ModelViewSet):
             if serialized_data:
                 return JsonResponse(data=serialized_data)
             else:
-                return JsonResponse(data="Something went wrong")
+                return JsonResponse(
+                    data={"message": "Something went wrong"},
+                    status=500,
+                )
         except Exception as e:
-            return JsonResponse(data={"message": "Something went wrong", "error": e})
+            logger.exception("clone_batch failed")
+            return JsonResponse(
+                data={"message": "Something went wrong", "error": str(e)},
+                status=500,
+            )
 
     @action(methods=["post"], detail=False, url_path="canonicalizesmiles")
     def canonicalize_smiles(self, request, pk=None):
@@ -379,6 +394,13 @@ class BatchViewSet(viewsets.ModelViewSet):
             if task.status == "PENDING":
                 data = {"task_status": task.status}
                 return JsonResponse(data)
+
+            return JsonResponse(data={"task_status": task.status})
+
+        return JsonResponse(
+            data={"error": "task_id query parameter is required"},
+            status=400,
+        )
 
     @action(methods=["post"], detail=False, url_path="updatereactionsuccess")
     def update_reaction_success(self, request, pk=None):
@@ -547,6 +569,13 @@ class OTProjectViewSet(viewsets.ModelViewSet):
             if task.status == "PENDING":
                 data = {"task_status": task.status}
                 return JsonResponse(data)
+
+            return JsonResponse(data={"task_status": task.status})
+
+        return JsonResponse(
+            data={"error": "task_id query parameter is required"},
+            status=400,
+        )
 
 
 class OTBatchProtocolViewSet(viewsets.ModelViewSet):

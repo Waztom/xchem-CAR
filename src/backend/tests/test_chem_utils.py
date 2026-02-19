@@ -20,6 +20,10 @@ from backend.chem_utils import (
     remove_radicals,
     are_equivalent_structures,
 )
+from backend.exceptions import (
+    MolecularPropertyError,
+    SMARTSReactionError,
+)
 
 from .fixtures.testutils import (
     snar_combo_equal,
@@ -112,12 +116,8 @@ class ChemistryFunctionsTestCase(TestCase):
         )
 
     def test_get_mws_fail(self):
-        test_mws = get_mws(smiles=["OT Chemistry is possible"])
-        self.assertEqual(
-            test_mws,
-            None,
-            "incorrect capture of bad SMILES input",
-        )
+        with self.assertRaises(MolecularPropertyError):
+            get_mws(smiles=["OT Chemistry is possible"])
 
     # KNOWN FAILURE: RDKit 2020.09.4 in this container was built without InChI
     # support (INCHI_AVAILABLE=False), so get_inchi_key returns None.
@@ -202,7 +202,7 @@ class ChemistryFunctionsTestCase(TestCase):
         )
 
     def test_get_addition_order_success(self):
-        test_ordered_smis = get_addtion_order(
+        test_ordered_smis = get_addition_order(
             product_smi=self.snar_product_smiles,
             reactant_SMILES=self.snar_reactant_smiles_tuple,
             reaction_SMARTS=self.snar_encoded_smarts,
@@ -217,7 +217,7 @@ class ChemistryFunctionsTestCase(TestCase):
         first_reactant_smiles = "OT Chemistry is possible"
         second_reactant_smiles = self.snar_reactant_smiles_one[0]
         reactant_SMILES = (first_reactant_smiles, second_reactant_smiles)
-        test_ordered_smis = get_addtion_order(
+        test_ordered_smis = get_addition_order(
             product_smi=self.snar_product_smiles,
             reactant_SMILES=reactant_SMILES,
             reaction_SMARTS=self.snar_encoded_smarts,
@@ -301,9 +301,9 @@ class TestGetMolecularFormula(TestCase):
         self.assertEqual(result[0], "C2H6O")
         self.assertEqual(result[1], "H2O")
 
-    def test_invalid_smiles_returns_none(self):
-        result = get_molecular_formula(["not_a_smiles"])
-        self.assertIsNone(result)
+    def test_invalid_smiles_raises(self):
+        with self.assertRaises(MolecularPropertyError):
+            get_molecular_formula(["not_a_smiles"])
 
 
 # =========================================================================
@@ -367,9 +367,9 @@ class TestMatchSmarts(TestCase):
         result = match_smarts("CCO", "c1ccccc1")
         self.assertFalse(result)
 
-    def test_invalid_smiles_returns_none(self):
-        result = match_smarts("not_a_smiles", "c1ccccc1")
-        self.assertIsNone(result)
+    def test_invalid_smiles_raises(self):
+        with self.assertRaises(SMARTSReactionError):
+            match_smarts("not_a_smiles", "c1ccccc1")
 
 
 # =========================================================================
@@ -505,28 +505,24 @@ class TestAreEquivalentStructures(TestCase):
 
 
 # =========================================================================
-# Tests for get_addition_order (new name) and get_addtion_order (compat)
+# Tests for get_addition_order
 # =========================================================================
 
 
-class TestGetAdditionOrderCompat(TestCase):
-    """Test that the old misspelled name still works."""
+class TestGetAdditionOrder(TestCase):
+    """Tests for get_addition_order (typo-alias removed)."""
 
-    def test_deprecated_name_delegates(self):
+    def test_correct_order_found(self):
         snar_smarts = [
             "[#6:3]-[#7;H3,H2,H1:2].[c:1]-[F,Cl,Br,I]>>[#6:3]-[#7:2]-[c:1]"
         ]
-        result = get_addtion_order(
+        result = get_addition_order(
             product_smi="O=C(O)Cc1ccc(Nc2ccccc2)cc1F",
             reactant_SMILES=("C1=CC(=C(C=C1F)F)CC(=O)O", "C1=CC=C(C=C1)N"),
             reaction_SMARTS=snar_smarts,
         )
-        expected = get_addition_order(
-            product_smi="O=C(O)Cc1ccc(Nc2ccccc2)cc1F",
-            reactant_SMILES=("C1=CC(=C(C=C1F)F)CC(=O)O", "C1=CC=C(C=C1)N"),
-            reaction_SMARTS=snar_smarts,
-        )
-        self.assertEqual(result, expected)
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, list)
 
 
 class TestGetAdditionOrderSingleReactant(TestCase):

@@ -49,6 +49,8 @@ from .chem_utils import (
 from .conversions import calculate_mols_from_conc, calculate_mass_from_mols
 from .pubchem_utils import get_pubchem_cas, get_pubchem_compound
 
+from .exceptions import ModelCreationError, ActionModelError
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -645,7 +647,9 @@ class CreateEncodedActionModels(object):
                 mass_material = mol_material * reactant_MW * 1000
                 return mass_material
         except Exception as e:
-            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
+            raise ModelCreationError(
+                f"Failed to calculate mass (unit={calcunit}, value={calcvalue})"
+            ) from e
 
     def calculateVolume(
         self,
@@ -689,7 +693,9 @@ class CreateEncodedActionModels(object):
                     vol_material = (mol_material / conc_reagents) * 1e6  # in uL
                 return vol_material
         except Exception as e:
-            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
+            raise ModelCreationError(
+                f"Failed to calculate volume (unit={calcunit}, value={calcvalue})"
+            ) from e
 
     def createActionSessionModel(
         self,
@@ -725,7 +731,9 @@ class CreateEncodedActionModels(object):
             actionsession.save()
             return actionsession
         except Exception as e:
-            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
+            raise ModelCreationError(
+                f"Failed to create ActionSession (type={actionsessiontype})"
+            ) from e
 
     def createAddActionModel(self, actionsession_obj: ActionSession, recipe_add):
         """Create a runtime ``AddAction`` from a ``RecipeAddAction`` model.
@@ -803,7 +811,9 @@ class CreateEncodedActionModels(object):
             add.save()
 
         except Exception as e:
-            logger.warning("Error creating AddAction from recipe: {}".format(e))
+            raise ActionModelError(
+                f"Failed to create AddAction from recipe"
+            ) from e
 
     def createExtractActionModel(self, actionsession_obj: ActionSession, recipe_ext):
         """Create a runtime ``ExtractAction`` from a ``RecipeExtractAction`` model.
@@ -838,7 +848,9 @@ class CreateEncodedActionModels(object):
             extract.concentration = recipe_ext.concentration or 0
             extract.save()
         except Exception as e:
-            logger.info("Error creating ExtractAction from recipe: {}".format(e))
+            raise ActionModelError(
+                f"Failed to create ExtractAction from recipe"
+            ) from e
 
     def createMixActionModel(self, actionsession_obj: ActionSession, recipe_mix):
         """Create a runtime ``MixAction`` from a ``RecipeMixAction`` model.
@@ -860,7 +872,9 @@ class CreateEncodedActionModels(object):
             mix.repetitions = recipe_mix.repetitions
             mix.save()
         except Exception as e:
-            logger.info("Error creating MixAction from recipe: {}".format(e))
+            raise ActionModelError(
+                f"Failed to create MixAction from recipe"
+            ) from e
 
     def createStirActionModel(self, actionsession_obj: ActionSession, recipe_stir):
         """Create a runtime ``StirAction`` from a ``RecipeStirAction`` model.
@@ -885,4 +899,6 @@ class CreateEncodedActionModels(object):
             stir.temperatureunit = recipe_stir.temperature_unit
             stir.save()
         except Exception as e:
-            logger.info("Error creating StirAction from recipe: {}".format(e))
+            raise ActionModelError(
+                f"Failed to create StirAction from recipe"
+            ) from e

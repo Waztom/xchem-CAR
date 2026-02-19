@@ -22,6 +22,11 @@ conversions, default_storage, MCuleAPI) are mocked.
 from unittest import TestCase
 from unittest.mock import patch, MagicMock, call, PropertyMock
 import math
+import logging
+
+from backend.exceptions import ModelCreationError, ActionModelError
+
+logger = logging.getLogger(__name__)
 
 
 # ===================================================================
@@ -991,14 +996,13 @@ class TestCreateActionSessionModel(TestCase):
         obj = self._make_instance()
         MockAS.side_effect = Exception("DB error")
 
-        result = obj.createActionSessionModel(
-            actionsessiontype="stir",
-            driver="human",
-            sessionnumber=2,
-            continuation=True,
-        )
-
-        self.assertIsNone(result)
+        with self.assertRaises(ModelCreationError):
+            obj.createActionSessionModel(
+                actionsessiontype="stir",
+                driver="human",
+                sessionnumber=2,
+                continuation=True,
+            )
 
 
 # ===================================================================
@@ -1046,8 +1050,8 @@ class TestCreateStirActionModel(TestCase):
         obj = self._make_instance()
         MockStir.side_effect = Exception("DB error")
 
-        result = obj.createStirActionModel(MagicMock(), MagicMock())
-        # Should not raise — exception is caught and logged
+        with self.assertRaises(ActionModelError):
+            obj.createStirActionModel(MagicMock(), MagicMock())
 
 
 # ===================================================================
@@ -1290,7 +1294,7 @@ class TestCreateAddActionModel(TestCase):
     @patch("backend.createmodels.AddAction")
     @patch("backend.createmodels.match_smarts")
     def test_add_action_catches_exception(self, mock_match, MockAdd):
-        """Verify broad except block doesn't propagate."""
+        """Verify exception propagates as ActionModelError."""
         obj = self._make_instance()
         mock_match.side_effect = Exception("SMARTS parsing error")
 
@@ -1298,8 +1302,8 @@ class TestCreateAddActionModel(TestCase):
         recipe_add.material_smarts = "[INVALID"
         recipe_add.material_smiles = None
 
-        # Should not raise
-        obj.createAddActionModel(MagicMock(), recipe_add)
+        with self.assertRaises(ActionModelError):
+            obj.createAddActionModel(MagicMock(), recipe_add)
 
 
 # ===================================================================
