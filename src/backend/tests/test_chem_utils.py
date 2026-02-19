@@ -3,14 +3,14 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 from backend.chem_utils import (
-    getMWs,
-    getInchiKey,
-    canonSmiles,
-    combiChem,
-    createSVGString,
-    createReactionSVGString,
-    getAddtionOrder,
-    checkReactantSMARTS,
+    get_mws,
+    get_inchi_key,
+    canon_smiles,
+    combi_chem,
+    create_svg_string,
+    create_reaction_svg_string,
+    get_addtion_order,
+    check_reactant_smarts,
 )
 
 from .fixtures.testutils import (
@@ -89,7 +89,7 @@ class ChemistryFunctionsTestCase(TestCase):
         return str.replace(" ", "").replace("\t", "").replace("\n", "")
 
     def test_get_mws(self):
-        test_mws = getMWs(smiles=self.snar_reactant_smiles_tuple)
+        test_mws = get_mws(smiles=self.snar_reactant_smiles_tuple)
         self.assertAlmostEqual(
             first=test_mws[0],
             second=172.13,
@@ -104,7 +104,7 @@ class ChemistryFunctionsTestCase(TestCase):
         )
 
     def test_get_mws_fail(self):
-        test_mws = getMWs(smiles=["OT Chemistry is possible"])
+        test_mws = get_mws(smiles=["OT Chemistry is possible"])
         self.assertEqual(
             test_mws,
             None,
@@ -112,9 +112,9 @@ class ChemistryFunctionsTestCase(TestCase):
         )
 
     # KNOWN FAILURE: RDKit 2020.09.4 in this container was built without InChI
-    # support (INCHI_AVAILABLE=False), so getInchiKey returns None.
+    # support (INCHI_AVAILABLE=False), so get_inchi_key returns None.
     def test_get_inchi_key(self):
-        test_inchi_key = getInchiKey(smiles=self.smiles)
+        test_inchi_key = get_inchi_key(smiles=self.smiles)
         self.assertEqual(
             test_inchi_key,
             "YZDFADGMVOSVIX-UHFFFAOYSA-N",
@@ -122,7 +122,7 @@ class ChemistryFunctionsTestCase(TestCase):
         )
 
     def test_get_inchi_key_fail(self):
-        test_inchi_key = getInchiKey(smiles="OT Chemistry is possible")
+        test_inchi_key = get_inchi_key(smiles="OT Chemistry is possible")
         self.assertEqual(
             test_inchi_key,
             None,
@@ -130,7 +130,7 @@ class ChemistryFunctionsTestCase(TestCase):
         )
 
     def test_canon_smiles(self):
-        test_canon_smiles = canonSmiles(smiles=self.smiles)
+        test_canon_smiles = canon_smiles(smiles=self.smiles)
         self.assertEqual(
             test_canon_smiles,
             "NCCc1c2c(c(Br)c3c1OCC3)OCC2",
@@ -138,17 +138,17 @@ class ChemistryFunctionsTestCase(TestCase):
         )
 
     def test_canon_smiles_fail(self):
-        test_canon_smiles = canonSmiles(smiles="OT Chemistry is possible")
+        test_canon_smiles = canon_smiles(smiles="OT Chemistry is possible")
         self.assertEqual(
             test_canon_smiles,
             False,
             "incorrect capture of bad SMILES input",
         )
 
-    # KNOWN FAILURE: combiChem uses InChI-based canonicalisation internally,
+    # KNOWN FAILURE: combi_chem uses InChI-based canonicalisation internally,
     # which is unavailable in this container's RDKit (INCHI_AVAILABLE=False).
     def test_combi_chem(self):
-        test_all_possible_combinations = combiChem(
+        test_all_possible_combinations = combi_chem(
             reactant_1_SMILES=self.snar_reactant_smiles_one,
             reactant_2_SMILES=self.snar_reactant_smiles_two,
         )
@@ -158,10 +158,10 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect combinatorial product of two equal length lists of smiles",
         )
 
-    # KNOWN FAILURE: combiChem uses InChI-based canonicalisation internally,
+    # KNOWN FAILURE: combi_chem uses InChI-based canonicalisation internally,
     # which is unavailable in this container's RDKit (INCHI_AVAILABLE=False).
     def test_combi_chem_fail(self):
-        test_all_possible_combinations = combiChem(
+        test_all_possible_combinations = combi_chem(
             reactant_1_SMILES=self.snar_reactant_smiles_one[0:1],
             reactant_2_SMILES=self.snar_reactant_smiles_two,
         )
@@ -171,10 +171,10 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect combinatorial product of two non-equal length lists of smiles",
         )
 
-    # KNOWN FAILURE: createSVGString output differs from expected fixture
+    # KNOWN FAILURE: create_svg_string output differs from expected fixture
     # due to RDKit 2020.09.4 rendering differences (no InChI support).
     def test_create_svg_string(self):
-        test_svg_str = createSVGString(smiles=self.smiles)
+        test_svg_str = create_svg_string(smiles=self.smiles)
         test_svg_str = self.strip_white_space(test_svg_str)
         self.assertEqual(
             test_svg_str,
@@ -182,10 +182,10 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect creation of a svg string from SMILES",
         )
 
-    # KNOWN FAILURE: createReactionSVGString output differs from expected
+    # KNOWN FAILURE: create_reaction_svg_string output differs from expected
     # fixture due to RDKit 2020.09.4 rendering differences (no InChI support).
     def test_create_reaction_svg_string(self):
-        test_svg_str = createReactionSVGString(smarts=self.reaction_smarts)
+        test_svg_str = create_reaction_svg_string(smarts=self.reaction_smarts)
         test_svg_str = self.strip_white_space(test_svg_str)
         self.assertEqual(
             test_svg_str,
@@ -194,7 +194,7 @@ class ChemistryFunctionsTestCase(TestCase):
         )
 
     def test_get_addition_order_success(self):
-        test_ordered_smis = getAddtionOrder(
+        test_ordered_smis = get_addtion_order(
             product_smi=self.snar_product_smiles,
             reactant_SMILES=self.snar_reactant_smiles_tuple,
             reaction_SMARTS=self.snar_encoded_smarts,
@@ -209,7 +209,7 @@ class ChemistryFunctionsTestCase(TestCase):
         first_reactant_smiles = "OT Chemistry is possible"
         second_reactant_smiles = self.snar_reactant_smiles_one[0]
         reactant_SMILES = (first_reactant_smiles, second_reactant_smiles)
-        test_ordered_smis = getAddtionOrder(
+        test_ordered_smis = get_addtion_order(
             product_smi=self.snar_product_smiles,
             reactant_SMILES=reactant_SMILES,
             reaction_SMARTS=self.snar_encoded_smarts,
@@ -220,10 +220,10 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect SMILES input should return None for addtion order",
         )
 
-    # KNOWN FAILURE: checkReactantSMARTS product SMILES differ due to RDKit
+    # KNOWN FAILURE: check_reactant_smarts product SMILES differ due to RDKit
     # 2020.09.4 canonicalisation without InChI support (INCHI_AVAILABLE=False).
     def test_check_reactant_smarts_success(self):
-        test_product_mols = checkReactantSMARTS(
+        test_product_mols = check_reactant_smarts(
             reactant_SMILES=self.snar_reactant_smiles_tuple,
             reaction_SMARTS=self.snar_encoded_smarts,
         )
@@ -241,7 +241,7 @@ class ChemistryFunctionsTestCase(TestCase):
         )
 
     def test_more_one_reaction_smarts_success_boc_tbs(self):
-        test_product_mols = checkReactantSMARTS(
+        test_product_mols = check_reactant_smarts(
             reactant_SMILES=self.boc_tbs_reactant_smiles,
             reaction_SMARTS=self.boc_tbs_reaction_smarts,
         )
@@ -258,7 +258,7 @@ class ChemistryFunctionsTestCase(TestCase):
         )
 
     def test_more_one_reaction_smarts_success_double_ester(self):
-        test_product_mols = checkReactantSMARTS(
+        test_product_mols = check_reactant_smarts(
             reactant_SMILES=self.ester_double_reactant_smiles,
             reaction_SMARTS=self.ester_double_reaction_smarts,
         )

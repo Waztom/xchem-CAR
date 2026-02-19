@@ -515,7 +515,7 @@ class TestCheckReaction(TestCase):
             return vf
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
+    @patch("backend.validate.check_reactant_smarts")
     def test_valid_reaction_returns_product(self, mock_check, mock_smarts):
         """Mock a successful reaction and verify product is returned."""
         vf = self._make_vf()
@@ -533,7 +533,7 @@ class TestCheckReaction(TestCase):
         self.assertIsNotNone(Chem.MolFromSmiles(result[0]))
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
+    @patch("backend.validate.check_reactant_smarts")
     def test_invalid_reaction_sets_validated_false(self, mock_check, mock_smarts):
         vf = self._make_vf()
         mock_smarts.return_value = ["[C:1](=O)Cl.[N:2]>>[C:1](=O)[N:2]"]
@@ -548,7 +548,7 @@ class TestCheckReaction(TestCase):
         self.assertIn("check_reaction", vf.validate_dict["field"])
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
+    @patch("backend.validate.check_reactant_smarts")
     def test_reaction_with_explicit_product_smiles(self, mock_check, mock_smarts):
         """When product_smiles are provided, the explicit product is used."""
         vf = self._make_vf()
@@ -599,7 +599,7 @@ class TestCheckReaction(TestCase):
         self.assertIn("check_reaction", vf.validate_dict["field"])
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
+    @patch("backend.validate.check_reactant_smarts")
     def test_multiple_reactions_validated(self, mock_check, mock_smarts):
         """Multiple reaction pairs all succeed."""
         vf = self._make_vf()
@@ -620,7 +620,7 @@ class TestCheckReaction(TestCase):
         self.assertEqual(len(result), 2)
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
+    @patch("backend.validate.check_reactant_smarts")
     def test_second_reaction_invalid_first_valid(self, mock_check, mock_smarts):
         vf = self._make_vf()
         mock_smarts.return_value = ["SMARTS"]
@@ -798,7 +798,7 @@ class TestCustomChemValidation(TestCase):
     """Tests for the custom-chem validation path."""
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
+    @patch("backend.validate.check_reactant_smarts")
     def test_valid_custom_chem_1step(self, mock_check, mock_smarts):
         """A valid single-step custom-chem CSV passes validation."""
         mock_smarts.return_value = ["SMARTS"]
@@ -810,7 +810,7 @@ class TestCustomChemValidation(TestCase):
         self.assertEqual(len(vf.validate_dict["field"]), 0)
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
+    @patch("backend.validate.check_reactant_smarts")
     def test_custom_chem_builds_dataframe(self, mock_check, mock_smarts):
         """Output DataFrame has the expected columns after validation."""
         mock_smarts.return_value = ["SMARTS"]
@@ -844,7 +844,7 @@ class TestCustomChemValidation(TestCase):
             ValidateFile(csv, "custom-chem")
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
+    @patch("backend.validate.check_reactant_smarts")
     def test_custom_chem_reaction_failure_invalidates(self, mock_check, mock_smarts):
         mock_smarts.return_value = ["SMARTS"]
         mock_check.return_value = []  # no products
@@ -855,7 +855,7 @@ class TestCustomChemValidation(TestCase):
         self.assertIn("check_reaction", vf.validate_dict["field"])
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
+    @patch("backend.validate.check_reactant_smarts")
     def test_custom_chem_string_concentration_fails(self, mock_check, mock_smarts):
         mock_smarts.return_value = ["SMARTS"]
         mock_check.return_value = [Chem.MolFromSmiles("CC(=O)NCC1CCOCC1")]
@@ -866,7 +866,7 @@ class TestCustomChemValidation(TestCase):
         self.assertIn("check_number", vf.validate_dict["field"])
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
+    @patch("backend.validate.check_reactant_smarts")
     def test_custom_chem_stores_reaction_info(self, mock_check, mock_smarts):
         mock_smarts.return_value = ["SMARTS"]
         mol = Chem.MolFromSmiles("CC(=O)NCC1CCOCC1")
@@ -879,7 +879,7 @@ class TestCustomChemValidation(TestCase):
             self.assertIn(col, vf.df.columns)
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
+    @patch("backend.validate.check_reactant_smarts")
     def test_custom_chem_two_rows(self, mock_check, mock_smarts):
         """Two-row custom-chem CSV processes both rows."""
         mock_smarts.return_value = ["SMARTS"]
@@ -914,8 +914,8 @@ class TestCombiCustomChemValidation(TestCase):
     """Tests for the combi-custom-chem validation path."""
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
-    @patch("backend.validate.combiChem")
+    @patch("backend.validate.check_reactant_smarts")
+    @patch("backend.validate.combi_chem")
     def test_valid_combi_csv(self, mock_combi, mock_check, mock_smarts):
         mock_smarts.return_value = ["SMARTS"]
         mock_combi.return_value = [
@@ -937,8 +937,8 @@ class TestCombiCustomChemValidation(TestCase):
             ValidateFile(csv, "combi-custom-chem")
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
-    @patch("backend.validate.combiChem")
+    @patch("backend.validate.check_reactant_smarts")
+    @patch("backend.validate.combi_chem")
     def test_combi_csv_builds_output_dataframe(self, mock_combi, mock_check, mock_smarts):
         mock_smarts.return_value = ["SMARTS"]
         mock_combi.return_value = [
@@ -961,8 +961,8 @@ class TestCombiCustomChemValidation(TestCase):
             self.assertIn(col, vf.df.columns, f"Missing column: {col}")
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
-    @patch("backend.validate.combiChem")
+    @patch("backend.validate.check_reactant_smarts")
+    @patch("backend.validate.combi_chem")
     def test_combi_csv_produces_correct_number_of_targets(
         self, mock_combi, mock_check, mock_smarts
     ):
@@ -981,8 +981,8 @@ class TestCombiCustomChemValidation(TestCase):
         self.assertEqual(len(vf.target_smiles), 2)
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
-    @patch("backend.validate.combiChem")
+    @patch("backend.validate.check_reactant_smarts")
+    @patch("backend.validate.combi_chem")
     def test_combi_csv_reaction_failure(self, mock_combi, mock_check, mock_smarts):
         mock_smarts.return_value = ["SMARTS"]
         mock_combi.return_value = [("CC(=O)Cl", "NCC1CCOCC1")]
@@ -993,8 +993,8 @@ class TestCombiCustomChemValidation(TestCase):
         self.assertFalse(vf.validated)
 
     @patch("backend.validate.get_recipe_smarts")
-    @patch("backend.validate.checkReactantSMARTS")
-    @patch("backend.validate.combiChem")
+    @patch("backend.validate.check_reactant_smarts")
+    @patch("backend.validate.combi_chem")
     def test_combi_csv_non_numeric_concentration_raises(self, mock_combi, mock_check, mock_smarts):
         """Non-numeric concentration causes a ValueError during float() conversion."""
         mock_smarts.return_value = ["SMARTS"]

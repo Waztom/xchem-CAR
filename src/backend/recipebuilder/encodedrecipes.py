@@ -18,26 +18,26 @@ density (g/mL)
 
 # Removing recipes
 # from .models import OTBatchProtocol
-# from .utils import getActionSessionQuerySet
-# from .utils import getBatchReactions
+# from .utils import get_action_session_query_set
+# from .utils import get_batch_reactions
 # batchid=107
-# reactions = getBatchReactions(batchid=batchid)
+# reactions = get_batch_reactions(batchid=batchid)
 # suzukis = reactions.filter(recipe__name="Sp2-sp2 Suzuki coupling")
 # for reaction in suzukis:
 #     reaction.recipe = "SOCS2A-suz-2"
-# getActionSessionQuerySet(reaction_ids=reactions).delete()
+# get_action_session_query_set(reaction_ids=reactions).delete()
 # OTBatchProtocol.objects.get(batch_id=batchid).delete()
 
 # Finding plate reactions and MWS
 # from .models import Plate
-# from .utils import getMWs
+# from .utils import get_mws
 # plate_id=3034
 # plate = Plate.objects.get(id=plate_id)
 # wells = plate.well_set.all().order_by("id")
 # smiles = wells.values_list("smiles", flat=True)
 # for smi in smiles:
 #     print(smi)
-# mws = getMWs(smiles=smiles)
+# mws = get_mws(smiles=smiles)
 # for mw in mws:
 #     print(mw)
 # Addition order in SMARTS is critical. Must check, should be adaptive for changingrecipes ie go with order in actions and not order

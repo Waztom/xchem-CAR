@@ -9,7 +9,7 @@ import logging
 from django.db.models import QuerySet
 
 from backend.models import ExtractAction, MixAction, RecipeExtractAction, RecipeMixAction
-from backend.db_utils import getReaction
+from backend.db_utils import get_reaction
 from backend.recipe_utils import get_session_recipe_actions
 
 from .base_handler import SessionHandler
@@ -54,7 +54,7 @@ class WorkupSessionHandler(SessionHandler):
             logger.info(
                 f"Processing workup for reaction {reaction_id} ({i+1}/{action_count})"
             )
-            reaction_obj = getReaction(reaction_id=reaction_id)
+            reaction_obj = get_reaction(reaction_id=reaction_id)
             self.process_workup_actions(actionsession_obj, reaction_obj, session_number)
 
         self.log_session_end("workup")

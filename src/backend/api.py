@@ -14,12 +14,12 @@ logger = logging.getLogger(__name__)
 import pandas as pd
 
 from .tasks import (
-    validateFileUpload,
-    uploadManifoldReaction,
-    uploadCustomReaction,
-    uploadCombiCustomReaction,
-    createOTScript,
-    canonicalizeSmiles,
+    validate_file_upload,
+    upload_manifold_reaction,
+    upload_custom_reaction,
+    upload_combi_custom_reaction,
+    create_ot_script,
+    canonicalize_smiles,
 )
 
 # Import standard models
@@ -106,7 +106,7 @@ from .serializers import (
 from django.core.files.storage import default_storage
 
 
-def getOTBatchProductSmiles(batch_obj: Batch) -> list:
+def get_ot_batch_product_smiles(batch_obj: Batch) -> list:
     """Gets the product SMILES for a batch
 
     Parameters
@@ -133,7 +133,7 @@ def getOTBatchProductSmiles(batch_obj: Batch) -> list:
     return productsmiles
 
 
-def cloneTarget(target_obj: Target, batch_obj: Batch) -> Target:
+def clone_target(target_obj: Target, batch_obj: Batch) -> Target:
     """Clone a target"""
     related_catalogentry_queryset = target_obj.catalogentries.all().order_by("id")
 
@@ -158,7 +158,7 @@ def cloneTarget(target_obj: Target, batch_obj: Batch) -> Target:
     return target_obj
 
 
-def cloneMethod(method_obj: Method, target_obj: Target):
+def clone_method(method_obj: Method, target_obj: Target):
     """Clone a synthesis method"""
     related_reaction_queryset = method_obj.reactions.all().order_by("id")
     method_obj.pk = None
@@ -250,43 +250,43 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
         if str(validate_choice) == "0":
             if str(API_choice) == "0":
-                task = validateFileUpload.delay(
+                task = validate_file_upload.delay(
                     csv_fp=tmp_file, validate_type="retro-API"
                 )
 
             if str(API_choice) == "1":
-                task = validateFileUpload.delay(
+                task = validate_file_upload.delay(
                     csv_fp=tmp_file, validate_type="custom-chem"
                 )
 
             if str(API_choice) == "2":
-                task = validateFileUpload.delay(
+                task = validate_file_upload.delay(
                     csv_fp=tmp_file, validate_type="combi-custom-chem"
                 )
 
         if str(validate_choice) == "1":
             if str(API_choice) == "0":
                 task = (
-                    validateFileUpload.s(
+                    validate_file_upload.s(
                         csv_fp=tmp_file,
                         validate_type="retro-API",
                         project_info=project_info,
                         validate_only=False,
                     )
-                    | uploadManifoldReaction.s(
+                    | upload_manifold_reaction.s(
                         fetch_pubchem=fetch_pubchem,
                     )
                 ).apply_async()
 
             if str(API_choice) == "1":
                 task = (
-                    validateFileUpload.s(
+                    validate_file_upload.s(
                         csv_fp=tmp_file,
                         validate_type="custom-chem",
                         project_info=project_info,
                         validate_only=False,
                     )
-                    | uploadCustomReaction.s(
+                    | upload_custom_reaction.s(
                         fetch_pubchem=fetch_pubchem,
                         fetch_catalogue=fetch_catalogue,
                     )
@@ -294,13 +294,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
             if str(API_choice) == "2":
                 task = (
-                    validateFileUpload.s(
+                    validate_file_upload.s(
                         csv_fp=tmp_file,
                         validate_type="combi-custom-chem",
                         project_info=project_info,
                         validate_only=False,
                     )
-                    | uploadCombiCustomReaction.s(
+                    | upload_combi_custom_reaction.s(
                         fetch_pubchem=fetch_pubchem,
                         fetch_catalogue=fetch_catalogue,
                     )
@@ -434,11 +434,11 @@ class BatchViewSet(viewsets.ModelViewSet):
                     .filter(pk__in=method_ids)
                     .order_by("id")
                 )
-                target_obj_clone = cloneTarget(
+                target_obj_clone = clone_target(
                     target_obj=target_obj, batch_obj=batch_obj_new
                 )
                 for method_obj in method_query_set_to_clone:
-                    cloneMethod(method_obj=method_obj, target_obj=target_obj_clone)
+                    clone_method(method_obj=method_obj, target_obj=target_obj_clone)
             serialized_data = BatchSerializer(batch_obj_new).data
             if serialized_data:
                 return JsonResponse(data=serialized_data)
@@ -453,13 +453,13 @@ class BatchViewSet(viewsets.ModelViewSet):
         # check_services()
         if request.POST.get("smiles"):
             smiles = request.POST.getlist("smiles")
-            task = canonicalizeSmiles.delay(smiles=smiles)
+            task = canonicalize_smiles.delay(smiles=smiles)
             data = {"task_id": task.id}
             return JsonResponse(data=data)
         if len(request.FILES) != 0:
             csvfile = request.FILES["csv_file"]
             tmp_file = save_tmp_file(csvfile)
-            task = canonicalizeSmiles.delay(csvfile=tmp_file)
+            task = canonicalize_smiles.delay(csvfile=tmp_file)
             data = {"task_id": task.id}
             return JsonResponse(data=data)
 
@@ -656,7 +656,7 @@ class OTProjectViewSet(viewsets.ModelViewSet):
                     starting_material_files[str(batch_id)] = tmp_file_path
 
         # Start the task with the optional starting material files
-        task = createOTScript.delay(
+        task = create_ot_script.delay(
             batchids=batch_ids,
             protocol_name=protocol_name,
             custom_SM_files=starting_material_files if has_custom_materials else None,

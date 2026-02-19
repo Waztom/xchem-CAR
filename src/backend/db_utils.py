@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 # -----------------------------------------------------------------------------
 
 
-def getAddActionQuerySet(
+def get_add_action_query_set(
     reaction_ids: list,
     actionsession_ids: list = None,
     actionsessiontype: str = None,
@@ -70,7 +70,7 @@ def getAddActionQuerySet(
         return addactionqueryset
 
 
-def getExtractActionQuerySet(
+def get_extract_action_query_set(
     reaction_ids: list,
     actionsession_ids: list = None,
     actionsessiontype: str = None,
@@ -107,7 +107,7 @@ def getExtractActionQuerySet(
         return extractactionqueryset
 
 
-def getOTBatchProtocolQuerySet(batch_id: int) -> QuerySet[OTBatchProtocol]:
+def get_ot_batch_protocol_query_set(batch_id: int) -> QuerySet[OTBatchProtocol]:
     """Gets the OT batch protocol queryset
 
     Parameters
@@ -128,7 +128,7 @@ def getOTBatchProtocolQuerySet(batch_id: int) -> QuerySet[OTBatchProtocol]:
 # -----------------------------------------------------------------------------
 
 
-def getActionSessionSequenceNumbers(
+def get_action_session_sequence_numbers(
     actionsessionqueryset: QuerySet[ActionSession],
 ) -> list:
     """Set of action session sequence numbers
@@ -146,7 +146,7 @@ def getActionSessionSequenceNumbers(
     return sessionnumbers
 
 
-def getActionSessionTypes(actionsessionqueryset: QuerySet[ActionSession]) -> QuerySet:
+def get_action_session_types(actionsessionqueryset: QuerySet[ActionSession]) -> QuerySet:
     """Set of action session types
 
     Returns
@@ -159,7 +159,7 @@ def getActionSessionTypes(actionsessionqueryset: QuerySet[ActionSession]) -> Que
     return actionsessiontypes
 
 
-def getGroupedActionSessionSequences(
+def get_grouped_action_session_sequences(
     sessionnumbers: list, actionsessionqueryset: QuerySet[ActionSession]
 ) -> list:
     """Group action sessions by sequence number
@@ -185,7 +185,7 @@ def getGroupedActionSessionSequences(
     return groupedactionsessionsequences
 
 
-def getGroupedActionSessionTypes(
+def get_grouped_action_session_types(
     actionsessiontypes: QuerySet, actionsessionqueryset: QuerySet[ActionSession]
 ) -> list:
     """Group action sessions by type
@@ -212,7 +212,7 @@ def getGroupedActionSessionTypes(
     return groupedactionsessiontypes
 
 
-def getActionSessionQuerySet(
+def get_action_session_query_set(
     reaction_ids: QuerySet[Reaction],
     driver: str = None,
 ) -> QuerySet[ActionSession]:
@@ -249,7 +249,7 @@ def getActionSessionQuerySet(
 # -----------------------------------------------------------------------------
 
 
-def getPreviousObjEntries(queryset: list, obj: object) -> QuerySet:
+def get_previous_obj_entries(queryset: list, obj: object) -> QuerySet:
     """Finds all previous objects relative to obj of queryset"""
     previousqueryset = queryset.filter(pk__lt=obj.pk).order_by("-pk")
     return previousqueryset
@@ -260,10 +260,10 @@ def getPreviousObjEntries(queryset: list, obj: object) -> QuerySet:
 # -----------------------------------------------------------------------------
 
 
-def checkPreviousReactionFailures(reactionobj: Reaction) -> bool:
+def check_previous_reaction_failures(reactionobj: Reaction) -> bool:
     """Check if any previous reaction failures for a method"""
-    reactionqueryset = getReactions(method_ids=[reactionobj.method_id.id])
-    previousreactionqueryset = getPreviousObjEntries(
+    reactionqueryset = get_reactions(method_ids=[reactionobj.method_id.id])
+    previousreactionqueryset = get_previous_obj_entries(
         queryset=reactionqueryset, obj=reactionobj
     )
     failedreactions = previousreactionqueryset.filter(success=False)
@@ -273,7 +273,7 @@ def checkPreviousReactionFailures(reactionobj: Reaction) -> bool:
         return False
 
 
-def checkNoMethodSteps(reactionobj: Reaction) -> bool:
+def check_no_method_steps(reactionobj: Reaction) -> bool:
     """Check no reaction steps in method is > 1"""
     methodobj = reactionobj.method_id
     noreactionsteps = methodobj.nosteps
@@ -283,7 +283,7 @@ def checkNoMethodSteps(reactionobj: Reaction) -> bool:
         return False
 
 
-def getReactionsToDo(groupreactionqueryset: QuerySet[Reaction]) -> QuerySet[Reaction]:
+def get_reactions_to_do(groupreactionqueryset: QuerySet[Reaction]) -> QuerySet[Reaction]:
     """Get reactions that need to be done. Exclude those in methods that had
     failed previous reaction step
 
@@ -299,8 +299,8 @@ def getReactionsToDo(groupreactionqueryset: QuerySet[Reaction]) -> QuerySet[Reac
     """
     reactionstodo = []
     for reactionobj in groupreactionqueryset:
-        if checkNoMethodSteps(reactionobj=reactionobj):
-            if not checkPreviousReactionFailures(reactionobj=reactionobj):
+        if check_no_method_steps(reactionobj=reactionobj):
+            if not check_previous_reaction_failures(reactionobj=reactionobj):
                 reactionstodo.append(reactionobj.id)
     groupreactiontodoqueryset = groupreactionqueryset.filter(id__in=reactionstodo)
     return groupreactiontodoqueryset
@@ -311,12 +311,12 @@ def getReactionsToDo(groupreactionqueryset: QuerySet[Reaction]) -> QuerySet[Reac
 # -----------------------------------------------------------------------------
 
 
-def getTargets(batch_ids: QuerySet[Batch]) -> QuerySet[Target]:
+def get_targets(batch_ids: QuerySet[Batch]) -> QuerySet[Target]:
     targetqueryset = Target.objects.filter(batch_id__in=batch_ids).order_by("id")
     return targetqueryset
 
 
-def getMethods(target_ids: QuerySet[Target]) -> QuerySet[Method]:
+def get_methods(target_ids: QuerySet[Target]) -> QuerySet[Method]:
     methodqueryset = (
         Method.objects.filter(target_id__in=target_ids)
         .filter(otchem=True)
@@ -325,28 +325,28 @@ def getMethods(target_ids: QuerySet[Target]) -> QuerySet[Method]:
     return methodqueryset
 
 
-def getReactions(method_ids: QuerySet[Method]) -> QuerySet[Reaction]:
+def get_reactions(method_ids: QuerySet[Method]) -> QuerySet[Reaction]:
     reactionqueryset = Reaction.objects.filter(method_id__in=method_ids).order_by("id")
     return reactionqueryset
 
 
-def getBatchTag(batchid):
+def get_batch_tag(batchid):
     batch_obj = Batch.objects.get(id=batchid)
     batchtag = batch_obj.batchtag
     return batchtag
 
 
-def getBatchReactions(batchid: int) -> QuerySet[Reaction]:
-    targetqueryset = getTargets(batch_ids=[batchid])
+def get_batch_reactions(batchid: int) -> QuerySet[Reaction]:
+    targetqueryset = get_targets(batch_ids=[batchid])
     if targetqueryset:
-        methodqueryset = getMethods(target_ids=targetqueryset)
+        methodqueryset = get_methods(target_ids=targetqueryset)
         if methodqueryset:
-            reactionqueryset = getReactions(method_ids=methodqueryset)
+            reactionqueryset = get_reactions(method_ids=methodqueryset)
             if reactionqueryset:
                 return reactionqueryset
 
 
-def getMaxReactionNumber(reactionqueryset: QuerySet[Reaction]) -> int:
+def get_max_reaction_number(reactionqueryset: QuerySet[Reaction]) -> int:
     """Get the maximum number of reaction steps in a reaction queryset
 
     Parameters
@@ -365,7 +365,7 @@ def getMaxReactionNumber(reactionqueryset: QuerySet[Reaction]) -> int:
     return maxreactionnumber
 
 
-def groupReactions(reactionqueryset: QuerySet[Reaction], maxreactionnumber: int):
+def group_reactions(reactionqueryset: QuerySet[Reaction], maxreactionnumber: int):
     """
     Groups reactionqueries into first reactions, second reactions and so on
     """
@@ -380,7 +380,7 @@ def groupReactions(reactionqueryset: QuerySet[Reaction], maxreactionnumber: int)
     return groupedreactionquerysets
 
 
-def getReactantsToBuy(batch_ids: list[int]) -> list:
+def get_reactants_to_buy(batch_ids: list[int]) -> list:
     """Finds the reactnats that need to be bought to execute a batch/batches
     synthesis. Finds recatants that are not made in previous method's reactions
 
@@ -423,7 +423,7 @@ def getReactantsToBuy(batch_ids: list[int]) -> list:
 # -----------------------------------------------------------------------------
 
 
-def getBatchTargetSmiles(batch_id: int) -> list[float]:
+def get_batch_target_smiles(batch_id: int) -> list[float]:
     """Gets the SMILES of the final target compounds
     for a batch
 
@@ -444,7 +444,7 @@ def getBatchTargetSmiles(batch_id: int) -> list[float]:
     return target_SMILES
 
 
-def getBatchReactionIDs(batch_id: int, reaction_number: int) -> list[float]:
+def get_batch_reaction_ids(batch_id: int, reaction_number: int) -> list[float]:
     """Gets the reaction ids for a reaction number in
        a batch
 
@@ -474,7 +474,7 @@ def getBatchReactionIDs(batch_id: int, reaction_number: int) -> list[float]:
     return reaction_IDs
 
 
-def getBatchReactionProductSmiles(batch_id: int, reaction_number: int) -> list[float]:
+def get_batch_reaction_product_smiles(batch_id: int, reaction_number: int) -> list[float]:
     """Gets the MWs of the products for a reaction in
        a batch
 
@@ -511,7 +511,7 @@ def getBatchReactionProductSmiles(batch_id: int, reaction_number: int) -> list[f
 # -----------------------------------------------------------------------------
 
 
-def updateTargetMols(batch_id: int, concentration: float, volume: float) -> int:
+def update_target_mols(batch_id: int, concentration: float, volume: float) -> int:
     """Updates the Target mols in a Batch - using concentartion and volume
 
     Parameters
@@ -527,15 +527,15 @@ def updateTargetMols(batch_id: int, concentration: float, volume: float) -> int:
     -------
     """
     # Import here to avoid circular imports
-    from .conversions import calculateMolsFromConc, calculateMassFromMols
+    from .conversions import calculate_mols_from_conc, calculate_mass_from_mols
 
     target_qs = Batch.objects.get(id=batch_id).targets.all()
     for target_obj in target_qs:
         smiles = target_obj.smiles
-        mols = calculateMolsFromConc(
+        mols = calculate_mols_from_conc(
             target_concentration=concentration, target_volume=volume
         )
-        mass = calculateMassFromMols(mols=mols, SMILES=smiles)
+        mass = calculate_mass_from_mols(mols=mols, SMILES=smiles)
         target_obj.mols = mols
         target_obj.concentration = concentration
         target_obj.volume = volume
@@ -543,7 +543,7 @@ def updateTargetMols(batch_id: int, concentration: float, volume: float) -> int:
         target_obj.save()
 
 
-def updateReactionSuccessToFail(reaction_ids: list[int]):
+def update_reaction_success_to_fail(reaction_ids: list[int]):
     """Updates reactions to be failures
 
     Parameters
@@ -555,7 +555,7 @@ def updateReactionSuccessToFail(reaction_ids: list[int]):
         Reaction.objects.filter(id__in=reaction_ids).update(success=False)
 
 
-def updateBatchMethodOTFriendly(batch_id: int):
+def update_batch_method_ot_friendly(batch_id: int):
     """Updates a batch of methods to all be OT friendly
 
     Parameters
@@ -572,7 +572,7 @@ def updateBatchMethodOTFriendly(batch_id: int):
             methodobj.save()
 
 
-def deleteBatchActionSessions(batch_id: int):
+def delete_batch_action_sessions(batch_id: int):
     """Deletes all actions for a batch
 
     Parameters
@@ -580,11 +580,11 @@ def deleteBatchActionSessions(batch_id: int):
     batch_id: int
         The batch id to delete all actions for
     """
-    reaction_qs = getBatchReactions(batchid=batch_id)
-    getActionSessionQuerySet(reaction_ids=reaction_qs).delete()
+    reaction_qs = get_batch_reactions(batchid=batch_id)
+    get_action_session_query_set(reaction_ids=reaction_qs).delete()
 
 
-def updateRecipeType(
+def update_recipe_type(
     batch_id: int, reaction_class: str, current_recipe: str, recipe_to_use: str
 ):
     """Updates the recipe type for a Reactions in a Batch
@@ -600,7 +600,7 @@ def updateRecipeType(
     recipe_to_use: str
         The recipe to update to
     """
-    reaction_qs = getBatchReactions(batchid=batch_id).filter(
+    reaction_qs = get_batch_reactions(batchid=batch_id).filter(
         reactionclass=reaction_class, recipe=current_recipe
     )
     for reaction_obj in reaction_qs:
@@ -613,7 +613,7 @@ def updateRecipeType(
 # -----------------------------------------------------------------------------
 
 
-def getPlateQuerySet(plate_id: int = None, otsession_id: int = None) -> QuerySet[Plate]:
+def get_plate_query_set(plate_id: int = None, otsession_id: int = None) -> QuerySet[Plate]:
     if plate_id:
         platequeryset = Plate.objects.filter(id=plate_id)
     if otsession_id:
@@ -621,7 +621,7 @@ def getPlateQuerySet(plate_id: int = None, otsession_id: int = None) -> QuerySet
     return platequeryset
 
 
-def getPlateMap(plate_ids: list, out_dir: str):
+def get_plate_map(plate_ids: list, out_dir: str):
     """Generates a Plate Map for a list of plate ids
 
     Parameters
@@ -637,7 +637,7 @@ def getPlateMap(plate_ids: list, out_dir: str):
         The csv files in tmp-files
     """
     # Import here to avoid circular imports
-    from .chem_utils import getMWs
+    from .chem_utils import get_mws
 
     plate_info = {
         "plate_id": [],
@@ -662,11 +662,11 @@ def getPlateMap(plate_ids: list, out_dir: str):
                 target_id = well.method_id.target_id.id
                 target_name = well.method_id.target_id.name
                 target_smi = well.smiles
-                target_mw = getMWs(smiles=[target_smi])[0]
+                target_mw = get_mws(smiles=[target_smi])[0]
                 reactant_smiles = well.reaction_id.reactants.values_list(
                     "smiles", flat=True
                 )
-                reactant_mws = getMWs(smiles=reactant_smiles)
+                reactant_mws = get_mws(smiles=reactant_smiles)
                 if len(reactant_smiles) == 1:
                     reactant_1_smi = reactant_smiles[0]
                     reactant_1_mw = reactant_mws[0]
@@ -708,7 +708,7 @@ def getPlateMap(plate_ids: list, out_dir: str):
 # -----------------------------------------------------------------------------
 
 
-def getProductQuerySet(reaction_ids: list) -> QuerySet[Product]:
+def get_product_query_set(reaction_ids: list) -> QuerySet[Product]:
     """Get product queryset for reaction ids
 
     Parameters
@@ -725,7 +725,7 @@ def getProductQuerySet(reaction_ids: list) -> QuerySet[Product]:
     return productqueryset
 
 
-def getProduct(reaction_id: int) -> Product:
+def get_product(reaction_id: int) -> Product:
     """Get product object
 
     Parameters
@@ -742,7 +742,7 @@ def getProduct(reaction_id: int) -> Product:
     return productobj
 
 
-def getProductSmiles(reaction_ids: list) -> list:
+def get_product_smiles(reaction_ids: list) -> list:
     """Get product smiles of reactions
 
     Parameters
@@ -770,7 +770,7 @@ def getProductSmiles(reaction_ids: list) -> list:
 # -----------------------------------------------------------------------------
 
 
-def getReaction(reaction_id: int) -> Reaction:
+def get_reaction(reaction_id: int) -> Reaction:
     """Get reaction object
 
     Parameters
@@ -787,7 +787,7 @@ def getReaction(reaction_id: int) -> Reaction:
     return reactionobj
 
 
-def getReactionTemperature(reaction_id: int) -> float:
+def get_reaction_temperature(reaction_id: int) -> float:
     """Get reaction temperature
 
     Parameters
@@ -804,7 +804,7 @@ def getReactionTemperature(reaction_id: int) -> float:
     return reactionobj.temperature
 
 
-def getReactionClass(reaction_id: int) -> str:
+def get_reaction_class(reaction_id: int) -> str:
     """Get reaction class
 
     Parameters
@@ -821,7 +821,7 @@ def getReactionClass(reaction_id: int) -> str:
     return reactionobj.reactionclass
 
 
-def getReactionRecipe(reaction_id: int) -> str:
+def get_reaction_recipe(reaction_id: int) -> str:
     """Get reaction recipe
 
     Parameters
@@ -838,7 +838,7 @@ def getReactionRecipe(reaction_id: int) -> str:
     return reactionobj.recipe
 
 
-def getReactionQuerySet(
+def get_reaction_query_set(
     reaction_ids: list = None, method_id: int = None
 ) -> QuerySet[Reaction]:
     """Get a  synthesis methods reactions
@@ -862,7 +862,7 @@ def getReactionQuerySet(
     return reactionqueryset
 
 
-def checkProceedingReactions(reaction_id: int) -> QuerySet[Reaction]:
+def check_proceeding_reactions(reaction_id: int) -> QuerySet[Reaction]:
     """Checks if there are any reactions that proceed the reaction
 
     Parameters
@@ -876,14 +876,14 @@ def checkProceedingReactions(reaction_id: int) -> QuerySet[Reaction]:
     proceedingreactionqueryset: QuerySet[Reaction]
         Returns the reactions that proceed the reaction
     """
-    reactionobj = getReaction(reaction_id=reaction_id)
+    reactionobj = get_reaction(reaction_id=reaction_id)
     proceedingreactionqueryset = Method.objects.get(
         id=reactionobj.method_id.id
     ).reactions.filter(id__gt=reaction_id)
     return proceedingreactionqueryset
 
 
-def getReactionYields(reactionclasslist: list, recipelist) -> list[int]:
+def get_reaction_yields(reactionclasslist: list, recipelist) -> list[int]:
     """Gets the reaction yields
 
     Parameters
@@ -907,7 +907,7 @@ def getReactionYields(reactionclasslist: list, recipelist) -> list[int]:
     return reactionyields
 
 
-def checkPreviousReactionProducts(reaction_id: int, smiles: str) -> bool:
+def check_previous_reaction_products(reaction_id: int, smiles: str) -> bool:
     """Checks if any previous reactions had a product matching the smiles
 
     Parameters
@@ -924,15 +924,15 @@ def checkPreviousReactionProducts(reaction_id: int, smiles: str) -> bool:
     status: bool
         The status is True if a match is found
     """
-    reactionobj = getReaction(reaction_id=reaction_id)
-    reactionqueryset = getReactionQuerySet(method_id=reactionobj.method_id.id)
-    prevreactionqueryset = getPreviousObjEntries(
+    reactionobj = get_reaction(reaction_id=reaction_id)
+    reactionqueryset = get_reaction_query_set(method_id=reactionobj.method_id.id)
+    prevreactionqueryset = get_previous_obj_entries(
         queryset=reactionqueryset, obj=reactionobj
     )
     productmatches = []
     if prevreactionqueryset:
         for reactionobj in prevreactionqueryset:
-            productobj = getProduct(reaction_id=reactionobj)
+            productobj = get_product(reaction_id=reactionobj)
             if productobj.smiles == smiles:
                 productmatches.append(productobj)
         if productmatches:
@@ -943,7 +943,7 @@ def checkPreviousReactionProducts(reaction_id: int, smiles: str) -> bool:
         return False
 
 
-def getPreviousReactionQuerySets(reaction_id: int, smiles: str) -> QuerySet[Reaction]:
+def get_previous_reaction_query_sets(reaction_id: int, smiles: str) -> QuerySet[Reaction]:
     """Checks if any previous reactions had a product matching the smiles
 
     Parameters
@@ -960,7 +960,7 @@ def getPreviousReactionQuerySets(reaction_id: int, smiles: str) -> QuerySet[Reac
     previousreactionqueryset: QuerySet[Reaction]
         Returns the reactions that yiled products that match the SMILES searched
     """
-    reactionobj = getReaction(reaction_id=reaction_id)
+    reactionobj = get_reaction(reaction_id=reaction_id)
     previousreactionqueryset = Method.objects.get(
         id=reactionobj.method_id.id
     ).reactions.filter(id__lt=reaction_id, products__smiles=smiles)
@@ -972,7 +972,7 @@ def getPreviousReactionQuerySets(reaction_id: int, smiles: str) -> QuerySet[Reac
 # -----------------------------------------------------------------------------
 
 
-def getBatchTargetMWs(batch_id: int) -> list[float]:
+def get_batch_target_mws(batch_id: int) -> list[float]:
     """Gets the molecular weights of the final target compounds
     for batches
 
@@ -986,16 +986,16 @@ def getBatchTargetMWs(batch_id: int) -> list[float]:
     target_MWs: list
         The molecular weights of the targets for a batch
     """
-    from .chem_utils import getMWs
+    from .chem_utils import get_mws
 
     batchobj = Batch.objects.get(id=batch_id)
     targetqueryset = batchobj.targets.all()
     smiles = [targetobj.smiles for targetobj in targetqueryset]
-    target_MWs = getMWs(smiles=smiles)
+    target_MWs = get_mws(smiles=smiles)
     return target_MWs
 
 
-def getBatchReactionProductMWs(batch_id: int, reaction_number: int) -> list[float]:
+def get_batch_reaction_product_mws(batch_id: int, reaction_number: int) -> list[float]:
     """Gets the MWs of the products for a list of reactions
        for a batch
 
@@ -1011,7 +1011,7 @@ def getBatchReactionProductMWs(batch_id: int, reaction_number: int) -> list[floa
     product_MWs: list
         The product MWs for a batch of reactions
     """
-    from .chem_utils import getMWs
+    from .chem_utils import get_mws
 
     product_SMILES = []
     batchobj = Batch.objects.get(id=batch_id)
@@ -1028,5 +1028,5 @@ def getBatchReactionProductMWs(batch_id: int, reaction_number: int) -> list[floa
                     .order_by("id")
                     .values_list("smiles", flat=True)
                 )
-    product_MWs = getMWs(smiles=product_SMILES)
+    product_MWs = get_mws(smiles=product_SMILES)
     return product_MWs

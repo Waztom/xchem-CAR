@@ -8,7 +8,7 @@ import logging
 from django.db.models import QuerySet
 
 from backend.models import AddAction, MixAction, RecipeAddAction, RecipeMixAction
-from backend.db_utils import getReaction, getPreviousReactionQuerySets, getReactionQuerySet
+from backend.db_utils import get_reaction, get_previous_reaction_query_sets, get_reaction_query_set
 from backend.recipe_utils import get_session_recipe_actions
 
 from .base_handler import SessionHandler
@@ -64,7 +64,7 @@ class ReactionSessionHandler(SessionHandler):
         for i, actionsession_obj in enumerate(actionsession_queryset):
             reaction_id = actionsession_obj.reaction_id.id
             logger.info(f"Processing reaction {reaction_id} ({i+1}/{action_count})")
-            reaction_obj = getReaction(reaction_id=reaction_id)
+            reaction_obj = get_reaction(reaction_id=reaction_id)
             self.process_reaction_actions(
                 actionsession_obj, reaction_obj, session_number
             )
@@ -84,7 +84,7 @@ class ReactionSessionHandler(SessionHandler):
 
         try:
             # Get reaction data
-            reaction_queryset = getReactionQuerySet(
+            reaction_queryset = get_reaction_query_set(
                 reaction_ids=self.script_generator.reaction_ids
             )
             reaction_count = reaction_queryset.count()
@@ -336,7 +336,7 @@ class ReactionSessionHandler(SessionHandler):
                 logger.info(f"SMILES: {smiles[:20]}...")
 
                 # Check if there's a previous reaction for this SMILES
-                previous_reaction_queryset = getPreviousReactionQuerySets(
+                previous_reaction_queryset = get_previous_reaction_query_sets(
                     reaction_id=reaction_obj.id, smiles=smiles
                 )
 

@@ -34,27 +34,27 @@ from .models import (
 )
 
 from .db_utils import (
-    getProduct,
-    getProductSmiles,
-    checkProceedingReactions,
-    getReactionYields,
+    get_product,
+    get_product_smiles,
+    check_proceeding_reactions,
+    get_reaction_yields,
 )
 from .chem_utils import (
-    canonSmiles,
-    createSVGString,
-    createReactionSVGString,
-    getInchiKey,
-    matchSMARTS,
+    canon_smiles,
+    create_svg_string,
+    create_reaction_svg_string,
+    get_inchi_key,
+    match_smarts,
 )
-from .conversions import calculateMolsFromConc, calculateMassFromMols
-from .pubchem_utils import getPubChemCAS, getPubChemCompound
+from .conversions import calculate_mols_from_conc, calculate_mass_from_mols
+from .pubchem_utils import get_pubchem_cas, get_pubchem_compound
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def createProjectModel(project_info: dict) -> Tuple[int, str]:
+def create_project_model(project_info: dict) -> Tuple[int, str]:
     """Creates a Django project object - a project model entry
 
     Parameters
@@ -78,7 +78,7 @@ def createProjectModel(project_info: dict) -> Tuple[int, str]:
     return project.id
 
 
-def createBatchModel(project_id: int, batchtag: str, batch_id: int = None) -> int:
+def create_batch_model(project_id: int, batchtag: str, batch_id: int = None) -> int:
     """Creates a Django batch object - a batch of target compounds model entry
 
     Parameters
@@ -107,7 +107,7 @@ def createBatchModel(project_id: int, batchtag: str, batch_id: int = None) -> in
     return batch.id
 
 
-def createTargetModel(
+def create_target_model(
     batch_id: int, name: str, smiles: str, concentration: float, volume: float
 ) -> int:
     """Creates a Django target object - a target compound model entry
@@ -133,17 +133,17 @@ def createTargetModel(
     target = Target()
     batch_obj = Batch.objects.get(id=batch_id)
     target.batch_id = batch_obj
-    target.smiles = canonSmiles(smiles=smiles)
-    mols = calculateMolsFromConc(
+    target.smiles = canon_smiles(smiles=smiles)
+    mols = calculate_mols_from_conc(
         target_concentration=concentration, target_volume=volume
     )
-    mass = calculateMassFromMols(mols=mols, SMILES=smiles)
+    mass = calculate_mass_from_mols(mols=mols, SMILES=smiles)
     target.mols = mols
     target.concentration = concentration
     target.volume = volume
     target.mass = mass
     target.name = str(name)
-    target_svg_string = createSVGString(smiles)
+    target_svg_string = create_svg_string(smiles)
     target_svg_fn = default_storage.save(
         "targetimages/" + target.name + ".svg", ContentFile(target_svg_string)
     )
@@ -152,7 +152,7 @@ def createTargetModel(
     return target.id
 
 
-def createMethodModel(target_id: int, nosteps: int, otchem: bool) -> int:
+def create_method_model(target_id: int, nosteps: int, otchem: bool) -> int:
     """Creates a Django method object - a method is a collection of reactions
        for a target compound
 
@@ -180,7 +180,7 @@ def createMethodModel(target_id: int, nosteps: int, otchem: bool) -> int:
     return method.id
 
 
-def createReactionModel(
+def create_reaction_model(
     method_id: int,
     reaction_class: str,
     reaction_number: int,
@@ -227,7 +227,7 @@ def createReactionModel(
     if reaction_recipe:
         reaction.recipe = reaction_recipe
     reaction.groupbycolumn = groupby_column
-    reaction_svg_string = createReactionSVGString(reaction_smarts)
+    reaction_svg_string = create_reaction_svg_string(reaction_smarts)
     reaction_svg_fn = default_storage.save(
         "reactionimages/" + reaction_class + ".svg", ContentFile(reaction_svg_string)
     )
@@ -237,7 +237,7 @@ def createReactionModel(
     return reaction.id
 
 
-def createPubChemInfoModel(compoundid: int, smiles: str, cas: str = None) -> object:
+def create_pubchem_info_model(compoundid: int, smiles: str, cas: str = None) -> object:
     """Creates a Django pubcheminfo object - the PubChem info captured for a
     compound
 
@@ -256,7 +256,7 @@ def createPubChemInfoModel(compoundid: int, smiles: str, cas: str = None) -> obj
         The PubChem model object created
     """
     pubcheminfo = PubChemInfo()
-    pubcheminfo.smiles = canonSmiles(smiles=smiles)
+    pubcheminfo.smiles = canon_smiles(smiles=smiles)
     if cas:
         pubcheminfo.cas = cas
     pubcheminfo.compoundid = compoundid
@@ -270,7 +270,7 @@ def createPubChemInfoModel(compoundid: int, smiles: str, cas: str = None) -> obj
     return pubcheminfo
 
 
-def getPubChemInfo(smiles: str) -> object:
+def get_pubchem_info(smiles: str) -> object:
     """Searches if Django PubChemInfo object exists for smiles. If not checks if
     an entry exists on PuBChem and if it does, creates a PubChemInfo model object
 
@@ -287,23 +287,23 @@ def getPubChemInfo(smiles: str) -> object:
         Returns False if no Django PubChemInfo model instance found or
         PubChem DB entry found for the compound
     """
-    smiles = canonSmiles(smiles=smiles)
+    smiles = canon_smiles(smiles=smiles)
     pubcheminfoqueryset = PubChemInfo.objects.filter(smiles=smiles)
     if pubcheminfoqueryset:
         pubcheminfo = pubcheminfoqueryset[0]
         return pubcheminfo
     else:
-        inchikey = getInchiKey(smiles=smiles)
-        compound = getPubChemCompound(inchikey=inchikey)
+        inchikey = get_inchi_key(smiles=smiles)
+        compound = get_pubchem_compound(inchikey=inchikey)
         if compound:
             compoundid = compound.cid
-            cas = getPubChemCAS(compound=compound)
+            cas = get_pubchem_cas(compound=compound)
             if cas:
-                pubcheminfo = createPubChemInfoModel(
+                pubcheminfo = create_pubchem_info_model(
                     compoundid=compoundid, smiles=smiles, cas=cas
                 )
             if not cas:
-                pubcheminfo = createPubChemInfoModel(
+                pubcheminfo = create_pubchem_info_model(
                     compoundid=compoundid, smiles=smiles
                 )
             return pubcheminfo
@@ -311,20 +311,20 @@ def getPubChemInfo(smiles: str) -> object:
             return False
 
 
-def createProductModel(reaction_id: int, product_smiles: str, fetch_pubchem: bool = True):
+def create_product_model(reaction_id: int, product_smiles: str, fetch_pubchem: bool = True):
     """Creates a Django product object - the product of a reaction"""
-    product_smiles = canonSmiles(smiles=product_smiles)
+    product_smiles = canon_smiles(smiles=product_smiles)
     product = Product()
     reaction_obj = Reaction.objects.get(id=reaction_id)
     product.reaction_id = reaction_obj
     product.smiles = product_smiles
     
     if fetch_pubchem:
-        pubcheminfoobj = getPubChemInfo(smiles=product_smiles)
+        pubcheminfoobj = get_pubchem_info(smiles=product_smiles)
         if pubcheminfoobj:
             product.pubcheminfo_id = pubcheminfoobj
 
-    product_svg_string = createSVGString(product_smiles)
+    product_svg_string = create_svg_string(product_smiles)
     product_svg_fn = default_storage.save(
         "productimages/product.svg", ContentFile(product_svg_string)
     )
@@ -332,7 +332,7 @@ def createProductModel(reaction_id: int, product_smiles: str, fetch_pubchem: boo
     product.save()
 
 
-def createReactantModel(
+def create_reactant_model(
     reaction_id: int, reactant_smiles: str, previous_reaction_product: bool, fetch_pubchem: bool = True
 ) -> int:
     """Creates a Django reactant object - the reactant in a reaction
@@ -361,7 +361,7 @@ def createReactantModel(
     reactant.smiles = reactant_smiles
     
     if fetch_pubchem:
-        pubcheminfoobj = getPubChemInfo(smiles=reactant_smiles)
+        pubcheminfoobj = get_pubchem_info(smiles=reactant_smiles)
         if pubcheminfoobj:
             reactant.pubcheminfo_id = pubcheminfoobj
     
@@ -370,7 +370,7 @@ def createReactantModel(
     return reactant.id
 
 
-def createCatalogEntryModel(
+def create_catalog_entry_model(
     catalog_entry: dict = None,
     target_id: int = None,
     reactant_id: int = None,
@@ -551,13 +551,13 @@ class CreateEncodedActionModels(object):
         self.reactant_pair_smiles = list(reactant_pair_smiles)
         self.used_reactant_indices = []
         self.reaction_name = reaction_class
-        self.product_obj = getProduct(reaction_id=reaction_id)
+        self.product_obj = get_product(reaction_id=reaction_id)
         self.target_obj = Target.objects.get(id=target_id)
         self.productmols = self.getProductMols()
-        self.productmass = calculateMassFromMols(
+        self.productmass = calculate_mass_from_mols(
             mols=self.productmols, SMILES=self.product_obj.smiles
         )
-        self.productsmiles = getProductSmiles(reaction_ids=[reaction_id])[0]
+        self.productsmiles = get_product_smiles(reaction_ids=[reaction_id])[0]
         self.mculeidlist = []
         self.amountslist = []
 
@@ -591,7 +591,7 @@ class CreateEncodedActionModels(object):
         product_mols: float
             The product mols required
         """
-        proceedingreactionqueryset = checkProceedingReactions(
+        proceedingreactionqueryset = check_proceeding_reactions(
             reaction_id=self.reaction_obj.id
         )
 
@@ -602,13 +602,13 @@ class CreateEncodedActionModels(object):
             recipelist = [
                 reactionobj.recipe for reactionobj in proceedingreactionqueryset
             ] + [self.reaction_obj.recipe]
-            reactionyields = getReactionYields(
+            reactionyields = get_reaction_yields(
                 reactionclasslist=reactionclasslist, recipelist=recipelist
             )
             yieldcorrection = math.prod(reactionyields)
 
         if not proceedingreactionqueryset:
-            reactionyields = getReactionYields(
+            reactionyields = get_reaction_yields(
                 reactionclasslist=[self.reaction_name],
                 recipelist=[self.reaction_obj.recipe],
             )
@@ -740,7 +740,7 @@ class CreateEncodedActionModels(object):
         try:
             if recipe_add.material_smarts:
                 matches = [
-                    matchSMARTS(smiles=smi, smarts=recipe_add.material_smarts)
+                    match_smarts(smiles=smi, smarts=recipe_add.material_smarts)
                     for smi in self.reactant_pair_smiles
                 ]
                 if not any(matches):
@@ -756,7 +756,7 @@ class CreateEncodedActionModels(object):
                     smiles = self.reactant_pair_smiles[selected_index]
                     self.used_reactant_indices.append(selected_index)
             elif recipe_add.material_smiles:
-                smiles = canonSmiles(recipe_add.material_smiles)
+                smiles = canon_smiles(recipe_add.material_smiles)
             else:
                 smiles = self.productsmiles
 

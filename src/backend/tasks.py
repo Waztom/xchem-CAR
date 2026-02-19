@@ -26,20 +26,20 @@ from .models import (
 
 from .validate import ValidateFile
 from .createmodels import (
-    createProjectModel,
-    createBatchModel,
-    createTargetModel,
-    createCatalogEntryModel,
-    createMethodModel,
-    createReactionModel,
-    createProductModel,
-    createReactantModel,
+    create_project_model,
+    create_batch_model,
+    create_target_model,
+    create_catalog_entry_model,
+    create_method_model,
+    create_reaction_model,
+    create_product_model,
+    create_reactant_model,
     CreateEncodedActionModels,
 )
 
 from .manifold.apicalls import (
-    getExactSearch,
-    getManifoldRetrosynthesisBatch,
+    get_exact_search,
+    get_manifold_retrosynthesis_batch,
 )
 from .recipe_utils import (
     recipe_exists,
@@ -47,20 +47,20 @@ from .recipe_utils import (
     get_recipe_stir_temperature,
 )
 from .db_utils import (
-    checkPreviousReactionProducts,
-    getActionSessionQuerySet,
-    getActionSessionSequenceNumbers,
-    getActionSessionTypes,
-    getBatchReactions,
-    getBatchTag,
-    getGroupedActionSessionSequences,
-    getGroupedActionSessionTypes,
-    getMaxReactionNumber,
-    getOTBatchProtocolQuerySet,
-    getReactionsToDo,
-    groupReactions,
+    check_previous_reaction_products,
+    get_action_session_query_set,
+    get_action_session_sequence_numbers,
+    get_action_session_types,
+    get_batch_reactions,
+    get_batch_tag,
+    get_grouped_action_session_sequences,
+    get_grouped_action_session_types,
+    get_max_reaction_number,
+    get_ot_batch_protocol_query_set,
+    get_reactions_to_do,
+    group_reactions,
 )
-from .chem_utils import canonSmiles
+from .chem_utils import canon_smiles
 
 from .opentrons.otsession import SessionOrchestrator
 from .opentrons.otwriter import ScriptGenerator
@@ -71,7 +71,7 @@ def delete_tmp_file(filepath):
 
 
 @shared_task
-def validateFileUpload(
+def validate_file_upload(
     csv_fp, validate_type: str = None, project_info=None, validate_only=True
 ):
     """Celery task to process validate the uploaded files for retrosynthesis planning.
@@ -163,29 +163,29 @@ def _create_reactant_and_catalog(
     fetch_pubchem : bool
         Whether to fetch PubChem data for the reactant.
     fetch_catalogue : bool
-        Whether to call getExactSearch for vendor catalog entries
+        Whether to call get_exact_search for vendor catalog entries
         (used by custom-chem and combi uploads).
     manifold_molecules : list[dict] or None
         If provided (Manifold uploads), catalog entries are looked up from
-        this list by SMILES match instead of using getExactSearch.
+        this list by SMILES match instead of using get_exact_search.
     """
-    previousreactionqueryset = checkPreviousReactionProducts(
+    previousreactionqueryset = check_previous_reaction_products(
         reaction_id=reaction_id,
         smiles=reactant_smi,
     )
     if previousreactionqueryset:
-        reactant_id = createReactantModel(
+        reactant_id = create_reactant_model(
             reaction_id=reaction_id,
             reactant_smiles=reactant_smi,
             previous_reaction_product=True,
             fetch_pubchem=fetch_pubchem,
         )
-        createCatalogEntryModel(
+        create_catalog_entry_model(
             reactant_id=reactant_id,
             previous_reaction_product=True,
         )
     else:
-        reactant_id = createReactantModel(
+        reactant_id = create_reactant_model(
             reaction_id=reaction_id,
             reactant_smiles=reactant_smi,
             previous_reaction_product=False,
@@ -199,22 +199,22 @@ def _create_reactant_and_catalog(
                 if molecule["smiles"] == reactant_smi
             ][0]
             for catalog_entry in catalog_entries:
-                createCatalogEntryModel(
+                create_catalog_entry_model(
                     catalog_entry=catalog_entry,
                     reactant_id=reactant_id,
                 )
         else:
             # Custom / combi path: lab inventory entry + optional vendor search
-            createCatalogEntryModel(
+            create_catalog_entry_model(
                 reactant_id=reactant_id,
                 previous_reaction_product=False,
                 lab_inventory=True,
             )
             if fetch_catalogue:
-                catalog_entries = getExactSearch(smiles=reactant_smi)
+                catalog_entries = get_exact_search(smiles=reactant_smi)
                 if "results" in catalog_entries:
                     for catalog_entry in catalog_entries["results"]:
-                        createCatalogEntryModel(
+                        create_catalog_entry_model(
                             catalog_entry=catalog_entry,
                             reactant_id=reactant_id,
                             previous_reaction_product=False,
@@ -248,7 +248,7 @@ def _process_manifold_route_reactions(
     ]
     all_encoded = len(encoded_reactions_found) == no_steps
 
-    method_id = createMethodModel(
+    method_id = create_method_model(
         target_id=target_id,
         nosteps=no_steps,
         otchem=all_encoded,
@@ -276,7 +276,7 @@ def _process_manifold_route_reactions(
             elif len(reactant_smiles) == 2:
                 intramolecular = False
 
-        # Build createReactionModel kwargs
+        # Build create_reaction_model kwargs
         reaction_kwargs = dict(
             method_id=method_id,
             reaction_class=reaction_name,
@@ -287,9 +287,9 @@ def _process_manifold_route_reactions(
         if all_encoded:
             reaction_kwargs["reaction_recipe"] = "standard"
 
-        reaction_id = createReactionModel(**reaction_kwargs)
+        reaction_id = create_reaction_model(**reaction_kwargs)
 
-        createProductModel(
+        create_product_model(
             reaction_id=reaction_id,
             product_smiles=product_smiles,
             fetch_pubchem=fetch_pubchem,
@@ -310,7 +310,7 @@ def _upload_custom_or_combi(
     fetch_catalogue=True,
     has_groupby_column=False,
 ):
-    """Shared implementation for uploadCustomReaction and uploadCombiCustomReaction.
+    """Shared implementation for upload_custom_reaction and upload_combi_custom_reaction.
 
     Parameters
     ----------
@@ -319,7 +319,7 @@ def _upload_custom_or_combi(
     fetch_pubchem : bool
         Whether to fetch PubChem data for products/reactants.
     fetch_catalogue : bool
-        Whether to call getExactSearch for vendor catalog entries.
+        Whether to call get_exact_search for vendor catalog entries.
     has_groupby_column : bool
         True for custom-chem uploads (which include a groupby column),
         False for combi-custom-chem uploads.
@@ -331,12 +331,12 @@ def _upload_custom_or_combi(
     if not validated:
         return _handle_not_validated(validate_dict, project_info, csv_fp)
 
-    project_id = createProjectModel(project_info)
+    project_id = create_project_model(project_info)
     project_info["project_id"] = project_id
 
     grouped_targets = uploaded_df.groupby("batch-tag")
     for batchtag, group in grouped_targets:
-        batch_id = createBatchModel(
+        batch_id = create_batch_model(
             project_id=project_id,
             batchtag=batchtag,
         )
@@ -374,14 +374,14 @@ def _upload_custom_or_combi(
                 target_row[9] if has_groupby_column else None
             )
 
-            target_id = createTargetModel(
+            target_id = create_target_model(
                 batch_id=batch_id,
                 name=target_name,
                 smiles=target_smiles,
                 concentration=target_concentration,
                 volume=target_volume,
             )
-            method_id = createMethodModel(
+            method_id = create_method_model(
                 target_id=target_id,
                 nosteps=no_steps,
                 otchem=True,
@@ -429,9 +429,9 @@ def _upload_custom_or_combi(
                 if has_groupby_column:
                     reaction_kwargs["groupby_column"] = reaction_groupby_column
 
-                reaction_id = createReactionModel(**reaction_kwargs)
+                reaction_id = create_reaction_model(**reaction_kwargs)
 
-                createProductModel(
+                create_product_model(
                     reaction_id=reaction_id,
                     product_smiles=reaction_product_smiles,
                     fetch_pubchem=fetch_pubchem,
@@ -455,7 +455,7 @@ def _upload_custom_or_combi(
 
 
 @shared_task
-def uploadManifoldReaction(validate_output, fetch_pubchem=True):
+def upload_manifold_reaction(validate_output, fetch_pubchem=True):
     validate_dict, validated, project_info, csv_fp, uploaded_df = (
         _unpack_validate_output(validate_output)
     )
@@ -463,12 +463,12 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
     if not validated:
         return _handle_not_validated(validate_dict, project_info, csv_fp)
 
-    project_id = createProjectModel(project_info)
+    project_id = create_project_model(project_info)
     project_info["project_id"] = project_id
 
     grouped_targets = uploaded_df.groupby("batch-tag")
     for batchtag, group in grouped_targets:
-        batch_id = createBatchModel(
+        batch_id = create_batch_model(
             project_id=project_id,
             batchtag=batchtag,
         )
@@ -484,7 +484,7 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
             target_concentrations_10 = target_concentrations[i : i + 10]
             target_volumes_10 = target_volumes[i : i + 10]
 
-            retrosynthesis_results = getManifoldRetrosynthesisBatch(
+            retrosynthesis_results = get_manifold_retrosynthesis_batch(
                 smiles=target_smiles_10
             )
             if "results" not in retrosynthesis_results:
@@ -509,7 +509,7 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                 if not routes:
                     continue
 
-                target_id = createTargetModel(
+                target_id = create_target_model(
                     batch_id=batch_id,
                     name=target_name,
                     smiles=target_smi,
@@ -521,7 +521,7 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
                 first_route = routes[0]
                 if first_route["molecules"][0]["isBuildingBlock"]:
                     for catalog_entry in first_route["molecules"][0]["catalogEntries"]:
-                        createCatalogEntryModel(
+                        create_catalog_entry_model(
                             catalog_entry=catalog_entry,
                             target_id=target_id,
                         )
@@ -539,7 +539,7 @@ def uploadManifoldReaction(validate_output, fetch_pubchem=True):
 
 
 @shared_task
-def uploadCustomReaction(validate_output, fetch_pubchem=True, fetch_catalogue=True):
+def upload_custom_reaction(validate_output, fetch_pubchem=True, fetch_catalogue=True):
     return _upload_custom_or_combi(
         validate_output,
         fetch_pubchem=fetch_pubchem,
@@ -549,7 +549,7 @@ def uploadCustomReaction(validate_output, fetch_pubchem=True, fetch_catalogue=Tr
 
 
 @shared_task
-def uploadCombiCustomReaction(validate_output, fetch_pubchem=True, fetch_catalogue=True):
+def upload_combi_custom_reaction(validate_output, fetch_pubchem=True, fetch_catalogue=True):
     return _upload_custom_or_combi(
         validate_output,
         fetch_pubchem=fetch_pubchem,
@@ -559,7 +559,7 @@ def uploadCombiCustomReaction(validate_output, fetch_pubchem=True, fetch_catalog
 
 
 @shared_task
-def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = None):
+def create_ot_script(batchids: list, protocol_name: str, custom_SM_files: dict = None):
     """
     Create otscripts and starting plates for a list of batch ids
 
@@ -582,8 +582,8 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
     otprojectobj.save()
 
     for batchid in batchids:
-        reactionqueryset = getBatchReactions(batchid=batchid)
-        actionsessionqueryset = getActionSessionQuerySet(reaction_ids=reactionqueryset)
+        reactionqueryset = get_batch_reactions(batchid=batchid)
+        actionsessionqueryset = get_action_session_query_set(reaction_ids=reactionqueryset)
         if not actionsessionqueryset:
             for reactionobj in reactionqueryset:
                 reaction_id = reactionobj.id
@@ -611,8 +611,8 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
                     reactant_pair_smiles=list(reactant_pair_smiles),
                 )
 
-        batchtag = getBatchTag(batchid=batchid)
-        otbatchprotocolqueryset = getOTBatchProtocolQuerySet(batch_id=batchid)
+        batchtag = get_batch_tag(batchid=batchid)
+        otbatchprotocolqueryset = get_ot_batch_protocol_query_set(batch_id=batchid)
 
         if otbatchprotocolqueryset and otbatchprotocolqueryset[0].zipfile:
             otbatchprotocolobj = otbatchprotocolqueryset[0]
@@ -626,28 +626,28 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
             otbatchprotocolobj.otproject_id = otprojectobj
             otbatchprotocolobj.celery_taskid = current_task.request.id
             otbatchprotocolobj.save()
-            maxreactionnumber = getMaxReactionNumber(reactionqueryset=reactionqueryset)
-            groupedreactionquerysets = groupReactions(
+            maxreactionnumber = get_max_reaction_number(reactionqueryset=reactionqueryset)
+            groupedreactionquerysets = group_reactions(
                 reactionqueryset=reactionqueryset, maxreactionnumber=maxreactionnumber
             )
             for index, groupreactionqueryset in enumerate(groupedreactionquerysets):
                 if index == 0:
                     reaction_ids = [reaction.id for reaction in groupreactionqueryset]
-                    actionsessionqueryset = getActionSessionQuerySet(
+                    actionsessionqueryset = get_action_session_query_set(
                         reaction_ids=reaction_ids
                     )
-                    sessionnumbers = getActionSessionSequenceNumbers(
+                    sessionnumbers = get_action_session_sequence_numbers(
                         actionsessionqueryset=actionsessionqueryset
                     )
-                    groupedactionsessionsequences = getGroupedActionSessionSequences(
+                    groupedactionsessionsequences = get_grouped_action_session_sequences(
                         sessionnumbers=sessionnumbers,
                         actionsessionqueryset=actionsessionqueryset,
                     )
                     for groupactionsession in groupedactionsessionsequences:
-                        actionsessiontypes = getActionSessionTypes(
+                        actionsessiontypes = get_action_session_types(
                             actionsessionqueryset=groupactionsession
                         )
-                        groupedactionsessiontypes = getGroupedActionSessionTypes(
+                        groupedactionsessiontypes = get_grouped_action_session_types(
                             actionsessiontypes=actionsessiontypes,
                             actionsessionqueryset=groupactionsession,
                         )
@@ -679,7 +679,7 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
                                     )
 
                                 # Create multiple sessions for reactions
-                                sessions = createMultipleOTSessions(
+                                sessions = create_multiple_ot_sessions(
                                     reactionstep=index + 1,
                                     otbatchprotocolobj=otbatchprotocolobj,
                                     actionsessionqueryset=robot_actionsessionqueryset,
@@ -688,7 +688,7 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
                                 )
 
                 if index > 0:
-                    groupreactiontodoqueryset = getReactionsToDo(
+                    groupreactiontodoqueryset = get_reactions_to_do(
                         groupreactionqueryset=groupreactionqueryset
                     )
                     if len(groupreactiontodoqueryset) == 0:
@@ -697,23 +697,23 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
                         reaction_ids = [
                             reaction.id for reaction in groupreactiontodoqueryset
                         ]
-                        actionsessionqueryset = getActionSessionQuerySet(
+                        actionsessionqueryset = get_action_session_query_set(
                             reaction_ids=reaction_ids
                         )
-                        sessionnumbers = getActionSessionSequenceNumbers(
+                        sessionnumbers = get_action_session_sequence_numbers(
                             actionsessionqueryset=actionsessionqueryset
                         )
                         groupedactionsessionsequences = (
-                            getGroupedActionSessionSequences(
+                            get_grouped_action_session_sequences(
                                 sessionnumbers=sessionnumbers,
                                 actionsessionqueryset=actionsessionqueryset,
                             )
                         )
                         for groupactionsession in groupedactionsessionsequences:
-                            actionsessiontypes = getActionSessionTypes(
+                            actionsessiontypes = get_action_session_types(
                                 actionsessionqueryset=groupactionsession
                             )
-                            groupedactionsessiontypes = getGroupedActionSessionTypes(
+                            groupedactionsessiontypes = get_grouped_action_session_types(
                                 actionsessiontypes=actionsessiontypes,
                                 actionsessionqueryset=groupactionsession,
                             )
@@ -744,7 +744,7 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
                                         ]
 
                                     # Create multiple sessions for reactions
-                                    sessions = createMultipleOTSessions(
+                                    sessions = create_multiple_ot_sessions(
                                         reactionstep=index + 1,
                                         otbatchprotocolobj=otbatchprotocolobj,
                                         actionsessionqueryset=robot_actionsessionqueryset,
@@ -775,7 +775,7 @@ def createOTScript(batchids: list, protocol_name: str, custom_SM_files: dict = N
     return task_summary, otprojectobj.id
 
 
-def createMultipleOTSessions(
+def create_multiple_ot_sessions(
     reactionstep: int,
     otbatchprotocolobj: OTBatchProtocol,
     actionsessionqueryset: QuerySet[ActionSession],
@@ -921,7 +921,7 @@ def createMultipleOTSessions(
                 sub_action_sessions = actionsessionqueryset.filter(
                     reaction_id__in=reaction_group
                 )
-                sub_sessions = createMultipleOTSessions(
+                sub_sessions = create_multiple_ot_sessions(
                     reactionstep=reactionstep,
                     otbatchprotocolobj=otbatchprotocolobj,
                     actionsessionqueryset=sub_action_sessions,
@@ -1109,7 +1109,7 @@ class ZipOTBatchProtocol(object):
 
 
 @shared_task
-def canonicalizeSmiles(csvfile: str = None, smiles: list = None):
+def canonicalize_smiles(csvfile: str = None, smiles: list = None):
     """ "
     Canonicalizes smiles from csv file uploaded from frontend
     """
@@ -1125,7 +1125,7 @@ def canonicalizeSmiles(csvfile: str = None, smiles: list = None):
     molcheck = [Chem.MolFromSmiles(smi) for smi in smiles]
 
     if None not in molcheck:
-        canonicalizedsmiles = [canonSmiles(smi) for smi in smiles]
+        canonicalizedsmiles = [canon_smiles(smi) for smi in smiles]
         return validated, canonicalizedsmiles
     else:
         validated = False

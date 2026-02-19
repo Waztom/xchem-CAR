@@ -11,7 +11,7 @@ from typing import List, Union
 from backend.models import (
     OTSession,
 )
-from backend.db_utils import getReactionQuerySet
+from backend.db_utils import get_reaction_query_set
 
 from .file_manager import FileManager
 from .command_generator import CommandGenerator
@@ -107,7 +107,7 @@ class ScriptGenerator:
         ]
 
         logger.info(f"Found {len(self.reaction_ids)} reactions to process")
-        self.groupreactionqueryset = getReactionQuerySet(reaction_ids=self.reaction_ids)
+        self.groupreactionqueryset = get_reaction_query_set(reaction_ids=self.reaction_ids)
 
         # Get required resources
         logger.info("Loading equipment resources (tip racks, pipettes, plates)")

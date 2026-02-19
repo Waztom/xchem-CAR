@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 # -----------------------------------------------------------------------------
 
 
-def getMWs(smiles: list[str]) -> list[float]:
+def get_mws(smiles: list[str]) -> list[float]:
     """Gets the molecular weights of a list of compounds SMILES
 
     Parameters
@@ -49,7 +49,7 @@ def getMWs(smiles: list[str]) -> list[float]:
         print(e)
 
 
-def getInchiKey(smiles: str) -> str:
+def get_inchi_key(smiles: str) -> str:
     """Gets the inchikey for a compound SMILES
 
     Parameters
@@ -77,7 +77,7 @@ def getInchiKey(smiles: str) -> str:
         return None
 
 
-def getMolecularFormula(smiles: list) -> list:
+def get_molecular_formula(smiles: list) -> list:
     """Gets the molecular formula of a list of compounds SMILES
     Parameters
     ----------
@@ -102,7 +102,7 @@ def getMolecularFormula(smiles: list) -> list:
 # -----------------------------------------------------------------------------
 
 
-def canonSmiles(smiles: str) -> str:
+def canon_smiles(smiles: str) -> str:
     """Function to canonicalise SMILES
 
     Parameters
@@ -129,7 +129,7 @@ def canonSmiles(smiles: str) -> str:
         print(e)
 
 
-def stripSalts(smiles: str, return_details: bool = False):
+def strip_salts(smiles: str, return_details: bool = False):
     """Strips salts from a SMILES string by returning the largest molecular fragment.
 
     Parameters
@@ -155,7 +155,7 @@ def stripSalts(smiles: str, return_details: bool = False):
     """
     try:
         # Canonicalize input SMILES first
-        canonical_smiles = canonSmiles(smiles)
+        canonical_smiles = canon_smiles(smiles)
         if not canonical_smiles:
             logger.warning(f"Could not canonicalize SMILES: {smiles}")
             return (smiles, False, []) if return_details else smiles
@@ -204,7 +204,7 @@ def stripSalts(smiles: str, return_details: bool = False):
 # -----------------------------------------------------------------------------
 
 
-def matchSMARTS(smiles: str, smarts: str) -> bool:
+def match_smarts(smiles: str, smarts: str) -> bool:
     """Matches a SMILES pattern to a SMARTS pattern
 
     Parameters
@@ -231,7 +231,7 @@ def matchSMARTS(smiles: str, smarts: str) -> bool:
         print(e)
 
 
-def checkReactantSMARTS(reactant_SMILES: tuple, reaction_SMARTS: list) -> list:
+def check_reactant_smarts(reactant_SMILES: tuple, reaction_SMARTS: list) -> list:
     """Checks if reactant pair can produce a product
 
     Parameters
@@ -357,7 +357,7 @@ def checkReactantSMARTS(reactant_SMILES: tuple, reaction_SMARTS: list) -> list:
 # -----------------------------------------------------------------------------
 
 
-def getAdditionOrder(
+def get_addition_order(
     product_smi: str, reactant_SMILES: tuple, reaction_SMARTS: list
 ) -> list:
     """Gets reactant pair addition order as SMILES that yields the expected
@@ -388,10 +388,10 @@ def getAdditionOrder(
         ]
 
         if reaction_SMARTS_reactants == "":
-            ordered_smis = [canonSmiles(smi) for smi in reactant_SMILES if smi != ""]
+            ordered_smis = [canon_smiles(smi) for smi in reactant_SMILES if smi != ""]
 
         if len(reactant_mols) == 1:
-            ordered_smis = [canonSmiles(smi) for smi in reactant_SMILES if smi != ""]
+            ordered_smis = [canon_smiles(smi) for smi in reactant_SMILES if smi != ""]
 
         if len(reactant_mols) > 1:
 
@@ -399,7 +399,7 @@ def getAdditionOrder(
                 reaction_SMARTS_reactants[1]
             ):
                 ordered_smis = [
-                    canonSmiles(smi) for smi in reactant_SMILES if smi != ""
+                    canon_smiles(smi) for smi in reactant_SMILES if smi != ""
                 ]
             else:
                 for reactant_permutation in list(itertools.permutations(reactant_mols)):
@@ -435,11 +435,11 @@ def getAdditionOrder(
 
 
 # Keep the old name with typo for backward compatibility
-def getAddtionOrder(
+def get_addtion_order(
     product_smi: str, reactant_SMILES: tuple, reaction_SMARTS: list
 ) -> list:
-    """Deprecated: Use getAdditionOrder instead."""
-    return getAdditionOrder(product_smi, reactant_SMILES, reaction_SMARTS)
+    """Deprecated: Use get_addition_order instead."""
+    return get_addition_order(product_smi, reactant_SMILES, reaction_SMARTS)
 
 
 # -----------------------------------------------------------------------------
@@ -447,7 +447,7 @@ def getAddtionOrder(
 # -----------------------------------------------------------------------------
 
 
-def atomRemover(mol, rxn):
+def atom_remover(mol, rxn):
     """Remove atoms from a molecule using a reaction pattern.
 
     Parameters
@@ -468,7 +468,7 @@ def atomRemover(mol, rxn):
     >>> from rdkit.Chem import AllChem
     >>> mol = Chem.MolFromSmiles('CC(=O)O')
     >>> rxn = AllChem.ReactionFromSmarts('[C:1](=[O:2])[OH]>>[C:1](=[O:2])')
-    >>> result = atomRemover(mol, rxn)
+    >>> result = atom_remover(mol, rxn)
     """
     try:
         ps = rxn.RunReactants((mol,))
@@ -485,11 +485,11 @@ def atomRemover(mol, rxn):
             return res
 
     except Exception as e:
-        logger.error(f"Error in atomRemover: {str(e)}")
+        logger.error(f"Error in atom_remover: {str(e)}")
         return None
 
 
-def getFrags(mols: list, smarts: str) -> list:
+def get_frags(mols: list, smarts: str) -> list:
     """Get the fragments of a list of molecules"
     Parameters
     ----------
@@ -514,16 +514,16 @@ def getFrags(mols: list, smarts: str) -> list:
                     res = Chem.RemoveHs(p[0])
                     frag_mols.append(res)
             except Exception as e:
-                logger.error(f"Error in getFrags: {str(e)}")
+                logger.error(f"Error in get_frags: {str(e)}")
                 frag_mols.append(None)
                 continue
         return frag_mols
     except Exception as e:
-        logger.error(f"Error in getFrags: {str(e)}")
+        logger.error(f"Error in get_frags: {str(e)}")
         return None
 
 
-def removeRadicals(mol):
+def remove_radicals(mol):
     """Remove radicals from a molecule by adding hydrogens.
 
     Parameters
@@ -540,7 +540,7 @@ def removeRadicals(mol):
     --------
     >>> from rdkit import Chem
     >>> mol = Chem.MolFromSmiles('[CH2]CC')
-    >>> result = removeRadicals(mol)
+    >>> result = remove_radicals(mol)
     >>> Chem.MolToSmiles(result)
     'CCC'
     """
@@ -591,8 +591,8 @@ def are_equivalent_structures(smiles1, smiles2, match_tautomers=True, similarity
             return False
             
         # Method 1: Direct canonicalized SMILES comparison after stripping salts
-        clean1 = stripSalts(canonSmiles(smiles1))
-        clean2 = stripSalts(canonSmiles(smiles2))
+        clean1 = strip_salts(canon_smiles(smiles1))
+        clean2 = strip_salts(canon_smiles(smiles2))
         
         if clean1 == clean2:
             logger.debug(f"Structures matched by direct SMILES comparison")
@@ -645,7 +645,7 @@ def are_equivalent_structures(smiles1, smiles2, match_tautomers=True, similarity
 # -----------------------------------------------------------------------------
 
 
-def createSVGString(smiles: str) -> str:
+def create_svg_string(smiles: str) -> str:
     """Function that creates a SVG image string from smiles string
 
     Parameters
@@ -672,7 +672,7 @@ def createSVGString(smiles: str) -> str:
         print(e)
 
 
-def createReactionSVGString(smarts: str) -> str:
+def create_reaction_svg_string(smarts: str) -> str:
     """Function that creates a SVG image string from smarts string
 
     Parameters
@@ -702,7 +702,7 @@ def createReactionSVGString(smarts: str) -> str:
 # -----------------------------------------------------------------------------
 
 
-def combiChem(
+def combi_chem(
     reactant_1_SMILES: list, reactant_2_SMILES: list, are_product_SMILES: bool = False
 ) -> list:
     """Gets all possible combinations between two uneven lists of
@@ -726,22 +726,22 @@ def combiChem(
         as a list of tuples
     """
     if len(reactant_1_SMILES) == 0:
-        reactant_2_SMILES_canon = [canonSmiles(smi) for smi in reactant_2_SMILES]
+        reactant_2_SMILES_canon = [canon_smiles(smi) for smi in reactant_2_SMILES]
         if not are_product_SMILES:
             reactant_2_SMILES_canon = list(dict.fromkeys(reactant_2_SMILES_canon))
         all_possible_combinations = list(
             itertools.product([""], reactant_2_SMILES_canon)
         )
     if len(reactant_2_SMILES) == 0:
-        reactant_1_SMILES_canon = [canonSmiles(smi) for smi in reactant_1_SMILES]
+        reactant_1_SMILES_canon = [canon_smiles(smi) for smi in reactant_1_SMILES]
         if not are_product_SMILES:
             reactant_1_SMILES_canon = list(dict.fromkeys(reactant_1_SMILES_canon))
         all_possible_combinations = list(
             itertools.product([""], reactant_1_SMILES_canon)
         )
     if len(reactant_1_SMILES) != 0 and len(reactant_2_SMILES) != 0:
-        reactant_1_SMILES_canon = [canonSmiles(smi) for smi in reactant_1_SMILES]
-        reactant_2_SMILES_canon = [canonSmiles(smi) for smi in reactant_2_SMILES]
+        reactant_1_SMILES_canon = [canon_smiles(smi) for smi in reactant_1_SMILES]
+        reactant_2_SMILES_canon = [canon_smiles(smi) for smi in reactant_2_SMILES]
         if not are_product_SMILES:
             reactant_2_SMILES_canon = list(dict.fromkeys(reactant_2_SMILES_canon))
         all_possible_combinations = list(
@@ -752,7 +752,7 @@ def combiChem(
     return all_possible_combinations
 
 
-def createCombiChemCSV(csv_input_file: str, out_dir: str):
+def create_combi_chem_csv(csv_input_file: str, out_dir: str):
     """Creates a .csv file for all the combinations possible for a given input
         of reactant SMILES pairs
 
@@ -778,10 +778,10 @@ def createCombiChemCSV(csv_input_file: str, out_dir: str):
                 reaction_classes[0], reaction_recipes[0]
             )
 
-            all_possible_combinations = combiChem(reactant_1_SMILES, reactant_2_SMILES)
+            all_possible_combinations = combi_chem(reactant_1_SMILES, reactant_2_SMILES)
             product_smiles = []
             for reactant_pair in all_possible_combinations:
-                product_mols = checkReactantSMARTS(
+                product_mols = check_reactant_smarts(
                     reactant_SMILES=reactant_pair, reaction_SMARTS=reaction_SMARTS
                 )
                 product_smiles.append(Chem.MolToSmiles(product_mols[0]))

@@ -1,10 +1,10 @@
 """Tests for CAR's celery upload tasks.
 
 Tests for:
-  - uploadManifoldReaction
-  - uploadCustomReaction
-  - uploadCombiCustomReaction
-  - canonicalizeSmiles
+  - upload_manifold_reaction
+  - upload_custom_reaction
+  - upload_combi_custom_reaction
+  - canonicalize_smiles
 
 All external dependencies (model creation, API calls, file I/O) are mocked.
 These tests verify the orchestration logic: correct wiring of data through
@@ -16,10 +16,10 @@ from unittest import TestCase
 from unittest.mock import patch, call, ANY
 
 from backend.tasks import (
-    uploadManifoldReaction,
-    uploadCustomReaction,
-    uploadCombiCustomReaction,
-    canonicalizeSmiles,
+    upload_manifold_reaction,
+    upload_custom_reaction,
+    upload_combi_custom_reaction,
+    canonicalize_smiles,
 )
 
 # ---------------------------------------------------------------------------
@@ -220,24 +220,24 @@ def _make_combi_validate_output(
 
 
 # ===========================================================================
-# uploadManifoldReaction tests
+# upload_manifold_reaction tests
 # ===========================================================================
 
 # All patches target backend.tasks where the names are imported
 MANIFOLD_PATCHES = [
     "backend.tasks.delete_tmp_file",
-    "backend.tasks.createCatalogEntryModel",
-    "backend.tasks.createReactantModel",
-    "backend.tasks.createProductModel",
-    "backend.tasks.createReactionModel",
-    "backend.tasks.createMethodModel",
-    "backend.tasks.createTargetModel",
-    "backend.tasks.createBatchModel",
-    "backend.tasks.createProjectModel",
-    "backend.tasks.checkPreviousReactionProducts",
+    "backend.tasks.create_catalog_entry_model",
+    "backend.tasks.create_reactant_model",
+    "backend.tasks.create_product_model",
+    "backend.tasks.create_reaction_model",
+    "backend.tasks.create_method_model",
+    "backend.tasks.create_target_model",
+    "backend.tasks.create_batch_model",
+    "backend.tasks.create_project_model",
+    "backend.tasks.check_previous_reaction_products",
     "backend.tasks.recipe_exists",
     "backend.tasks.get_recipe_intramolecular",
-    "backend.tasks.getManifoldRetrosynthesisBatch",
+    "backend.tasks.get_manifold_retrosynthesis_batch",
 ]
 
 
@@ -247,17 +247,17 @@ class TestUploadManifoldNotValidated(TestCase):
     @patch("backend.tasks.delete_tmp_file")
     def test_returns_early_and_deletes_file(self, mock_del):
         validate_output = _make_retro_validate_output(validated=False)
-        result = uploadManifoldReaction(validate_output)
+        result = upload_manifold_reaction(validate_output)
 
         validate_dict, validated, project_info = result
         self.assertFalse(validated)
         mock_del.assert_called_once_with("/tmp/test.csv")
 
     @patch("backend.tasks.delete_tmp_file")
-    @patch("backend.tasks.createProjectModel")
+    @patch("backend.tasks.create_project_model")
     def test_no_models_created(self, mock_project, mock_del):
         validate_output = _make_retro_validate_output(validated=False)
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
         mock_project.assert_not_called()
 
 
@@ -267,32 +267,32 @@ class TestUploadManifoldHappyPath(TestCase):
     def setUp(self):
         self.patcher_del = patch("backend.tasks.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.createProjectModel", return_value=1
+            "backend.tasks.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.createBatchModel", return_value=10)
+        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.createTargetModel", return_value=100
+            "backend.tasks.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.createMethodModel", return_value=1000
+            "backend.tasks.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.createReactionModel", return_value=5000
+            "backend.tasks.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.createProductModel")
+        self.patcher_product = patch("backend.tasks.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.createReactantModel", return_value=9000
+            "backend.tasks.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.createCatalogEntryModel")
+        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.checkPreviousReactionProducts", return_value=None
+            "backend.tasks.check_previous_reaction_products", return_value=None
         )
         self.patcher_recipe = patch("backend.tasks.recipe_exists", return_value=True)
         self.patcher_intra = patch(
             "backend.tasks.get_recipe_intramolecular", return_value=False
         )
         self.patcher_manifold = patch(
-            "backend.tasks.getManifoldRetrosynthesisBatch"
+            "backend.tasks.get_manifold_retrosynthesis_batch"
         )
 
         self.mock_del = self.patcher_del.start()
@@ -346,7 +346,7 @@ class TestUploadManifoldHappyPath(TestCase):
 
     def test_creates_project(self):
         validate_output = self._single_target_single_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_project.assert_called_once()
         call_args = self.mock_project.call_args[0][0]
@@ -354,7 +354,7 @@ class TestUploadManifoldHappyPath(TestCase):
 
     def test_creates_batch(self):
         validate_output = self._single_target_single_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_batch.assert_called_once_with(
             project_id=1,
@@ -363,7 +363,7 @@ class TestUploadManifoldHappyPath(TestCase):
 
     def test_creates_target(self):
         validate_output = self._single_target_single_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_target.assert_called_once_with(
             batch_id=10,
@@ -375,7 +375,7 @@ class TestUploadManifoldHappyPath(TestCase):
 
     def test_creates_building_block_catalog_entry(self):
         validate_output = self._single_target_single_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         # Building block catalog entry from routes[0]
         self.mock_catalog.assert_any_call(
@@ -386,7 +386,7 @@ class TestUploadManifoldHappyPath(TestCase):
     def test_encoded_route_creates_method_with_otchem_true(self):
         """All reactions found encoded → otchem=True."""
         validate_output = self._single_target_single_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_method.assert_called_with(
             target_id=100,
@@ -396,7 +396,7 @@ class TestUploadManifoldHappyPath(TestCase):
 
     def test_creates_reaction_with_standard_recipe(self):
         validate_output = self._single_target_single_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_reaction.assert_called_once()
         call_kwargs = self.mock_reaction.call_args[1]
@@ -407,7 +407,7 @@ class TestUploadManifoldHappyPath(TestCase):
 
     def test_creates_product(self):
         validate_output = self._single_target_single_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_product.assert_called_once_with(
             reaction_id=5000,
@@ -417,7 +417,7 @@ class TestUploadManifoldHappyPath(TestCase):
 
     def test_creates_reactants_with_catalog_entries(self):
         validate_output = self._single_target_single_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         # 2 reactants, both are new (no previous reaction product)
         self.assertEqual(self.mock_reactant.call_count, 2)
@@ -427,12 +427,12 @@ class TestUploadManifoldHappyPath(TestCase):
 
     def test_deletes_tmp_file(self):
         validate_output = self._single_target_single_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
         self.mock_del.assert_called_once_with("/tmp/test.csv")
 
     def test_return_tuple(self):
         validate_output = self._single_target_single_route()
-        result = uploadManifoldReaction(validate_output)
+        result = upload_manifold_reaction(validate_output)
 
         validate_dict, validated, project_info = result
         self.assertTrue(validated)
@@ -446,25 +446,25 @@ class TestUploadManifoldNotEncoded(TestCase):
     def setUp(self):
         self.patcher_del = patch("backend.tasks.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.createProjectModel", return_value=1
+            "backend.tasks.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.createBatchModel", return_value=10)
+        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.createTargetModel", return_value=100
+            "backend.tasks.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.createMethodModel", return_value=1000
+            "backend.tasks.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.createReactionModel", return_value=5000
+            "backend.tasks.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.createProductModel")
+        self.patcher_product = patch("backend.tasks.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.createReactantModel", return_value=9000
+            "backend.tasks.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.createCatalogEntryModel")
+        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.checkPreviousReactionProducts", return_value=None
+            "backend.tasks.check_previous_reaction_products", return_value=None
         )
         # recipe_exists returns False → not encoded
         self.patcher_recipe = patch("backend.tasks.recipe_exists", return_value=False)
@@ -472,7 +472,7 @@ class TestUploadManifoldNotEncoded(TestCase):
             "backend.tasks.get_recipe_intramolecular", return_value=False
         )
         self.patcher_manifold = patch(
-            "backend.tasks.getManifoldRetrosynthesisBatch"
+            "backend.tasks.get_manifold_retrosynthesis_batch"
         )
 
         self.mock_del = self.patcher_del.start()
@@ -521,7 +521,7 @@ class TestUploadManifoldNotEncoded(TestCase):
             smiles=[SMILES_ASPIRIN],
             names=["Aspirin"],
         )
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_method.assert_called_with(
             target_id=100,
@@ -558,7 +558,7 @@ class TestUploadManifoldNotEncoded(TestCase):
             smiles=[SMILES_ASPIRIN],
             names=["Aspirin"],
         )
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         call_kwargs = self.mock_reaction.call_args[1]
         self.assertNotIn("reaction_recipe", call_kwargs)
@@ -570,32 +570,32 @@ class TestUploadManifoldEdgeCases(TestCase):
     def setUp(self):
         self.patcher_del = patch("backend.tasks.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.createProjectModel", return_value=1
+            "backend.tasks.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.createBatchModel", return_value=10)
+        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.createTargetModel", return_value=100
+            "backend.tasks.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.createMethodModel", return_value=1000
+            "backend.tasks.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.createReactionModel", return_value=5000
+            "backend.tasks.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.createProductModel")
+        self.patcher_product = patch("backend.tasks.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.createReactantModel", return_value=9000
+            "backend.tasks.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.createCatalogEntryModel")
+        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.checkPreviousReactionProducts", return_value=None
+            "backend.tasks.check_previous_reaction_products", return_value=None
         )
         self.patcher_recipe = patch("backend.tasks.recipe_exists", return_value=True)
         self.patcher_intra = patch(
             "backend.tasks.get_recipe_intramolecular", return_value=False
         )
         self.patcher_manifold = patch(
-            "backend.tasks.getManifoldRetrosynthesisBatch"
+            "backend.tasks.get_manifold_retrosynthesis_batch"
         )
 
         self.mock_del = self.patcher_del.start()
@@ -623,7 +623,7 @@ class TestUploadManifoldEdgeCases(TestCase):
         validate_output = _make_retro_validate_output(
             smiles=[SMILES_ASPIRIN], names=["Aspirin"]
         )
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_target.assert_not_called()
         self.mock_method.assert_not_called()
@@ -634,7 +634,7 @@ class TestUploadManifoldEdgeCases(TestCase):
         validate_output = _make_retro_validate_output(
             smiles=[SMILES_ASPIRIN], names=["Aspirin"]
         )
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_target.assert_not_called()
 
@@ -662,7 +662,7 @@ class TestUploadManifoldEdgeCases(TestCase):
             names=["Aspirin", "Ibuprofen"],
             batch_tags=["batch-A", "batch-B"],
         )
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.assertEqual(self.mock_batch.call_count, 2)
         batch_tags_used = [c[1]["batchtag"] for c in self.mock_batch.call_args_list]
@@ -670,7 +670,7 @@ class TestUploadManifoldEdgeCases(TestCase):
         self.assertIn("batch-B", batch_tags_used)
 
     def test_previous_reaction_product_detected(self):
-        """When checkPreviousReactionProducts returns a truthy value,
+        """When check_previous_reaction_products returns a truthy value,
         the reactant should be marked as previous_reaction_product=True."""
         self.mock_prev.return_value = True  # truthy queryset
 
@@ -699,7 +699,7 @@ class TestUploadManifoldEdgeCases(TestCase):
         validate_output = _make_retro_validate_output(
             smiles=[SMILES_ASPIRIN], names=["Aspirin"]
         )
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         # Reactant created with previous_reaction_product=True
         self.mock_reactant.assert_called_once()
@@ -740,7 +740,7 @@ class TestUploadManifoldEdgeCases(TestCase):
         validate_output = _make_retro_validate_output(
             smiles=[SMILES_ASPIRIN], names=["Aspirin"]
         )
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         call_kwargs = self.mock_reaction.call_args[1]
         self.assertTrue(call_kwargs["intramolecular"])
@@ -774,7 +774,7 @@ class TestUploadManifoldEdgeCases(TestCase):
         validate_output = _make_retro_validate_output(
             smiles=[SMILES_ASPIRIN], names=["Aspirin"]
         )
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         call_kwargs = self.mock_reaction.call_args[1]
         self.assertTrue(call_kwargs["intramolecular"])
@@ -811,7 +811,7 @@ class TestUploadManifoldEdgeCases(TestCase):
         validate_output = _make_retro_validate_output(
             smiles=[SMILES_ASPIRIN], names=["Aspirin"]
         )
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.assertEqual(self.mock_reaction.call_count, 2)
         # Check reaction numbers are 1 and 2
@@ -822,7 +822,7 @@ class TestUploadManifoldEdgeCases(TestCase):
 
 
 # ===========================================================================
-# uploadCustomReaction tests
+# upload_custom_reaction tests
 # ===========================================================================
 
 
@@ -832,17 +832,17 @@ class TestUploadCustomNotValidated(TestCase):
     @patch("backend.tasks.delete_tmp_file")
     def test_returns_early_and_deletes_file(self, mock_del):
         validate_output = _make_custom_chem_validate_output(validated=False)
-        result = uploadCustomReaction(validate_output)
+        result = upload_custom_reaction(validate_output)
 
         validate_dict, validated, project_info = result
         self.assertFalse(validated)
         mock_del.assert_called_once_with("/tmp/test_custom.csv")
 
     @patch("backend.tasks.delete_tmp_file")
-    @patch("backend.tasks.createProjectModel")
+    @patch("backend.tasks.create_project_model")
     def test_no_models_created(self, mock_project, mock_del):
         validate_output = _make_custom_chem_validate_output(validated=False)
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
         mock_project.assert_not_called()
 
 
@@ -852,30 +852,30 @@ class TestUploadCustomHappyPath(TestCase):
     def setUp(self):
         self.patcher_del = patch("backend.tasks.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.createProjectModel", return_value=1
+            "backend.tasks.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.createBatchModel", return_value=10)
+        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.createTargetModel", return_value=100
+            "backend.tasks.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.createMethodModel", return_value=1000
+            "backend.tasks.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.createReactionModel", return_value=5000
+            "backend.tasks.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.createProductModel")
+        self.patcher_product = patch("backend.tasks.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.createReactantModel", return_value=9000
+            "backend.tasks.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.createCatalogEntryModel")
+        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.checkPreviousReactionProducts", return_value=None
+            "backend.tasks.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
             "backend.tasks.get_recipe_stir_temperature", return_value=25.0
         )
-        self.patcher_exact = patch("backend.tasks.getExactSearch")
+        self.patcher_exact = patch("backend.tasks.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -895,13 +895,13 @@ class TestUploadCustomHappyPath(TestCase):
 
     def test_creates_project(self):
         validate_output = _make_custom_chem_validate_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         self.mock_project.assert_called_once()
 
     def test_creates_batch_per_tag(self):
         validate_output = _make_custom_chem_validate_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         self.mock_batch.assert_called_once_with(
             project_id=1,
@@ -910,7 +910,7 @@ class TestUploadCustomHappyPath(TestCase):
 
     def test_creates_target(self):
         validate_output = _make_custom_chem_validate_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         self.mock_target.assert_called_once_with(
             batch_id=10,
@@ -923,7 +923,7 @@ class TestUploadCustomHappyPath(TestCase):
     def test_method_always_otchem_true(self):
         """Custom-chem uploads always set otchem=True."""
         validate_output = _make_custom_chem_validate_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         self.mock_method.assert_called_once_with(
             target_id=100,
@@ -933,7 +933,7 @@ class TestUploadCustomHappyPath(TestCase):
 
     def test_creates_reaction_with_temperature_and_groupby(self):
         validate_output = _make_custom_chem_validate_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         self.mock_reaction.assert_called_once()
         call_kwargs = self.mock_reaction.call_args[1]
@@ -946,7 +946,7 @@ class TestUploadCustomHappyPath(TestCase):
 
     def test_creates_product(self):
         validate_output = _make_custom_chem_validate_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         self.mock_product.assert_called_once_with(
             reaction_id=5000,
@@ -957,7 +957,7 @@ class TestUploadCustomHappyPath(TestCase):
     def test_reactant_not_previous_creates_lab_inventory_entry(self):
         """New reactants get a lab_inventory=True catalog entry."""
         validate_output = _make_custom_chem_validate_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         # 2 reactants
         self.assertEqual(self.mock_reactant.call_count, 2)
@@ -969,29 +969,29 @@ class TestUploadCustomHappyPath(TestCase):
         )
 
     def test_fetch_catalogue_calls_exact_search(self):
-        """When fetch_catalogue=True, getExactSearch is called per reactant."""
+        """When fetch_catalogue=True, get_exact_search is called per reactant."""
         self.mock_exact.return_value = {
             "results": [{"vendorName": "Enamine", "smiles": SMILES_REACTANT_A}]
         }
         validate_output = _make_custom_chem_validate_output()
-        uploadCustomReaction(validate_output, fetch_catalogue=True)
+        upload_custom_reaction(validate_output, fetch_catalogue=True)
 
         self.assertEqual(self.mock_exact.call_count, 2)
 
     def test_fetch_catalogue_false_skips_exact_search(self):
         validate_output = _make_custom_chem_validate_output()
-        uploadCustomReaction(validate_output, fetch_catalogue=False)
+        upload_custom_reaction(validate_output, fetch_catalogue=False)
 
         self.mock_exact.assert_not_called()
 
     def test_deletes_tmp_file(self):
         validate_output = _make_custom_chem_validate_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
         self.mock_del.assert_called_once_with("/tmp/test_custom.csv")
 
     def test_return_tuple(self):
         validate_output = _make_custom_chem_validate_output()
-        result = uploadCustomReaction(validate_output)
+        result = upload_custom_reaction(validate_output)
 
         validate_dict, validated, project_info = result
         self.assertTrue(validated)
@@ -1000,7 +1000,7 @@ class TestUploadCustomHappyPath(TestCase):
     def test_multiple_targets(self):
         """Two targets should create two target models and two methods."""
         validate_output = _make_custom_chem_validate_output(n_targets=2)
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         self.assertEqual(self.mock_target.call_count, 2)
         self.assertEqual(self.mock_method.call_count, 2)
@@ -1009,7 +1009,7 @@ class TestUploadCustomHappyPath(TestCase):
         """When a reactant matches a previous reaction product."""
         self.mock_prev.return_value = True  # truthy
         validate_output = _make_custom_chem_validate_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         # All reactant calls should have previous_reaction_product=True
         for c in self.mock_reactant.call_args_list:
@@ -1022,7 +1022,7 @@ class TestUploadCustomHappyPath(TestCase):
 
 
 # ===========================================================================
-# uploadCombiCustomReaction tests
+# upload_combi_custom_reaction tests
 # ===========================================================================
 
 
@@ -1032,17 +1032,17 @@ class TestUploadCombiNotValidated(TestCase):
     @patch("backend.tasks.delete_tmp_file")
     def test_returns_early_and_deletes_file(self, mock_del):
         validate_output = _make_combi_validate_output(validated=False)
-        result = uploadCombiCustomReaction(validate_output)
+        result = upload_combi_custom_reaction(validate_output)
 
         validate_dict, validated, project_info = result
         self.assertFalse(validated)
         mock_del.assert_called_once_with("/tmp/test_combi.csv")
 
     @patch("backend.tasks.delete_tmp_file")
-    @patch("backend.tasks.createProjectModel")
+    @patch("backend.tasks.create_project_model")
     def test_no_models_created(self, mock_project, mock_del):
         validate_output = _make_combi_validate_output(validated=False)
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
         mock_project.assert_not_called()
 
 
@@ -1052,30 +1052,30 @@ class TestUploadCombiHappyPath(TestCase):
     def setUp(self):
         self.patcher_del = patch("backend.tasks.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.createProjectModel", return_value=1
+            "backend.tasks.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.createBatchModel", return_value=10)
+        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.createTargetModel", return_value=100
+            "backend.tasks.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.createMethodModel", return_value=1000
+            "backend.tasks.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.createReactionModel", return_value=5000
+            "backend.tasks.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.createProductModel")
+        self.patcher_product = patch("backend.tasks.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.createReactantModel", return_value=9000
+            "backend.tasks.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.createCatalogEntryModel")
+        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.checkPreviousReactionProducts", return_value=None
+            "backend.tasks.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
             "backend.tasks.get_recipe_stir_temperature", return_value=80.0
         )
-        self.patcher_exact = patch("backend.tasks.getExactSearch")
+        self.patcher_exact = patch("backend.tasks.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -1095,7 +1095,7 @@ class TestUploadCombiHappyPath(TestCase):
 
     def test_creates_project_and_batch(self):
         validate_output = _make_combi_validate_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         self.mock_project.assert_called_once()
         self.mock_batch.assert_called_once_with(
@@ -1105,13 +1105,13 @@ class TestUploadCombiHappyPath(TestCase):
 
     def test_creates_targets_per_combi_row(self):
         validate_output = _make_combi_validate_output(n_targets=2)
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         self.assertEqual(self.mock_target.call_count, 2)
 
     def test_method_always_otchem_true(self):
         validate_output = _make_combi_validate_output(n_targets=1)
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         self.mock_method.assert_called_once_with(
             target_id=100,
@@ -1122,7 +1122,7 @@ class TestUploadCombiHappyPath(TestCase):
     def test_reaction_has_temperature_but_no_groupby(self):
         """Combi upload creates reactions with temperature but without groupby_column."""
         validate_output = _make_combi_validate_output(n_targets=1)
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         self.mock_reaction.assert_called_once()
         call_kwargs = self.mock_reaction.call_args[1]
@@ -1133,7 +1133,7 @@ class TestUploadCombiHappyPath(TestCase):
 
     def test_creates_product(self):
         validate_output = _make_combi_validate_output(n_targets=1)
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         self.mock_product.assert_called_once_with(
             reaction_id=5000,
@@ -1144,7 +1144,7 @@ class TestUploadCombiHappyPath(TestCase):
     def test_creates_reactants_with_lab_inventory(self):
         """New reactants get lab_inventory=True catalog entries."""
         validate_output = _make_combi_validate_output(n_targets=1)
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         self.assertEqual(self.mock_reactant.call_count, 2)
         self.mock_catalog.assert_any_call(
@@ -1158,24 +1158,24 @@ class TestUploadCombiHappyPath(TestCase):
             "results": [{"vendorName": "Enamine", "smiles": SMILES_REACTANT_C}]
         }
         validate_output = _make_combi_validate_output(n_targets=1)
-        uploadCombiCustomReaction(validate_output, fetch_catalogue=True)
+        upload_combi_custom_reaction(validate_output, fetch_catalogue=True)
 
         self.assertEqual(self.mock_exact.call_count, 2)
 
     def test_fetch_catalogue_false_skips_search(self):
         validate_output = _make_combi_validate_output(n_targets=1)
-        uploadCombiCustomReaction(validate_output, fetch_catalogue=False)
+        upload_combi_custom_reaction(validate_output, fetch_catalogue=False)
 
         self.mock_exact.assert_not_called()
 
     def test_deletes_tmp_file(self):
         validate_output = _make_combi_validate_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
         self.mock_del.assert_called_once_with("/tmp/test_combi.csv")
 
     def test_return_tuple(self):
         validate_output = _make_combi_validate_output()
-        result = uploadCombiCustomReaction(validate_output)
+        result = upload_combi_custom_reaction(validate_output)
 
         validate_dict, validated, project_info = result
         self.assertTrue(validated)
@@ -1184,7 +1184,7 @@ class TestUploadCombiHappyPath(TestCase):
     def test_previous_reaction_product(self):
         self.mock_prev.return_value = True
         validate_output = _make_combi_validate_output(n_targets=1)
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         for c in self.mock_reactant.call_args_list:
             self.assertTrue(c[1]["previous_reaction_product"])
@@ -1277,30 +1277,30 @@ class TestUploadCustomMultiStep(TestCase):
     def setUp(self):
         self.patcher_del = patch("backend.tasks.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.createProjectModel", return_value=1
+            "backend.tasks.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.createBatchModel", return_value=10)
+        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.createTargetModel", return_value=100
+            "backend.tasks.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.createMethodModel", return_value=1000
+            "backend.tasks.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.createReactionModel", side_effect=[5001, 5002]
+            "backend.tasks.create_reaction_model", side_effect=[5001, 5002]
         )
-        self.patcher_product = patch("backend.tasks.createProductModel")
+        self.patcher_product = patch("backend.tasks.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.createReactantModel", return_value=9000
+            "backend.tasks.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.createCatalogEntryModel")
+        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.checkPreviousReactionProducts", return_value=None
+            "backend.tasks.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
             "backend.tasks.get_recipe_stir_temperature", return_value=25.0
         )
-        self.patcher_exact = patch("backend.tasks.getExactSearch")
+        self.patcher_exact = patch("backend.tasks.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -1320,12 +1320,12 @@ class TestUploadCustomMultiStep(TestCase):
 
     def test_creates_two_reactions(self):
         validate_output = _make_custom_chem_multistep_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
         self.assertEqual(self.mock_reaction.call_count, 2)
 
     def test_reaction_numbers_sequential(self):
         validate_output = _make_custom_chem_multistep_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         reaction_numbers = [
             c[1]["reaction_number"] for c in self.mock_reaction.call_args_list
@@ -1334,7 +1334,7 @@ class TestUploadCustomMultiStep(TestCase):
 
     def test_reaction_classes_match_steps(self):
         validate_output = _make_custom_chem_multistep_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         classes = [
             c[1]["reaction_class"] for c in self.mock_reaction.call_args_list
@@ -1343,7 +1343,7 @@ class TestUploadCustomMultiStep(TestCase):
 
     def test_groupby_columns_per_step(self):
         validate_output = _make_custom_chem_multistep_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         groupby_cols = [
             c[1]["groupby_column"] for c in self.mock_reaction.call_args_list
@@ -1352,7 +1352,7 @@ class TestUploadCustomMultiStep(TestCase):
 
     def test_products_per_step(self):
         validate_output = _make_custom_chem_multistep_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         product_calls = self.mock_product.call_args_list
         self.assertEqual(len(product_calls), 2)
@@ -1365,7 +1365,7 @@ class TestUploadCustomMultiStep(TestCase):
 
     def test_method_nosteps_is_two(self):
         validate_output = _make_custom_chem_multistep_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         self.mock_method.assert_called_once_with(
             target_id=100, nosteps=2, otchem=True,
@@ -1374,12 +1374,12 @@ class TestUploadCustomMultiStep(TestCase):
     def test_reactants_across_both_steps(self):
         """2 reactants per step × 2 steps = 4 reactant models."""
         validate_output = _make_custom_chem_multistep_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
         self.assertEqual(self.mock_reactant.call_count, 4)
 
     def test_recipes_per_step(self):
         validate_output = _make_custom_chem_multistep_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         recipes = [
             c[1]["reaction_recipe"] for c in self.mock_reaction.call_args_list
@@ -1398,30 +1398,30 @@ class TestUploadCombiMultiStep(TestCase):
     def setUp(self):
         self.patcher_del = patch("backend.tasks.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.createProjectModel", return_value=1
+            "backend.tasks.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.createBatchModel", return_value=10)
+        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.createTargetModel", return_value=100
+            "backend.tasks.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.createMethodModel", return_value=1000
+            "backend.tasks.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.createReactionModel", side_effect=[5001, 5002]
+            "backend.tasks.create_reaction_model", side_effect=[5001, 5002]
         )
-        self.patcher_product = patch("backend.tasks.createProductModel")
+        self.patcher_product = patch("backend.tasks.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.createReactantModel", return_value=9000
+            "backend.tasks.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.createCatalogEntryModel")
+        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.checkPreviousReactionProducts", return_value=None
+            "backend.tasks.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
             "backend.tasks.get_recipe_stir_temperature", return_value=80.0
         )
-        self.patcher_exact = patch("backend.tasks.getExactSearch")
+        self.patcher_exact = patch("backend.tasks.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -1441,12 +1441,12 @@ class TestUploadCombiMultiStep(TestCase):
 
     def test_creates_two_reactions(self):
         validate_output = _make_combi_multistep_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
         self.assertEqual(self.mock_reaction.call_count, 2)
 
     def test_reaction_numbers_sequential(self):
         validate_output = _make_combi_multistep_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         numbers = [
             c[1]["reaction_number"] for c in self.mock_reaction.call_args_list
@@ -1455,7 +1455,7 @@ class TestUploadCombiMultiStep(TestCase):
 
     def test_reaction_classes_match_steps(self):
         validate_output = _make_combi_multistep_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         classes = [
             c[1]["reaction_class"] for c in self.mock_reaction.call_args_list
@@ -1465,14 +1465,14 @@ class TestUploadCombiMultiStep(TestCase):
     def test_no_groupby_column_on_combi(self):
         """Combi reactions should not have groupby_column, even multi-step."""
         validate_output = _make_combi_multistep_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         for c in self.mock_reaction.call_args_list:
             self.assertNotIn("groupby_column", c[1])
 
     def test_products_per_step(self):
         validate_output = _make_combi_multistep_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         product_calls = self.mock_product.call_args_list
         self.assertEqual(len(product_calls), 2)
@@ -1485,7 +1485,7 @@ class TestUploadCombiMultiStep(TestCase):
 
     def test_method_nosteps_is_two(self):
         validate_output = _make_combi_multistep_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         self.mock_method.assert_called_once_with(
             target_id=100, nosteps=2, otchem=True,
@@ -1493,7 +1493,7 @@ class TestUploadCombiMultiStep(TestCase):
 
     def test_reactants_across_both_steps(self):
         validate_output = _make_combi_multistep_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
         self.assertEqual(self.mock_reactant.call_count, 4)
 
 
@@ -1569,32 +1569,32 @@ class TestUploadCustomMultiBatch(TestCase):
     def setUp(self):
         self.patcher_del = patch("backend.tasks.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.createProjectModel", return_value=1
+            "backend.tasks.create_project_model", return_value=1
         )
         self.patcher_batch = patch(
-            "backend.tasks.createBatchModel", side_effect=[10, 20]
+            "backend.tasks.create_batch_model", side_effect=[10, 20]
         )
         self.patcher_target = patch(
-            "backend.tasks.createTargetModel", side_effect=[100, 200]
+            "backend.tasks.create_target_model", side_effect=[100, 200]
         )
         self.patcher_method = patch(
-            "backend.tasks.createMethodModel", return_value=1000
+            "backend.tasks.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.createReactionModel", return_value=5000
+            "backend.tasks.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.createProductModel")
+        self.patcher_product = patch("backend.tasks.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.createReactantModel", return_value=9000
+            "backend.tasks.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.createCatalogEntryModel")
+        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.checkPreviousReactionProducts", return_value=None
+            "backend.tasks.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
             "backend.tasks.get_recipe_stir_temperature", return_value=25.0
         )
-        self.patcher_exact = patch("backend.tasks.getExactSearch")
+        self.patcher_exact = patch("backend.tasks.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -1614,7 +1614,7 @@ class TestUploadCustomMultiBatch(TestCase):
 
     def test_creates_two_batches(self):
         validate_output = _make_custom_chem_multibatch_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         self.assertEqual(self.mock_batch.call_count, 2)
         tags = sorted(c[1]["batchtag"] for c in self.mock_batch.call_args_list)
@@ -1622,7 +1622,7 @@ class TestUploadCustomMultiBatch(TestCase):
 
     def test_each_target_in_correct_batch(self):
         validate_output = _make_custom_chem_multibatch_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
 
         self.assertEqual(self.mock_target.call_count, 2)
         # First call should use batch_id=10, second batch_id=20
@@ -1631,7 +1631,7 @@ class TestUploadCustomMultiBatch(TestCase):
 
     def test_single_project_created(self):
         validate_output = _make_custom_chem_multibatch_output()
-        uploadCustomReaction(validate_output)
+        upload_custom_reaction(validate_output)
         self.mock_project.assert_called_once()
 
 
@@ -1641,32 +1641,32 @@ class TestUploadCombiMultiBatch(TestCase):
     def setUp(self):
         self.patcher_del = patch("backend.tasks.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.createProjectModel", return_value=1
+            "backend.tasks.create_project_model", return_value=1
         )
         self.patcher_batch = patch(
-            "backend.tasks.createBatchModel", side_effect=[10, 20]
+            "backend.tasks.create_batch_model", side_effect=[10, 20]
         )
         self.patcher_target = patch(
-            "backend.tasks.createTargetModel", side_effect=[100, 200]
+            "backend.tasks.create_target_model", side_effect=[100, 200]
         )
         self.patcher_method = patch(
-            "backend.tasks.createMethodModel", return_value=1000
+            "backend.tasks.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.createReactionModel", return_value=5000
+            "backend.tasks.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.createProductModel")
+        self.patcher_product = patch("backend.tasks.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.createReactantModel", return_value=9000
+            "backend.tasks.create_reactant_model", return_value=9000
         )
-        self.patcher_catalog = patch("backend.tasks.createCatalogEntryModel")
+        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.checkPreviousReactionProducts", return_value=None
+            "backend.tasks.check_previous_reaction_products", return_value=None
         )
         self.patcher_temp = patch(
             "backend.tasks.get_recipe_stir_temperature", return_value=80.0
         )
-        self.patcher_exact = patch("backend.tasks.getExactSearch")
+        self.patcher_exact = patch("backend.tasks.get_exact_search")
 
         self.mock_del = self.patcher_del.start()
         self.mock_project = self.patcher_project.start()
@@ -1686,7 +1686,7 @@ class TestUploadCombiMultiBatch(TestCase):
 
     def test_creates_two_batches(self):
         validate_output = _make_combi_multibatch_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         self.assertEqual(self.mock_batch.call_count, 2)
         tags = sorted(c[1]["batchtag"] for c in self.mock_batch.call_args_list)
@@ -1694,7 +1694,7 @@ class TestUploadCombiMultiBatch(TestCase):
 
     def test_each_target_in_correct_batch(self):
         validate_output = _make_combi_multibatch_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
 
         self.assertEqual(self.mock_target.call_count, 2)
         batch_ids = [c[1]["batch_id"] for c in self.mock_target.call_args_list]
@@ -1702,7 +1702,7 @@ class TestUploadCombiMultiBatch(TestCase):
 
     def test_single_project_created(self):
         validate_output = _make_combi_multibatch_output()
-        uploadCombiCustomReaction(validate_output)
+        upload_combi_custom_reaction(validate_output)
         self.mock_project.assert_called_once()
 
 
@@ -1717,33 +1717,33 @@ class TestManifoldCatalogWiring(TestCase):
     def setUp(self):
         self.patcher_del = patch("backend.tasks.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.createProjectModel", return_value=1
+            "backend.tasks.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.createBatchModel", return_value=10)
+        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.createTargetModel", return_value=100
+            "backend.tasks.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.createMethodModel", return_value=1000
+            "backend.tasks.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.createReactionModel", return_value=5000
+            "backend.tasks.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.createProductModel")
+        self.patcher_product = patch("backend.tasks.create_product_model")
         # Return distinct IDs per reactant so we can tell them apart
         self.patcher_reactant = patch(
-            "backend.tasks.createReactantModel", side_effect=[9001, 9002]
+            "backend.tasks.create_reactant_model", side_effect=[9001, 9002]
         )
-        self.patcher_catalog = patch("backend.tasks.createCatalogEntryModel")
+        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.checkPreviousReactionProducts", return_value=None
+            "backend.tasks.check_previous_reaction_products", return_value=None
         )
         self.patcher_recipe = patch("backend.tasks.recipe_exists", return_value=True)
         self.patcher_intra = patch(
             "backend.tasks.get_recipe_intramolecular", return_value=False
         )
         self.patcher_manifold = patch(
-            "backend.tasks.getManifoldRetrosynthesisBatch"
+            "backend.tasks.get_manifold_retrosynthesis_batch"
         )
 
         self.mock_del = self.patcher_del.start()
@@ -1810,7 +1810,7 @@ class TestManifoldCatalogWiring(TestCase):
     def test_reactant_a_gets_sigma_catalog(self):
         """Reactant A (id=9001) should get Sigma catalog entry."""
         validate_output = self._two_reactant_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_catalog.assert_any_call(
             catalog_entry={"vendorName": "Sigma", "smiles": SMILES_REACTANT_A},
@@ -1820,7 +1820,7 @@ class TestManifoldCatalogWiring(TestCase):
     def test_reactant_b_gets_enamine_catalog(self):
         """Reactant B (id=9002) should get Enamine catalog entry."""
         validate_output = self._two_reactant_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_catalog.assert_any_call(
             catalog_entry={"vendorName": "Enamine", "smiles": SMILES_REACTANT_B},
@@ -1830,7 +1830,7 @@ class TestManifoldCatalogWiring(TestCase):
     def test_no_cross_wiring(self):
         """Sigma entry should NOT be sent to reactant 9002, and vice versa."""
         validate_output = self._two_reactant_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         # Collect all catalog calls that have a reactant_id
         reactant_catalog_calls = [
@@ -1853,25 +1853,25 @@ class TestManifoldCatalogWiringNotEncoded(TestCase):
     def setUp(self):
         self.patcher_del = patch("backend.tasks.delete_tmp_file")
         self.patcher_project = patch(
-            "backend.tasks.createProjectModel", return_value=1
+            "backend.tasks.create_project_model", return_value=1
         )
-        self.patcher_batch = patch("backend.tasks.createBatchModel", return_value=10)
+        self.patcher_batch = patch("backend.tasks.create_batch_model", return_value=10)
         self.patcher_target = patch(
-            "backend.tasks.createTargetModel", return_value=100
+            "backend.tasks.create_target_model", return_value=100
         )
         self.patcher_method = patch(
-            "backend.tasks.createMethodModel", return_value=1000
+            "backend.tasks.create_method_model", return_value=1000
         )
         self.patcher_reaction = patch(
-            "backend.tasks.createReactionModel", return_value=5000
+            "backend.tasks.create_reaction_model", return_value=5000
         )
-        self.patcher_product = patch("backend.tasks.createProductModel")
+        self.patcher_product = patch("backend.tasks.create_product_model")
         self.patcher_reactant = patch(
-            "backend.tasks.createReactantModel", side_effect=[9001, 9002]
+            "backend.tasks.create_reactant_model", side_effect=[9001, 9002]
         )
-        self.patcher_catalog = patch("backend.tasks.createCatalogEntryModel")
+        self.patcher_catalog = patch("backend.tasks.create_catalog_entry_model")
         self.patcher_prev = patch(
-            "backend.tasks.checkPreviousReactionProducts", return_value=None
+            "backend.tasks.check_previous_reaction_products", return_value=None
         )
         # Not encoded
         self.patcher_recipe = patch("backend.tasks.recipe_exists", return_value=False)
@@ -1879,7 +1879,7 @@ class TestManifoldCatalogWiringNotEncoded(TestCase):
             "backend.tasks.get_recipe_intramolecular", return_value=False
         )
         self.patcher_manifold = patch(
-            "backend.tasks.getManifoldRetrosynthesisBatch"
+            "backend.tasks.get_manifold_retrosynthesis_batch"
         )
 
         self.mock_del = self.patcher_del.start()
@@ -1944,7 +1944,7 @@ class TestManifoldCatalogWiringNotEncoded(TestCase):
 
     def test_reactant_a_gets_alfa_catalog(self):
         validate_output = self._two_reactant_not_encoded_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_catalog.assert_any_call(
             catalog_entry={"vendorName": "Alfa", "smiles": SMILES_REACTANT_A},
@@ -1953,7 +1953,7 @@ class TestManifoldCatalogWiringNotEncoded(TestCase):
 
     def test_reactant_b_gets_tci_catalog(self):
         validate_output = self._two_reactant_not_encoded_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         self.mock_catalog.assert_any_call(
             catalog_entry={"vendorName": "TCI", "smiles": SMILES_REACTANT_B},
@@ -1962,7 +1962,7 @@ class TestManifoldCatalogWiringNotEncoded(TestCase):
 
     def test_no_cross_wiring(self):
         validate_output = self._two_reactant_not_encoded_route()
-        uploadManifoldReaction(validate_output)
+        upload_manifold_reaction(validate_output)
 
         reactant_catalog_calls = [
             c for c in self.mock_catalog.call_args_list
@@ -1979,40 +1979,40 @@ class TestManifoldCatalogWiringNotEncoded(TestCase):
 
 
 # ===========================================================================
-# canonicalizeSmiles tests
+# canonicalize_smiles tests
 # ===========================================================================
 
 
 class TestCanonicalizeSmilesList(TestCase):
-    """Test canonicalizeSmiles with a list of SMILES (no CSV)."""
+    """Test canonicalize_smiles with a list of SMILES (no CSV)."""
 
-    @patch("backend.tasks.canonSmiles", side_effect=lambda s: s)
+    @patch("backend.tasks.canon_smiles", side_effect=lambda s: s)
     def test_valid_smiles_returns_validated_true(self, mock_canon):
-        validated, result = canonicalizeSmiles(smiles=["CCO", "CC"])
+        validated, result = canonicalize_smiles(smiles=["CCO", "CC"])
         self.assertTrue(validated)
 
-    @patch("backend.tasks.canonSmiles", side_effect=lambda s: s)
+    @patch("backend.tasks.canon_smiles", side_effect=lambda s: s)
     def test_valid_smiles_returns_canonicalized_list(self, mock_canon):
-        validated, result = canonicalizeSmiles(smiles=["CCO", "CC"])
+        validated, result = canonicalize_smiles(smiles=["CCO", "CC"])
         self.assertIsInstance(result, list)
         self.assertEqual(len(result), 2)
 
     def test_invalid_smiles_returns_validated_false(self):
-        validated, result = canonicalizeSmiles(smiles=["CCO", "INVALID_SMILES_XYZ"])
+        validated, result = canonicalize_smiles(smiles=["CCO", "INVALID_SMILES_XYZ"])
         self.assertFalse(validated)
 
     def test_invalid_smiles_returns_error_with_index(self):
-        validated, result = canonicalizeSmiles(smiles=["CCO", "INVALID_SMILES_XYZ"])
+        validated, result = canonicalize_smiles(smiles=["CCO", "INVALID_SMILES_XYZ"])
         self.assertIn("1", str(result))  # index 1 is the bad one
 
-    @patch("backend.tasks.canonSmiles", side_effect=lambda s: s)
+    @patch("backend.tasks.canon_smiles", side_effect=lambda s: s)
     def test_single_smiles_valid(self, mock_canon):
-        validated, result = canonicalizeSmiles(smiles=["CCO"])
+        validated, result = canonicalize_smiles(smiles=["CCO"])
         self.assertTrue(validated)
         self.assertEqual(len(result), 1)
 
     def test_multiple_invalid_smiles_reports_all_indices(self):
-        validated, result = canonicalizeSmiles(
+        validated, result = canonicalize_smiles(
             smiles=["INVALID_1", "CCO", "INVALID_2"]
         )
         self.assertFalse(validated)
@@ -2021,29 +2021,29 @@ class TestCanonicalizeSmilesList(TestCase):
 
 
 class TestCanonicalizeSmilesCSV(TestCase):
-    """Test canonicalizeSmiles reading from a CSV file."""
+    """Test canonicalize_smiles reading from a CSV file."""
 
-    @patch("backend.tasks.canonSmiles", side_effect=lambda s: s)
+    @patch("backend.tasks.canon_smiles", side_effect=lambda s: s)
     @patch("backend.tasks.delete_tmp_file")
     @patch("backend.tasks.pd.read_csv")
     def test_reads_csv_and_deletes_file(self, mock_csv, mock_del, mock_canon):
         import pandas as pd
 
         mock_csv.return_value = pd.DataFrame({"SMILES": ["CCO", "CC"]})
-        validated, result = canonicalizeSmiles(csvfile="/tmp/test_smiles.csv")
+        validated, result = canonicalize_smiles(csvfile="/tmp/test_smiles.csv")
 
         self.assertTrue(validated)
         mock_csv.assert_called_once_with("/tmp/test_smiles.csv", encoding="utf8")
         mock_del.assert_called_once_with("/tmp/test_smiles.csv")
 
-    @patch("backend.tasks.canonSmiles", side_effect=lambda s: s)
+    @patch("backend.tasks.canon_smiles", side_effect=lambda s: s)
     @patch("backend.tasks.delete_tmp_file")
     @patch("backend.tasks.pd.read_csv")
     def test_csv_with_invalid_smiles(self, mock_csv, mock_del, mock_canon):
         import pandas as pd
 
         mock_csv.return_value = pd.DataFrame({"SMILES": ["CCO", "NOT_A_MOLECULE"]})
-        validated, result = canonicalizeSmiles(csvfile="/tmp/bad.csv")
+        validated, result = canonicalize_smiles(csvfile="/tmp/bad.csv")
 
         self.assertFalse(validated)
         mock_del.assert_called_once_with("/tmp/bad.csv")

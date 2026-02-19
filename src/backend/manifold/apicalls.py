@@ -8,7 +8,7 @@ manifold_base_url = "https://api.asap.postera.ai/api/v1"
 
 @sleep_and_retry
 @limits(calls=1000, period=60)
-def getManifoldRetrosynthesis(smiles: str):
+def get_manifold_retrosynthesis(smiles: str):
     """Call Manifold API to search for a retrosynthesis for a given smiles
 
     Parameters
@@ -47,7 +47,7 @@ def getManifoldRetrosynthesis(smiles: str):
 
 @sleep_and_retry
 @limits(calls=1000, period=60)
-def getManifoldRetrosynthesisBatch(smiles: list):
+def get_manifold_retrosynthesis_batch(smiles: list):
     """Call Manifold API to search for a retrosynthesis for a given list
     of target compound SMILES
 
@@ -87,7 +87,7 @@ def getManifoldRetrosynthesisBatch(smiles: list):
 
 @sleep_and_retry
 @limits(calls=1000, period=60)
-def getExactSearch(smiles: str):
+def get_exact_search(smiles: str):
     """Searches for exact compound match for catalogue info
 
     Parameters
@@ -120,7 +120,7 @@ def getExactSearch(smiles: str):
 
 @sleep_and_retry
 @limits(calls=1000, period=60)
-def getExactSearchBatch(smilesList: list):
+def get_exact_search_batch(smilesList: list):
     """Searches for exact compound match for catalogue info
 
     Parameters

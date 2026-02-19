@@ -2,7 +2,7 @@ from pycule import MCuleWrapper
 import os
 import inspect
 
-from ..chem_utils import canonSmiles
+from ..chem_utils import canon_smiles
 
 import logging
 
@@ -49,7 +49,7 @@ class MCuleAPI(object):
                 )
                 results = response_dict["response"]["results"]
                 if results:
-                    smiles_test = canonSmiles(results[0]["smiles"])
+                    smiles_test = canon_smiles(results[0]["smiles"])
                     if smiles_test == smiles:
                         mculeid = results[0]["mcule_id"]
                         mculeurl = results[0]["url"]
