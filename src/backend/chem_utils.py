@@ -9,7 +9,6 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import Draw
 from rdkit.Chem import rdMolDescriptors
-from rdkit.Chem import DataStructs
 from rdkit.Chem import MolStandardize
 from rdkit.Chem import inchi
 
@@ -419,13 +418,6 @@ def get_addition_order(
     except Exception as e:
         logger.info(f"get_addition_order yielded error: {e}")
 
-
-# Keep the old name with typo for backward compatibility
-def get_addtion_order(
-    product_smi: str, reactant_SMILES: tuple, reaction_SMARTS: list
-) -> list:
-    """Deprecated: Use get_addition_order instead."""
-    return get_addition_order(product_smi, reactant_SMILES, reaction_SMARTS)
 
 
 # -----------------------------------------------------------------------------
