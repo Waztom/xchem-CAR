@@ -1,0 +1,4 @@
+﻿target-names,target-SMILES,concentration-required-mM,amount-required-uL,batch-tag
+Frag-1,Fc1ccc(Oc2ccc(F)c(NCC3CCOCC3)n2)cc1,100,100,to-check
+Frag-2,Nc1nc(Oc2ccc(F)cc2)ccc1F,100,100,to-check
+Frag-3,Fc1ccc(Oc2ccc(F)cn2)cc1,100,100,to-check

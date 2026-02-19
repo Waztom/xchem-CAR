@@ -22,9 +22,9 @@ from backend.models import (
     Well,
 )
 from backend.db_utils import (
-    getProductSmiles,
-    getPreviousReactionQuerySets,
-    getReactionQuerySet,
+    get_product_smiles,
+    get_previous_reaction_query_sets,
+    get_reaction_query_set,
 )
 
 logger = logging.getLogger(__name__)
@@ -441,7 +441,7 @@ class QueryService:
         """
         logger.info(f"Finding well for reaction ID {reaction_id}, role='{role}', index={role_index}")
         try:
-            productsmiles = getProductSmiles(reaction_ids=[reaction_id])[0]
+            productsmiles = get_product_smiles(reaction_ids=[reaction_id])[0]
             logger.info(
                 f"Found product SMILES for reaction {reaction_id}: {productsmiles[:20]}..."
             )
@@ -632,7 +632,7 @@ class QueryService:
         if solvent:
             logger.info(f"Solvent: {solvent}, concentration: {concentration}")
 
-        previousreactionqueryset = getPreviousReactionQuerySets(
+        previousreactionqueryset = get_previous_reaction_query_sets(
             reaction_id=reaction_id, smiles=smiles
         )
 
@@ -1080,7 +1080,7 @@ class QueryService:
         )
         logger.info(f"Product SMILES: {productsmiles[:20]}...")
 
-        reactionqueryset = getReactionQuerySet(method_id=reactionobj.method_id.id)
+        reactionqueryset = get_reaction_query_set(method_id=reactionobj.method_id.id)
         nextreactionqueryset = self.get_next_obj_entries(
             queryset=reactionqueryset, obj=reactionobj
         )

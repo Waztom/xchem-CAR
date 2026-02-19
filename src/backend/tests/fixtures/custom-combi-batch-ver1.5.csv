@@ -1,0 +1,4 @@
+﻿combi-group,no-steps,concentration-required-mM,amount-required-uL,batch-tag,reactant-1-1,reactant-2-1,reaction-name-1,reaction-recipe-1,reactant-1-2,reaction-name-2,reaction-recipe-2,reactant-1-3,reaction-name-3,reaction-recipe-3
+1,3,500,35,Iter-2.0-ra,Cc1cc(Cl)nc(C)n1,O=C(OC(C)(C)C)N1CCNCCC1,N-nucleophilic aromatic substitution,standard,,Boc deprotection,standard,O=CC1CCC1,Reductive amination,standard
+1,3,500,35,Iter-2.0-ra,,CC(C)(C)OC(=O)N1CCNCC1,N-nucleophilic aromatic substitution,standard,,Boc deprotection,standard,O=CCC1CCCC1,Reductive amination,standard
+1,3,500,35,Iter-2.0-ra,,,N-nucleophilic aromatic substitution,standard,,Boc deprotection,standard,O=CC1CCCCC1,Reductive amination,standard

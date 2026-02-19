@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional, Union, Tuple
 from django.db.models import QuerySet, Q
 
 from backend.models import ActionSession, AddAction, RecipeAddAction
-from backend.db_utils import getReaction, getReactionQuerySet
+from backend.db_utils import get_reaction, get_reaction_query_set
 from backend.recipe_utils import get_session_recipe_actions
 
 from .base_handler import SessionHandler
@@ -57,7 +57,7 @@ class AnalysisSessionHandler(SessionHandler):
             logger.info(
                 f"Processing analysis for reaction {reaction_id} ({i+1}/{action_count})"
             )
-            reaction_obj = getReaction(reaction_id=reaction_id)
+            reaction_obj = get_reaction(reaction_id=reaction_id)
             self.process_analysis_actions(
                 actionsession_obj, reaction_obj, session_number
             )

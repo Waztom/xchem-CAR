@@ -15,7 +15,7 @@ from ..managers.pipette_manager import PipetteManager
 from ..managers.material_manager import MaterialManager
 from ..managers.data_manager import DataManager
 from ....models import OTSession
-from ....db_utils import getReactionQuerySet
+from ....db_utils import get_reaction_query_set
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +153,7 @@ class BaseSession(ABC):
             self.deckobj = self.deck_manager.create_deck_model()
 
             # Get reaction queryset for this session
-            self.groupreactionqueryset = getReactionQuerySet(
+            self.groupreactionqueryset = get_reaction_query_set(
                 reaction_ids=self.reaction_ids
             )
 

@@ -9,7 +9,7 @@ from typing import List
 from django.db.models import Q
 
 from backend.models import Well, Plate
-from backend.db_utils import getPreviousReactionQuerySets, getProductSmiles
+from backend.db_utils import get_previous_reaction_query_sets, get_product_smiles
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class WellFinder:
         logger.info(
             f"Finding reaction well for reaction ID {reaction_id}, role={role}, index={role_index}"
         )
-        product_smiles = getProductSmiles(reaction_ids=[reaction_id])[0]
+        product_smiles = get_product_smiles(reaction_ids=[reaction_id])[0]
         logger.info(f"Looking for well with product SMILES: {product_smiles[:20]}...")
 
         try:
@@ -226,7 +226,7 @@ class WellFinder:
         if solvent:
             logger.info(f"Solvent: {solvent}, concentration: {concentration}")
 
-        previous_reaction_queryset = getPreviousReactionQuerySets(
+        previous_reaction_queryset = get_previous_reaction_query_sets(
             reaction_id=reaction_id, smiles=smiles
         )
 

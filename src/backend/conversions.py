@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def wellIndexToWellName(wellindex: int, platesize: int) -> str:
+def well_index_to_well_name(wellindex: int, platesize: int) -> str:
     """Converts a well index to a human readable well name
 
     Parameters
@@ -39,7 +39,7 @@ def wellIndexToWellName(wellindex: int, platesize: int) -> str:
     return wellname
 
 
-def calculateMolsFromConc(target_concentration: float, target_volume: float) -> object:
+def calculate_mols_from_conc(target_concentration: float, target_volume: float) -> object:
     """Function to calculate product mols of reaction using a target mass
 
     Parameters
@@ -62,7 +62,7 @@ def calculateMolsFromConc(target_concentration: float, target_volume: float) -> 
         print(e)
 
 
-def calculateMassFromMols(mols: float, SMILES: str) -> object:
+def calculate_mass_from_mols(mols: float, SMILES: str) -> object:
     """Function to calculate mass from mols
 
     Parameters

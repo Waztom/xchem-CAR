@@ -6,7 +6,7 @@ import pandas as pd
 from rdkit import Chem
 
 from .recipe_utils import get_recipe_smarts
-from .chem_utils import checkReactantSMARTS, combiChem
+from .chem_utils import check_reactant_smarts, combi_chem
 
 import logging
 
@@ -363,7 +363,7 @@ class ValidateFile(object):
                         reactant_2_SMILES = product_smiles[:number_reactant_pair_smiles]
                         are_product_SMILES = True
 
-                    reactant_pair_smiles = combiChem(
+                    reactant_pair_smiles = combi_chem(
                         reactant_1_SMILES=reactant_1_SMILES,
                         reactant_2_SMILES=reactant_2_SMILES,
                         are_product_SMILES=are_product_SMILES,
@@ -609,7 +609,7 @@ class ValidateFile(object):
                     # reactant_pair_smiles_ordered.append(reactant_pair)
                     continue
 
-                product_mols = checkReactantSMARTS(
+                product_mols = check_reactant_smarts(
                     reactant_SMILES=reactant_pair, reaction_SMARTS=smarts
                 )
                 if not product_mols:

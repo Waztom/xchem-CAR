@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from backend.conversions import calculateMolsFromConc, calculateMassFromMols
+from backend.conversions import calculate_mols_from_conc, calculate_mass_from_mols
 
 
 class ConversionsFunctionsTestCase(TestCase):
@@ -8,7 +8,7 @@ class ConversionsFunctionsTestCase(TestCase):
         self.snar_product_smiles = "O=C(O)Cc1ccc(Nc2ccccc2)cc1F"
 
     def test_calculate_mols_from_conc(self):
-        test_product_mols = calculateMolsFromConc(
+        test_product_mols = calculate_mols_from_conc(
             target_concentration=0.5,
             target_volume=1,
         )
@@ -21,7 +21,7 @@ class ConversionsFunctionsTestCase(TestCase):
         )
 
     def test_calculate_mols_fail(self):
-        test_product_mols = calculateMolsFromConc(
+        test_product_mols = calculate_mols_from_conc(
             target_concentration="090", target_volume="OT Chemistry is possible"
         )
 
@@ -32,7 +32,7 @@ class ConversionsFunctionsTestCase(TestCase):
         )
 
     def test_calculate_mass_from_mols(self):
-        mass = calculateMassFromMols(mols=0.5, SMILES=self.snar_product_smiles)
+        mass = calculate_mass_from_mols(mols=0.5, SMILES=self.snar_product_smiles)
         self.assertAlmostEqual(
             mass,
             122626.5,
@@ -41,7 +41,7 @@ class ConversionsFunctionsTestCase(TestCase):
         )
 
     def test_calculate_mass_from_mols_fail(self):
-        mass = calculateMassFromMols(mols=0.5, SMILES="OT Chemistry is possible")
+        mass = calculate_mass_from_mols(mols=0.5, SMILES="OT Chemistry is possible")
         self.assertEqual(
             mass,
             None,

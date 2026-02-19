@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def getPubChemCompound(inchikey: str) -> object:
+def get_pubchem_compound(inchikey: str) -> object:
     """Searches PubChem for compound using inchi key
 
     Parameters
@@ -42,7 +42,7 @@ def getPubChemCompound(inchikey: str) -> object:
         )
 
 
-def getPubChemCAS(compound: object) -> str:
+def get_pubchem_cas(compound: object) -> str:
     """Get CAS identifier for PubChem compound synonyms
 
     Parameters
@@ -68,7 +68,7 @@ def getPubChemCAS(compound: object) -> str:
         print(e)
 
 
-def getChemicalName(inchikey: str) -> str:
+def get_chemical_name(inchikey: str) -> str:
     """Searches PubChem for compound using SMILES
 
     Parameters

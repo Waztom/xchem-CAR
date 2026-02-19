@@ -2,7 +2,7 @@ import logging
 from django.db.models import QuerySet
 
 from .....models import Plate, Well, Reaction, Column
-from .....conversions import wellIndexToWellName
+from .....conversions import well_index_to_well_name
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +154,7 @@ class WellManager:
         well_obj.role = role
         well_obj.role_index = role_index
         well_obj.index = wellindex
-        well_obj.name = wellIndexToWellName(
+        well_obj.name = well_index_to_well_name(
             wellindex=wellindex, platesize=plate_obj.numberwells
         )
         well_obj.volume = volume
