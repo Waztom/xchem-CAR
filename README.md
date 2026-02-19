@@ -1,8 +1,8 @@
 [![CI](https://github.com/Waztom/xchem-CAR/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Waztom/xchem-CAR/actions/workflows/ci.yml)
 
-[![Docker Hub](https://img.shields.io/docker/v/<your-dockerhub-username>/car?label=Docker%20Hub&logo=docker&sort=date)](https://hub.docker.com/r/<your-dockerhub-username>/car)
-[![Docker Pulls](https://img.shields.io/docker/pulls/<your-dockerhub-username>/car?logo=docker)](https://hub.docker.com/r/<your-dockerhub-username>/car)
-[![Docker Image Size](https://img.shields.io/docker/image-size/<your-dockerhub-username>/car?sort=date&logo=docker)](https://hub.docker.com/r/<your-dockerhub-username>/car)
+[![Docker Hub](https://img.shields.io/docker/v/waztom/car?label=Docker%20Hub&logo=docker&sort=date)](https://hub.docker.com/r/waztom/car)
+[![Docker Pulls](https://img.shields.io/docker/pulls/waztom/car?logo=docker)](https://hub.docker.com/r/waztom/car)
+[![Docker Image Size](https://img.shields.io/docker/image-size/waztom/car?sort=date&logo=docker)](https://hub.docker.com/r/waztom/car)
 
 [![Python 3.9](https://img.shields.io/badge/python-3.9-blue?logo=python&logoColor=white)](https://python.org)
 [![Django 3.1](https://img.shields.io/badge/django-3.1-green?logo=django&logoColor=white)](https://djangoproject.com)
