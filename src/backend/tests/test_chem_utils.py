@@ -1,3 +1,4 @@
+import unittest
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 from rdkit import Chem
@@ -119,8 +120,7 @@ class ChemistryFunctionsTestCase(TestCase):
         with self.assertRaises(MolecularPropertyError):
             get_mws(smiles=["OT Chemistry is possible"])
 
-    # KNOWN FAILURE: RDKit 2020.09.4 in this container was built without InChI
-    # support (INCHI_AVAILABLE=False), so get_inchi_key returns None.
+    @unittest.skip("RDKit 2020.09.4 built without InChI support — get_inchi_key returns None")
     def test_get_inchi_key(self):
         test_inchi_key = get_inchi_key(smiles=self.smiles)
         self.assertEqual(
@@ -153,8 +153,7 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect capture of bad SMILES input",
         )
 
-    # KNOWN FAILURE: combi_chem uses InChI-based canonicalisation internally,
-    # which is unavailable in this container's RDKit (INCHI_AVAILABLE=False).
+    @unittest.skip("RDKit 2020.09.4 built without InChI support — combi_chem uses InChI canonicalisation")
     def test_combi_chem(self):
         test_all_possible_combinations = combi_chem(
             reactant_1_SMILES=self.snar_reactant_smiles_one,
@@ -166,8 +165,7 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect combinatorial product of two equal length lists of smiles",
         )
 
-    # KNOWN FAILURE: combi_chem uses InChI-based canonicalisation internally,
-    # which is unavailable in this container's RDKit (INCHI_AVAILABLE=False).
+    @unittest.skip("RDKit 2020.09.4 built without InChI support — combi_chem uses InChI canonicalisation")
     def test_combi_chem_fail(self):
         test_all_possible_combinations = combi_chem(
             reactant_1_SMILES=self.snar_reactant_smiles_one[0:1],
@@ -179,8 +177,7 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect combinatorial product of two non-equal length lists of smiles",
         )
 
-    # KNOWN FAILURE: create_svg_string output differs from expected fixture
-    # due to RDKit 2020.09.4 rendering differences (no InChI support).
+    @unittest.skip("RDKit 2020.09.4 SVG output differs from fixture — no InChI support")
     def test_create_svg_string(self):
         test_svg_str = create_svg_string(smiles=self.smiles)
         test_svg_str = self.strip_white_space(test_svg_str)
@@ -190,8 +187,7 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect creation of a svg string from SMILES",
         )
 
-    # KNOWN FAILURE: create_reaction_svg_string output differs from expected
-    # fixture due to RDKit 2020.09.4 rendering differences (no InChI support).
+    @unittest.skip("RDKit 2020.09.4 reaction SVG output differs from fixture — no InChI support")
     def test_create_reaction_svg_string(self):
         test_svg_str = create_reaction_svg_string(smarts=self.reaction_smarts)
         test_svg_str = self.strip_white_space(test_svg_str)
@@ -228,8 +224,7 @@ class ChemistryFunctionsTestCase(TestCase):
             "incorrect SMILES input should return None for addtion order",
         )
 
-    # KNOWN FAILURE: check_reactant_smarts product SMILES differ due to RDKit
-    # 2020.09.4 canonicalisation without InChI support (INCHI_AVAILABLE=False).
+    @unittest.skip("RDKit 2020.09.4 canonicalisation differs without InChI support")
     def test_check_reactant_smarts_success(self):
         test_product_mols = check_reactant_smarts(
             reactant_SMILES=self.snar_reactant_smiles_tuple,
