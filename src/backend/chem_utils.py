@@ -14,7 +14,6 @@ from rdkit.Chem import MolStandardize
 from rdkit.Chem import inchi
 
 import itertools
-import inspect
 import logging
 import pandas as pd
 import datetime
@@ -45,8 +44,7 @@ def get_mws(smiles: list[str]) -> list[float]:
         ]
         return MWs
     except Exception as e:
-        logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-        print(e)
+        logger.info(f"get_mws yielded error: {e}")
 
 
 def get_inchi_key(smiles: str) -> str:
@@ -72,8 +70,7 @@ def get_inchi_key(smiles: str) -> str:
         inchikey = Chem.inchi.MolToInchiKey(mol)
         return inchikey
     except Exception as e:
-        logger.info(f"{inspect.stack()[0][3]} yielded error: {str(e)}")
-        print(f"Failed to generate InChiKey for {smiles}: {e}")
+        logger.info(f"get_inchi_key yielded error for {smiles}: {e}")
         return None
 
 
@@ -93,8 +90,7 @@ def get_molecular_formula(smiles: list) -> list:
         ]
         return formula
     except Exception as e:
-        logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-        print(e)
+        logger.info(f"get_molecular_formula yielded error: {e}")
 
 
 # -----------------------------------------------------------------------------
@@ -125,8 +121,7 @@ def canon_smiles(smiles: str) -> str:
         else:
             return False
     except Exception as e:
-        logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-        print(e)
+        logger.info(f"canon_smiles yielded error: {e}")
 
 
 def strip_salts(smiles: str, return_details: bool = False):
@@ -227,8 +222,7 @@ def match_smarts(smiles: str, smarts: str) -> bool:
         else:
             return False
     except Exception as e:
-        logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-        print(e)
+        logger.info(f"match_smarts yielded error: {e}")
 
 
 def check_reactant_smarts(reactant_SMILES: tuple, reaction_SMARTS: list) -> list:
@@ -252,6 +246,7 @@ def check_reactant_smarts(reactant_SMILES: tuple, reaction_SMARTS: list) -> list
     if len(reaction_SMARTS) == 1:
         SMARTS_pattern = reaction_SMARTS[0]
         rxn = AllChem.ReactionFromSmarts(SMARTS_pattern)
+        product_mols = None
         if len(reactant_mols) == 1:
             try:
                 products = rxn.RunReactants(reactant_mols)
@@ -262,17 +257,16 @@ def check_reactant_smarts(reactant_SMILES: tuple, reaction_SMARTS: list) -> list
                     )
                     product_mols = [Chem.MolFromSmiles(smi) for smi in product_smiles]
             except Exception as e:
-                logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-                print(e)
+                logger.info(f"check_reactant_smarts yielded error: {e}")
 
         if len(reactant_mols) > 1:
-            print("The number of reactant mols is > 1")
+            logger.debug("The number of reactant mols is > 1")
             for reactant_permutation in list(itertools.permutations(reactant_mols)):
                 try:
                     products = rxn.RunReactants(reactant_permutation)
                     product_mols = [product[0] for product in products]
                     if product_mols:
-                        print("The product mols are {}".format(product_mols))
+                        logger.debug(f"The product mols are {product_mols}")
                         product_smiles = set(
                             [Chem.MolToSmiles(mol) for mol in product_mols]
                         )
@@ -283,72 +277,66 @@ def check_reactant_smarts(reactant_SMILES: tuple, reaction_SMARTS: list) -> list
                     if not product_mols:
                         continue  # reactants were in wrong order so no product
                 except Exception as e:
-                    logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-                    print(e)
-                    print(reactant_permutation)
+                    logger.info(f"check_reactant_smarts yielded error: {e}")
+                    logger.debug(f"Permutation: {reactant_permutation}")
                     continue
-        if "product_mols" in locals() and len(product_mols) != 0:
+        if product_mols:
             return [product_mols[0]]
         else:
-            print(SMARTS_pattern)
-            print(reactant_SMILES)
+            logger.debug(f"No products for SMARTS={SMARTS_pattern}, reactants={reactant_SMILES}")
             return None
 
     if len(reaction_SMARTS) > 1:
         product_mols = []
         if len(reactant_mols) == 1:
-            print("The number of reactant mols is 1")
+            logger.debug("The number of reactant mols is 1")
             try:
+                product_mol = None
                 for SMARTS_pattern in reaction_SMARTS:
                     rxn = AllChem.ReactionFromSmarts(SMARTS_pattern)
-                    if not "product_mol" in locals():
+                    if product_mol is None:
                         products = rxn.RunReactants(reactant_mols)
-                    if "product_mol" in locals():
+                    else:
                         products = rxn.RunReactants(product_mol)
                     product_mol = [products[0][0]]
-                    print("The product mol is {}".format(product_mol))
-                    print(
-                        "The product smiles is {}".format(
-                            Chem.MolToSmiles(product_mol[0])
-                        )
+                    logger.debug(f"The product mol is {product_mol}")
+                    logger.debug(
+                        f"The product smiles is {Chem.MolToSmiles(product_mol[0])}"
                     )
                     if product_mol:
                         product_mols.append(product_mol[-1])
             except Exception as e:
-                print("The reactant smiles are {}".format(reactant_SMILES))
-                print("The SMARTS pattern is {}".format(SMARTS_pattern))
-                logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-                print(e)
+                logger.info(
+                    f"check_reactant_smarts yielded error: {e} "
+                    f"(reactants={reactant_SMILES}, SMARTS={SMARTS_pattern})"
+                )
         if len(reactant_mols) > 1:
-            print("The number of reactant mols is > 1")
+            logger.debug("The number of reactant mols is > 1")
             try:
                 for reactant_permutation in list(itertools.permutations(reactant_mols)):
+                    product_mol = None
                     for SMARTS_pattern in reaction_SMARTS:
                         rxn = AllChem.ReactionFromSmarts(SMARTS_pattern)
-                        if not "product_mol" in locals:
+                        if product_mol is None:
                             products = rxn.RunReactants(reactant_mols)
-                        if "product_mol" in locals():
+                        else:
                             products = rxn.RunReactants(product_mol)
                         product_mol = [products[0][0]]
-                        print("The product mol is {}".format(product_mol))
-                        print(
-                            "The product smiles is {}".format(
-                                Chem.MolToSmiles(product_mol)
-                            )
+                        logger.debug(f"The product mol is {product_mol}")
+                        logger.debug(
+                            f"The product smiles is {Chem.MolToSmiles(product_mol[0])}"
                         )
                         if product_mol:
                             product_mols.extend(product_mol[-1])
                         if not product_mol:
                             continue
             except Exception as e:
-                logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-                print(e)
-                print(reactant_permutation)
+                logger.info(f"check_reactant_smarts yielded error: {e}")
+                logger.debug(f"Permutation: {reactant_permutation}")
         if len(product_mols) != 0:
             return product_mols
         else:
-            print(SMARTS_pattern)
-            print(reactant_SMILES)
+            logger.debug(f"No products for SMARTS={SMARTS_pattern}, reactants={reactant_SMILES}")
             return None
 
 
@@ -386,6 +374,7 @@ def get_addition_order(
         reactant_mols = [
             Chem.MolFromSmiles(smi) for smi in reactant_SMILES if smi != ""
         ]
+        ordered_smis = None
 
         if reaction_SMARTS_reactants == "":
             ordered_smis = [canon_smiles(smi) for smi in reactant_SMILES if smi != ""]
@@ -409,11 +398,8 @@ def get_addition_order(
                         if not product_mols:
                             continue  # reactants were in wrong order so no product
                     except Exception as e:
-                        logger.info(
-                            inspect.stack()[0][3] + " yielded error: {}".format(e)
-                        )
-                        print(e)
-                        print(reactant_permutation)
+                        logger.info(f"get_addition_order yielded error: {e}")
+                        logger.debug(f"Permutation: {reactant_permutation}")
                         continue
                     product_smis = [
                         Chem.MolToSmiles(m) for m in product_mols if m is not None
@@ -422,16 +408,16 @@ def get_addition_order(
                         ordered_smis = [
                             Chem.MolToSmiles(m) for m in reactant_permutation
                         ]
-        if "ordered_smis" in locals():
+        if ordered_smis is not None:
             return ordered_smis
         else:
-            print("Addition order not found for product SMILES".format(product_smi))
-            print("The reaction SMARTS pattern is {}".format(reaction_SMARTS))
-            print("The reactant SMILES are {}".format(reactant_SMILES))
+            logger.debug(
+                f"Addition order not found for product SMILES {product_smi}, "
+                f"SMARTS={reaction_SMARTS}, reactants={reactant_SMILES}"
+            )
             return None
     except Exception as e:
-        logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-        print(e)
+        logger.info(f"get_addition_order yielded error: {e}")
 
 
 # Keep the old name with typo for backward compatibility
@@ -668,8 +654,7 @@ def create_svg_string(smiles: str) -> str:
         svg_string = drawer.GetDrawingText()
         return svg_string
     except Exception as e:
-        logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-        print(e)
+        logger.info(f"create_svg_string yielded error: {e}")
 
 
 def create_reaction_svg_string(smarts: str) -> str:
@@ -693,8 +678,7 @@ def create_reaction_svg_string(smarts: str) -> str:
         svg_string = drawer.GetDrawingText()
         return svg_string
     except Exception as e:
-        logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-        print(e)
+        logger.info(f"create_reaction_svg_string yielded error: {e}")
 
 
 # -----------------------------------------------------------------------------
@@ -808,11 +792,12 @@ def create_combi_chem_csv(csv_input_file: str, out_dir: str):
                 "reaction_recipe",
             ],
         )
-        out_df.write_csv(
+        out_df.to_csv(
             out_dir
-            + "{}-combi-chem.csv".format(datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
+            + "{}-combi-chem.csv".format(
+                datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+            )
         )
 
     except Exception as e:
-        logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
-        print(e)
+        logger.info(f"create_combi_chem_csv yielded error: {e}")
