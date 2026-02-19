@@ -90,7 +90,8 @@ class ReactionSession(BaseSession):
             # Create reaction plate for non-continuation reactions
             self.plate_factory.create_plates_by_temperature(
                 grouped_reaction_temperature_querysets=self.grouped_reaction_temperature_querysets,
-                platetype="reaction",
+                role="reaction",
+                role_index=1,
             )
 
         # Get input plates needed based on SMILES

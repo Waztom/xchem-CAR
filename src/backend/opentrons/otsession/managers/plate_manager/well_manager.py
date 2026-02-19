@@ -2,7 +2,7 @@ import logging
 from django.db.models import QuerySet
 
 from .....models import Plate, Well, Reaction, Column
-from .....utils import wellIndexToWellName
+from .....conversions import well_index_to_well_name
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +95,8 @@ class WellManager:
     def create_well_model(
         self,
         plate_obj: Plate,
-        welltype: str,
+        role: str,
+        role_index: int,
         wellindex: int,
         volume: float = None,
         reactionobj: Reaction = None,
@@ -112,8 +113,10 @@ class WellManager:
         ----------
         plate_obj: Plate
             The plate that the well is linked to
-        welltype: str
-            The well type eg. reaction, analyse
+        role: str
+            The plate role (e.g., "reaction", "analyse").
+        role_index: int
+            The plate role index.
         wellindex: int
             The index of the well in the plate eg. 0, 1, 2, 3 etc
         volume: float = None
@@ -148,9 +151,10 @@ class WellManager:
         if columnobj:
             well_obj.column_id = columnobj
 
-        well_obj.type = welltype
+        well_obj.role = role
+        well_obj.role_index = role_index
         well_obj.index = wellindex
-        well_obj.name = wellIndexToWellName(
+        well_obj.name = well_index_to_well_name(
             wellindex=wellindex, platesize=plate_obj.numberwells
         )
         well_obj.volume = volume

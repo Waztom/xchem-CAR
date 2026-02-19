@@ -14,7 +14,7 @@ from .commonsolvents import common_solvents
 sys.path.append("..")
 
 
-from ..utils import canonSmiles
+from ..chem_utils import canon_smiles
 
 
 class IBMAPI(object):
@@ -103,7 +103,7 @@ class IBMAPI(object):
     def collect_products(self, tree):
         products = []
         if "children" in tree and len(tree["children"]):
-            products.append(canonSmiles(tree["smiles"]))
+            products.append(canon_smiles(tree["smiles"]))
 
         for node in tree["children"]:
             products.extend(self.collect_products(node))
@@ -112,7 +112,7 @@ class IBMAPI(object):
     def collect_reactants(self, tree):
         reactants = []
         if "children" in tree and len(tree["children"]):
-            reactants.append([canonSmiles(node["smiles"]) for node in tree["children"]])
+            reactants.append([canon_smiles(node["smiles"]) for node in tree["children"]])
 
         for node in tree["children"]:
             reactants.extend(self.collect_reactants(node))
@@ -126,9 +126,9 @@ class IBMAPI(object):
                     "{}>>{}".format(
                         ".".join(
                             [
-                                canonSmiles(node["smiles"])
+                                canon_smiles(node["smiles"])
                                 for node in tree["children"]
-                                if canonSmiles(node["smiles"]) not in common_solvents
+                                if canon_smiles(node["smiles"]) not in common_solvents
                             ]
                         ),
                         tree["smiles"],

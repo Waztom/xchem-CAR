@@ -5,3 +5,4 @@
 # Git crypt files
 .*env filter=git-crypt diff=git-crypt
 env.yaml filter=git-crypt diff=git-crypt
+src/backend/enamine/enamine-real-tools-rxns.csv filter=git-crypt diff=git-crypt

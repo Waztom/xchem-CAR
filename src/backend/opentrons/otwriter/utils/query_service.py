@@ -21,10 +21,10 @@ from backend.models import (
     Plate,
     Well,
 )
-from backend.utils import (
-    getProductSmiles,
-    getPreviousReactionQuerySets,
-    getReactionQuerySet,
+from backend.db_utils import (
+    get_product_smiles,
+    get_previous_reaction_query_sets,
+    get_reaction_query_set,
 )
 
 logger = logging.getLogger(__name__)
@@ -326,7 +326,7 @@ class QueryService:
         plate = Plate.objects.filter(id=plateid).first()
 
         if plate:
-            logger.info(f"Found plate: {plate.name} (type: {plate.type})")
+            logger.info(f"Found plate: {plate.name} (role: {plate.role}, role_index: {plate.role_index})")
         else:
             logger.warning(f"No plate found with ID {plateid}")
 
@@ -379,27 +379,29 @@ class QueryService:
             return Pipette.objects.filter(otsession_id=self.otsession_id).first()
 
     def get_column_query_set(
-        self, columntype: str, reactionclass: str
+        self, role: str, role_index: int, reactionclass: str
     ) -> QuerySet[Column]:
-        """Get column queryset for column type and reactionclass
+        """Get column queryset for role/index and reactionclass
 
         Parameters
         ----------
-        columntype: str
-            The type of plate the column is on eg. reaction, workup1, workup2, analyse
+        role: str
+            The plate role (e.g., "reaction", "workup").
+        role_index: int
+            The plate role index.
         reactionclass: str
             The reaction class that occupy the columns
 
         Returns
         -------
         QuerySet[Column]
-            The columns related to the column type and reaction class
+            The columns related to the role and reaction class
         """
         logger.info(
-            f"Querying columns of type '{columntype}' for reaction class '{reactionclass}'"
+            f"Querying columns with role='{role}', index={role_index} for reaction class '{reactionclass}'"
         )
         criterion1 = Q(otsession_id=self.otsession_id)
-        criterion2 = Q(type=columntype)
+        criterion2 = Q(role=role, role_index=role_index)
         criterion3 = Q(reactionclass=reactionclass)
 
         columnqueryset = Column.objects.filter(
@@ -409,33 +411,37 @@ class QueryService:
         count = columnqueryset.count()
         if count == 0:
             logger.warning(
-                f"No columns found for type '{columntype}' and reaction class '{reactionclass}'"
+                f"No columns found for role='{role}', index={role_index} and reaction class '{reactionclass}'"
             )
         else:
             logger.info(
-                f"Found {count} column(s) for type '{columntype}' and reaction class '{reactionclass}'"
+                f"Found {count} column(s) for role='{role}', index={role_index} and reaction class '{reactionclass}'"
             )
 
         return columnqueryset
 
-    def get_well_by_reaction_id(self, reaction_id: int, welltype: str) -> Well:
+    def get_well_by_reaction_id(
+        self, reaction_id: int, role: str, role_index: int
+    ) -> Well:
         """Find the reaction plate well
 
         Parameters
         ----------
         reaction_id: int
             The reaction's id linked to the well on the reaction plate
-        welltype: str
-            The type of well eg. reaction, workup, lcms
+        role: str
+            The plate role (e.g., "reaction", "workup").
+        role_index: int
+            The plate role index.
 
         Returns
         -------
         Well
             The well used in the reaction
         """
-        logger.info(f"Finding well for reaction ID {reaction_id}, type '{welltype}'")
+        logger.info(f"Finding well for reaction ID {reaction_id}, role='{role}', index={role_index}")
         try:
-            productsmiles = getProductSmiles(reaction_ids=[reaction_id])[0]
+            productsmiles = get_product_smiles(reaction_ids=[reaction_id])[0]
             logger.info(
                 f"Found product SMILES for reaction {reaction_id}: {productsmiles[:20]}..."
             )
@@ -443,7 +449,8 @@ class QueryService:
             wellobj = Well.objects.get(
                 otsession_id=self.otsession_id,
                 reaction_id=reaction_id,
-                type=welltype,
+                role=role,
+                role_index=role_index,
                 smiles=productsmiles,
             )
             logger.info(
@@ -455,16 +462,17 @@ class QueryService:
             logger.error(f"No product SMILES found for reaction {reaction_id}")
             raise
         except Well.DoesNotExist:
-            logger.error(f"No well found for reaction {reaction_id}, type '{welltype}'")
+            logger.error(f"No well found for reaction {reaction_id}, role='{role}'")
             raise
         except Well.MultipleObjectsReturned:
             logger.warning(
-                f"Multiple wells found for reaction {reaction_id}, type '{welltype}', using first one"
+                f"Multiple wells found for reaction {reaction_id}, role='{role}', using first one"
             )
             wells = Well.objects.filter(
                 otsession_id=self.otsession_id,
                 reaction_id=reaction_id,
-                type=welltype,
+                role=role,
+                role_index=role_index,
                 smiles=productsmiles,
             )
             return wells.first()
@@ -495,7 +503,7 @@ class QueryService:
 
         try:
             solventplatequeryset = Plate.objects.filter(
-                otsession_id=self.otsession_id, type="solvent"
+                otsession_id=self.otsession_id, role="solvent"
             )
 
             plate_count = solventplatequeryset.count()
@@ -515,7 +523,7 @@ class QueryService:
                     wellqueryset = solventplate.well_set.all().filter(
                         solvent=solvent,
                         available=True,
-                        type="solvent",
+                        role="solvent",
                     )
 
                     well_count = wellqueryset.count()
@@ -624,7 +632,7 @@ class QueryService:
         if solvent:
             logger.info(f"Solvent: {solvent}, concentration: {concentration}")
 
-        previousreactionqueryset = getPreviousReactionQuerySets(
+        previousreactionqueryset = get_previous_reaction_query_sets(
             reaction_id=reaction_id, smiles=smiles
         )
 
@@ -647,7 +655,7 @@ class QueryService:
                         otsession_id=self.otsession_id,
                         smiles=smiles,
                         available=True,
-                        type="startingmaterial",
+                        role="startingmaterial",
                     ).order_by("id")
                 else:
                     logger.info(
@@ -659,7 +667,7 @@ class QueryService:
                         solvent=solvent,
                         concentration=concentration,
                         available=True,
-                        type="startingmaterial",
+                        role="startingmaterial",
                     ).order_by("id")
 
                 well_count = wellobjects.count()
@@ -690,7 +698,7 @@ class QueryService:
                         otsession_id=self.otsession_id,
                         smiles=smiles,
                         available=True,
-                        type="startingmaterial",
+                        role="startingmaterial",
                     ).order_by("id")
                 else:
                     logger.info(
@@ -702,7 +710,7 @@ class QueryService:
                         solvent=solvent,
                         concentration=concentration,
                         available=True,
-                        type="startingmaterial",
+                        role="startingmaterial",
                     ).order_by("id")
 
                 well_count = wellobjects.count()
@@ -727,20 +735,14 @@ class QueryService:
                         "No starting material wells found, checking reaction and workup plates"
                     )
                     try:
-                        plates = [
-                            "reaction",
-                            "workup1",
-                            "workup2",
-                            "workup3",
-                            "spefilter",
-                        ]
-                        logger.info(f"Searching in plate types: {', '.join(plates)}")
+                        roles_to_search = ["reaction", "workup", "spefilter"]
+                        logger.info(f"Searching in plate roles: {', '.join(roles_to_search)}")
 
                         criterion1 = Q(otsession_id=self.otsession_id)
                         criterion2 = Q(reaction_id=reaction_id)
                         criterion3 = Q(reaction_id__in=previousreactionqueryset)
                         criterion4 = Q(smiles=smiles)
-                        criterion5 = Q(type__in=plates)
+                        criterion5 = Q(role__in=["reaction", "workup", "spefilter"])
                         criterion6 = Q(reactantfornextstep=True)
 
                         wellqueryset = Well.objects.filter(
@@ -783,7 +785,7 @@ class QueryService:
                 Well.objects.values_list("smiles", flat=True)
                 .filter(
                     otsession_id=self.otsession_id,
-                    type="startingmaterial",
+                    role="startingmaterial",
                     available=True,
                 )
                 .distinct()
@@ -1078,7 +1080,7 @@ class QueryService:
         )
         logger.info(f"Product SMILES: {productsmiles[:20]}...")
 
-        reactionqueryset = getReactionQuerySet(method_id=reactionobj.method_id.id)
+        reactionqueryset = get_reaction_query_set(method_id=reactionobj.method_id.id)
         nextreactionqueryset = self.get_next_obj_entries(
             queryset=reactionqueryset, obj=reactionobj
         )

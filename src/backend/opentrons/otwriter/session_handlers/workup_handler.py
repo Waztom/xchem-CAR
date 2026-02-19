@@ -8,9 +8,9 @@ involve extract and mix operations.
 import logging
 from django.db.models import QuerySet
 
-from backend.models import ExtractAction, MixAction
-from backend.utils import getReaction
-from backend.recipebuilder.encodedrecipes import encoded_recipes
+from backend.models import ExtractAction, MixAction, RecipeExtractAction, RecipeMixAction
+from backend.db_utils import get_reaction
+from backend.recipe_utils import get_session_recipe_actions
 
 from .base_handler import SessionHandler
 
@@ -54,7 +54,7 @@ class WorkupSessionHandler(SessionHandler):
             logger.info(
                 f"Processing workup for reaction {reaction_id} ({i+1}/{action_count})"
             )
-            reaction_obj = getReaction(reaction_id=reaction_id)
+            reaction_obj = get_reaction(reaction_id=reaction_id)
             self.process_workup_actions(actionsession_obj, reaction_obj, session_number)
 
         self.log_session_end("workup")
@@ -87,44 +87,37 @@ class WorkupSessionHandler(SessionHandler):
         )
         logger.info(f"Using {reaction_action_search} workup actions")
 
-        # Get actions from encoded recipes
+        # Get actions from Recipe DB
         try:
-            action_sessions = encoded_recipes[reaction_class]["recipes"][recipe_type][
-                "actionsessions"
-            ]
-            workup_actions = None
+            workup_actions = get_session_recipe_actions(
+                reaction_class=reaction_class,
+                name=recipe_type,
+                session_type="workup",
+                session_number=session_number,
+                molecular_context=reaction_action_search,
+            )
 
-            try:
-                workup_actions = [
-                    actionsession[reaction_action_search]["actions"]
-                    for actionsession in action_sessions
-                    if actionsession["type"] == "workup"
-                    and actionsession["sessionnumber"] == session_number
-                ][0]
-
-                action_count = len(workup_actions)
-                logger.info(
-                    f"Found {action_count} workup actions for reaction {reaction_id}"
-                )
-            except (IndexError, KeyError) as e:
+            if not workup_actions:
                 logger.warning(
-                    f"No workup actions defined for reaction {reaction_id}, recipe {recipe_type}: {str(e)}"
+                    f"No workup actions defined for reaction {reaction_id}, recipe {recipe_type}"
                 )
                 self.add_command(
                     f"\n\t# No workup actions found for reaction {reaction_id}"
                 )
                 return
 
+            action_count = len(workup_actions)
+            logger.info(
+                f"Found {action_count} workup actions for reaction {reaction_id}"
+            )
+
             # Process each workup action
             for index, workup_action in enumerate(workup_actions):
-                action_type = workup_action["type"]
-                action_number = workup_action["actionnumber"]
-
-                logger.info(
-                    f"Processing workup action {index+1}/{len(workup_actions)}: {action_type} {action_number}"
-                )
-
-                if action_type == "extract":
+                if isinstance(workup_action, RecipeExtractAction):
+                    action_number = workup_action.action_number
+                    logger.info(
+                        f"Processing workup action {index+1}/{len(workup_actions)}: extract {action_number}"
+                    )
                     self.process_extract_action(
                         workup_action,
                         action_number,
@@ -135,12 +128,16 @@ class WorkupSessionHandler(SessionHandler):
                         reaction_id,
                     )
 
-                elif action_type == "mix":
+                elif isinstance(workup_action, RecipeMixAction):
+                    action_number = workup_action.action_number
+                    logger.info(
+                        f"Processing workup action {index+1}/{len(workup_actions)}: mix {action_number}"
+                    )
                     self.process_mix_action(
                         action_number, actionsession_obj, reaction_obj, reaction_id
                     )
                 else:
-                    logger.warning(f"Unknown workup action type: {action_type}")
+                    logger.warning(f"Unknown workup action type: {type(workup_action).__name__}")
 
         except (KeyError, IndexError) as e:
             logger.error(
@@ -192,23 +189,26 @@ class WorkupSessionHandler(SessionHandler):
                 number=action_number,
             )
 
-            from_plate_type = extract_action_obj.fromplatetype
-            to_plate_type = extract_action_obj.toplatetype
-            extract_layer = extract_action_obj.extractlayer
+            from_plate_role = extract_action_obj.from_plate_role
+            from_plate_role_index = extract_action_obj.from_plate_role_index
+            to_plate_role = extract_action_obj.to_plate_role
+            to_plate_role_index = extract_action_obj.to_plate_role_index
+            extract_layer = extract_action_obj.layer
             bottom_layer_volume = extract_action_obj.bottomlayervolume
 
             logger.info(
-                f"Extract parameters: from={from_plate_type}, to={to_plate_type}, "
+                f"Extract parameters: from={from_plate_role}{from_plate_role_index}, to={to_plate_role}{to_plate_role_index}, "
                 + f"layer={extract_layer}, bottom_volume={bottom_layer_volume} µL"
             )
 
             # Find source well
             logger.info(
-                f"Finding source well for reaction {reaction_id}, type {from_plate_type}"
+                f"Finding source well for reaction {reaction_id}, role={from_plate_role}, index={from_plate_role_index}"
             )
             from_well_obj = self.well_finder.find_reaction_well(
                 reaction_id=reaction_id,
-                well_type=from_plate_type,
+                role=from_plate_role,
+                role_index=from_plate_role_index,
             )
 
             from_well_index = from_well_obj.index
@@ -219,11 +219,12 @@ class WorkupSessionHandler(SessionHandler):
 
             # Find destination well
             logger.info(
-                f"Finding destination well for reaction {reaction_id}, type {to_plate_type}"
+                f"Finding destination well for reaction {reaction_id}, role={to_plate_role}, index={to_plate_role_index}"
             )
             to_well_obj = self.well_finder.find_reaction_well(
                 reaction_id=reaction_id,
-                well_type=to_plate_type,
+                role=to_plate_role,
+                role_index=to_plate_role_index,
             )
 
             to_well_index = to_well_obj.index
@@ -281,9 +282,9 @@ class WorkupSessionHandler(SessionHandler):
             )
 
             # Drop tip if this isn't the action before a mix step
-            next_action_is_mix = (index + 1 < len(workup_actions)) and workup_actions[
-                index + 1
-            ]["type"] == "mix"
+            next_action_is_mix = (index + 1 < len(workup_actions)) and isinstance(
+                workup_actions[index + 1], RecipeMixAction
+            )
             if not next_action_is_mix:
                 logger.info("No mix action follows, dropping tip")
                 self.add_command(self.command_generator.drop_tip())
@@ -334,19 +335,20 @@ class WorkupSessionHandler(SessionHandler):
                 number=action_number,
             )
 
-            plate_type = mix_action_obj.platetype
+            plate_role = mix_action_obj.plate_role
+            plate_role_index = mix_action_obj.plate_role_index
             repetitions = mix_action_obj.repetitions
 
             logger.info(
-                f"Mix parameters: plate type={plate_type}, repetitions={repetitions}"
+                f"Mix parameters: role={plate_role}, index={plate_role_index}, repetitions={repetitions}"
             )
 
             # Find the well to mix
             logger.info(
-                f"Finding well to mix for reaction {reaction_id}, type {plate_type}"
+                f"Finding well to mix for reaction {reaction_id}, role={plate_role}, index={plate_role_index}"
             )
             mix_well_obj = self.well_finder.find_reaction_well(
-                reaction_id=reaction_id, well_type=plate_type
+                reaction_id=reaction_id, role=plate_role, role_index=plate_role_index
             )
 
             mix_well_index = mix_well_obj.index

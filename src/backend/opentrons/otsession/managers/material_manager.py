@@ -3,6 +3,7 @@ Manages material properties and preparation for OpenTrons sessions.
 """
 
 import logging
+import traceback
 import math
 import pandas as pd
 from django.core.files.storage import default_storage
@@ -11,11 +12,8 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 
 from ....models import AddAction, Plate, Well, CompoundOrder, SolventPrep, Product
-from ....utils import (
-    canonSmiles,
-    stripSalts,
-    checkPreviousReactionProducts,
-)
+from ....chem_utils import canon_smiles, strip_salts, are_equivalent_structures
+from ....db_utils import check_previous_reaction_products
 
 logger = logging.getLogger(__name__)
 
@@ -93,21 +91,20 @@ class SaltMatchingService:
                 return (False, [], None, volume, None)  # Added None for actual_smiles
 
             # Clean the query SMILES
-            cleaned_smiles = stripSalts(canonical_smiles)
+            cleaned_smiles = strip_salts(canonical_smiles)
 
             matching_wells = []
             containing_plate = None
             total_available_volume = 0
             actual_smiles = None  # Track the actual SMILES found
-
+            
             # Process the potential matches
             for well in potential_matches:
                 # Canonicalize and strip salts from the well's SMILES
-                well_canonical = canonSmiles(well.smiles)
-                well_cleaned = stripSalts(well_canonical)
+                well_canonical = canon_smiles(well.smiles)
 
-                # Compare the cleaned, salt-free structures
-                if well_cleaned == cleaned_smiles:
+               # Use our comprehensive structure comparison
+                if are_equivalent_structures(cleaned_smiles, well_canonical):
                     matching_wells.append(well)
                     if containing_plate is None and hasattr(well, "plate_id"):
                         containing_plate = well.plate_id
@@ -120,7 +117,6 @@ class SaltMatchingService:
                         self.logger.info(
                             f"Using SMILES from matched well: {actual_smiles}"
                         )
-
             # Calculate remaining volume needed
             remaining_volume_needed = max(0, volume - total_available_volume)
 
@@ -151,8 +147,6 @@ class SaltMatchingService:
                 return (False, [], None, volume, None)
 
         except Exception as e:
-            import traceback
-
             self.logger.error(f"Error in salt matching: {str(e)}")
             self.logger.error(traceback.format_exc())
             return (False, [], None, volume, None)
@@ -213,7 +207,7 @@ class MaterialManager:
             # Select only add actions that are not products from previous reactions
             if product_exists:
                 condition = addactionsdf.apply(
-                    lambda row: checkPreviousReactionProducts(
+                    lambda row: check_previous_reaction_products(
                         reaction_id=row["reaction_id_id"],
                         smiles=row["smiles"],
                     ),
@@ -249,7 +243,7 @@ class MaterialManager:
             logger.debug(f"Grouped materials dataframe: {materials_df.head()}")
 
             # Canonicalize SMILES for consistent comparison
-            materials_df["SMILES"] = materials_df["smiles"].apply(canonSmiles)
+            materials_df["SMILES"] = materials_df["smiles"].apply(canon_smiles)
 
             # Check existing materials and get remaining volume needed
             adjusted_materials = []
@@ -343,7 +337,7 @@ class MaterialManager:
 
             # Add molecular weight column calculated from the SMILES
             result_df["molecular_weight"] = result_df["smiles"].apply(
-                lambda s: Descriptors.MolWt(Chem.MolFromSmiles(stripSalts(s)))
+                lambda s: Descriptors.MolWt(Chem.MolFromSmiles(strip_salts(s)))
             )
 
             # Use the actual required volume (convert μL to mL for consistency)
@@ -392,7 +386,7 @@ class MaterialManager:
             if product_smiles:
                 # Canonicalize the SMILES strings for consistent comparison
                 canonicalized_smiles = [
-                    canonSmiles(smiles) for smiles in product_smiles
+                    canon_smiles(smiles) for smiles in product_smiles
                 ]
                 return list(set(canonicalized_smiles))  # Remove duplicates
             else:
@@ -404,7 +398,7 @@ class MaterialManager:
 
     def check_starting_material_exists(self, smiles, volume, concentration, solvent):
         """Coordinates the process of finding materials with salt handling"""
-        canonical_smiles = canonSmiles(smiles)
+        canonical_smiles = canon_smiles(smiles)
         # Query DB for potential matches
         potential_matches = self._get_potential_matches(concentration, solvent)
         # Delegate the complex salt matching to specialized service
@@ -461,7 +455,7 @@ class MaterialManager:
             # Get only custom starting material plates
             plates = Plate.objects.filter(
                 otbatchprotocol_id=self.session.otbatchprotocolobj,
-                type="startingmaterial",
+                role="startingmaterial",
                 otsession_id__in=custom_session_ids,
             )
 
@@ -522,7 +516,7 @@ class MaterialManager:
     def calc_mass(self, row) -> float:
         """
         Calculates the mass of material (mg) from the
-        concentration (mol/L) and volume (ul) needed.
+        concentration (mol/L) and volume (uL) needed.
 
         Parameters
         ----------
@@ -545,7 +539,7 @@ class MaterialManager:
             smiles = row[smiles_field]
 
             # Strip salts before calculating molecular weight
-            cleaned_smiles = stripSalts(smiles)
+            cleaned_smiles = strip_salts(smiles)
             mol = Chem.MolFromSmiles(cleaned_smiles)
 
             if mol:

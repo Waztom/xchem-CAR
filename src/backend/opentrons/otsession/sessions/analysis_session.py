@@ -70,22 +70,12 @@ class AnalysisSession(BaseSession):
         # Find source plates (workup or reaction plates)
         source_plates = self.get_source_plates_for_analysis()
         if source_plates:
-            self.plate_manager.update_plate_deck_ot_session_ids(
+            self.plate_factory.update_plate_deck_ot_session_ids(
                 plate_queryset=source_plates
             )
 
         # Create analysis plate
-        volumes = self.roundedvolumes
-
-        # Get appropriate labware type for analysis
-        labware_type = self.plate_manager.get_plate_type(
-            platetype="analyse", volumes=volumes
-        )
-
-        # Create the analysis plate
-        analysis_plates = self.plate_manager.create_analyse_plate(
-            reaction_queryset=self.groupreactionqueryset, labware_platetype=labware_type
-        )
+        analysis_plates = self.plate_factory.create_analyse_plate()
 
         # Create pipette model
         self.pipette_manager.create_pipette_model()
@@ -102,8 +92,8 @@ class AnalysisSession(BaseSession):
                 )
             )
             if not self.solventmaterialsdf.empty:
-                self.plate_manager.create_solvent_plate(
-                    materialsdf=self.solventmaterialsdf
+                self.plate_factory.create_solvent_plate(
+                    materials_df=self.solventmaterialsdf
                 )
 
         logger.info(
@@ -120,27 +110,35 @@ class AnalysisSession(BaseSession):
         source_plates: list
             The plates containing material to be analyzed
         """
-        # Determine source plate types
-        # Analysis typically comes from workup3 -> workup2 -> workup1 -> reaction in that order of preference
-        source_plate_types = ["workup3", "workup2", "workup1", "reaction"]
-
         # Find all plates from previous steps in this batch protocol
-        all_plates = self.plate_manager.get_all_ot_batch_protocol_plates(
+        all_plates = self.plate_query_service.get_all_ot_batch_protocol_plates(
             otbatchprotocol_id=self.otbatchprotocolobj
         )
 
         source_plates = []
 
-        # Try to find plates of each type in order of preference
-        for plate_type in source_plate_types:
-            plates_of_type = [plate for plate in all_plates if plate.type == plate_type]
-            if plates_of_type:
-                # Found plates of this type, use them
+        # Get workup plates sorted by role_index descending (highest index = most processed)
+        workup_plates = sorted(
+            [p for p in all_plates if p.role == "workup"],
+            key=lambda p: p.role_index,
+            reverse=True
+        )
+
+        if workup_plates:
+            # Use the highest indexed workup plate(s)
+            highest_index = workup_plates[0].role_index
+            source_plates = [p for p in workup_plates if p.role_index == highest_index]
+            logger.info(
+                f"Using {len(source_plates)} workup plate(s) with index {highest_index} for analysis"
+            )
+        else:
+            # Fall back to reaction plates
+            reaction_plates = [p for p in all_plates if p.role == "reaction"]
+            if reaction_plates:
+                source_plates = reaction_plates
                 logger.info(
-                    f"Using {len(plates_of_type)} plates of type {plate_type} for analysis"
+                    f"Using {len(source_plates)} reaction plate(s) for analysis"
                 )
-                source_plates.extend(plates_of_type)
-                break
 
         if not source_plates:
             logger.warning("No suitable source plates found for analysis")

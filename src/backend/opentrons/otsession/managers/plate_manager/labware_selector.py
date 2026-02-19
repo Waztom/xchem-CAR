@@ -23,7 +23,7 @@ class LabwareSelector:
 
     def get_plate_type(
         self,
-        platetype: str,
+        role: str,
         volumes: list,
         temperature: int = 25,
         wellsneeded: int = None,
@@ -34,8 +34,8 @@ class LabwareSelector:
 
         Parameters
         ---------
-        platetype: str
-            The plateype eg. reaction, starting plate
+        role: str
+            The plate role (e.g., "reaction", "workup", "startingmaterial")
         volumes: list
             The volumes that the plate and wells need to accomodate
         temperature: int = 25
@@ -48,19 +48,19 @@ class LabwareSelector:
         labware_plate_type: str
             The best suited labware type for the requirements
         """
-        platetype = platetype.lower()
+        role = role.lower()
         median_volume = self.session.data_manager.get_median_value(values=volumes)
 
         possible_labware_plate_types = [
             labware_plate
             for labware_plate in labware_plates
-            if platetype in labware_plates[labware_plate]["type"]
+            if role in labware_plates[labware_plate]["type"]
             and labware_plates[labware_plate]["max_temp"] >= temperature
         ]
 
         if not possible_labware_plate_types:
             logger.warning(
-                f"No labware types found for {platetype} at {temperature}°C for type {platetype} and volumes {platetype}"
+                f"No labware types found for {role} at {temperature}°C"
             )
             return None
 
@@ -91,7 +91,7 @@ class LabwareSelector:
                 f"Volume Difference: {volume_difference}, "
                 f"Temperature Difference: {temp_difference}"
             )
-            if platetype == "reaction":  # Reaction plates can only fill one well
+            if role == "reaction":  # Reaction plates can only fill one well
                 max_volume_exceeded_test = all(
                     [False if max_volume_vial - vol <= 0 else True for vol in volumes]
                 )
@@ -102,7 +102,7 @@ class LabwareSelector:
                 ):
                     continue
 
-            if platetype == "starting":  # Starting plates can fill multiple wells
+            if role == "startingmaterial":  # Starting plates can fill multiple wells
                 if volume_difference < 0 or temp_difference < 0:
                     continue
 
@@ -118,14 +118,14 @@ class LabwareSelector:
         # Add check for empty dictionary
         if not vial_compare_dict:
             logger.warning(
-                f"No suitable labware found for {platetype}-plate with volumes {volumes} at {temperature}°C"
+                f"No suitable labware found for {role} plate with volumes {volumes} at {temperature}°C"
             )
-            if platetype == "starting":
+            if role == "startingmaterial":
                 # For starting materials, use the largest available plate that can handle the temperature
                 fallback_plates = [
                     p
                     for p in labware_plates
-                    if "starting" in labware_plates[p]["type"]
+                    if "startingmaterial" in labware_plates[p]["type"]
                     and labware_plates[p]["max_temp"] >= temperature
                 ]
                 if fallback_plates:

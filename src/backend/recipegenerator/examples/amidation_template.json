@@ -1,0 +1,78 @@
+{
+    "name": "Amidation-screening",
+    "description": "Template for screening amidation reaction conditions",
+    "base": "Amidation.standard",
+    
+    "action_ids": {
+        "add_acid": {"session": 1, "actionnumber": 1},
+        "add_coupling_agent": {"session": 1, "actionnumber": 2},
+        "add_base": {"session": 1, "actionnumber": 3},
+        "add_amine": {"session": 2, "actionnumber": 7},
+        "stir_reaction": {"session": 3, "actionnumber": 8}
+    },
+    
+    "session_ids": {
+        "activation": 1,
+        "coupling": 2,
+        "stir": 3,
+        "workup": 4
+    },
+    
+    "variables": {
+        "acid_solvent": {
+            "action_id": "add_acid",
+            "path": "content.material.solvent"
+        },
+        "acid_concentration": {
+            "action_id": "add_acid",
+            "path": "content.material.concentration"
+        },
+        "coupling_agent_equiv": {
+            "action_id": "add_coupling_agent",
+            "path": "content.material.quantity.value"
+        },
+        "base_equiv": {
+            "action_id": "add_base",
+            "path": "content.material.quantity.value"
+        },
+        "amine_equiv": {
+            "action_id": "add_amine",
+            "path": "content.material.quantity.value"
+        },
+        "reaction_temperature": {
+            "action_id": "stir_reaction",
+            "path": "content.temperature.value"
+        },
+        "reaction_duration": {
+            "action_id": "stir_reaction",
+            "path": "content.duration.value"
+        }
+    },
+    
+    "order_presets": {
+        "default": {
+            "description": "Standard addition order: acid, coupling agent, base",
+            "action_orders": {
+                "activation": ["add_acid", "add_coupling_agent", "add_base"]
+            }
+        },
+        "preactivation": {
+            "description": "Pre-activate acid with coupling agent before adding base",
+            "action_orders": {
+                "activation": ["add_acid", "add_coupling_agent", "add_base"]
+            }
+        },
+        "coupling_first": {
+            "description": "Add coupling agent to vessel before acid (for moisture-sensitive reagents)",
+            "action_orders": {
+                "activation": ["add_coupling_agent", "add_acid", "add_base"]
+            }
+        },
+        "base_first": {
+            "description": "Pre-charge base (for slow activation kinetics)",
+            "action_orders": {
+                "activation": ["add_base", "add_acid", "add_coupling_agent"]
+            }
+        }
+    }
+}

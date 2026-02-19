@@ -1,0 +1,176 @@
+{
+    "reaction_class": "Amidation",
+    "name": "standard",
+    "description": "Standard amidation with T3P coupling, DIPEA base, DMA solvent. Supports both inter- and intramolecular pathways.",
+    "intramolecular": true,
+    "estimated_yield": 85,
+    "reaction_smarts": [
+        "[#6:1](=[#8:2])-[#8;H1].[#7;H3,H2,H1:3]>>[#6:1](=[#8:2])-[#7:3]"
+    ],
+    "action_sessions": [
+        {
+            "session_type": "reaction",
+            "driver": "robot",
+            "actions": [
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": "[#6:1](=[#8:2])-[#8;H1]",
+                    "amount": 1.0,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 0.5,
+                    "from_plate_role": "startingmaterial",
+                    "to_plate_role": "reaction"
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smiles": "CCCP1(=O)OP(=O)(OP(=O)(O1)CCC)CCC",
+                    "amount": 1.2,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 0.5,
+                    "from_plate_role": "startingmaterial",
+                    "to_plate_role": "reaction"
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smiles": "CCN(C(C)C)C(C)C",
+                    "amount": 3.5,
+                    "quantity_unit": "moleq",
+                    "density": 0.74,
+                    "from_plate_role": "startingmaterial",
+                    "to_plate_role": "reaction"
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intramolecular",
+                    "material_smarts": "[#6:1](=[#8:2])-[#8;H1]",
+                    "amount": 1.0,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 0.5,
+                    "from_plate_role": "startingmaterial",
+                    "to_plate_role": "reaction"
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intramolecular",
+                    "material_smiles": "CCCP1(=O)OP(=O)(OP(=O)(O1)CCC)CCC",
+                    "amount": 1.2,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 0.5,
+                    "from_plate_role": "startingmaterial",
+                    "to_plate_role": "reaction"
+                },
+                {
+                    "type": "add",
+                    "molecular_context": "intramolecular",
+                    "material_smiles": "CCN(C(C)C)C(C)C",
+                    "amount": 3.5,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 10.0,
+                    "from_plate_role": "startingmaterial",
+                    "to_plate_role": "reaction"
+                }
+            ]
+        },
+        {
+            "session_type": "reaction",
+            "driver": "robot",
+            "continuation": true,
+            "actions": [
+                {
+                    "type": "add",
+                    "molecular_context": "intermolecular",
+                    "material_smarts": "[#7;H3,H2,H1]",
+                    "amount": 1.1,
+                    "quantity_unit": "moleq",
+                    "solvent": "DMA",
+                    "concentration": 0.5,
+                    "from_plate_role": "startingmaterial",
+                    "to_plate_role": "reaction"
+                }
+            ]
+        },
+        {
+            "session_type": "stir",
+            "driver": "human",
+            "actions": [
+                {
+                    "type": "stir",
+                    "temperature": 25,
+                    "duration": 12.0,
+                    "duration_unit": "h",
+                    "plate_role": "reaction"
+                }
+            ]
+        },
+        {
+            "session_type": "workup",
+            "driver": "robot",
+            "actions": [
+                {
+                    "type": "add",
+                    "material_smiles": "CC#N",
+                    "amount": 200.0,
+                    "quantity_unit": "uL",
+                    "solvent": "ACN",
+                    "from_plate_role": "solvent",
+                    "to_plate_role": "reaction"
+                }
+            ]
+        },
+        {
+            "session_type": "stir",
+            "driver": "human",
+            "actions": [
+                {
+                    "type": "stir",
+                    "temperature": 25,
+                    "duration": 1.0,
+                    "duration_unit": "h",
+                    "plate_role": "reaction"
+                }
+            ]
+        },
+        {
+            "session_type": "workup",
+            "driver": "robot",
+            "actions": [
+                {
+                    "type": "add",
+                    "amount": 200.0,
+                    "quantity_unit": "uL",
+                    "from_plate_role": "reaction",
+                    "to_plate_role": "spefilter"
+                },
+                {
+                    "type": "add",
+                    "material_smiles": "CC#N",
+                    "amount": 200.0,
+                    "quantity_unit": "uL",
+                    "solvent": "ACN",
+                    "from_plate_role": "solvent",
+                    "to_plate_role": "reaction"
+                },
+                {
+                    "type": "mix",
+                    "repetitions": 3,
+                    "plate_role": "reaction"
+                },
+                {
+                    "type": "add",
+                    "amount": 300.0,
+                    "quantity_unit": "uL",
+                    "from_plate_role": "reaction",
+                    "to_plate_role": "spefilter"
+                }
+            ]
+        }
+    ]
+}
