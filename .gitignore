@@ -16,6 +16,7 @@ src/media/*
 !src/backend/enamine/enamine-real-tools-rxns.csv
 !src/backend/recipe_generator/examples/*
 !src/backend/tests/fixtures/*
+
 # Ignore db files including Redis (rdb)
 *.db
 *.rdb
@@ -40,7 +41,7 @@ src/logs/*
     
 # Django / React / Webpack stuff
 # TODO: Remove before production - migrations should be tracked
-src/backend/migrations/*
+# src/backend/migrations/*
 venv/*
 db.sqlite3
 *.pyc
