@@ -71,6 +71,7 @@ jobs:
           CELERY_BROKER_URL: redis://localhost:6379/0
           CELERY_RESULT_BACKEND: redis://localhost:6379/0
         run: |
+          mkdir -p logs && touch logs/logfile.log
           python3 -m django test backend.tests.test_chem_utils \
                                   backend.tests.test_conversions \
                                   backend.tests.test_validate \
@@ -139,6 +140,7 @@ jobs:
           CELERY_BROKER_URL: redis://localhost:6379/0
           CELERY_RESULT_BACKEND: redis://localhost:6379/0
         run: |
+          mkdir -p logs && touch logs/logfile.log
           python3 -m django test backend.tests.test_api \
                                   backend.tests.test_recipe_models \
                                   backend.tests.test_recipe_utils \
