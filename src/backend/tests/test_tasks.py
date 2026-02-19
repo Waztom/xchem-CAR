@@ -13,13 +13,17 @@ cleanup on both success and failure paths.
 """
 
 from unittest import TestCase
-from unittest.mock import patch, call, ANY
+from unittest.mock import patch, call, MagicMock, ANY
 
 from backend.tasks import (
     upload_manifold_reaction,
     upload_custom_reaction,
     upload_combi_custom_reaction,
     canonicalize_smiles,
+    create_ot_script,
+    _process_reaction_step_sessions,
+    _get_custom_sm_csv_path,
+    ZipOTBatchProtocol,
 )
 
 # ---------------------------------------------------------------------------
@@ -2047,3 +2051,1169 @@ class TestCanonicalizeSmilesCSV(TestCase):
 
         self.assertFalse(validated)
         mock_del.assert_called_once_with("/tmp/bad.csv")
+
+
+# ===========================================================================
+# _get_custom_sm_csv_path tests
+# ===========================================================================
+
+
+class TestGetCustomSmCsvPath(TestCase):
+    """Unit tests for the _get_custom_sm_csv_path helper."""
+
+    def test_returns_path_when_key_present(self):
+        result = _get_custom_sm_csv_path({"42": "/tmp/sm.csv"}, 42)
+        self.assertEqual(result, "/tmp/sm.csv")
+
+    def test_returns_none_when_key_missing(self):
+        result = _get_custom_sm_csv_path({"99": "/tmp/sm.csv"}, 42)
+        self.assertIsNone(result)
+
+    def test_returns_none_when_dict_is_none(self):
+        result = _get_custom_sm_csv_path(None, 42)
+        self.assertIsNone(result)
+
+    def test_returns_none_when_dict_is_empty(self):
+        result = _get_custom_sm_csv_path({}, 42)
+        self.assertIsNone(result)
+
+
+# ===========================================================================
+# _process_reaction_step_sessions tests
+# ===========================================================================
+
+OT_STEP_PATCHES = [
+    "backend.tasks.create_multiple_ot_sessions",
+    "backend.tasks.get_grouped_action_session_types",
+    "backend.tasks.get_action_session_types",
+    "backend.tasks.get_grouped_action_session_sequences",
+    "backend.tasks.get_action_session_sequence_numbers",
+    "backend.tasks.get_action_session_query_set",
+]
+
+
+class TestProcessReactionStepSessions(TestCase):
+    """Tests for the _process_reaction_step_sessions helper."""
+
+    @patch(*OT_STEP_PATCHES[:1])
+    @patch(*OT_STEP_PATCHES[1:2])
+    @patch(*OT_STEP_PATCHES[2:3])
+    @patch(*OT_STEP_PATCHES[3:4])
+    @patch(*OT_STEP_PATCHES[4:5])
+    @patch(*OT_STEP_PATCHES[5:6])
+    def _run(
+        self,
+        reaction_ids,
+        mock_get_as_qs,
+        mock_seq_nums,
+        mock_grouped_seqs,
+        mock_as_types,
+        mock_grouped_types,
+        mock_create_sessions,
+        robot_count=1,
+        human_count=0,
+        custom_sm_csv_path=None,
+    ):
+        """Helper to set up a single-sequence, single-type scenario."""
+        # Build a fake queryset-like object with a .filter method
+        from unittest.mock import MagicMock
+
+        mock_qs = MagicMock()
+        mock_get_as_qs.return_value = mock_qs
+        mock_seq_nums.return_value = [1]
+
+        # Build the type-level queryset
+        type_qs = MagicMock()
+        robot_qs = MagicMock()
+        robot_qs.__bool__ = lambda self: robot_count > 0
+        human_qs = MagicMock()
+        human_qs.__bool__ = lambda self: human_count > 0
+        type_qs.filter.side_effect = lambda driver=None: (
+            robot_qs if driver == "robot" else human_qs
+        )
+
+        # One sequence group containing one type group
+        mock_grouped_seqs.return_value = [mock_qs]
+        mock_as_types.return_value = ["robot"]
+        mock_grouped_types.return_value = [type_qs]
+
+        protocol_obj = MagicMock()
+        _process_reaction_step_sessions(
+            reaction_ids=reaction_ids,
+            reactionstep=1,
+            otbatchprotocolobj=protocol_obj,
+            custom_sm_csv_path=custom_sm_csv_path,
+            batchtag="batch-1",
+        )
+        return mock_create_sessions, robot_qs, protocol_obj
+
+    def test_calls_create_multiple_ot_sessions_for_robot(self):
+        mock_create, robot_qs, protocol_obj = self._run([10, 20])
+        mock_create.assert_called_once_with(
+            reactionstep=1,
+            otbatchprotocolobj=protocol_obj,
+            actionsessionqueryset=robot_qs,
+            customSMcsvpath=None,
+            batchtag="batch-1",
+        )
+
+    def test_passes_custom_sm_csv_path(self):
+        mock_create, _, _ = self._run(
+            [10], custom_sm_csv_path="/tmp/custom.csv"
+        )
+        self.assertEqual(
+            mock_create.call_args.kwargs["customSMcsvpath"], "/tmp/custom.csv"
+        )
+
+    def test_skips_when_no_robot_sessions(self):
+        mock_create, _, _ = self._run([10], robot_count=0)
+        mock_create.assert_not_called()
+
+
+# ===========================================================================
+# create_ot_script tests
+# ===========================================================================
+
+# Common patches for create_ot_script tests
+OT_SCRIPT_PATCHES = [
+    "backend.tasks.ZipOTBatchProtocol",
+    "backend.tasks._process_reaction_step_sessions",
+    "backend.tasks.group_reactions",
+    "backend.tasks.get_max_reaction_number",
+    "backend.tasks._get_custom_sm_csv_path",
+    "backend.tasks.get_ot_batch_protocol_query_set",
+    "backend.tasks.get_batch_tag",
+    "backend.tasks.CreateEncodedActionModels",
+    "backend.tasks.get_recipe_intramolecular",
+    "backend.tasks.get_action_session_query_set",
+    "backend.tasks.get_batch_reactions",
+    "backend.tasks.get_reactions_to_do",
+    "backend.tasks.current_task",
+    "backend.tasks.Batch",
+    "backend.tasks.OTProject",
+    "backend.tasks.OTBatchProtocol",
+]
+
+
+def _make_reaction_obj(
+    reaction_id=1,
+    reactionclass="Amidation",
+    recipe="standard",
+    target_id=100,
+    reactant_smiles=None,
+):
+    """Build a mock reaction ORM object."""
+    from unittest.mock import MagicMock
+
+    if reactant_smiles is None:
+        reactant_smiles = [SMILES_REACTANT_A, SMILES_REACTANT_B]
+    obj = MagicMock()
+    obj.id = reaction_id
+    obj.reactionclass = reactionclass
+    obj.recipe = recipe
+    obj.method_id.target_id.id = target_id
+    obj.reactants.all.return_value.values_list.return_value = reactant_smiles
+    return obj
+
+
+@patch("backend.tasks.OTBatchProtocol")
+@patch("backend.tasks.OTProject")
+@patch("backend.tasks.Batch")
+@patch("backend.tasks.current_task")
+@patch("backend.tasks.get_reactions_to_do")
+@patch("backend.tasks.get_batch_reactions")
+@patch("backend.tasks.get_action_session_query_set")
+@patch("backend.tasks.get_recipe_intramolecular")
+@patch("backend.tasks.CreateEncodedActionModels")
+@patch("backend.tasks.get_batch_tag")
+@patch("backend.tasks.get_ot_batch_protocol_query_set")
+@patch("backend.tasks._get_custom_sm_csv_path")
+@patch("backend.tasks.get_max_reaction_number")
+@patch("backend.tasks.group_reactions")
+@patch("backend.tasks._process_reaction_step_sessions")
+@patch("backend.tasks.ZipOTBatchProtocol")
+class TestCreateOTScriptHappyPath(TestCase):
+    """Single-batch, single-step, action sessions already exist."""
+
+    def _setup_mocks(
+        self,
+        mock_zip,
+        mock_process_step,
+        mock_group_rxns,
+        mock_max_rxn,
+        mock_custom_sm,
+        mock_get_protocol,
+        mock_get_tag,
+        mock_create_encoded,
+        mock_intramolecular,
+        mock_get_as_qs,
+        mock_get_batch_rxns,
+        mock_rxns_to_do,
+        mock_current_task,
+        mock_Batch,
+        mock_OTProject,
+        mock_OTBatchProtocol,
+    ):
+        # OTProject mock
+        mock_otproject = mock_OTProject.return_value
+        mock_otproject.id = 500
+
+        # Batch
+        mock_batch = MagicMock()
+        mock_batch.project_id = MagicMock()
+        mock_Batch.objects.get.return_value = mock_batch
+
+        # current_task
+        mock_current_task.request.id = "celery-task-id-123"
+
+        # Reactions already have action sessions
+        rxn = _make_reaction_obj(reaction_id=10)
+        mock_get_batch_rxns.return_value = [rxn]
+        mock_get_as_qs.return_value = MagicMock(__bool__=lambda self: True)
+
+        # Protocol doesn't exist yet
+        mock_get_protocol.return_value = []
+
+        # Batch tag
+        mock_get_tag.return_value = "batch-1"
+
+        # Grouping: single step with one reaction
+        mock_max_rxn.return_value = 1
+        mock_group_rxns.return_value = [[rxn]]
+
+        # Custom SM path
+        mock_custom_sm.return_value = None
+
+        # Zip succeeds
+        mock_zip.return_value.errors = []
+
+        return mock_otproject
+
+    def test_returns_task_summary_and_project_id(self, *mocks):
+        mock_otproject = self._setup_mocks(*mocks)
+        result = create_ot_script(batchids=[1], protocol_name="P1")
+        task_summary, project_id = result
+        self.assertEqual(project_id, 500)
+        self.assertIn(1, task_summary)
+
+    def test_creates_ot_project(self, *mocks):
+        self._setup_mocks(*mocks)
+        mock_OTProject = mocks[-2]
+        create_ot_script(batchids=[1], protocol_name="P1")
+        mock_OTProject.return_value.save.assert_called()
+        self.assertEqual(mock_OTProject.return_value.name, "P1")
+
+    def test_creates_batch_protocol(self, *mocks):
+        self._setup_mocks(*mocks)
+        mock_OTBatchProtocol = mocks[-1]
+        create_ot_script(batchids=[1], protocol_name="P1")
+        mock_OTBatchProtocol.return_value.save.assert_called()
+
+    def test_calls_process_reaction_step(self, *mocks):
+        self._setup_mocks(*mocks)
+        mock_process_step = mocks[1]
+        create_ot_script(batchids=[1], protocol_name="P1")
+        mock_process_step.assert_called_once()
+        kwargs = mock_process_step.call_args.kwargs
+        self.assertEqual(kwargs["reactionstep"], 1)
+        self.assertEqual(kwargs["reaction_ids"], [10])
+        self.assertEqual(kwargs["batchtag"], "batch-1")
+
+    def test_creates_zip_protocol(self, *mocks):
+        self._setup_mocks(*mocks)
+        mock_zip = mocks[0]
+        create_ot_script(batchids=[1], protocol_name="P1")
+        mock_zip.assert_called_once()
+
+    def test_does_not_call_create_encoded_when_actions_exist(self, *mocks):
+        self._setup_mocks(*mocks)
+        mock_create_encoded = mocks[8]
+        create_ot_script(batchids=[1], protocol_name="P1")
+        mock_create_encoded.assert_not_called()
+
+    def test_task_summary_true_when_zip_no_errors(self, *mocks):
+        self._setup_mocks(*mocks)
+        mock_zip = mocks[0]
+        mock_zip.return_value.errors = []
+        result = create_ot_script(batchids=[1], protocol_name="P1")
+        self.assertTrue(result[0][1])
+
+
+@patch("backend.tasks.OTBatchProtocol")
+@patch("backend.tasks.OTProject")
+@patch("backend.tasks.Batch")
+@patch("backend.tasks.current_task")
+@patch("backend.tasks.get_reactions_to_do")
+@patch("backend.tasks.get_batch_reactions")
+@patch("backend.tasks.get_action_session_query_set")
+@patch("backend.tasks.get_recipe_intramolecular")
+@patch("backend.tasks.CreateEncodedActionModels")
+@patch("backend.tasks.get_batch_tag")
+@patch("backend.tasks.get_ot_batch_protocol_query_set")
+@patch("backend.tasks._get_custom_sm_csv_path")
+@patch("backend.tasks.get_max_reaction_number")
+@patch("backend.tasks.group_reactions")
+@patch("backend.tasks._process_reaction_step_sessions")
+@patch("backend.tasks.ZipOTBatchProtocol")
+class TestCreateOTScriptNoActionSessions(TestCase):
+    """When action sessions don't exist, CreateEncodedActionModels is called."""
+
+    def test_creates_encoded_action_models(
+        self,
+        mock_zip,
+        mock_process_step,
+        mock_group_rxns,
+        mock_max_rxn,
+        mock_custom_sm,
+        mock_get_protocol,
+        mock_get_tag,
+        mock_create_encoded,
+        mock_intramolecular,
+        mock_get_as_qs,
+        mock_get_batch_rxns,
+        mock_rxns_to_do,
+        mock_current_task,
+        mock_Batch,
+        mock_OTProject,
+        mock_OTBatchProtocol,
+    ):
+        mock_OTProject.return_value.id = 500
+        mock_batch = MagicMock()
+        mock_batch.project_id = MagicMock()
+        mock_Batch.objects.get.return_value = mock_batch
+        mock_current_task.request.id = "task-1"
+
+        rxn = _make_reaction_obj(reaction_id=10, reactionclass="Amidation")
+        mock_get_batch_rxns.return_value = [rxn]
+        # No action sessions exist yet
+        mock_get_as_qs.return_value = MagicMock(__bool__=lambda self: False)
+        mock_get_protocol.return_value = []
+        mock_get_tag.return_value = "batch-1"
+        mock_max_rxn.return_value = 1
+        mock_group_rxns.return_value = [[rxn]]
+        mock_custom_sm.return_value = None
+        mock_zip.return_value.errors = []
+        mock_intramolecular.return_value = False
+
+        create_ot_script(batchids=[1], protocol_name="P1")
+
+        mock_create_encoded.assert_called_once_with(
+            reaction_class="Amidation",
+            recipe_name="standard",
+            intramolecular=False,
+            target_id=100,
+            reaction_id=10,
+            reactant_pair_smiles=[SMILES_REACTANT_A, SMILES_REACTANT_B],
+        )
+
+    def test_intramolecular_true_for_single_reactant(
+        self,
+        mock_zip,
+        mock_process_step,
+        mock_group_rxns,
+        mock_max_rxn,
+        mock_custom_sm,
+        mock_get_protocol,
+        mock_get_tag,
+        mock_create_encoded,
+        mock_intramolecular,
+        mock_get_as_qs,
+        mock_get_batch_rxns,
+        mock_rxns_to_do,
+        mock_current_task,
+        mock_Batch,
+        mock_OTProject,
+        mock_OTBatchProtocol,
+    ):
+        mock_OTProject.return_value.id = 500
+        mock_batch = MagicMock()
+        mock_batch.project_id = MagicMock()
+        mock_Batch.objects.get.return_value = mock_batch
+        mock_current_task.request.id = "task-1"
+
+        rxn = _make_reaction_obj(
+            reaction_id=10,
+            reactionclass="Cyclization",
+            reactant_smiles=[SMILES_REACTANT_A],  # single reactant
+        )
+        mock_get_batch_rxns.return_value = [rxn]
+        mock_get_as_qs.return_value = MagicMock(__bool__=lambda self: False)
+        mock_get_protocol.return_value = []
+        mock_get_tag.return_value = "batch-1"
+        mock_max_rxn.return_value = 1
+        mock_group_rxns.return_value = [[rxn]]
+        mock_custom_sm.return_value = None
+        mock_zip.return_value.errors = []
+        mock_intramolecular.return_value = True
+
+        create_ot_script(batchids=[1], protocol_name="P1")
+
+        # Single reactant + intramolecular recipe → intramolecular=True
+        enc_call = mock_create_encoded.call_args
+        self.assertTrue(enc_call.kwargs["intramolecular"])
+
+
+@patch("backend.tasks.OTBatchProtocol")
+@patch("backend.tasks.OTProject")
+@patch("backend.tasks.Batch")
+@patch("backend.tasks.current_task")
+@patch("backend.tasks.get_reactions_to_do")
+@patch("backend.tasks.get_batch_reactions")
+@patch("backend.tasks.get_action_session_query_set")
+@patch("backend.tasks.get_recipe_intramolecular")
+@patch("backend.tasks.CreateEncodedActionModels")
+@patch("backend.tasks.get_batch_tag")
+@patch("backend.tasks.get_ot_batch_protocol_query_set")
+@patch("backend.tasks._get_custom_sm_csv_path")
+@patch("backend.tasks.get_max_reaction_number")
+@patch("backend.tasks.group_reactions")
+@patch("backend.tasks._process_reaction_step_sessions")
+@patch("backend.tasks.ZipOTBatchProtocol")
+class TestCreateOTScriptExistingProtocol(TestCase):
+    """When a completed protocol already exists, it should be re-used."""
+
+    def test_reuses_existing_protocol(
+        self,
+        mock_zip,
+        mock_process_step,
+        mock_group_rxns,
+        mock_max_rxn,
+        mock_custom_sm,
+        mock_get_protocol,
+        mock_get_tag,
+        mock_create_encoded,
+        mock_intramolecular,
+        mock_get_as_qs,
+        mock_get_batch_rxns,
+        mock_rxns_to_do,
+        mock_current_task,
+        mock_Batch,
+        mock_OTProject,
+        mock_OTBatchProtocol,
+    ):
+        mock_OTProject.return_value.id = 500
+        mock_batch = MagicMock()
+        mock_batch.project_id = MagicMock()
+        mock_Batch.objects.get.return_value = mock_batch
+        mock_current_task.request.id = "task-1"
+
+        rxn = _make_reaction_obj(reaction_id=10)
+        mock_get_batch_rxns.return_value = [rxn]
+        mock_get_as_qs.return_value = MagicMock(__bool__=lambda self: True)
+        mock_get_tag.return_value = "batch-1"
+
+        # Protocol already exists with a zipfile
+        existing_protocol = MagicMock()
+        existing_protocol.zipfile = "/existing/zip.zip"
+        mock_get_protocol.return_value = [existing_protocol]
+
+        result = create_ot_script(batchids=[1], protocol_name="P1")
+
+        # Should NOT create a new protocol or call step processing
+        mock_process_step.assert_not_called()
+        mock_zip.assert_not_called()
+        mock_group_rxns.assert_not_called()
+
+        # Should mark as True
+        self.assertTrue(result[0][1])
+
+        # Existing protocol should be updated and saved
+        existing_protocol.save.assert_called()
+
+    def test_no_new_otbatchprotocol_created(
+        self,
+        mock_zip,
+        mock_process_step,
+        mock_group_rxns,
+        mock_max_rxn,
+        mock_custom_sm,
+        mock_get_protocol,
+        mock_get_tag,
+        mock_create_encoded,
+        mock_intramolecular,
+        mock_get_as_qs,
+        mock_get_batch_rxns,
+        mock_rxns_to_do,
+        mock_current_task,
+        mock_Batch,
+        mock_OTProject,
+        mock_OTBatchProtocol,
+    ):
+        mock_OTProject.return_value.id = 500
+        mock_batch = MagicMock()
+        mock_batch.project_id = MagicMock()
+        mock_Batch.objects.get.return_value = mock_batch
+        mock_current_task.request.id = "task-1"
+
+        rxn = _make_reaction_obj()
+        mock_get_batch_rxns.return_value = [rxn]
+        mock_get_as_qs.return_value = MagicMock(__bool__=lambda self: True)
+        mock_get_tag.return_value = "batch-1"
+
+        existing_protocol = MagicMock()
+        existing_protocol.zipfile = "/existing/zip.zip"
+        mock_get_protocol.return_value = [existing_protocol]
+
+        create_ot_script(batchids=[1], protocol_name="P1")
+
+        # The OTBatchProtocol constructor should only be called for the
+        # class-level mock setup, not for creating a new instance
+        # (the function uses the existing one, not OTBatchProtocol())
+        mock_OTBatchProtocol.assert_not_called()
+
+
+@patch("backend.tasks.OTBatchProtocol")
+@patch("backend.tasks.OTProject")
+@patch("backend.tasks.Batch")
+@patch("backend.tasks.current_task")
+@patch("backend.tasks.get_reactions_to_do")
+@patch("backend.tasks.get_batch_reactions")
+@patch("backend.tasks.get_action_session_query_set")
+@patch("backend.tasks.get_recipe_intramolecular")
+@patch("backend.tasks.CreateEncodedActionModels")
+@patch("backend.tasks.get_batch_tag")
+@patch("backend.tasks.get_ot_batch_protocol_query_set")
+@patch("backend.tasks._get_custom_sm_csv_path")
+@patch("backend.tasks.get_max_reaction_number")
+@patch("backend.tasks.group_reactions")
+@patch("backend.tasks._process_reaction_step_sessions")
+@patch("backend.tasks.ZipOTBatchProtocol")
+class TestCreateOTScriptMultiStep(TestCase):
+    """Two-step reaction: step 1 always runs, step 2 uses QC filter."""
+
+    def _setup(
+        self,
+        mock_zip,
+        mock_process_step,
+        mock_group_rxns,
+        mock_max_rxn,
+        mock_custom_sm,
+        mock_get_protocol,
+        mock_get_tag,
+        mock_create_encoded,
+        mock_intramolecular,
+        mock_get_as_qs,
+        mock_get_batch_rxns,
+        mock_rxns_to_do,
+        mock_current_task,
+        mock_Batch,
+        mock_OTProject,
+        mock_OTBatchProtocol,
+        step2_reactions_remain=True,
+    ):
+        mock_OTProject.return_value.id = 500
+        mock_batch = MagicMock()
+        mock_batch.project_id = MagicMock()
+        mock_Batch.objects.get.return_value = mock_batch
+        mock_current_task.request.id = "task-1"
+
+        rxn1 = _make_reaction_obj(reaction_id=10)
+        rxn2 = _make_reaction_obj(reaction_id=20)
+        mock_get_batch_rxns.return_value = [rxn1, rxn2]
+        mock_get_as_qs.return_value = MagicMock(__bool__=lambda self: True)
+        mock_get_protocol.return_value = []
+        mock_get_tag.return_value = "batch-1"
+        mock_max_rxn.return_value = 2
+        mock_custom_sm.return_value = None
+        mock_zip.return_value.errors = []
+
+        # Two steps: step 0 has rxn1, step 1 has rxn2
+        step1_group = [rxn1]
+        step2_group = [rxn2]
+        mock_group_rxns.return_value = [step1_group, step2_group]
+
+        if step2_reactions_remain:
+            mock_rxns_to_do.return_value = [rxn2]
+        else:
+            mock_rxns_to_do.return_value = []
+
+        return mock_process_step, mock_rxns_to_do
+
+    def test_both_steps_processed(self, *mocks):
+        mock_process_step, _ = self._setup(*mocks)
+        create_ot_script(batchids=[1], protocol_name="P1")
+        self.assertEqual(mock_process_step.call_count, 2)
+
+        # Step 1: reactionstep=1, reaction_ids=[10]
+        call1 = mock_process_step.call_args_list[0]
+        self.assertEqual(call1.kwargs["reactionstep"], 1)
+        self.assertEqual(call1.kwargs["reaction_ids"], [10])
+
+        # Step 2: reactionstep=2, reaction_ids=[20]
+        call2 = mock_process_step.call_args_list[1]
+        self.assertEqual(call2.kwargs["reactionstep"], 2)
+        self.assertEqual(call2.kwargs["reaction_ids"], [20])
+
+    def test_qc_filter_applied_only_to_step_2(self, *mocks):
+        """get_reactions_to_do is called for step 2 but not step 1."""
+        _, mock_rxns_to_do = self._setup(*mocks)
+        create_ot_script(batchids=[1], protocol_name="P1")
+        mock_rxns_to_do.assert_called_once()
+
+    def test_step2_skipped_when_no_reactions_pass_qc(self, *mocks):
+        mock_process_step, mock_rxns_to_do = self._setup(
+            *mocks, step2_reactions_remain=False
+        )
+        create_ot_script(batchids=[1], protocol_name="P1")
+
+        # Only step 1 processed
+        self.assertEqual(mock_process_step.call_count, 1)
+        call1 = mock_process_step.call_args_list[0]
+        self.assertEqual(call1.kwargs["reactionstep"], 1)
+
+    def test_three_steps_breaks_at_empty_step2(self, *mocks):
+        """If step 2 has no reactions to do, step 3 never runs."""
+        mock_process_step = mocks[1]
+        mock_group_rxns = mocks[2]
+        mock_rxns_to_do = mocks[11]  # get_reactions_to_do
+
+        # Build 3-step scenario
+        mock_OTProject = mocks[-2]
+        mock_Batch = mocks[-3]
+        mock_current_task = mocks[-4]
+
+        mock_OTProject.return_value.id = 500
+        mock_batch = MagicMock()
+        mock_batch.project_id = MagicMock()
+        mock_Batch.objects.get.return_value = mock_batch
+        mock_current_task.request.id = "task-1"
+
+        rxn1 = _make_reaction_obj(reaction_id=10)
+        rxn2 = _make_reaction_obj(reaction_id=20)
+        rxn3 = _make_reaction_obj(reaction_id=30)
+        mocks[10].return_value = [rxn1, rxn2, rxn3]  # get_batch_reactions
+        mocks[7].return_value = MagicMock(__bool__=lambda self: True)  # get_as_qs
+        mocks[5].return_value = []  # get_ot_batch_protocol_query_set
+        mocks[6].return_value = "batch-1"  # get_batch_tag
+        mocks[3].return_value = 3  # get_max_reaction_number
+        mocks[4].return_value = None  # custom_sm_csv_path
+        mocks[0].return_value.errors = []  # ZipOTBatchProtocol
+
+        mock_group_rxns.return_value = [[rxn1], [rxn2], [rxn3]]
+        mock_rxns_to_do.return_value = []  # step 2 fails QC → empty
+
+        create_ot_script(batchids=[1], protocol_name="P1")
+
+        # Only step 1 runs; step 2 QC check returns empty → break
+        self.assertEqual(mock_process_step.call_count, 1)
+
+
+@patch("backend.tasks.OTBatchProtocol")
+@patch("backend.tasks.OTProject")
+@patch("backend.tasks.Batch")
+@patch("backend.tasks.current_task")
+@patch("backend.tasks.get_reactions_to_do")
+@patch("backend.tasks.get_batch_reactions")
+@patch("backend.tasks.get_action_session_query_set")
+@patch("backend.tasks.get_recipe_intramolecular")
+@patch("backend.tasks.CreateEncodedActionModels")
+@patch("backend.tasks.get_batch_tag")
+@patch("backend.tasks.get_ot_batch_protocol_query_set")
+@patch("backend.tasks._get_custom_sm_csv_path")
+@patch("backend.tasks.get_max_reaction_number")
+@patch("backend.tasks.group_reactions")
+@patch("backend.tasks._process_reaction_step_sessions")
+@patch("backend.tasks.ZipOTBatchProtocol")
+class TestCreateOTScriptTempFileCleanup(TestCase):
+    """Custom SM files should be deleted after the transaction."""
+
+    @patch("backend.tasks.os.path.exists", return_value=True)
+    @patch("backend.tasks.os.remove")
+    def test_custom_sm_files_cleaned_up(
+        self,
+        mock_remove,
+        mock_exists,
+        mock_zip,
+        mock_process_step,
+        mock_group_rxns,
+        mock_max_rxn,
+        mock_custom_sm,
+        mock_get_protocol,
+        mock_get_tag,
+        mock_create_encoded,
+        mock_intramolecular,
+        mock_get_as_qs,
+        mock_get_batch_rxns,
+        mock_rxns_to_do,
+        mock_current_task,
+        mock_Batch,
+        mock_OTProject,
+        mock_OTBatchProtocol,
+    ):
+        mock_OTProject.return_value.id = 500
+        mock_batch = MagicMock()
+        mock_batch.project_id = MagicMock()
+        mock_Batch.objects.get.return_value = mock_batch
+        mock_current_task.request.id = "task-1"
+
+        rxn = _make_reaction_obj()
+        mock_get_batch_rxns.return_value = [rxn]
+        mock_get_as_qs.return_value = MagicMock(__bool__=lambda self: True)
+        mock_get_protocol.return_value = []
+        mock_get_tag.return_value = "batch-1"
+        mock_max_rxn.return_value = 1
+        mock_group_rxns.return_value = [[rxn]]
+        mock_custom_sm.return_value = "/tmp/custom.csv"
+        mock_zip.return_value.errors = []
+
+        create_ot_script(
+            batchids=[1],
+            protocol_name="P1",
+            custom_SM_files={"1": "/tmp/custom.csv"},
+        )
+
+        mock_remove.assert_called_once_with("/tmp/custom.csv")
+
+    @patch("backend.tasks.os.path.exists", return_value=False)
+    @patch("backend.tasks.os.remove")
+    def test_no_remove_when_file_missing(
+        self,
+        mock_remove,
+        mock_exists,
+        mock_zip,
+        mock_process_step,
+        mock_group_rxns,
+        mock_max_rxn,
+        mock_custom_sm,
+        mock_get_protocol,
+        mock_get_tag,
+        mock_create_encoded,
+        mock_intramolecular,
+        mock_get_as_qs,
+        mock_get_batch_rxns,
+        mock_rxns_to_do,
+        mock_current_task,
+        mock_Batch,
+        mock_OTProject,
+        mock_OTBatchProtocol,
+    ):
+        mock_OTProject.return_value.id = 500
+        mock_batch = MagicMock()
+        mock_batch.project_id = MagicMock()
+        mock_Batch.objects.get.return_value = mock_batch
+        mock_current_task.request.id = "task-1"
+
+        rxn = _make_reaction_obj()
+        mock_get_batch_rxns.return_value = [rxn]
+        mock_get_as_qs.return_value = MagicMock(__bool__=lambda self: True)
+        mock_get_protocol.return_value = []
+        mock_get_tag.return_value = "batch-1"
+        mock_max_rxn.return_value = 1
+        mock_group_rxns.return_value = [[rxn]]
+        mock_custom_sm.return_value = None
+        mock_zip.return_value.errors = []
+
+        create_ot_script(
+            batchids=[1],
+            protocol_name="P1",
+            custom_SM_files={"1": "/tmp/gone.csv"},
+        )
+
+        mock_remove.assert_not_called()
+
+
+@patch("backend.tasks.OTBatchProtocol")
+@patch("backend.tasks.OTProject")
+@patch("backend.tasks.Batch")
+@patch("backend.tasks.current_task")
+@patch("backend.tasks.get_reactions_to_do")
+@patch("backend.tasks.get_batch_reactions")
+@patch("backend.tasks.get_action_session_query_set")
+@patch("backend.tasks.get_recipe_intramolecular")
+@patch("backend.tasks.CreateEncodedActionModels")
+@patch("backend.tasks.get_batch_tag")
+@patch("backend.tasks.get_ot_batch_protocol_query_set")
+@patch("backend.tasks._get_custom_sm_csv_path")
+@patch("backend.tasks.get_max_reaction_number")
+@patch("backend.tasks.group_reactions")
+@patch("backend.tasks._process_reaction_step_sessions")
+@patch("backend.tasks.ZipOTBatchProtocol")
+class TestCreateOTScriptZipErrors(TestCase):
+    """When ZipOTBatchProtocol reports errors, task_summary should be False."""
+
+    def test_task_summary_false_on_zip_errors(
+        self,
+        mock_zip,
+        mock_process_step,
+        mock_group_rxns,
+        mock_max_rxn,
+        mock_custom_sm,
+        mock_get_protocol,
+        mock_get_tag,
+        mock_create_encoded,
+        mock_intramolecular,
+        mock_get_as_qs,
+        mock_get_batch_rxns,
+        mock_rxns_to_do,
+        mock_current_task,
+        mock_Batch,
+        mock_OTProject,
+        mock_OTBatchProtocol,
+    ):
+        mock_OTProject.return_value.id = 500
+        mock_batch = MagicMock()
+        mock_batch.project_id = MagicMock()
+        mock_Batch.objects.get.return_value = mock_batch
+        mock_current_task.request.id = "task-1"
+
+        rxn = _make_reaction_obj()
+        mock_get_batch_rxns.return_value = [rxn]
+        mock_get_as_qs.return_value = MagicMock(__bool__=lambda self: True)
+        mock_get_protocol.return_value = []
+        mock_get_tag.return_value = "batch-1"
+        mock_max_rxn.return_value = 1
+        mock_group_rxns.return_value = [[rxn]]
+        mock_custom_sm.return_value = None
+
+        # Zip reports errors
+        mock_zip.return_value.errors = [
+            {"function": "someFunc", "errorwarning": "something went wrong"},
+        ]
+
+        result = create_ot_script(batchids=[1], protocol_name="P1")
+        # Errors list is truthy → not errors = False
+        self.assertFalse(result[0][1])
+
+
+# =========================================================================
+# Tests for ZipOTBatchProtocol (direct class tests)
+# =========================================================================
+
+
+def _make_file_obj(name):
+    """Return a mock with a .name attribute (mimics Django FileField)."""
+    obj = MagicMock()
+    obj.name = name
+    return obj
+
+
+def _make_artifact_obj(field_name, file_path):
+    """Return a mock ORM object whose *field_name* attr is a FileField-like."""
+    obj = MagicMock()
+    file_field = MagicMock()
+    file_field.name = file_path
+    setattr(obj, field_name, file_field)
+    return obj
+
+
+@patch("backend.tasks.os.remove")
+@patch("builtins.open", MagicMock())
+@patch("backend.tasks.ZipFile")
+@patch("backend.tasks.OTScript.objects.filter")
+@patch("backend.tasks.CompoundOrder.objects.filter")
+@patch("backend.tasks.SolventPrep.objects.filter")
+@patch("backend.tasks.OTSession.objects.filter")
+@patch("backend.tasks.settings")
+class TestZipOTBatchProtocolHappyPath(TestCase):
+    """Full construction with one session that has one of each artifact type."""
+
+    def _setup(
+        self,
+        mock_settings,
+        mock_ot_filter,
+        mock_sp_filter,
+        mock_co_filter,
+        mock_os_filter,
+        mock_zipfile,
+        mock_remove,
+    ):
+        mock_settings.MEDIA_ROOT = "/media"
+
+        session = MagicMock()
+        mock_ot_filter.return_value = [session]
+
+        sp = _make_artifact_obj("solventprepcsv", "solventprep/sp1.csv")
+        co = _make_artifact_obj("ordercsv", "compoundorders/co1.csv")
+        ot = _make_artifact_obj("otscript", "otscripts/run1.py")
+
+        def related_side_effect(otsession_id=None):
+            return None  # overridden per-model below
+
+        mock_sp_filter.return_value = [sp]
+        mock_co_filter.return_value = [co]
+        mock_os_filter.return_value = [ot]
+
+        return mock_zipfile, mock_remove
+
+    def test_no_errors_on_success(self, *args):
+        self._setup(*args)
+        proto_obj = MagicMock()
+        z = ZipOTBatchProtocol(otbatchprotocolobj=proto_obj, batchtag="B1")
+        self.assertEqual(z.errors, [])
+
+    def test_zipfn_uses_batchtag(self, *args):
+        self._setup(*args)
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="X42")
+        self.assertEqual(z.zipfn, "batch-X42-protocol.zip")
+
+    def test_zip_write_called_three_times(self, *args):
+        mock_zipfile, _ = self._setup(*args)
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        # One artifact per type → 3 write calls
+        zip_instance = mock_zipfile.return_value.__enter__.return_value
+        self.assertEqual(zip_instance.write.call_count, 3)
+
+    def test_zip_arcnames_use_correct_subdirs(self, *args):
+        mock_zipfile, _ = self._setup(*args)
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        zip_instance = mock_zipfile.return_value.__enter__.return_value
+        arcnames = [c.kwargs["arcname"] for c in zip_instance.write.call_args_list]
+        self.assertIn("solventprep/sp1.csv", arcnames)
+        self.assertIn("compoundorders/co1.csv", arcnames)
+        self.assertIn("otscripts/run1.py", arcnames)
+
+    def test_zip_filenames_use_mediaroot(self, *args):
+        mock_zipfile, _ = self._setup(*args)
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        zip_instance = mock_zipfile.return_value.__enter__.return_value
+        filenames = [c.kwargs["filename"] for c in zip_instance.write.call_args_list]
+        for fn in filenames:
+            self.assertTrue(fn.startswith("/media/"))
+
+    def test_saves_zip_to_model(self, *args):
+        self._setup(*args)
+        proto_obj = MagicMock()
+        z = ZipOTBatchProtocol(otbatchprotocolobj=proto_obj, batchtag="B1")
+        proto_obj.zipfile.save.assert_called_once()
+        proto_obj.save.assert_called_once()
+
+    def test_deletes_tmp_zip(self, *args):
+        _, mock_remove = self._setup(*args)
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        mock_remove.assert_called_once_with("/media/tmp/batchprotocoltmp.zip")
+
+
+@patch("backend.tasks.os.remove")
+@patch("builtins.open", MagicMock())
+@patch("backend.tasks.ZipFile")
+@patch("backend.tasks.OTScript.objects.filter")
+@patch("backend.tasks.CompoundOrder.objects.filter")
+@patch("backend.tasks.SolventPrep.objects.filter")
+@patch("backend.tasks.OTSession.objects.filter")
+@patch("backend.tasks.settings")
+class TestZipOTBatchProtocolNoSessions(TestCase):
+    """When no OT sessions exist, zip is not created and a warning is logged."""
+
+    def test_records_warning_when_no_sessions(
+        self,
+        mock_settings,
+        mock_ot_filter,
+        mock_sp_filter,
+        mock_co_filter,
+        mock_os_filter,
+        mock_zipfile,
+        mock_remove,
+    ):
+        mock_settings.MEDIA_ROOT = "/media"
+        mock_ot_filter.return_value = []  # empty queryset
+
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        self.assertEqual(len(z.errors), 1)
+        self.assertIn("_get_ot_sessions", z.errors[0]["function"])
+
+    def test_no_zip_created_when_no_sessions(
+        self,
+        mock_settings,
+        mock_ot_filter,
+        mock_sp_filter,
+        mock_co_filter,
+        mock_os_filter,
+        mock_zipfile,
+        mock_remove,
+    ):
+        mock_settings.MEDIA_ROOT = "/media"
+        mock_ot_filter.return_value = []
+
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        mock_zipfile.assert_not_called()
+        mock_remove.assert_not_called()
+
+
+@patch("backend.tasks.os.remove")
+@patch("builtins.open", MagicMock())
+@patch("backend.tasks.ZipFile")
+@patch("backend.tasks.OTScript.objects.filter")
+@patch("backend.tasks.CompoundOrder.objects.filter")
+@patch("backend.tasks.SolventPrep.objects.filter")
+@patch("backend.tasks.OTSession.objects.filter")
+@patch("backend.tasks.settings")
+class TestZipOTBatchProtocolMissingArtifacts(TestCase):
+    """When some artifact types are missing, warnings are logged but
+    other artifacts still get zipped."""
+
+    def test_missing_solventprep_logs_warning(
+        self,
+        mock_settings,
+        mock_ot_filter,
+        mock_sp_filter,
+        mock_co_filter,
+        mock_os_filter,
+        mock_zipfile,
+        mock_remove,
+    ):
+        mock_settings.MEDIA_ROOT = "/media"
+        session = MagicMock()
+        mock_ot_filter.return_value = [session]
+        mock_sp_filter.return_value = []  # no solvent preps
+        mock_co_filter.return_value = [
+            _make_artifact_obj("ordercsv", "compoundorders/co1.csv")
+        ]
+        mock_os_filter.return_value = [
+            _make_artifact_obj("otscript", "otscripts/run1.py")
+        ]
+
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        warning_funcs = [e["function"] for e in z.errors]
+        self.assertTrue(
+            any("SolventPrep" in f for f in warning_funcs),
+            f"Expected SolventPrep warning, got: {warning_funcs}",
+        )
+        # Other two artifacts still written
+        zip_instance = mock_zipfile.return_value.__enter__.return_value
+        self.assertEqual(zip_instance.write.call_count, 2)
+
+    def test_all_artifacts_missing_logs_three_warnings(
+        self,
+        mock_settings,
+        mock_ot_filter,
+        mock_sp_filter,
+        mock_co_filter,
+        mock_os_filter,
+        mock_zipfile,
+        mock_remove,
+    ):
+        mock_settings.MEDIA_ROOT = "/media"
+        session = MagicMock()
+        mock_ot_filter.return_value = [session]
+        mock_sp_filter.return_value = []
+        mock_co_filter.return_value = []
+        mock_os_filter.return_value = []
+
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        self.assertEqual(len(z.errors), 3)
+        zip_instance = mock_zipfile.return_value.__enter__.return_value
+        zip_instance.write.assert_not_called()
+
+
+@patch("backend.tasks.os.remove")
+@patch("builtins.open", MagicMock())
+@patch("backend.tasks.ZipFile")
+@patch("backend.tasks.OTScript.objects.filter")
+@patch("backend.tasks.CompoundOrder.objects.filter")
+@patch("backend.tasks.SolventPrep.objects.filter")
+@patch("backend.tasks.OTSession.objects.filter")
+@patch("backend.tasks.settings")
+class TestZipOTBatchProtocolMultipleSessions(TestCase):
+    """Multiple OT sessions each contribute their own artifacts."""
+
+    def test_two_sessions_both_processed(
+        self,
+        mock_settings,
+        mock_ot_filter,
+        mock_sp_filter,
+        mock_co_filter,
+        mock_os_filter,
+        mock_zipfile,
+        mock_remove,
+    ):
+        mock_settings.MEDIA_ROOT = "/media"
+        s1, s2 = MagicMock(), MagicMock()
+        mock_ot_filter.return_value = [s1, s2]
+
+        # Only OTScript for each session; others empty
+        mock_sp_filter.return_value = []
+        mock_co_filter.return_value = []
+        ot1 = _make_artifact_obj("otscript", "otscripts/run1.py")
+        ot2 = _make_artifact_obj("otscript", "otscripts/run2.py")
+        mock_os_filter.side_effect = [[ot1], [ot2]]
+
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        zip_instance = mock_zipfile.return_value.__enter__.return_value
+        # 2 otscripts written (SolventPrep + CompoundOrder empty → warnings only)
+        self.assertEqual(zip_instance.write.call_count, 2)
+
+    def test_multiple_artifacts_per_type(
+        self,
+        mock_settings,
+        mock_ot_filter,
+        mock_sp_filter,
+        mock_co_filter,
+        mock_os_filter,
+        mock_zipfile,
+        mock_remove,
+    ):
+        mock_settings.MEDIA_ROOT = "/media"
+        session = MagicMock()
+        mock_ot_filter.return_value = [session]
+
+        sp1 = _make_artifact_obj("solventprepcsv", "solventprep/sp1.csv")
+        sp2 = _make_artifact_obj("solventprepcsv", "solventprep/sp2.csv")
+        mock_sp_filter.return_value = [sp1, sp2]
+        mock_co_filter.return_value = []
+        mock_os_filter.return_value = []
+
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        zip_instance = mock_zipfile.return_value.__enter__.return_value
+        # 2 solvent preps written
+        self.assertEqual(zip_instance.write.call_count, 2)
+
+
+@patch("backend.tasks.os.remove")
+@patch("builtins.open", MagicMock())
+@patch("backend.tasks.ZipFile")
+@patch("backend.tasks.OTScript.objects.filter")
+@patch("backend.tasks.CompoundOrder.objects.filter")
+@patch("backend.tasks.SolventPrep.objects.filter")
+@patch("backend.tasks.OTSession.objects.filter")
+@patch("backend.tasks.settings")
+class TestZipOTBatchProtocolAddWarning(TestCase):
+    """Test the add_warning method directly."""
+
+    def test_add_warning_appends_to_errors(
+        self,
+        mock_settings,
+        mock_ot_filter,
+        mock_sp_filter,
+        mock_co_filter,
+        mock_os_filter,
+        mock_zipfile,
+        mock_remove,
+    ):
+        mock_settings.MEDIA_ROOT = "/media"
+        mock_ot_filter.return_value = []  # triggers a warning via _get_ot_sessions
+
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        # Already has 1 warning from no sessions; add another manually
+        z.add_warning(function="test_func", errorwarning="test warning")
+        self.assertEqual(len(z.errors), 2)
+        self.assertEqual(z.errors[1]["function"], "test_func")
+        self.assertEqual(z.errors[1]["errorwarning"], "test warning")
+
+    def test_errors_is_falsy_when_no_warnings(
+        self,
+        mock_settings,
+        mock_ot_filter,
+        mock_sp_filter,
+        mock_co_filter,
+        mock_os_filter,
+        mock_zipfile,
+        mock_remove,
+    ):
+        """Validates the bug fix: empty errors list is falsy (was a truthy
+        dict before refactoring)."""
+        mock_settings.MEDIA_ROOT = "/media"
+        session = MagicMock()
+        mock_ot_filter.return_value = [session]
+        mock_sp_filter.return_value = [
+            _make_artifact_obj("solventprepcsv", "solventprep/sp1.csv")
+        ]
+        mock_co_filter.return_value = [
+            _make_artifact_obj("ordercsv", "compoundorders/co1.csv")
+        ]
+        mock_os_filter.return_value = [
+            _make_artifact_obj("otscript", "otscripts/run1.py")
+        ]
+
+        z = ZipOTBatchProtocol(otbatchprotocolobj=MagicMock(), batchtag="B1")
+        self.assertFalse(z.errors)  # [] is falsy
+        self.assertTrue(not z.errors)  # mirrors create_ot_script check

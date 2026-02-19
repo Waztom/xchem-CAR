@@ -2,6 +2,7 @@
 from __future__ import annotations
 from celery import shared_task, current_task
 from django.conf import settings
+from django.db import transaction
 import logging
 
 logger = logging.getLogger(__name__)
@@ -463,76 +464,77 @@ def upload_manifold_reaction(validate_output, fetch_pubchem=True):
     if not validated:
         return _handle_not_validated(validate_dict, project_info, csv_fp)
 
-    project_id = create_project_model(project_info)
-    project_info["project_id"] = project_id
+    with transaction.atomic():
+        project_id = create_project_model(project_info)
+        project_info["project_id"] = project_id
 
-    grouped_targets = uploaded_df.groupby("batch-tag")
-    for batchtag, group in grouped_targets:
-        batch_id = create_batch_model(
-            project_id=project_id,
-            batchtag=batchtag,
-        )
-        target_names = list(group["target-names"])
-        target_smiles = list(group["target-SMILES"])
-        target_concentrations = list(group["concentration-required-mM"])
-        target_volumes = list(group["amount-required-uL"])
-
-        # Manifold can do 10 smiles in one batch query
-        for i in range(0, len(target_smiles), 10):
-            target_names_10 = target_names[i : i + 10]
-            target_smiles_10 = target_smiles[i : i + 10]
-            target_concentrations_10 = target_concentrations[i : i + 10]
-            target_volumes_10 = target_volumes[i : i + 10]
-
-            retrosynthesis_results = get_manifold_retrosynthesis_batch(
-                smiles=target_smiles_10
+        grouped_targets = uploaded_df.groupby("batch-tag")
+        for batchtag, group in grouped_targets:
+            batch_id = create_batch_model(
+                project_id=project_id,
+                batchtag=batchtag,
             )
-            if "results" not in retrosynthesis_results:
-                continue
+            target_names = list(group["target-names"])
+            target_smiles = list(group["target-SMILES"])
+            target_concentrations = list(group["concentration-required-mM"])
+            target_volumes = list(group["amount-required-uL"])
 
-            for (
-                target_name,
-                target_smi,
-                target_concentration,
-                target_volume,
-                routeresult,
-            ) in zip(
-                target_names_10,
-                target_smiles_10,
-                target_concentrations_10,
-                target_volumes_10,
-                retrosynthesis_results["results"],
-            ):
-                if "routes" not in routeresult:
-                    continue
-                routes = routeresult["routes"]
-                if not routes:
-                    continue
+            # Manifold can do 10 smiles in one batch query
+            for i in range(0, len(target_smiles), 10):
+                target_names_10 = target_names[i : i + 10]
+                target_smiles_10 = target_smiles[i : i + 10]
+                target_concentrations_10 = target_concentrations[i : i + 10]
+                target_volumes_10 = target_volumes[i : i + 10]
 
-                target_id = create_target_model(
-                    batch_id=batch_id,
-                    name=target_name,
-                    smiles=target_smi,
-                    concentration=target_concentration,
-                    volume=target_volume,
+                retrosynthesis_results = get_manifold_retrosynthesis_batch(
+                    smiles=target_smiles_10
                 )
+                if "results" not in retrosynthesis_results:
+                    continue
 
-                # First route: building-block catalog entries
-                first_route = routes[0]
-                if first_route["molecules"][0]["isBuildingBlock"]:
-                    for catalog_entry in first_route["molecules"][0]["catalogEntries"]:
-                        create_catalog_entry_model(
-                            catalog_entry=catalog_entry,
-                            target_id=target_id,
-                        )
+                for (
+                    target_name,
+                    target_smi,
+                    target_concentration,
+                    target_volume,
+                    routeresult,
+                ) in zip(
+                    target_names_10,
+                    target_smiles_10,
+                    target_concentrations_10,
+                    target_volumes_10,
+                    retrosynthesis_results["results"],
+                ):
+                    if "routes" not in routeresult:
+                        continue
+                    routes = routeresult["routes"]
+                    if not routes:
+                        continue
 
-                # Remaining routes: reaction methods
-                for route in routes[1:]:
-                    _process_manifold_route_reactions(
-                        route=route,
-                        target_id=target_id,
-                        fetch_pubchem=fetch_pubchem,
+                    target_id = create_target_model(
+                        batch_id=batch_id,
+                        name=target_name,
+                        smiles=target_smi,
+                        concentration=target_concentration,
+                        volume=target_volume,
                     )
+
+                    # First route: building-block catalog entries
+                    first_route = routes[0]
+                    if first_route["molecules"][0]["isBuildingBlock"]:
+                        for catalog_entry in first_route["molecules"][0]["catalogEntries"]:
+                            create_catalog_entry_model(
+                                catalog_entry=catalog_entry,
+                                target_id=target_id,
+                            )
+
+                    # Remaining routes: reaction methods
+                    for route in routes[1:]:
+                        _process_manifold_route_reactions(
+                            route=route,
+                            target_id=target_id,
+                            fetch_pubchem=fetch_pubchem,
+                        )
 
     delete_tmp_file(csv_fp)
     return validate_dict, validated, project_info
@@ -558,219 +560,189 @@ def upload_combi_custom_reaction(validate_output, fetch_pubchem=True, fetch_cata
     )
 
 
-@shared_task
-def create_ot_script(batchids: list, protocol_name: str, custom_SM_files: dict = None):
-    """
-    Create otscripts and starting plates for a list of batch ids
+def _get_custom_sm_csv_path(custom_SM_files, batchid):
+    """Return the custom starting-material CSV path for *batchid*, or None."""
+    if custom_SM_files and str(batchid) in custom_SM_files:
+        return custom_SM_files[str(batchid)]
+    return None
+
+
+def _process_reaction_step_sessions(
+    reaction_ids,
+    reactionstep,
+    otbatchprotocolobj,
+    custom_sm_csv_path,
+    batchtag,
+):
+    """Shared logic for processing a single reaction step.
+
+    Groups the action sessions by sequence number and type, filters for
+    robot-driven sessions, and creates OT sessions for each group.
 
     Parameters
     ----------
-    batchids: list
-        list of batch ids to create otscripts for
-    protocol_name: str
-        name of the protocol to create
-    custom_SM_files: dict
-        dictionary of optional custom SM files to use for the protocol
-        Keys are batch IDs (as strings) and values are paths to CSV files
-        Format: {"batch_id": "path/to/csv"}
+    reaction_ids : list[int]
+        Reaction IDs to process for this step.
+    reactionstep : int
+        1-based reaction step number.
+    otbatchprotocolobj : OTBatchProtocol
+        The parent batch protocol object.
+    custom_sm_csv_path : str or None
+        Path to a custom starting-material CSV, if any.
+    batchtag : str or None
+        Batch tag for session naming.
+    """
+    actionsessionqueryset = get_action_session_query_set(
+        reaction_ids=reaction_ids
+    )
+    sessionnumbers = get_action_session_sequence_numbers(
+        actionsessionqueryset=actionsessionqueryset
+    )
+    grouped_sequences = get_grouped_action_session_sequences(
+        sessionnumbers=sessionnumbers,
+        actionsessionqueryset=actionsessionqueryset,
+    )
+    for group_action_session in grouped_sequences:
+        action_session_types = get_action_session_types(
+            actionsessionqueryset=group_action_session
+        )
+        grouped_types = get_grouped_action_session_types(
+            actionsessiontypes=action_session_types,
+            actionsessionqueryset=group_action_session,
+        )
+        for action_session_type_qs in grouped_types:
+            robot_qs = action_session_type_qs.filter(driver="robot")
+            if not robot_qs:
+                continue
+            create_multiple_ot_sessions(
+                reactionstep=reactionstep,
+                otbatchprotocolobj=otbatchprotocolobj,
+                actionsessionqueryset=robot_qs,
+                customSMcsvpath=custom_sm_csv_path,
+                batchtag=batchtag,
+            )
+
+
+@shared_task
+def create_ot_script(batchids: list, protocol_name: str, custom_SM_files: dict = None):
+    """Create OT scripts and starting plates for a list of batch IDs.
+
+    Parameters
+    ----------
+    batchids : list
+        Batch IDs to create OT scripts for.
+    protocol_name : str
+        Name of the protocol to create.
+    custom_SM_files : dict or None
+        Optional custom starting-material files keyed by batch ID (as str)
+        to CSV file path.  Format: ``{"batch_id": "path/to/csv"}``
     """
     task_summary = {}
-    otprojectobj = OTProject()
-    projectobj = Batch.objects.get(id=batchids[0]).project_id
-    otprojectobj.project_id = projectobj
-    otprojectobj.name = protocol_name
-    otprojectobj.save()
 
-    for batchid in batchids:
-        reactionqueryset = get_batch_reactions(batchid=batchid)
-        actionsessionqueryset = get_action_session_query_set(reaction_ids=reactionqueryset)
-        if not actionsessionqueryset:
-            for reactionobj in reactionqueryset:
-                reaction_id = reactionobj.id
-                reactionclass = reactionobj.reactionclass
-                reactionrecipe = reactionobj.recipe
-                target_id = reactionobj.method_id.target_id.id
-                reactant_pair_smiles = reactionobj.reactants.all().values_list(
-                    "smiles", flat=True
-                )
-                intramolecular_possible = get_recipe_intramolecular(
-                    reactionclass, reactionrecipe
-                )
+    with transaction.atomic():
+        otprojectobj = OTProject()
+        projectobj = Batch.objects.get(id=batchids[0]).project_id
+        otprojectobj.project_id = projectobj
+        otprojectobj.name = protocol_name
+        otprojectobj.save()
 
-                if intramolecular_possible and len(reactant_pair_smiles) == 1:
-                    intramolecular_possible = True
-                else:
-                    intramolecular_possible = False
+        for batchid in batchids:
+            reactionqueryset = get_batch_reactions(batchid=batchid)
+            actionsessionqueryset = get_action_session_query_set(
+                reaction_ids=reactionqueryset
+            )
 
-                CreateEncodedActionModels(
-                    reaction_class=reactionclass,
-                    recipe_name=reactionrecipe,
-                    intramolecular=intramolecular_possible,
-                    target_id=target_id,
-                    reaction_id=reaction_id,
-                    reactant_pair_smiles=list(reactant_pair_smiles),
-                )
+            # Ensure action models exist for every reaction in this batch
+            if not actionsessionqueryset:
+                for reactionobj in reactionqueryset:
+                    reactant_pair_smiles = list(
+                        reactionobj.reactants.all().values_list(
+                            "smiles", flat=True
+                        )
+                    )
+                    intramolecular = (
+                        get_recipe_intramolecular(
+                            reactionobj.reactionclass, reactionobj.recipe
+                        )
+                        and len(reactant_pair_smiles) == 1
+                    )
+                    CreateEncodedActionModels(
+                        reaction_class=reactionobj.reactionclass,
+                        recipe_name=reactionobj.recipe,
+                        intramolecular=intramolecular,
+                        target_id=reactionobj.method_id.target_id.id,
+                        reaction_id=reactionobj.id,
+                        reactant_pair_smiles=reactant_pair_smiles,
+                    )
 
-        batchtag = get_batch_tag(batchid=batchid)
-        otbatchprotocolqueryset = get_ot_batch_protocol_query_set(batch_id=batchid)
+            batchtag = get_batch_tag(batchid=batchid)
+            otbatchprotocolqueryset = get_ot_batch_protocol_query_set(
+                batch_id=batchid
+            )
 
-        if otbatchprotocolqueryset and otbatchprotocolqueryset[0].zipfile:
-            otbatchprotocolobj = otbatchprotocolqueryset[0]
-            otbatchprotocolobj.otproject_id = otprojectobj
-            otbatchprotocolobj.celery_taskid = current_task.request.id
-            otbatchprotocolobj.save()
-            task_summary[batchid] = True
-        else:
+            # Re-use an existing completed protocol if one exists
+            if otbatchprotocolqueryset and otbatchprotocolqueryset[0].zipfile:
+                otbatchprotocolobj = otbatchprotocolqueryset[0]
+                otbatchprotocolobj.otproject_id = otprojectobj
+                otbatchprotocolobj.celery_taskid = current_task.request.id
+                otbatchprotocolobj.save()
+                task_summary[batchid] = True
+                continue
+
+            # Create a fresh batch protocol
             otbatchprotocolobj = OTBatchProtocol()
             otbatchprotocolobj.batch_id = Batch.objects.get(id=batchid)
             otbatchprotocolobj.otproject_id = otprojectobj
             otbatchprotocolobj.celery_taskid = current_task.request.id
             otbatchprotocolobj.save()
-            maxreactionnumber = get_max_reaction_number(reactionqueryset=reactionqueryset)
-            groupedreactionquerysets = group_reactions(
-                reactionqueryset=reactionqueryset, maxreactionnumber=maxreactionnumber
+
+            custom_sm_csv_path = _get_custom_sm_csv_path(
+                custom_SM_files, batchid
             )
-            for index, groupreactionqueryset in enumerate(groupedreactionquerysets):
-                if index == 0:
-                    reaction_ids = [reaction.id for reaction in groupreactionqueryset]
-                    actionsessionqueryset = get_action_session_query_set(
-                        reaction_ids=reaction_ids
-                    )
-                    sessionnumbers = get_action_session_sequence_numbers(
-                        actionsessionqueryset=actionsessionqueryset
-                    )
-                    groupedactionsessionsequences = get_grouped_action_session_sequences(
-                        sessionnumbers=sessionnumbers,
-                        actionsessionqueryset=actionsessionqueryset,
-                    )
-                    for groupactionsession in groupedactionsessionsequences:
-                        actionsessiontypes = get_action_session_types(
-                            actionsessionqueryset=groupactionsession
-                        )
-                        groupedactionsessiontypes = get_grouped_action_session_types(
-                            actionsessiontypes=actionsessiontypes,
-                            actionsessionqueryset=groupactionsession,
-                        )
-                        for groupactionsessiontype in groupedactionsessiontypes:
-                            human_actionsessionqueryset = groupactionsessiontype.filter(
-                                driver="human"
-                            )
-                            robot_actionsessionqueryset = groupactionsessiontype.filter(
-                                driver="robot"
-                            )
-                            if human_actionsessionqueryset:
-                                pass
-                            if robot_actionsessionqueryset:
-                                actionsession_ids = (
-                                    robot_actionsessionqueryset.values_list(
-                                        "id", flat=True
-                                    )
-                                )
+            max_reaction_number = get_max_reaction_number(
+                reactionqueryset=reactionqueryset
+            )
+            grouped_reaction_querysets = group_reactions(
+                reactionqueryset=reactionqueryset,
+                maxreactionnumber=max_reaction_number,
+            )
 
-                                logger.info(
-                                    f"The custom starting material files are: {custom_SM_files}"
-                                )
-                                # Get custom starting material CSV path if it exists for this batch
-                                custom_sm_csv_path = None
-                                if custom_SM_files and str(batchid) in custom_SM_files:
-                                    custom_sm_csv_path = custom_SM_files[str(batchid)]
-                                    logger.info(
-                                        f"Using custom SMILES CSV for batch {batchid}: {custom_sm_csv_path}"
-                                    )
-
-                                # Create multiple sessions for reactions
-                                sessions = create_multiple_ot_sessions(
-                                    reactionstep=index + 1,
-                                    otbatchprotocolobj=otbatchprotocolobj,
-                                    actionsessionqueryset=robot_actionsessionqueryset,
-                                    customSMcsvpath=custom_sm_csv_path,
-                                    batchtag=batchtag,  # Pass batchtag
-                                )
-
-                if index > 0:
-                    groupreactiontodoqueryset = get_reactions_to_do(
-                        groupreactionqueryset=groupreactionqueryset
+            for step_index, step_reactions in enumerate(
+                grouped_reaction_querysets
+            ):
+                # For steps beyond the first, filter out reactions that
+                # failed QC — if none remain, stop processing further steps.
+                if step_index > 0:
+                    step_reactions = get_reactions_to_do(
+                        groupreactionqueryset=step_reactions
                     )
-                    if len(groupreactiontodoqueryset) == 0:
+                    if not step_reactions:
                         break
-                    else:
-                        reaction_ids = [
-                            reaction.id for reaction in groupreactiontodoqueryset
-                        ]
-                        actionsessionqueryset = get_action_session_query_set(
-                            reaction_ids=reaction_ids
-                        )
-                        sessionnumbers = get_action_session_sequence_numbers(
-                            actionsessionqueryset=actionsessionqueryset
-                        )
-                        groupedactionsessionsequences = (
-                            get_grouped_action_session_sequences(
-                                sessionnumbers=sessionnumbers,
-                                actionsessionqueryset=actionsessionqueryset,
-                            )
-                        )
-                        for groupactionsession in groupedactionsessionsequences:
-                            actionsessiontypes = get_action_session_types(
-                                actionsessionqueryset=groupactionsession
-                            )
-                            groupedactionsessiontypes = get_grouped_action_session_types(
-                                actionsessiontypes=actionsessiontypes,
-                                actionsessionqueryset=groupactionsession,
-                            )
-                            for groupactionsessiontype in groupedactionsessiontypes:
-                                human_actionsessionqueryset = (
-                                    groupactionsessiontype.filter(driver="human")
-                                )
-                                robot_actionsessionqueryset = (
-                                    groupactionsessiontype.filter(driver="robot")
-                                )
-                                if human_actionsessionqueryset:
-                                    pass
-                                if robot_actionsessionqueryset:
-                                    actionsession_ids = (
-                                        robot_actionsessionqueryset.values_list(
-                                            "id", flat=True
-                                        )
-                                    )
 
-                                    # Get custom starting material CSV path if it exists for this batch
-                                    custom_sm_csv_path = None
-                                    if (
-                                        custom_SM_files
-                                        and str(batchid) in custom_SM_files
-                                    ):
-                                        custom_sm_csv_path = custom_SM_files[
-                                            str(batchid)
-                                        ]
+                reaction_ids = [
+                    reaction.id for reaction in step_reactions
+                ]
+                _process_reaction_step_sessions(
+                    reaction_ids=reaction_ids,
+                    reactionstep=step_index + 1,
+                    otbatchprotocolobj=otbatchprotocolobj,
+                    custom_sm_csv_path=custom_sm_csv_path,
+                    batchtag=batchtag,
+                )
 
-                                    # Create multiple sessions for reactions
-                                    sessions = create_multiple_ot_sessions(
-                                        reactionstep=index + 1,
-                                        otbatchprotocolobj=otbatchprotocolobj,
-                                        actionsessionqueryset=robot_actionsessionqueryset,
-                                        customSMcsvpath=custom_sm_csv_path,
-                                        batchtag=batchtag,  # Pass batchtag
-                                    )
-
-            createZipOTBatchProtocol = ZipOTBatchProtocol(
+            zip_protocol = ZipOTBatchProtocol(
                 otbatchprotocolobj=otbatchprotocolobj, batchtag=batchtag
             )
+            task_summary[batchid] = not zip_protocol.errors
 
-            if createZipOTBatchProtocol.errors:
-                task_summary[batchid] = False
-            else:
-                task_summary[batchid] = True
-    else:
-        task_summary[batchid] = False
-
-    # Clean up temporary CSV files if they exist
+    # Clean up temporary CSV files outside the transaction
     if custom_SM_files:
         for filepath in custom_SM_files.values():
             try:
                 if os.path.exists(filepath):
                     os.remove(filepath)
             except Exception as e:
-                print(f"Error cleaning up file {filepath}: {str(e)}")
+                logger.warning(f"Error cleaning up file {filepath}: {e}")
 
     return task_summary, otprojectobj.id
 
@@ -941,170 +913,115 @@ def create_multiple_ot_sessions(
     return created_sessions
 
 
-class ZipOTBatchProtocol(object):
-    """
-    Creates a ZipBatchProtocol object for writing compound order csvs and otscripts
-    for a batch
+class ZipOTBatchProtocol:
+    """Creates a zip archive of compound orders, OT scripts, and solvent
+    preps for a batch protocol.
+
+    The zip is built during ``__init__``, written to the
+    ``OTBatchProtocol`` model's ``zipfile`` field, and the temp file is
+    cleaned up.  Any missing querysets are recorded in ``self.errors``.
     """
 
-    def __init__(self, otbatchprotocolobj: object, batchtag: str):
-        """
-        zipOTBatchProtocol constructor
-        Args:
-            otbatchprotocolobj (Django object): OT batch protocol object created for a batch
-            batchtag (str): Batch tag for naming zip file
-        """
-        self.errors = {"function": [], "errorwarning": []}
+    # (Model, file-field attribute name, zip subdirectory)
+    _ARTIFACT_TYPES = [
+        (SolventPrep, "solventprepcsv", "solventprep"),
+        (CompoundOrder, "ordercsv", "compoundorders"),
+        (OTScript, "otscript", "otscripts"),
+    ]
+
+    def __init__(self, otbatchprotocolobj, batchtag: str):
+        self.errors = []
         self.otbatchprotocolobj = otbatchprotocolobj
         self.mediaroot = settings.MEDIA_ROOT
-        self.otsessionqueryset = self.getOTSessionQuerySet()
-        self.zipfn = "batch-{}-protocol.zip".format(batchtag)
-        self.ziptmpfp = os.path.join(settings.MEDIA_ROOT, "tmp", "batchprotocoltmp.zip")
-        self.ziparchive = ZipFile(self.ziptmpfp, "w")
+        self.zipfn = f"batch-{batchtag}-protocol.zip"
+        self.ziptmpfp = os.path.join(
+            settings.MEDIA_ROOT, "tmp", "batchprotocoltmp.zip"
+        )
+        self._build_zip()
 
-        for otsession_obj in self.otsessionqueryset:
-            solventprepqueryset = self.getSolventPrepQuerySet(
-                otsessionobj=otsession_obj
-            )
-            compoundorderqueryset = self.getCompoundOrderQuerySet(
-                otsessionobj=otsession_obj
-            )
-            otscriptqueryset = self.getOTScriptQuerySet(otsessionobj=otsession_obj)
+    # ------------------------------------------------------------------
+    # Zip construction
+    # ------------------------------------------------------------------
 
-            if solventprepqueryset:
-                for solventprepobj in solventprepqueryset:
-                    filepath = self.getSolventPrepFilePath(
-                        solventprepobj=solventprepobj
+    def _build_zip(self):
+        """Orchestrate zip creation: query sessions, collect artifacts,
+        write to media, then clean up the temp file."""
+        ot_sessions = self._get_ot_sessions()
+        if not ot_sessions:
+            return
+
+        with ZipFile(self.ziptmpfp, "w") as ziparchive:
+            for session in ot_sessions:
+                for model, file_field, dest_dir in self._ARTIFACT_TYPES:
+                    self._add_artifacts_to_zip(
+                        ziparchive, session, model, file_field, dest_dir
                     )
-                    destdir = "solventprep"
-                    self.writeZip(destdir=destdir, filepath=filepath)
 
-            if compoundorderqueryset:
-                for compoundorderobj in compoundorderqueryset:
-                    filepath = self.getCompoundOrderFilePath(
-                        compoundorderobj=compoundorderobj
-                    )
-                    destdir = "compoundorders"
-                    self.writeZip(destdir=destdir, filepath=filepath)
+        self._write_zip_to_media()
+        self._delete_tmp_zip()
 
-            if otscriptqueryset:
-                for otscriptobj in otscriptqueryset:
-                    filepath = self.getOTScriptFilePath(otscriptobj=otscriptobj)
-                    destdir = "otscripts"
-                    self.writeZip(destdir=destdir, filepath=filepath)
-
-        self.ziparchive.close()
-        self.writeZipToMedia()
-        self.deleteTmpZip()
-
-    def addWarning(self, function: str, errorwarning: str):
-        self.errors["function"].append(function)
-        self.errors["errorwarning"].append(errorwarning)
-
-    def getOTSessionQuerySet(self):
-        """Retrieve OTSession model queryset"""
-        otsessionqueryset = OTSession.objects.filter(
-            otbatchprotocol_id=self.otbatchprotocolobj
+    def add_warning(self, function: str, errorwarning: str):
+        """Record a warning/error encountered during zip construction."""
+        self.errors.append(
+            {"function": function, "errorwarning": errorwarning}
         )
 
-        if not otsessionqueryset:
-            self.addWarning(
-                function=self.getOTSessionQuerySet.__name__,
-                errorwarning="No queryset found",
-            )
-        else:
-            return otsessionqueryset
+    # ------------------------------------------------------------------
+    # Queryset helpers
+    # ------------------------------------------------------------------
 
-    def getSolventPrepQuerySet(self, otsessionobj: object):
-        """Retrieve SolventPrep model queryset
-        Args:
-            otsessionobj (Django obj): OTSession Django object
-        """
-        solventprepqueryset = SolventPrep.objects.filter(otsession_id=otsessionobj)
-
-        if not solventprepqueryset:
-            self.addWarning(
-                function=self.getSolventPrepQuerySet.__name__,
+    def _get_ot_sessions(self):
+        """Return the OTSession queryset for the batch protocol, or
+        ``None`` if no sessions exist (records a warning)."""
+        qs = OTSession.objects.filter(
+            otbatchprotocol_id=self.otbatchprotocolobj
+        )
+        if not qs:
+            self.add_warning(
+                function="_get_ot_sessions",
                 errorwarning="No queryset found",
             )
             return None
-        else:
-            return solventprepqueryset
+        return qs
 
-    def getCompoundOrderQuerySet(self, otsessionobj: object):
-        """Retrieve CompoundOrder model queryset
-        Args:
-            otsessionobj (Django obj): OTSession Django object
-        """
-        compoundorderqueryset = CompoundOrder.objects.filter(otsession_id=otsessionobj)
-
-        if not compoundorderqueryset:
-            self.addWarning(
-                function=self.getCompoundOrderQuerySet.__name__,
+    def _get_related_queryset(self, model, session):
+        """Return the queryset for *model* filtered to *session*, or
+        ``None`` if empty (records a warning)."""
+        qs = model.objects.filter(otsession_id=session)
+        if not qs:
+            self.add_warning(
+                function=f"_get_related_queryset({model.__name__})",
                 errorwarning="No queryset found",
             )
-        else:
-            return compoundorderqueryset
+            return None
+        return qs
 
-    def getOTScriptQuerySet(self, otsessionobj: object):
-        """Retrieve OTScript model queryset
-        Args:
-            otsessionobj (Django obj): OTScript Django object
-        """
-        otscriptqueryset = OTScript.objects.filter(otsession_id=otsessionobj)
+    # ------------------------------------------------------------------
+    # Zip I/O
+    # ------------------------------------------------------------------
 
-        if not otscriptqueryset:
-            self.addWarning(
-                function=self.getOTScriptQuerySet.__name__,
-                errorwarning="No queryset found",
+    def _add_artifacts_to_zip(
+        self, ziparchive, session, model, file_field, dest_dir
+    ):
+        """Add all artifacts of a given type from *session* to the zip."""
+        qs = self._get_related_queryset(model, session)
+        if not qs:
+            return
+        for obj in qs:
+            filepath = os.path.join(
+                self.mediaroot, getattr(obj, file_field).name
             )
-        else:
-            return otscriptqueryset
+            arcname = os.path.join(dest_dir, os.path.basename(filepath))
+            ziparchive.write(filename=filepath, arcname=arcname)
 
-    def getSolventPrepFilePath(self, solventprepobj: object):
-        """Retrieve SolventPrep csv file path
-        Args:
-            solventprepobj (Django obj): SolventPrep Django object
-        """
-        filepath = os.path.join(self.mediaroot, solventprepobj.solventprepcsv.name)
-        return filepath
+    def _write_zip_to_media(self):
+        """Persist the zip archive to the OTBatchProtocol model."""
+        with open(self.ziptmpfp, "rb") as zf:
+            self.otbatchprotocolobj.zipfile.save(self.zipfn, zf)
+            self.otbatchprotocolobj.save()
 
-    def getCompoundOrderFilePath(self, compoundorderobj: object):
-        """Retrieve CompoundOrder csv file path
-        Args:
-            compoundorderobj (Django obj): OTSession Django object
-        """
-        filepath = os.path.join(self.mediaroot, compoundorderobj.ordercsv.name)
-        return filepath
-
-    def getOTScriptFilePath(self, otscriptobj: object):
-        """Retrieve OTScript Python file path
-        Args:
-            otscriptobj (Django obj): OTScript Django object
-        """
-        filepath = os.path.join(self.mediaroot, otscriptobj.otscript.name)
-        return filepath
-
-    def writeZip(self, destdir: str, filepath: str):
-        """Add the requested file to the zip archive.
-
-        Args:
-            destdir (str): directory to write file to in ziparchive
-            filepath (str): filepath from record
-        """
-        arcname = os.path.join(destdir, filepath.split("/")[-1])
-        self.ziparchive.write(filename=filepath, arcname=arcname)
-
-    def writeZipToMedia(self):
-        """Write the ziparchive to medida for the
-        OTBatchProtocol Django object
-        """
-        zf = open(self.ziptmpfp, "rb")
-        self.otbatchprotocolobj.zipfile.save(self.zipfn, zf)
-        self.otbatchprotocolobj.save()
-
-    def deleteTmpZip(self):
-        """ "Delete the temporary zip archive created by ZipFile"""
+    def _delete_tmp_zip(self):
+        """Remove the temporary zip file."""
         os.remove(self.ziptmpfp)
 
 
