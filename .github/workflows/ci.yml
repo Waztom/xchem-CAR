@@ -70,6 +70,11 @@ jobs:
           POSTGRES_PORT: "5432"
           CELERY_BROKER_URL: redis://localhost:6379/0
           CELERY_RESULT_BACKEND: redis://localhost:6379/0
+          # API keys required at module import time (not actually called in tests)
+          MANIFOLD_API_KEY: dummy
+          ENAMINE_REAL_TOOLS_API_KEY: dummy
+          IBM_API_KEY: dummy
+          MCULE_API_KEY: dummy
         run: |
           mkdir -p logs && touch logs/logfile.log
           python3 -m django test backend.tests.test_chem_utils \
@@ -139,6 +144,11 @@ jobs:
           POSTGRES_PORT: "5432"
           CELERY_BROKER_URL: redis://localhost:6379/0
           CELERY_RESULT_BACKEND: redis://localhost:6379/0
+          # API keys required at module import time (not actually called in tests)
+          MANIFOLD_API_KEY: dummy
+          ENAMINE_REAL_TOOLS_API_KEY: dummy
+          IBM_API_KEY: dummy
+          MCULE_API_KEY: dummy
         run: |
           mkdir -p logs && touch logs/logfile.log
           python3 -m django test backend.tests.test_api \
