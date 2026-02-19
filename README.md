@@ -1,3 +1,14 @@
+[![CI](https://github.com/Waztom/xchem-CAR/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Waztom/xchem-CAR/actions/workflows/ci.yml)
+
+[![Docker Hub](https://img.shields.io/docker/v/waztom/xchem-car?label=Docker%20Hub&logo=docker&sort=date)](https://hub.docker.com/r/waztom/xchem-car)
+[![Docker Pulls](https://img.shields.io/docker/pulls/waztom/xchem-car?logo=docker)](https://hub.docker.com/r/waztom/xchem-car)
+[![Docker Image Size](https://img.shields.io/docker/image-size/waztom/xchem-car?sort=date&logo=docker)](https://hub.docker.com/r/waztom/xchem-car)
+
+[![Python 3.9](https://img.shields.io/badge/python-3.9-blue?logo=python&logoColor=white)](https://python.org)
+[![Django 3.1](https://img.shields.io/badge/django-3.1-green?logo=django&logoColor=white)](https://djangoproject.com)
+[![React 18](https://img.shields.io/badge/react-18-61DAFB?logo=react&logoColor=white)](https://react.dev)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
+
 # <a name="LocalDeploymentXChemCAR"></a>**Local deployment of XChem-CAR**
 #
 Instructions for downloading and running XChem-CAR locally,<br>
