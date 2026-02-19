@@ -104,8 +104,6 @@ from .serializers import (
 
 from .services.batch_service import (
     clone_batch,
-    clone_target,
-    clone_method,
     mark_reactions_failed,
 )
 from .services.chemistry_service import get_ot_batch_product_smiles
@@ -122,8 +120,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
         fetchall = self.request.GET.get("fetchall", None)
         return ProjectSerializerAll if fetchall == "yes" else ProjectSerializer
 
-    @action(methods=["post"], detail=False)
-    def createproject(self, request, pk=None):
+    @action(methods=["post"], detail=False, url_path="createproject")
+    def create_project(self, request, pk=None):
         """Post method to create a new project
 
         Parameters
@@ -217,8 +215,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
         data = {"task_id": task.id}
         return JsonResponse(data=data)
 
-    @action(detail=False, methods=["get"])
-    def gettaskstatus(self, request, pk=None):
+    @action(detail=False, methods=["get"], url_path="gettaskstatus")
+    def get_task_status(self, request, pk=None):
         """Get method to get the Celery task status"""
         task_id = self.request.GET.get("task_id", None)
         if task_id:
@@ -281,7 +279,7 @@ class BatchViewSet(viewsets.ModelViewSet):
         fetchall = self.request.GET.get("fetchall", None)
         return BatchSerializerAll if fetchall == "yes" else BatchSerializer
 
-    def createBatch(
+    def create_batch(
         self, project_obj: Project, batch_node_obj: Batch, batchtag: str
     ) -> Batch:
         """Creates a batch object
@@ -334,8 +332,8 @@ class BatchViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return JsonResponse(data={"message": "Something went wrong", "error": e})
 
-    @action(methods=["post"], detail=False)
-    def canonicalizesmiles(self, request, pk=None):
+    @action(methods=["post"], detail=False, url_path="canonicalizesmiles")
+    def canonicalize_smiles(self, request, pk=None):
         """Post method to canonicalise a list or csv file of SMILES"""
         # check_services()
         if request.POST.get("smiles"):
@@ -350,8 +348,8 @@ class BatchViewSet(viewsets.ModelViewSet):
             data = {"task_id": task.id}
             return JsonResponse(data=data)
 
-    @action(detail=False, methods=["get"])
-    def gettaskstatus(self, request, pk=None):
+    @action(detail=False, methods=["get"], url_path="gettaskstatus")
+    def get_task_status(self, request, pk=None):
         """Get method to check the Celery task status of the the
         SMILES being canonicalised
         """
@@ -382,8 +380,8 @@ class BatchViewSet(viewsets.ModelViewSet):
                 data = {"task_status": task.status}
                 return JsonResponse(data)
 
-    @action(methods=["post"], detail=False)
-    def updatereactionsuccess(self, request, pk=None):
+    @action(methods=["post"], detail=False, url_path="updatereactionsuccess")
+    def update_reaction_success(self, request, pk=None):
         """Updates reactions to be set to be unsuccessful"""
         if request.POST.get("reaction_ids"):
             reaction_ids = request.POST.getlist("reaction_ids")
@@ -487,8 +485,8 @@ class OTProjectViewSet(viewsets.ModelViewSet):
     serializer_class = OTProjectSerializer
     filterset_fields = ["project_id"]
 
-    @action(methods=["post"], detail=False)
-    def createotproject(self, request, pk=None):
+    @action(methods=["post"], detail=False, url_path="createotproject")
+    def create_ot_project(self, request, pk=None):
         """Post method to create an OT project.
 
         Parses the request, extracts batch IDs, protocol name, and any
@@ -527,8 +525,8 @@ class OTProjectViewSet(viewsets.ModelViewSet):
 
         return JsonResponse(data={"task_id": task_id})
 
-    @action(detail=False, methods=["get"])
-    def gettaskstatus(self, request, pk=None):
+    @action(detail=False, methods=["get"], url_path="gettaskstatus")
+    def get_task_status(self, request, pk=None):
         """Get method for getting the OT project celery task status"""
         task_id = self.request.GET.get("task_id", None)
         if task_id:

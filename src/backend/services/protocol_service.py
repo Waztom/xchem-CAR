@@ -4,7 +4,7 @@ Handles OT project creation orchestration — parsing custom
 starting-material files, saving them to temp storage, and dispatching
 the ``create_ot_script`` Celery task.
 
-Extracted from ``OTProjectViewSet.createotproject`` so the ViewSet
+Extracted from ``OTProjectViewSet.create_ot_project`` so the ViewSet
 does only request parsing and JSON response assembly.
 """
 from __future__ import annotations
@@ -85,7 +85,7 @@ def initiate_ot_project(
 def poll_task_status(task_id: str) -> dict:
     """Check the status of a Celery task and return a JSON-serialisable dict.
 
-    This is a shared helper for the ``gettaskstatus`` endpoints on
+    This is a shared helper for the ``get_task_status`` endpoints on
     ``ProjectViewSet``, ``BatchViewSet``, and ``OTProjectViewSet``.
 
     Parameters
