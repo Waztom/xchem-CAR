@@ -725,31 +725,37 @@ def combi_chem(
         between reactat 1 and reactant two lists
         as a list of tuples
     """
-    if len(reactant_1_SMILES) == 0:
-        reactant_2_SMILES_canon = [canon_smiles(smi) for smi in reactant_2_SMILES]
-        if not are_product_SMILES:
-            reactant_2_SMILES_canon = list(dict.fromkeys(reactant_2_SMILES_canon))
-        all_possible_combinations = list(
-            itertools.product([""], reactant_2_SMILES_canon)
-        )
-    if len(reactant_2_SMILES) == 0:
-        reactant_1_SMILES_canon = [canon_smiles(smi) for smi in reactant_1_SMILES]
-        if not are_product_SMILES:
-            reactant_1_SMILES_canon = list(dict.fromkeys(reactant_1_SMILES_canon))
-        all_possible_combinations = list(
-            itertools.product([""], reactant_1_SMILES_canon)
-        )
-    if len(reactant_1_SMILES) != 0 and len(reactant_2_SMILES) != 0:
-        reactant_1_SMILES_canon = [canon_smiles(smi) for smi in reactant_1_SMILES]
-        reactant_2_SMILES_canon = [canon_smiles(smi) for smi in reactant_2_SMILES]
-        if not are_product_SMILES:
-            reactant_2_SMILES_canon = list(dict.fromkeys(reactant_2_SMILES_canon))
-        all_possible_combinations = list(
-            itertools.product(
-                list(dict.fromkeys(reactant_1_SMILES_canon)), reactant_2_SMILES_canon
+    try:
+        if len(reactant_1_SMILES) == 0:
+            reactant_2_SMILES_canon = [canon_smiles(smi) for smi in reactant_2_SMILES]
+            if not are_product_SMILES:
+                reactant_2_SMILES_canon = list(dict.fromkeys(reactant_2_SMILES_canon))
+            all_possible_combinations = list(
+                itertools.product([""], reactant_2_SMILES_canon)
             )
-        )
-    return all_possible_combinations
+        if len(reactant_2_SMILES) == 0:
+            reactant_1_SMILES_canon = [canon_smiles(smi) for smi in reactant_1_SMILES]
+            if not are_product_SMILES:
+                reactant_1_SMILES_canon = list(dict.fromkeys(reactant_1_SMILES_canon))
+            all_possible_combinations = list(
+                itertools.product([""], reactant_1_SMILES_canon)
+            )
+        if len(reactant_1_SMILES) != 0 and len(reactant_2_SMILES) != 0:
+            reactant_1_SMILES_canon = [canon_smiles(smi) for smi in reactant_1_SMILES]
+            reactant_2_SMILES_canon = [canon_smiles(smi) for smi in reactant_2_SMILES]
+            if not are_product_SMILES:
+                reactant_2_SMILES_canon = list(dict.fromkeys(reactant_2_SMILES_canon))
+            all_possible_combinations = list(
+                itertools.product(
+                    list(dict.fromkeys(reactant_1_SMILES_canon)), reactant_2_SMILES_canon
+                )
+            )
+        return all_possible_combinations
+    except Exception as e:
+        raise ChemistryError(
+            f"Failed to compute combinatorial chemistry combinations for "
+            f"reactant lists '{reactant_1_SMILES}' and '{reactant_2_SMILES}'"
+        ) from e    
 
 
 def create_combi_chem_csv(csv_input_file: str, out_dir: str):
