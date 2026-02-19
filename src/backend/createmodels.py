@@ -33,29 +33,30 @@ from .models import (
     StirAction,
 )
 
-from .utils import (
-    getProduct,
-    getProductSmiles,
-    canonSmiles,
-    calculateMassFromMols,
-    checkProceedingReactions,
-    calculateMolsFromConc,
-    calculateMassFromMols,
-    createSVGString,
-    createReactionSVGString,
-    getPubChemCAS,
-    getPubChemCompound,
-    getReactionYields,
-    getInchiKey,
-    matchSMARTS,
+from .db_utils import (
+    get_product,
+    get_product_smiles,
+    check_proceeding_reactions,
+    get_reaction_yields,
 )
+from .chem_utils import (
+    canon_smiles,
+    create_svg_string,
+    create_reaction_svg_string,
+    get_inchi_key,
+    match_smarts,
+)
+from .conversions import calculate_mols_from_conc, calculate_mass_from_mols
+from .pubchem_utils import get_pubchem_cas, get_pubchem_compound
+
+from .exceptions import ModelCreationError, ActionModelError
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def createProjectModel(project_info: dict) -> Tuple[int, str]:
+def create_project_model(project_info: dict) -> Tuple[int, str]:
     """Creates a Django project object - a project model entry
 
     Parameters
@@ -79,7 +80,7 @@ def createProjectModel(project_info: dict) -> Tuple[int, str]:
     return project.id
 
 
-def createBatchModel(project_id: int, batchtag: str, batch_id: int = None) -> int:
+def create_batch_model(project_id: int, batchtag: str, batch_id: int = None) -> int:
     """Creates a Django batch object - a batch of target compounds model entry
 
     Parameters
@@ -108,7 +109,7 @@ def createBatchModel(project_id: int, batchtag: str, batch_id: int = None) -> in
     return batch.id
 
 
-def createTargetModel(
+def create_target_model(
     batch_id: int, name: str, smiles: str, concentration: float, volume: float
 ) -> int:
     """Creates a Django target object - a target compound model entry
@@ -134,17 +135,17 @@ def createTargetModel(
     target = Target()
     batch_obj = Batch.objects.get(id=batch_id)
     target.batch_id = batch_obj
-    target.smiles = canonSmiles(smiles=smiles)
-    mols = calculateMolsFromConc(
+    target.smiles = canon_smiles(smiles=smiles)
+    mols = calculate_mols_from_conc(
         target_concentration=concentration, target_volume=volume
     )
-    mass = calculateMassFromMols(mols=mols, SMILES=smiles)
+    mass = calculate_mass_from_mols(mols=mols, SMILES=smiles)
     target.mols = mols
     target.concentration = concentration
     target.volume = volume
     target.mass = mass
     target.name = str(name)
-    target_svg_string = createSVGString(smiles)
+    target_svg_string = create_svg_string(smiles)
     target_svg_fn = default_storage.save(
         "targetimages/" + target.name + ".svg", ContentFile(target_svg_string)
     )
@@ -153,7 +154,7 @@ def createTargetModel(
     return target.id
 
 
-def createMethodModel(target_id: int, nosteps: int, otchem: bool) -> int:
+def create_method_model(target_id: int, nosteps: int, otchem: bool) -> int:
     """Creates a Django method object - a method is a collection of reactions
        for a target compound
 
@@ -181,7 +182,7 @@ def createMethodModel(target_id: int, nosteps: int, otchem: bool) -> int:
     return method.id
 
 
-def createReactionModel(
+def create_reaction_model(
     method_id: int,
     reaction_class: str,
     reaction_number: int,
@@ -228,7 +229,7 @@ def createReactionModel(
     if reaction_recipe:
         reaction.recipe = reaction_recipe
     reaction.groupbycolumn = groupby_column
-    reaction_svg_string = createReactionSVGString(reaction_smarts)
+    reaction_svg_string = create_reaction_svg_string(reaction_smarts)
     reaction_svg_fn = default_storage.save(
         "reactionimages/" + reaction_class + ".svg", ContentFile(reaction_svg_string)
     )
@@ -238,7 +239,7 @@ def createReactionModel(
     return reaction.id
 
 
-def createPubChemInfoModel(compoundid: int, smiles: str, cas: str = None) -> object:
+def create_pubchem_info_model(compoundid: int, smiles: str, cas: str = None) -> object:
     """Creates a Django pubcheminfo object - the PubChem info captured for a
     compound
 
@@ -257,7 +258,7 @@ def createPubChemInfoModel(compoundid: int, smiles: str, cas: str = None) -> obj
         The PubChem model object created
     """
     pubcheminfo = PubChemInfo()
-    pubcheminfo.smiles = canonSmiles(smiles=smiles)
+    pubcheminfo.smiles = canon_smiles(smiles=smiles)
     if cas:
         pubcheminfo.cas = cas
     pubcheminfo.compoundid = compoundid
@@ -271,7 +272,7 @@ def createPubChemInfoModel(compoundid: int, smiles: str, cas: str = None) -> obj
     return pubcheminfo
 
 
-def getPubChemInfo(smiles: str) -> object:
+def get_pubchem_info(smiles: str) -> object:
     """Searches if Django PubChemInfo object exists for smiles. If not checks if
     an entry exists on PuBChem and if it does, creates a PubChemInfo model object
 
@@ -288,23 +289,23 @@ def getPubChemInfo(smiles: str) -> object:
         Returns False if no Django PubChemInfo model instance found or
         PubChem DB entry found for the compound
     """
-    smiles = canonSmiles(smiles=smiles)
+    smiles = canon_smiles(smiles=smiles)
     pubcheminfoqueryset = PubChemInfo.objects.filter(smiles=smiles)
     if pubcheminfoqueryset:
         pubcheminfo = pubcheminfoqueryset[0]
         return pubcheminfo
     else:
-        inchikey = getInchiKey(smiles=smiles)
-        compound = getPubChemCompound(inchikey=inchikey)
+        inchikey = get_inchi_key(smiles=smiles)
+        compound = get_pubchem_compound(inchikey=inchikey)
         if compound:
             compoundid = compound.cid
-            cas = getPubChemCAS(compound=compound)
+            cas = get_pubchem_cas(compound=compound)
             if cas:
-                pubcheminfo = createPubChemInfoModel(
+                pubcheminfo = create_pubchem_info_model(
                     compoundid=compoundid, smiles=smiles, cas=cas
                 )
             if not cas:
-                pubcheminfo = createPubChemInfoModel(
+                pubcheminfo = create_pubchem_info_model(
                     compoundid=compoundid, smiles=smiles
                 )
             return pubcheminfo
@@ -312,18 +313,20 @@ def getPubChemInfo(smiles: str) -> object:
             return False
 
 
-def createProductModel(reaction_id: int, product_smiles: str):
+def create_product_model(reaction_id: int, product_smiles: str, fetch_pubchem: bool = True):
     """Creates a Django product object - the product of a reaction"""
-    product_smiles = canonSmiles(smiles=product_smiles)
-    # pubcheminfoobj = getPubChemInfo(smiles=product_smiles)
+    product_smiles = canon_smiles(smiles=product_smiles)
     product = Product()
     reaction_obj = Reaction.objects.get(id=reaction_id)
     product.reaction_id = reaction_obj
     product.smiles = product_smiles
-    # if pubcheminfoobj:
-    #     product.pubcheminfo_id = pubcheminfoobj
+    
+    if fetch_pubchem:
+        pubcheminfoobj = get_pubchem_info(smiles=product_smiles)
+        if pubcheminfoobj:
+            product.pubcheminfo_id = pubcheminfoobj
 
-    product_svg_string = createSVGString(product_smiles)
+    product_svg_string = create_svg_string(product_smiles)
     product_svg_fn = default_storage.save(
         "productimages/product.svg", ContentFile(product_svg_string)
     )
@@ -331,8 +334,8 @@ def createProductModel(reaction_id: int, product_smiles: str):
     product.save()
 
 
-def createReactantModel(
-    reaction_id: int, reactant_smiles: str, previous_reaction_product: bool
+def create_reactant_model(
+    reaction_id: int, reactant_smiles: str, previous_reaction_product: bool, fetch_pubchem: bool = True
 ) -> int:
     """Creates a Django reactant object - the reactant in a reaction
 
@@ -346,25 +349,30 @@ def createReactantModel(
         If the reactant is the product from a previous reaction in the method. Used
         for later determining if reactant needs to be purchased vs is made in the
         synthesis
+    fetch_pubchem: bool
+        If True, fetch PubChem info for the reactant
 
     Returns
     -------
     reactant_id: int
         The id of the reactant model object created
     """
-    # pubcheminfoobj = getPubChemInfo(smiles=reactant_smiles)
     reactant = Reactant()
     reaction_obj = Reaction.objects.get(id=reaction_id)
     reactant.reaction_id = reaction_obj
     reactant.smiles = reactant_smiles
-    # if pubcheminfoobj:
-    #     reactant.pubcheminfo_id = pubcheminfoobj
+    
+    if fetch_pubchem:
+        pubcheminfoobj = get_pubchem_info(smiles=reactant_smiles)
+        if pubcheminfoobj:
+            reactant.pubcheminfo_id = pubcheminfoobj
+    
     reactant.previousreactionproduct = previous_reaction_product
     reactant.save()
     return reactant.id
 
 
-def createCatalogEntryModel(
+def create_catalog_entry_model(
     catalog_entry: dict = None,
     target_id: int = None,
     reactant_id: int = None,
@@ -472,93 +480,109 @@ def createCatalogEntryModel(
 
 class CreateEncodedActionModels(object):
     """
-    Creates a createEncodedActionModels object for creating action models
-    for a reaction
+    Creates runtime action models (ActionSession, AddAction, StirAction, etc.)
+    for a reaction by querying the Recipe DB directly.
+
+    Usage::
+
+        CreateEncodedActionModels(
+            reaction_class="Amidation",
+            recipe_name="standard",
+            intramolecular=False,
+            target_id=42,
+            reaction_id=99,
+            reactant_pair_smiles=["CCO", "CC(=O)O"],
+        )
+
+    Queries Recipe → RecipeActionSession → RecipeAddAction (etc.) models,
+    filtering reaction-session adds by molecular_context.
     """
 
     def __init__(
         self,
+        reaction_class: str,
+        recipe_name: str,
         intramolecular: bool,
-        actionsessions: dict,
         target_id: int,
         reaction_id: int,
         reactant_pair_smiles: list,
-        reaction_name: str,
     ):
-        """
-        CreateEncodedActionModels
+        """Construct runtime action models directly from Recipe DB.
+
+        Queries Recipe → RecipeActionSession → RecipeAddAction (etc.)
+        models, filtering reaction-session adds by:
+
+            WHERE molecular_context IS NULL
+               OR molecular_context = <'intramolecular'|'intermolecular'>
 
         Parameters
         ----------
-        intramolecular: bool
-            Set to true if the reaction is intramolecular
-        actionsessions: dict
-            The action (add, stir, analyse) actionsessions  for the execution of a synthesis
-        project_id: int
-            The Django project model object id
-        reaction_id: int
-            The Django reaction model object id
-        target_id: int
-            The Django target model object id that the reaction is related
-            to
-        reactant_pair_smiles: list
-            The reactant smiles used in the reatcion
-        reaction_name: str
-            The name of the reaction type
+        reaction_class : str
+            e.g. "Amidation"
+        recipe_name : str
+            e.g. "standard"
+        intramolecular : bool
+            Whether the specific reaction instance is intramolecular
+        target_id : int
+            Target model id
+        reaction_id : int
+            Reaction model id
+        reactant_pair_smiles : list
+            Reactant SMILES list
         """
+        from .recipe_utils import (
+            get_latest_recipe,
+            collect_session_actions,
+        )
+        from .models import (
+            RecipeAddAction,
+            RecipeStirAction,
+            RecipeExtractAction,
+            RecipeMixAction,
+        )
+
+        recipe = get_latest_recipe(reaction_class, recipe_name)
+        molecular_context = (
+            "intramolecular" if intramolecular else "intermolecular"
+        )
+
         self.intramolecular = intramolecular
         self.mculeapi = MCuleAPI()
-        self.actionsessions = actionsessions
         self.reaction_id = reaction_id
         self.reaction_obj = Reaction.objects.get(id=reaction_id)
-        self.reactant_pair_smiles = reactant_pair_smiles
-        self.reaction_name = reaction_name
-        self.product_obj = getProduct(reaction_id=reaction_id)
+        self.reactant_pair_smiles = list(reactant_pair_smiles)
+        self.used_reactant_indices = []
+        self.reaction_name = reaction_class
+        self.product_obj = get_product(reaction_id=reaction_id)
         self.target_obj = Target.objects.get(id=target_id)
         self.productmols = self.getProductMols()
-        self.productmass = calculateMassFromMols(
+        self.productmass = calculate_mass_from_mols(
             mols=self.productmols, SMILES=self.product_obj.smiles
         )
-        self.productsmiles = getProductSmiles(reaction_ids=[reaction_id])[0]
+        self.productsmiles = get_product_smiles(reaction_ids=[reaction_id])[0]
         self.mculeidlist = []
         self.amountslist = []
 
-        for actionsession in actionsessions:
-            actionsessiontype = actionsession["type"]
-            if "continuation" in actionsession:
-                continuation = actionsession["continuation"]
-            else:
-                continuation = False
+        for session in recipe.action_sessions.all().order_by("session_number"):
             actionsession_obj = self.createActionSessionModel(
-                actionsessiontype=actionsessiontype,
-                driver=actionsession["driver"],
-                sessionnumber=actionsession["sessionnumber"],
-                continuation=continuation,
+                actionsessiontype=session.session_type,
+                driver=session.driver,
+                sessionnumber=session.session_number,
+                continuation=session.continuation,
             )
-            if actionsessiontype == "reaction" and self.intramolecular:
-                reaction_actions = actionsession["intramolecular"]["actions"]
-                [
-                    self.createEncodedActionModel(
-                        actionsession_obj=actionsession_obj, action=action
-                    )
-                    for action in reaction_actions
-                ]
-            if actionsessiontype == "reaction" and not self.intramolecular:
-                reaction_actions = actionsession["intermolecular"]["actions"]
-                [
-                    self.createEncodedActionModel(
-                        actionsession_obj=actionsession_obj, action=action
-                    )
-                    for action in reaction_actions
-                ]
-            if actionsessiontype != "reaction":
-                actions = actionsession["actions"]
-                [
-                    self.createEncodedActionModel(
-                        actionsession_obj=actionsession_obj, action=action
-                    )
-                    for action in actions
-                ]
+
+            ctx = molecular_context if session.session_type == "reaction" else None
+            actions = collect_session_actions(session, ctx)
+
+            for action in actions:
+                if isinstance(action, RecipeAddAction):
+                    self.createAddActionModel(actionsession_obj, action)
+                elif isinstance(action, RecipeStirAction):
+                    self.createStirActionModel(actionsession_obj, action)
+                elif isinstance(action, RecipeExtractAction):
+                    self.createExtractActionModel(actionsession_obj, action)
+                elif isinstance(action, RecipeMixAction):
+                    self.createMixActionModel(actionsession_obj, action)
 
     def getProductMols(self):
         """Calculates mols fo product required based on reaction
@@ -569,7 +593,7 @@ class CreateEncodedActionModels(object):
         product_mols: float
             The product mols required
         """
-        proceedingreactionqueryset = checkProceedingReactions(
+        proceedingreactionqueryset = check_proceeding_reactions(
             reaction_id=self.reaction_obj.id
         )
 
@@ -580,13 +604,13 @@ class CreateEncodedActionModels(object):
             recipelist = [
                 reactionobj.recipe for reactionobj in proceedingreactionqueryset
             ] + [self.reaction_obj.recipe]
-            reactionyields = getReactionYields(
+            reactionyields = get_reaction_yields(
                 reactionclasslist=reactionclasslist, recipelist=recipelist
             )
             yieldcorrection = math.prod(reactionyields)
 
         if not proceedingreactionqueryset:
-            reactionyields = getReactionYields(
+            reactionyields = get_reaction_yields(
                 reactionclasslist=[self.reaction_name],
                 recipelist=[self.reaction_obj.recipe],
             )
@@ -594,34 +618,6 @@ class CreateEncodedActionModels(object):
 
         product_mols = self.target_obj.mols / yieldcorrection
         return product_mols
-
-    def createEncodedActionModel(self, actionsession_obj: ActionSession, action: dict):
-        """Calls the functions to create the appropriate Django action
-           model object for the action
-
-        Parameters
-        ----------
-        actionsession_obj: ActionSession
-            The type of action session being excuted
-        action: dict
-            The action that needs to be executed
-        """
-        actionMethods = {
-            "add": self.createAddActionModel,
-            "extract": self.createExtractActionModel,
-            "mix": self.createMixActionModel,
-            "stir": self.createStirActionModel,
-        }
-
-        action_type = action["type"]
-
-        if action_type in actionMethods:
-            actionMethods[action_type](
-                actionsession_obj=actionsession_obj, action=action
-            )
-            return True
-        else:
-            logger.info(action_type)
 
     def calculateMass(
         self,
@@ -651,7 +647,9 @@ class CreateEncodedActionModels(object):
                 mass_material = mol_material * reactant_MW * 1000
                 return mass_material
         except Exception as e:
-            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
+            raise ModelCreationError(
+                f"Failed to calculate mass (unit={calcunit}, value={calcvalue})"
+            ) from e
 
     def calculateVolume(
         self,
@@ -661,7 +659,7 @@ class CreateEncodedActionModels(object):
         reactant_density: float = None,
         reactant_MW: float = None,
     ) -> float:
-        """Calculates the reactant volume (ul) required for an add action step
+        """Calculates the reactant volume (uL) required for an add action step
 
         Parameters
         ----------
@@ -672,14 +670,14 @@ class CreateEncodedActionModels(object):
         conc_reagents: float
             The optional concentration of the reactant
         reactant_density: float
-            The optional density (g/ml) of the reactant
+            The optional density (g/mL) of the reactant
         reactant_MW: float
             The optional molecular weight (g/mol) of the reactant
 
         Returns
         -------
         vol_material: float
-            The volume (ul) of the material required for the add action step
+            The volume (uL) of the material required for the add action step
         """
         try:
             if calcunit == "masseq":
@@ -695,7 +693,9 @@ class CreateEncodedActionModels(object):
                     vol_material = (mol_material / conc_reagents) * 1e6  # in uL
                 return vol_material
         except Exception as e:
-            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
+            raise ModelCreationError(
+                f"Failed to calculate volume (unit={calcunit}, value={calcvalue})"
+            ) from e
 
     def createActionSessionModel(
         self,
@@ -731,87 +731,79 @@ class CreateEncodedActionModels(object):
             actionsession.save()
             return actionsession
         except Exception as e:
-            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
+            raise ModelCreationError(
+                f"Failed to create ActionSession (type={actionsessiontype})"
+            ) from e
 
-    def createAddActionModel(self, actionsession_obj: ActionSession, action: dict):
-        """Creates a Django add action object - an add action
+    def createAddActionModel(self, actionsession_obj: ActionSession, recipe_add):
+        """Create a runtime ``AddAction`` from a ``RecipeAddAction`` model.
 
         Parameters
         ----------
-        actionsession_obj: ActionSession
-            The type of action session being excuted
-        action: dict
-            The analyse action that needs to be executed
+        actionsession_obj : ActionSession
+            The runtime action session this add belongs to
+        recipe_add : RecipeAddAction
+            The recipe add action blueprint from the DB
         """
         try:
-            actionnumber = action["actionnumber"]
-            fromplatetype = action["content"]["plates"]["fromplatetype"]
-            toplatetype = action["content"]["plates"]["toplatetype"]
-            materialinfo = action["content"]["material"]
-            if materialinfo["SMARTS"]:
+            if recipe_add.material_smarts:
                 matches = [
-                    matchSMARTS(smiles=smi, smarts=materialinfo["SMARTS"])
+                    match_smarts(smiles=smi, smarts=recipe_add.material_smarts)
                     for smi in self.reactant_pair_smiles
                 ]
                 if not any(matches):
-                    print("No match found")
-                # if all(matches):
-                # smiles = self.reactant_pair_smiles[matches.index(True)]
-                if any(matches):
-                    smiles = self.reactant_pair_smiles[matches.index(True)]
-                # MUst fix this to match SMARTS with molecule vs just taking first reactant SMILES!!!!!!
-                # FIX!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                # Do not use reactant pair smiles here
-                # smiles = self.reactant_pair_smiles[0]
-                # del self.reactant_pair_smiles[0]
-            if materialinfo["SMILES"]:
-                smiles = canonSmiles(materialinfo["SMILES"])
-            if not materialinfo["SMILES"] and not materialinfo["SMARTS"]:
+                    logger.warning("No match found for SMARTS: {}".format(recipe_add.material_smarts))
+                    smiles = None
+                else:
+                    matching_indices = [i for i, match in enumerate(matches) if match]
+                    available_indices = [i for i in matching_indices if i not in self.used_reactant_indices]
+                    if available_indices:
+                        selected_index = available_indices[0]
+                    else:
+                        selected_index = matching_indices[0]
+                    smiles = self.reactant_pair_smiles[selected_index]
+                    self.used_reactant_indices.append(selected_index)
+            elif recipe_add.material_smiles:
+                smiles = canon_smiles(recipe_add.material_smiles)
+            else:
                 smiles = self.productsmiles
-            calcvalue = materialinfo["quantity"]["value"]
-            calcunit = materialinfo["quantity"]["unit"]
-            concentration = materialinfo["concentration"]
-            solvent = materialinfo["solvent"]
+
+            calcvalue = recipe_add.equivalents
+            calcunit = recipe_add.quantity_unit
+            concentration = recipe_add.concentration
+            solvent = recipe_add.solvent
             mol = Chem.MolFromSmiles(smiles)
             molecular_weight = Descriptors.MolWt(mol)
+
             add = AddAction()
             add.reaction_id = self.reaction_obj
             add.actionsession_id = actionsession_obj
-            add.number = actionnumber
-            add.fromplatetype = fromplatetype
-            add.toplatetype = toplatetype
+            add.number = recipe_add.action_number
+            add.from_plate_role = recipe_add.from_plate_role
+            add.from_plate_role_index = recipe_add.from_plate_role_index
+            add.to_plate_role = recipe_add.to_plate_role
+            add.to_plate_role_index = recipe_add.to_plate_role_index
             add.smiles = smiles
             add.molecularweight = molecular_weight
-            if calcunit == "ul":
+            if calcunit == "uL":
                 add.volume = calcvalue
                 add.solvent = solvent
             if calcunit == "masseq":
-                add.volume = self.calculateVolume(
-                    calcunit=calcunit,
-                    calcvalue=calcvalue,
-                )
+                add.volume = self.calculateVolume(calcunit=calcunit, calcvalue=calcvalue)
                 add.solvent = solvent
             if calcunit == "moleq":
                 if not solvent and not concentration:
-
                     add.mass = self.calculateMass(
-                        calcunit=calcunit,
-                        calcvalue=calcvalue,
-                        reactant_MW=molecular_weight,
+                        calcunit=calcunit, calcvalue=calcvalue, reactant_MW=molecular_weight,
                     )
-                if "density" in materialinfo:
-                    reactant_density = materialinfo["density"]
+                if recipe_add.density:
                     add.volume = self.calculateVolume(
-                        calcunit=calcunit,
-                        calcvalue=calcvalue,
-                        reactant_density=reactant_density,
-                        reactant_MW=molecular_weight,
+                        calcunit=calcunit, calcvalue=calcvalue,
+                        reactant_density=recipe_add.density, reactant_MW=molecular_weight,
                     )
                 if solvent:
                     add.volume = self.calculateVolume(
-                        calcunit=calcunit,
-                        calcvalue=calcvalue,
-                        conc_reagents=concentration,
+                        calcunit=calcunit, calcvalue=calcvalue, conc_reagents=concentration,
                     )
                     add.solvent = solvent
             if concentration:
@@ -819,133 +811,94 @@ class CreateEncodedActionModels(object):
             add.save()
 
         except Exception as e:
-            print(smiles)
-            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
+            raise ActionModelError(
+                f"Failed to create AddAction from recipe"
+            ) from e
 
-    def createExtractActionModel(self, actionsession_obj: ActionSession, action: dict):
-        """Creates a Django extract action object - an add action
+    def createExtractActionModel(self, actionsession_obj: ActionSession, recipe_ext):
+        """Create a runtime ``ExtractAction`` from a ``RecipeExtractAction`` model.
 
         Parameters
         ----------
-        actionsession_obj: ActionSession
-            The type of action session being excuted
-        action: dict
-            The analyse action that needs to be executed
+        actionsession_obj : ActionSession
+            The runtime action session this extract belongs to
+        recipe_ext : RecipeExtractAction
+            The recipe extract action blueprint from the DB
         """
         try:
-            actionnumber = action["actionnumber"]
-            fromplatetype = action["content"]["plates"]["fromplatetype"]
-            toplatetype = action["content"]["plates"]["toplatetype"]
-            materialinfo = action["content"]["material"]
-            calcvalue = materialinfo["quantity"]["value"]
-            calcunit = materialinfo["quantity"]["unit"]
-            concentration = materialinfo["concentration"]
-            if not concentration:
-                concentration = 0
-            solvent = materialinfo["solvent"]
             smiles = self.productsmiles
             mol = Chem.MolFromSmiles(smiles)
             molecular_weight = Descriptors.MolWt(mol)
+
             extract = ExtractAction()
             extract.reaction_id = self.reaction_obj
             extract.actionsession_id = actionsession_obj
-            extract.number = actionnumber
-            extract.fromplatetype = fromplatetype
-            extract.toplatetype = toplatetype
+            extract.number = recipe_ext.action_number
+            extract.from_plate_role = recipe_ext.from_plate_role
+            extract.from_plate_role_index = recipe_ext.from_plate_role_index
+            extract.to_plate_role = recipe_ext.to_plate_role
+            extract.to_plate_role_index = recipe_ext.to_plate_role_index
             extract.smiles = smiles
             extract.molecularweight = molecular_weight
-            if calcunit == "ul":
-                extract.volume = calcvalue
-                extract.solvent = solvent
-            if calcunit == "masseq":
-                extract.volume = self.calculateVolume(
-                    calcunit=calcunit,
-                    calcvalue=calcvalue,
-                )
-                extract.solvent = solvent
-            if calcunit == "moleq":
-                if not solvent:
-                    reactant_density = materialinfo["density"]
-                    extract.volume = self.calculateVolume(
-                        calcunit=calcunit,
-                        calcvalue=calcvalue,
-                        reactant_density=reactant_density,
-                        reactant_MW=molecular_weight,
-                    )
-                if solvent:
-                    extract.volume = self.calculateVolume(
-                        calcunit=calcunit,
-                        calcvalue=calcvalue,
-                        conc_reagents=concentration,
-                    )
-                    extract.solvent = solvent
-            if "bottomlayerquantity" in materialinfo:
-                bottomlayercalcvalue = materialinfo["bottomlayerquantity"]["value"]
-                bottomlayercalcunit = materialinfo["bottomlayerquantity"]["unit"]
-                extract.bottomlayervolume = self.calculateVolume(
-                    calcunit=bottomlayercalcunit,
-                    calcvalue=bottomlayercalcvalue,
-                )
-            extract.concentration = concentration
+            extract.volume = recipe_ext.volume
+            if recipe_ext.solvent:
+                extract.solvent = recipe_ext.solvent
+            if recipe_ext.bottom_layer_volume is not None:
+                extract.bottomlayervolume = recipe_ext.bottom_layer_volume
+            extract.concentration = recipe_ext.concentration or 0
             extract.save()
-
         except Exception as e:
-            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
+            raise ActionModelError(
+                f"Failed to create ExtractAction from recipe"
+            ) from e
 
-    def createMixActionModel(self, actionsession_obj: ActionSession, action: dict):
-        """Creates a Django mix action object - a mix action
+    def createMixActionModel(self, actionsession_obj: ActionSession, recipe_mix):
+        """Create a runtime ``MixAction`` from a ``RecipeMixAction`` model.
 
         Parameters
         ----------
-        actionsession_obj: ActionSession
-            The type of action session being excuted
-        action: dict
-            The analyse action that needs to be executed
+        actionsession_obj : ActionSession
+            The runtime action session this mix belongs to
+        recipe_mix : RecipeMixAction
+            The recipe mix action blueprint from the DB
         """
         try:
-            actionnumber = action["actionnumber"]
-            platetype = action["content"]["platetype"]
-            repetitions = action["content"]["repetitions"]["value"]
-
             mix = MixAction()
             mix.reaction_id = self.reaction_obj
             mix.actionsession_id = actionsession_obj
-            mix.number = actionnumber
-            mix.platetype = platetype
-            mix.repetitions = repetitions
+            mix.number = recipe_mix.action_number
+            mix.plate_role = recipe_mix.plate_role
+            mix.plate_role_index = recipe_mix.plate_role_index
+            mix.repetitions = recipe_mix.repetitions
             mix.save()
-
         except Exception as e:
-            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
+            raise ActionModelError(
+                f"Failed to create MixAction from recipe"
+            ) from e
 
-    def createStirActionModel(self, actionsession_obj: ActionSession, action: dict):
-        """Creates a Django stir action object - a stir action
+    def createStirActionModel(self, actionsession_obj: ActionSession, recipe_stir):
+        """Create a runtime ``StirAction`` from a ``RecipeStirAction`` model.
 
         Parameters
         ----------
-        actionsession_obj: ActionSession
-            The type of action session being excuted
-        action: dict
-            The analyse action that needs to be executed
+        actionsession_obj : ActionSession
+            The runtime action session this stir belongs to
+        recipe_stir : RecipeStirAction
+            The recipe stir action blueprint from the DB
         """
         try:
-            actionnumber = action["actionnumber"]
-            platetype = action["content"]["platetype"]
-            duration = action["content"]["duration"]["value"]
-            durationunit = action["content"]["duration"]["unit"]
-            temperature = action["content"]["temperature"]["value"]
-            temperatureunit = action["content"]["temperature"]["unit"]
-
             stir = StirAction()
             stir.reaction_id = self.reaction_obj
             stir.actionsession_id = actionsession_obj
-            stir.number = actionnumber
-            stir.platetype = platetype
-            stir.duration = duration
-            stir.durationunit = durationunit
-            stir.temperature = temperature
-            stir.temperatureunit = temperatureunit
+            stir.number = recipe_stir.action_number
+            stir.plate_role = recipe_stir.plate_role
+            stir.plate_role_index = recipe_stir.plate_role_index
+            stir.duration = recipe_stir.duration
+            stir.durationunit = recipe_stir.duration_unit
+            stir.temperature = recipe_stir.temperature
+            stir.temperatureunit = recipe_stir.temperature_unit
             stir.save()
-
         except Exception as e:
-            logger.info(inspect.stack()[0][3] + " yielded error: {}".format(e))
+            raise ActionModelError(
+                f"Failed to create StirAction from recipe"
+            ) from e

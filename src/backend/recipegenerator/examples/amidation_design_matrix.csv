@@ -1,0 +1,13 @@
+experiment_id,recipe_name,acid_solvent,acid_concentration,coupling_agent_equiv,base_equiv,amine_equiv,reaction_temperature,reaction_duration,order_preset,notes
+1,amidation-DMF-25C,DMF,0.5,1.2,3.5,1.1,25,12,default,Standard conditions
+2,amidation-DMA-25C,DMA,0.5,1.2,3.5,1.1,25,12,default,DMA solvent screen
+3,amidation-NMP-25C,NMP,0.5,1.2,3.5,1.1,25,12,default,NMP solvent screen
+4,amidation-DMSO-25C,DMSO,0.5,1.2,3.5,1.1,25,12,default,DMSO solvent screen
+5,amidation-DMF-40C,DMF,0.5,1.2,3.5,1.1,40,12,default,Elevated temperature
+6,amidation-DMF-60C,DMF,0.5,1.2,3.5,1.1,60,12,default,High temperature
+7,amidation-DMF-1.5eq,DMF,0.5,1.5,3.5,1.1,25,12,default,Higher coupling agent loading
+8,amidation-DMF-2.0eq,DMF,0.5,2.0,3.5,1.1,25,12,default,High coupling agent loading
+9,amidation-coupling-first,DMF,0.5,1.2,3.5,1.1,25,12,coupling_first,Alternative addition order
+10,amidation-base-first,DMF,0.5,1.2,3.5,1.1,25,12,base_first,Pre-charge base
+11,amidation-conc-0.25,DMF,0.25,1.2,3.5,1.1,25,12,default,Dilute conditions
+12,amidation-conc-1.0,DMF,1.0,1.2,3.5,1.1,25,12,default,Concentrated conditions

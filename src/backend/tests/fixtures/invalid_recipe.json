@@ -1,0 +1,34 @@
+{
+    "recipes": [
+        {
+            "name": "",
+            "ingredients": [],
+            "instructions": "",
+            "cooking_time": -10
+        },
+        {
+            "name": "Test Recipe",
+            "ingredients": [
+                {
+                    "name": "Flour",
+                    "quantity": -1,
+                    "unit": "grams"
+                }
+            ],
+            "instructions": "Mix ingredients.",
+            "cooking_time": 0
+        },
+        {
+            "name": "Another Invalid Recipe",
+            "ingredients": [
+                {
+                    "name": "Sugar",
+                    "quantity": 100,
+                    "unit": ""
+                }
+            ],
+            "instructions": "",
+            "cooking_time": 30
+        }
+    ]
+}

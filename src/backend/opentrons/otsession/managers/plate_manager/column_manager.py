@@ -96,7 +96,12 @@ class ColumnManager:
         plate_obj.save()
 
     def create_column_model(
-        self, plate_obj: Plate, columnindex: int, columntype: str, reactionclass: str
+        self,
+        plate_obj: Plate,
+        columnindex: int,
+        role: str,
+        role_index: int,
+        reactionclass: str,
     ) -> Column:
         """
         Creates a column object.
@@ -107,8 +112,10 @@ class ColumnManager:
             The plate that the column is linked to
         columnindex: int
             The index of the column in the plate
-        columntype: str
-            The type of plate the column is used on
+        role: str
+            The plate role (e.g., "reaction", "workup").
+        role_index: int
+            The plate role index.
         reactionclass: str
             The reaction class occupying the column
 
@@ -121,7 +128,8 @@ class ColumnManager:
         column_obj.otsession_id = self.session.otsessionobj
         column_obj.plate_id = plate_obj
         column_obj.index = columnindex
-        column_obj.type = columntype
+        column_obj.role = role
+        column_obj.role_index = role_index
         column_obj.reactionclass = reactionclass
         column_obj.save()
 

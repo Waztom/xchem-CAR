@@ -5,12 +5,8 @@ import inspect
 import pandas as pd
 from rdkit import Chem
 
-from .recipebuilder.encodedrecipes import encoded_recipes
-from .utils import (
-    getAddtionOrder,
-    checkReactantSMARTS,
-    combiChem,
-)
+from .recipe_utils import get_recipe_smarts
+from .chem_utils import check_reactant_smarts, combi_chem
 
 import logging
 
@@ -164,10 +160,6 @@ class ValidateFile(object):
                         reaction_recipes=reaction_recipes,
                         product_smiles=product_smiles,
                     )
-                    # print(
-                    #     "The reactant pair smiles ordered are: ",
-                    #     reactant_pair_smiles_ordered,
-                    # )
                     if reaction_number == max_no_steps:
                         self.target_smiles = self.target_smiles + product_smiles
                     reaction_info[
@@ -340,6 +332,8 @@ class ValidateFile(object):
                 self.concentrations = self.concentrations + concentrations
                 self.amounts = self.amounts + amounts
                 self.nosteps = self.nosteps + no_steps
+                product_smiles = []
+                number_reactant_pair_smiles = 0
                 for reaction_number in reaction_numbers_group:
                     reaction_combi_group_info = {}
                     if reaction_number == 1:
@@ -371,7 +365,7 @@ class ValidateFile(object):
                         reactant_2_SMILES = product_smiles[:number_reactant_pair_smiles]
                         are_product_SMILES = True
 
-                    reactant_pair_smiles = combiChem(
+                    reactant_pair_smiles = combi_chem(
                         reactant_1_SMILES=reactant_1_SMILES,
                         reactant_2_SMILES=reactant_2_SMILES,
                         are_product_SMILES=are_product_SMILES,
@@ -607,9 +601,7 @@ class ValidateFile(object):
             for index, (reactant_pair, reaction_name, reaction_recipe) in enumerate(
                 zip(reactant_pair_smiles, reaction_names, reaction_recipes)
             ):
-                smarts = encoded_recipes[reaction_name]["recipes"][reaction_recipe][
-                    "reactionSMARTS"
-                ]
+                smarts = get_recipe_smarts(reaction_name, reaction_recipe)
                 if not all(smarts):
                     print(
                         "Warning ignoring smarts pattern for reaction: ", reaction_name
@@ -619,7 +611,7 @@ class ValidateFile(object):
                     # reactant_pair_smiles_ordered.append(reactant_pair)
                     continue
 
-                product_mols = checkReactantSMARTS(
+                product_mols = check_reactant_smarts(
                     reactant_SMILES=reactant_pair, reaction_SMARTS=smarts
                 )
                 if not product_mols:
@@ -637,13 +629,7 @@ class ValidateFile(object):
                     else:
                         product_mol = product_mols[-1]
                     product_smi = Chem.MolToSmiles(product_mol)
-                    # reactant_smis = getAddtionOrder(
-                    #     product_smi=product_smi,
-                    #     reactant_SMILES=reactant_pair,
-                    #     reaction_SMARTS=smarts,
-                    # )
                     product_created_smiles.append(product_smi)
-                    # reactant_pair_smiles_ordered.append(reactant_smis)
             return product_created_smiles
 
         except Exception as e:

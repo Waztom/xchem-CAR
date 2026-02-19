@@ -2,7 +2,7 @@ from pycule import MCuleWrapper
 import os
 import inspect
 
-from ..utils import canonSmiles
+from ..chem_utils import canon_smiles
 
 import logging
 
@@ -49,7 +49,7 @@ class MCuleAPI(object):
                 )
                 results = response_dict["response"]["results"]
                 if results:
-                    smiles_test = canonSmiles(results[0]["smiles"])
+                    smiles_test = canon_smiles(results[0]["smiles"])
                     if smiles_test == smiles:
                         mculeid = results[0]["mcule_id"]
                         mculeurl = results[0]["url"]
@@ -102,7 +102,7 @@ class MCuleAPI(object):
             mculeids (list): List of MCule IDs
             amount (float): Amount per compound for quote
             delivery_country (str): ISO 3166-1 alpha-2 code of the delivery country. Default GB
-            target_volume (float): Total volume in ml requested. Default None
+            target_volume (float): Total volume in mL requested. Default None
             target_cc (float): Target concentration in mM. Default None
         Returns:
             quote (dict): MCule quote info as a dictionary

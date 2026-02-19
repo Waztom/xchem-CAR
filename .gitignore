@@ -6,12 +6,17 @@ wget-log
 
 # Ignore documentation files
 src/docs/*
-
+src/input-files/*
+src/output-files/*
 src/staticfiles/*
 src/media/*
 .idea/
 /Test_DB_files/*
 *.csv
+!src/backend/enamine/enamine-real-tools-rxns.csv
+!src/backend/recipe_generator/examples/*
+!src/backend/tests/fixtures/*
+
 # Ignore db files including Redis (rdb)
 *.db
 *.rdb
@@ -35,7 +40,8 @@ boilerplatenotes.txt
 src/logs/*
     
 # Django / React / Webpack stuff
-src/backend/migrations/*
+# TODO: Remove before production - migrations should be tracked
+# src/backend/migrations/*
 venv/*
 db.sqlite3
 *.pyc
@@ -92,3 +98,4 @@ docs/_templates/
 *.doctree
 *.pickle
 docs/generated/
+src/2026-02(feb)-19-CAR technical report.txt

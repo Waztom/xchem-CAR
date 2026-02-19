@@ -4,17 +4,16 @@ Manages data query, processing, and analysis for OpenTrons sessions.
 
 import logging
 import pandas as pd
-import numpy as np
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet, Q
 
 from ....models import AddAction, ExtractAction, Reaction, CompoundOrder
-from ....utils import (
-    getReactionTemperature,
-    getReactionClass,
-    getReactionRecipe,
-    getReactionQuerySet,
+from ....db_utils import (
+    get_reaction_temperature,
+    get_reaction_class,
+    get_reaction_recipe,
+    get_reaction_query_set,
 )
 
 logger = logging.getLogger(__name__)
@@ -292,11 +291,11 @@ class DataManager:
         for temp in unique_temps:
             reactions_at_temp = []
             for reaction in reactionqueryset:
-                if getReactionTemperature(reaction_id=reaction.id) == temp:
+                if get_reaction_temperature(reaction_id=reaction.id) == temp:
                     reactions_at_temp.append(reaction.id)
 
             if reactions_at_temp:
-                grouped_reactions[temp] = getReactionQuerySet(
+                grouped_reactions[temp] = get_reaction_query_set(
                     reaction_ids=reactions_at_temp
                 )
 
@@ -333,14 +332,14 @@ class DataManager:
 
                 for reaction in reactionqueryset:
                     if (
-                        getReactionClass(reaction_id=reaction.id) == reaction_class
-                        and getReactionRecipe(reaction_id=reaction.id) == recipe
+                        get_reaction_class(reaction_id=reaction.id) == reaction_class
+                        and get_reaction_recipe(reaction_id=reaction.id) == recipe
                     ):
                         reactions_in_group.append(reaction.id)
 
                 if reactions_in_group:
                     group_key = f"{reaction_class}-{recipe}"
-                    grouped_reactions[group_key] = getReactionQuerySet(
+                    grouped_reactions[group_key] = get_reaction_query_set(
                         reaction_ids=reactions_in_group
                     )
 
@@ -363,7 +362,7 @@ class DataManager:
         unique_temperatures = []
 
         for reaction in reactionqueryset:
-            temp = getReactionTemperature(reaction_id=reaction.id)
+            temp = get_reaction_temperature(reaction_id=reaction.id)
             if temp not in unique_temperatures:
                 unique_temperatures.append(temp)
 
@@ -386,7 +385,7 @@ class DataManager:
         unique_classes = []
 
         for reaction in reactionqueryset:
-            reaction_class = getReactionClass(reaction_id=reaction.id)
+            reaction_class = get_reaction_class(reaction_id=reaction.id)
             if reaction_class not in unique_classes:
                 unique_classes.append(reaction_class)
 
@@ -409,7 +408,7 @@ class DataManager:
         unique_recipes = []
 
         for reaction in reactionqueryset:
-            recipe = getReactionRecipe(reaction_id=reaction.id)
+            recipe = get_reaction_recipe(reaction_id=reaction.id)
             if recipe not in unique_recipes:
                 unique_recipes.append(recipe)
 
