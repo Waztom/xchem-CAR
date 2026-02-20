@@ -313,6 +313,23 @@ class WorkupSessionHandler(SessionHandler):
                 )
             )
 
+            # Record extraction in the ledger
+            self.script_generator.transfer_ledger.record(
+                action_type="extract",
+                source_plate_name=aspirate_plate_name,
+                source_plate_role=from_plate_role,
+                source_well_index=aspirate_well_index,
+                source_well_name=getattr(from_well_obj, "name", "") or "",
+                dest_plate_name=dispense_plate_name,
+                dest_plate_role=to_plate_role,
+                dest_well_index=dispense_well_index,
+                dest_well_name=getattr(to_well_obj, "name", "") or "",
+                volume=transfer_volume,
+                reaction_id=reaction_id,
+                reaction_class=reaction_obj.reactionclass,
+                recipe=reaction_obj.recipe,
+            )
+
             # Drop tip if this isn't the action before a mix step
             next_action_is_mix = (index + 1 < len(workup_actions)) and isinstance(
                 workup_actions[index + 1], RecipeMixAction

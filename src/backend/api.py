@@ -114,7 +114,7 @@ from .services.protocol_service import (
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
+    queryset = Project.objects.all().order_by("-init_date")
 
     def get_serializer_class(self):
         fetchall = self.request.GET.get("fetchall", None)

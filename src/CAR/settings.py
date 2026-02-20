@@ -150,11 +150,12 @@ STATIC_URL = "/static/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
 
-# Add search and pagination to all APIs
+# Add search filtering to all APIs
+# Note: Global pagination was removed because the frontend expects flat
+# arrays and does client-side sorting/filtering.  Add pagination_class to
+# individual ViewSets when a specific endpoint needs it.
 REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 50,
 }
 
 # Add logging

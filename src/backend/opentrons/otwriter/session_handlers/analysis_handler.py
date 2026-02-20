@@ -283,6 +283,23 @@ class AnalysisSessionHandler(SessionHandler):
                 )
             )
 
+            # Record analysis transfer in the ledger
+            self.script_generator.transfer_ledger.record(
+                action_type="analysis",
+                source_plate_name=aspirate_plate_name,
+                source_plate_role=from_plate_role,
+                source_well_index=aspirate_well_index,
+                source_well_name=getattr(from_well_obj, "name", "") or "",
+                dest_plate_name=dispense_plate_name,
+                dest_plate_role=to_plate_role,
+                dest_well_index=dispense_well_index,
+                dest_well_name=getattr(to_well_obj, "name", "") or "",
+                volume=transfer_volume,
+                reaction_id=reaction_id,
+                reaction_class=reaction_obj.reactionclass,
+                recipe=reaction_obj.recipe,
+            )
+
             # Add mix command if specified
             if add_action_obj.mix:
                 mix_repetitions = 3  # Standard number of mixes
