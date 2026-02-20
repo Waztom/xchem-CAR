@@ -55,6 +55,14 @@ class WorkupSessionHandler(SessionHandler):
                 f"Processing workup for reaction {reaction_id} ({i+1}/{action_count})"
             )
             reaction_obj = get_reaction(reaction_id=reaction_id)
+
+            # --- Human-readable header for this workup ---
+            self.add_command(
+                self.annotation_generator.reaction_header(
+                    reaction_obj, session_label="Workup"
+                )
+            )
+
             self.process_workup_actions(actionsession_obj, reaction_obj, session_number)
 
         self.log_session_end("workup")
@@ -118,6 +126,19 @@ class WorkupSessionHandler(SessionHandler):
                     logger.info(
                         f"Processing workup action {index+1}/{len(workup_actions)}: extract {action_number}"
                     )
+
+                    # --- Human-readable extract summary ---
+                    desc = self.annotation_generator.extract_action_description(
+                        layer=workup_action.layer,
+                        from_plate_role=workup_action.from_plate_role,
+                        to_plate_role=workup_action.to_plate_role,
+                    )
+                    self.add_command(
+                        self.annotation_generator.action_summary(
+                            "Extract", index + 1, action_count, desc
+                        )
+                    )
+
                     self.process_extract_action(
                         workup_action,
                         action_number,
@@ -133,6 +154,17 @@ class WorkupSessionHandler(SessionHandler):
                     logger.info(
                         f"Processing workup action {index+1}/{len(workup_actions)}: mix {action_number}"
                     )
+
+                    # --- Human-readable mix summary ---
+                    desc = self.annotation_generator.mix_action_description(
+                        plate_role=workup_action.plate_role,
+                    )
+                    self.add_command(
+                        self.annotation_generator.action_summary(
+                            "Mix", index + 1, action_count, desc
+                        )
+                    )
+
                     self.process_mix_action(
                         action_number, actionsession_obj, reaction_obj, reaction_id
                     )

@@ -21,6 +21,7 @@ from .session_handlers.reaction_handler import ReactionSessionHandler
 from .session_handlers.workup_handler import WorkupSessionHandler
 from .session_handlers.analysis_handler import AnalysisSessionHandler
 from .utils.well_finder import WellFinder
+from .annotation_generator import AnnotationGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,7 @@ class ScriptGenerator:
         logger.info(f"Creating helper components for reaction step {self.reactionstep}")
         # Create helper components
         self.command_generator = CommandGenerator(self)
+        self.annotation_generator = AnnotationGenerator(self)
         self.file_manager = FileManager(self)
         self.query_service = QueryService(self)
         self.volume_manager = VolumeManager(self)

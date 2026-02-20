@@ -65,6 +65,14 @@ class ReactionSessionHandler(SessionHandler):
             reaction_id = actionsession_obj.reaction_id.id
             logger.info(f"Processing reaction {reaction_id} ({i+1}/{action_count})")
             reaction_obj = get_reaction(reaction_id=reaction_id)
+
+            # --- Human-readable header for this reaction ---
+            self.add_command(
+                self.annotation_generator.reaction_header(
+                    reaction_obj, session_label="Reaction"
+                )
+            )
+
             self.process_reaction_actions(
                 actionsession_obj, reaction_obj, session_number
             )
@@ -81,6 +89,11 @@ class ReactionSessionHandler(SessionHandler):
             The session number
         """
         logger.info(f"Starting dilution processing for session {session_number}")
+
+        # --- Human-readable dilution header ---
+        self.add_command(
+            self.annotation_generator.dilution_header()
+        )
 
         try:
             # Get reaction data
@@ -446,6 +459,19 @@ class ReactionSessionHandler(SessionHandler):
                                 logger.info(
                                     f"Adding dilution transfer command: {aspirate_plate_name}:{aspirate_well_index} → {dispense_plate_name}:{dispense_well_index}"
                                 )
+
+                                # --- Human-readable dilution transfer comment ---
+                                self.add_command(
+                                    self.annotation_generator.dilution_transfer(
+                                        volume=current_transfer_volume,
+                                        solvent=solvent,
+                                        aspirateplatename=aspirate_plate_name,
+                                        aspiratewellindex=aspirate_well_index,
+                                        dispenseplatename=dispense_plate_name,
+                                        dispensewellindex=dispense_well_index,
+                                    )
+                                )
+
                                 self.add_command(
                                     self.command_generator.transfer_fluid_single(
                                         aspirateplatename=aspirate_plate_name,
@@ -565,6 +591,19 @@ class ReactionSessionHandler(SessionHandler):
             solvent = add_action_obj.solvent
             transfer_volume = add_action_obj.volume
             concentration = add_action_obj.concentration
+
+            # --- Human-readable per-action comment ---
+            total_actions = len(reaction_actions)
+            desc = self.annotation_generator.add_action_description(
+                volume=transfer_volume,
+                smiles=smiles,
+                solvent=solvent,
+                from_plate_role=from_plate_role,
+                to_plate_role=to_plate_role,
+            )
+            self.add_command(
+                self.annotation_generator.action_summary("Add", index + 1, total_actions, desc)
+            )
 
             logger.info(
                 f"Transfer parameters: SMILES={smiles[:20]}..., volume={transfer_volume} µL"
@@ -703,6 +742,16 @@ class ReactionSessionHandler(SessionHandler):
                 plateid=mix_well_obj.plate_id.id
             )
             mix_plate_name = mix_plate_obj.name
+
+            # --- Human-readable mix comment ---
+            self.add_command(
+                self.annotation_generator.reaction_mix(
+                    repetitions=repetitions,
+                    plate_role=plate_role,
+                    plate_name=mix_plate_name,
+                    well_index=mix_well_index,
+                )
+            )
 
             # Add command for mixing
             logger.info(

@@ -58,6 +58,14 @@ class AnalysisSessionHandler(SessionHandler):
                 f"Processing analysis for reaction {reaction_id} ({i+1}/{action_count})"
             )
             reaction_obj = get_reaction(reaction_id=reaction_id)
+
+            # --- Human-readable header for this analysis ---
+            self.add_command(
+                self.annotation_generator.reaction_header(
+                    reaction_obj, session_label="Analysis"
+                )
+            )
+
             self.process_analysis_actions(
                 actionsession_obj, reaction_obj, session_number
             )
@@ -123,6 +131,18 @@ class AnalysisSessionHandler(SessionHandler):
                     logger.info(
                         f"Processing analysis action {index+1}/{len(analysis_actions)}: add {action_number}"
                     )
+
+                    # --- Human-readable analysis transfer summary ---
+                    desc = self.annotation_generator.analysis_transfer_description(
+                        from_plate_role=analysis_action.from_plate_role,
+                        to_plate_role=analysis_action.to_plate_role,
+                    )
+                    self.add_command(
+                        self.annotation_generator.action_summary(
+                            "Analysis transfer", index + 1, action_count, desc
+                        )
+                    )
+
                     self.process_add_action(
                         analysis_action,
                         action_number,

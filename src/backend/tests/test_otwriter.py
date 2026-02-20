@@ -41,6 +41,8 @@ _QS_MOD = f"{_WRITER_MOD}.utils.query_service"
 # ---------------------------------------------------------------------------
 def _make_script_generator_stub(**overrides):
     """Return a MagicMock with the interface expected by helper components."""
+    from backend.opentrons.otwriter.annotation_generator import AnnotationGenerator
+
     sg = MagicMock()
     sg.otsession_id = overrides.get("otsession_id", 1)
     sg.actionsession_ids = overrides.get("actionsession_ids", [1, 2])
@@ -58,6 +60,7 @@ def _make_script_generator_stub(**overrides):
 
     # Sub-components
     sg.command_generator = MagicMock()
+    sg.annotation_generator = AnnotationGenerator(sg)
     sg.query_service = MagicMock()
     sg.volume_manager = MagicMock()
     sg.well_finder = MagicMock()
