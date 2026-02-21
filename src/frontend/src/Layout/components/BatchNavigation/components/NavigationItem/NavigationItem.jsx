@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import { Checkbox, CircularProgress, Fab, Tooltip, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { DeleteForever, PrecisionManufacturing } from '@mui/icons-material';
+import { DeleteForever, PrecisionManufacturing, TableChart } from '@mui/icons-material';
 import { CgArrowsScrollV } from 'react-icons/cg';
 import { SuspenseWithBoundary } from '../../../../../common/components/SuspenseWithBoundary';
 import { IconComponent } from '../../../../../common/components/IconComponent';
@@ -11,6 +11,7 @@ import { useBatchViewsRefs } from '../../../../../common/stores/batchViewsRefsSt
 import { useTemporaryId } from '../../../../../common/hooks/useTemporaryId';
 import { requestDeleteSubBatch } from '../../../../stores/deleteSubBatchDialogStore';
 import { useGetBatchProtocol } from './hooks/useGetBatchProtocol';
+import { useDownloadBatchCsv } from './hooks/useDownloadBatchCsv';
 
 const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
   '& .MuiTreeItem-label': {
@@ -76,12 +77,32 @@ const StyledRobotIcon = styled(PrecisionManufacturing)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
+const StyledCsvIcon = styled(TableChart)(({ theme }) => ({
+  fontSize: '1.2rem',
+  color: theme.palette.success.main,
+}));
+
+const StyledFabSuccess = styled(Fab)(({ theme }) => ({
+  minHeight: 'unset',
+  width: theme.spacing(3),
+  height: theme.spacing(3),
+  boxShadow: 'none !important',
+  padding: 0,
+  '&:hover': {
+    backgroundColor: theme.palette.success.light,
+    '& .MuiSvgIcon-root': {
+      color: theme.palette.success.contrastText
+    }
+  }
+}));
+
 const NavigationItemContent = ({ batch, subBatchNodes, elementRef }) => {
   const displayed = useBatchNavigationStore(useCallback(state => state.selected[batch.id] || false, [batch.id]));
   const { isTemporaryId } = useTemporaryId();
   const isTemporaryBatch = isTemporaryId(batch.id);
   const deleteEnabled = !!batch.batch_id && !subBatchNodes.length;
   const protocol = useGetBatchProtocol(batch.id);
+  const { download: downloadCsv, loading: csvLoading } = useDownloadBatchCsv(batch);
 
   return (
     <>
@@ -91,19 +112,6 @@ const NavigationItemContent = ({ batch, subBatchNodes, elementRef }) => {
           <CircularProgress sx={{ width: '1.2em', height: '1.2em' }} />
         ) : (
           <>
-            {!!protocol?.zipfile && (
-              <Tooltip title="Download OT protocols">
-                <StyledFabPrimary
-                  size="small"
-                  component="a"
-                  href={protocol.zipfile}
-                  download
-                  onClick={e => e.stopPropagation()}
-                >
-                  <StyledRobotIcon />
-                </StyledFabPrimary>
-              </Tooltip>
-            )}
             {deleteEnabled && (
               <Tooltip title="Delete batch">
                 <StyledFab
@@ -117,6 +125,35 @@ const NavigationItemContent = ({ batch, subBatchNodes, elementRef }) => {
                 </StyledFab>
               </Tooltip>
             )}
+            {!!protocol?.zipfile && (
+              <Tooltip title="Download OT protocols">
+                <StyledFabPrimary
+                  size="small"
+                  component="a"
+                  href={protocol.zipfile}
+                  download
+                  onClick={e => e.stopPropagation()}
+                >
+                  <StyledRobotIcon />
+                </StyledFabPrimary>
+              </Tooltip>
+            )}
+            <Tooltip title="Download batch CSV">
+              <StyledFabSuccess
+                size="small"
+                disabled={csvLoading}
+                onClick={e => {
+                  e.stopPropagation();
+                  downloadCsv();
+                }}
+              >
+                {csvLoading ? (
+                  <CircularProgress size={14} />
+                ) : (
+                  <StyledCsvIcon />
+                )}
+              </StyledFabSuccess>
+            </Tooltip>
             {!!elementRef && (
               <Tooltip title="Scroll to batch">
                 <StyledFab

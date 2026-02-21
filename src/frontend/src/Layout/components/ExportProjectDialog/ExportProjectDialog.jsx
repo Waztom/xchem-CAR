@@ -58,17 +58,18 @@ export const ExportProjectDialog = ({ open, onClose }) => {
             .map((targets, i) =>
               targets.map(target =>
                 target.methods?.map((method, j) => ({
-                  batch_name: selectedBatches[i].batchtag,
-                  target_name: target.name,
-                  target_SMILES: target.smiles,        
-                  method_no: j + 1, // This should match with useGetTableData position attribute for sub rows
+                  'method-no': j + 1,
+                  'target-names': target.name,
+                  'no-steps': method.reactions.length,
+                  'target-SMILES': target.smiles,
+                  'batch-tag': selectedBatches[i].batchtag,
                   ...Object.fromEntries(
                     method.reactions
                       .map((reaction, k) => [
-                        ...reaction.reactants.map((reactant, l) => [`react${k + 1}.${l + 1}_SMILES`, reactant.smiles]),
-                        [`prod${k + 1}_SMILES`, reaction.products[0].smiles],
-                        [`reaction_class${k + 1}`, reaction.reactionclass],
-                        [`reaction_recipe${k + 1}`, reaction.recipe],      
+                        ...reaction.reactants.map((reactant, l) => [`reactant-${l + 1}-${k + 1}`, reactant.smiles]),
+                        [`reaction-product-smiles-${k + 1}`, reaction.products[0].smiles],
+                        [`reaction-name-${k + 1}`, reaction.reactionclass],
+                        [`reaction-recipe-${k + 1}`, reaction.recipe],
                       ])
                       .flat()
                   )
