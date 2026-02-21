@@ -253,6 +253,11 @@ class ReactionSessionHandler(SessionHandler):
                         smiles=smiles,
                         solvent=solvent,
                         reaction_id=rxn_id,
+                        reaction_class=getattr(
+                            aa.reaction_id, "reactionclass", None
+                        ),
+                        recipe=getattr(aa.reaction_id, "recipe", None),
+                        transfer_mode="multichannel",
                     )
 
                     # Update well statuses

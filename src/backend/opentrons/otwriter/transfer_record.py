@@ -53,6 +53,8 @@ class TransferRecord:
         Reaction class label (e.g. ``"amidation"``)
     recipe : str or None
         Recipe name
+    transfer_mode : str
+        ``"single"`` (default) or ``"multichannel"``
     """
 
     action_type: str
@@ -70,6 +72,7 @@ class TransferRecord:
     reaction_id: Optional[int] = None
     reaction_class: Optional[str] = None
     recipe: Optional[str] = None
+    transfer_mode: str = "single"
 
 
 class TransferLedger:

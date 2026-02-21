@@ -314,11 +314,29 @@ class PlateVisualizer:
                 f' data-transfers="{html_mod.escape(transfer_html)}"'
             )
 
+            # Multichannel indicator — a well is MC if:
+            #   1. The Well model has transfer_type="multichannel"
+            #      (set on starting-material wells during plate creation), OR
+            #   2. Any incoming/outgoing transfer record has
+            #      transfer_mode="multichannel" (reaction plate destinations).
+            transfer_type = (
+                getattr(well, "transfer_type", None) if well else None
+            )
+            has_mc_transfer = any(
+                getattr(r, "transfer_mode", "single") == "multichannel"
+                for r in incoming.get(idx, []) + outgoing.get(idx, [])
+            )
+            is_mc = transfer_type == "multichannel" or has_mc_transfer
+            mc_cls = " mc-well" if is_mc else ""
+
             occupied_cls = " occupied" if (well and smiles) else ""
+            mc_mode = "multichannel" if is_mc else (transfer_type or "")
             cells_html.append(
-                f'<div class="well{occupied_cls}" style="background:{colour};" '
+                f'<div class="well{occupied_cls}{mc_cls}" style="background:{colour};" '
+                f'data-transfer-type="{mc_mode}" '
                 f'{data_attrs} onclick="showWell(this)">'
                 f'<span class="well-label">{well_label}</span>'
+                f'{"<span class=mc-badge>MC</span>" if is_mc else ""}'
                 f"</div>"
             )
 
@@ -419,11 +437,16 @@ class PlateVisualizer:
             other_well = rec.source_well_name if direction == "in" else rec.dest_well_name
             other_index = rec.source_well_index if direction == "in" else rec.dest_well_index
             mat = rec.smiles or rec.solvent or rec.action_type
+            mode_tag = (
+                ' <span class="mc-tag">MC</span>'
+                if getattr(rec, "transfer_mode", "single") == "multichannel"
+                else ""
+            )
             items.append(
                 f"<li><b>{label}</b> {html_mod.escape(other_plate)} "
                 f"{html_mod.escape(other_well)} (idx {other_index}): "
                 f"{rec.volume:.1f} µL "
-                f"<i>{html_mod.escape(str(mat))}</i></li>"
+                f"<i>{html_mod.escape(str(mat))}</i>{mode_tag}</li>"
             )
         return "\n".join(items)
 
@@ -448,10 +471,17 @@ class PlateVisualizer:
                         f'alt="molecule" class="table-mol">'
                     )
 
+            mode = getattr(rec, "transfer_mode", "single")
+            mode_cell = (
+                '<span class="mc-tag">MC</span>' if mode == "multichannel"
+                else "SC"
+            )
+
             rows_html.append(
                 f"<tr>"
                 f"<td>{i}</td>"
                 f"<td>{html_mod.escape(rec.action_type)}</td>"
+                f"<td>{mode_cell}</td>"
                 f"<td>{html_mod.escape(rec.source_plate_name)}<br>"
                 f"<small>{html_mod.escape(rec.source_well_name)} (idx {rec.source_well_index})</small></td>"
                 f"<td>{html_mod.escape(rec.dest_plate_name)}<br>"
@@ -466,7 +496,7 @@ class PlateVisualizer:
         return (
             '<table class="transfer-table">'
             "<thead><tr>"
-            "<th>#</th><th>Type</th><th>Source</th><th>Dest</th>"
+            "<th>#</th><th>Type</th><th>Mode</th><th>Source</th><th>Dest</th>"
             "<th>Vol (µL)</th><th>SMILES / Structure</th><th>Solvent</th><th>Rxn Class</th>"
             "</tr></thead>"
             "<tbody>" + "\n".join(rows_html) + "</tbody></table>"
@@ -507,6 +537,13 @@ class PlateVisualizer:
                     f" {html_mod.escape(label)}</div>"
                 )
             items.append("</div>")
+
+        # Multichannel indicator
+        items.append(
+            '<div class="legend-group">'
+            '<div class="legend-swatch mc-legend-swatch"></div>'
+            ' Multichannel transfer (dashed border + <b>MC</b> badge)</div>'
+        )
 
         # Empty
         items.append(
@@ -578,6 +615,19 @@ _HTML_TEMPLATE = """\
   .well-label {{ font-size: 0.55rem; color: rgba(0,0,0,.45); pointer-events: none;
                  user-select: none; }}
   .well.occupied .well-label {{ color: rgba(0,0,0,.7); font-weight: 600; }}
+
+  /* Multichannel well indicator */
+  .well.mc-well {{ border: 2px dashed #e65100; }}
+  .mc-badge {{ position: absolute; bottom: -2px; right: -2px; font-size: 0.4rem;
+               background: #e65100; color: #fff; border-radius: 3px;
+               padding: 0 2px; line-height: 1.3; font-weight: 700;
+               pointer-events: none; }}
+  .mc-tag {{ display: inline-block; background: #e65100; color: #fff; font-size: 0.7rem;
+             border-radius: 3px; padding: 0 4px; margin-left: 4px; font-weight: 600;
+             vertical-align: middle; }}
+  .mc-legend-swatch {{ display: inline-block; width: 13px; height: 13px;
+                       border-radius: 50%; vertical-align: middle; margin-right: 4px;
+                       border: 2px dashed #e65100; background: #fff; }}
 
   /* Detail panel */
   #detail-panel {{ position: fixed; top: 20px; right: 20px; width: 340px;
@@ -665,12 +715,16 @@ function showWell(el) {{
   const conc   = el.dataset.concentration;
   const svgB64 = el.dataset.svg;
   const transfers = el.dataset.transfers;
+  const transferType = el.dataset.transferType;
 
   title.textContent = 'Well ' + label;
 
   let html = '';
   html += '<div class="field"><b>Well name:</b> ' + dbName + '</div>';
   html += '<div class="field"><b>Well index:</b> ' + idx + '</div>';
+  if (transferType === 'multichannel') {{
+    html += '<div class="field"><b>Mode:</b> <span style="background:#e65100;color:#fff;border-radius:3px;padding:1px 6px;font-size:0.82rem;font-weight:600;">Multichannel</span></div>';
+  }}
 
   if (smiles) {{
     html += '<div class="field"><b>SMILES:</b> ' + smiles + '</div>';

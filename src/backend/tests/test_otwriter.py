@@ -2657,3 +2657,4 @@ class TestReactionHandlerSkipMCHandledActions(TestCase):
         with patch.object(self.handler, "process_add_action") as mock_add:
             self.handler.process_reaction_actions(MagicMock(), rxn_obj, 1)
             self.assertEqual(mock_add.call_count, 2)
+
