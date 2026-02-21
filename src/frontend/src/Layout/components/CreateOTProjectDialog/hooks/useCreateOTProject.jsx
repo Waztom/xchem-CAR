@@ -5,7 +5,6 @@ import { addCeleryTask } from '../../../../common/stores/celeryTasksStore';
 import { CloseSnackbarButton } from '../../../../common/components/CloseSnackbarButton/CloseSnackbarButton';
 import { scopes } from '../../../../common/constants/scopes';
 import { useProjectSnackbar } from '../../../../common/hooks/useProjectSnackbar';
-import { ShowOTProjectSummaryButton } from '../components/ShowOTProjectSummaryButton';
 import { useCurrentProjectStore } from '../../../../common/stores/currentProjectStore';
 import {
   createOtProjectKey,
@@ -45,12 +44,7 @@ export const useCreateOTProject = () => {
           queryClient.invalidateQueries(otProjectsQueryKey);
 
           enqueueSnackbarSuccess('OT protocol has been generated successfully', {
-            action: key => (
-              <>
-                <ShowOTProjectSummaryButton messageId={key} otProjectId={otproject_id} />
-                <CloseSnackbarButton messageId={key} />
-              </>
-            )
+            action: key => <CloseSnackbarButton messageId={key} />
           });
         },
         onError: err => {

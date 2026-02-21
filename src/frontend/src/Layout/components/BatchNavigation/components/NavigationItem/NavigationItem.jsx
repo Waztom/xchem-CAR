@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import { Checkbox, CircularProgress, Fab, Tooltip, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { DeleteForever } from '@mui/icons-material';
+import { DeleteForever, PrecisionManufacturing } from '@mui/icons-material';
 import { CgArrowsScrollV } from 'react-icons/cg';
 import { SuspenseWithBoundary } from '../../../../../common/components/SuspenseWithBoundary';
 import { IconComponent } from '../../../../../common/components/IconComponent';
@@ -10,6 +10,7 @@ import { setBatchSelected, useBatchNavigationStore } from '../../../../../common
 import { useBatchViewsRefs } from '../../../../../common/stores/batchViewsRefsStore';
 import { useTemporaryId } from '../../../../../common/hooks/useTemporaryId';
 import { requestDeleteSubBatch } from '../../../../stores/deleteSubBatchDialogStore';
+import { useGetBatchProtocol } from './hooks/useGetBatchProtocol';
 
 const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
   '& .MuiTreeItem-label': {
@@ -34,7 +35,7 @@ const ActionsWrapper = styled('div')(({ theme }) => ({
 
 const StyledFab = styled(Fab)(({ theme }) => ({
   minHeight: 'unset',
-  width: theme.spacing(3),  // Increased size slightly
+  width: theme.spacing(3),
   height: theme.spacing(3),
   boxShadow: 'none !important',
   padding: 0,
@@ -42,6 +43,20 @@ const StyledFab = styled(Fab)(({ theme }) => ({
     backgroundColor: theme.palette.error.light,
     '& .MuiSvgIcon-root': {
       color: theme.palette.error.contrastText
+    }
+  }
+}));
+
+const StyledFabPrimary = styled(Fab)(({ theme }) => ({
+  minHeight: 'unset',
+  width: theme.spacing(3),
+  height: theme.spacing(3),
+  boxShadow: 'none !important',
+  padding: 0,
+  '&:hover': {
+    backgroundColor: theme.palette.primary.light,
+    '& .MuiSvgIcon-root': {
+      color: theme.palette.primary.contrastText
     }
   }
 }));
@@ -56,11 +71,17 @@ const StyledDeleteIcon = styled(DeleteForever)(({ theme }) => ({
   color: theme.palette.error.main,
 }));
 
+const StyledRobotIcon = styled(PrecisionManufacturing)(({ theme }) => ({
+  fontSize: '1.2rem',
+  color: theme.palette.primary.main,
+}));
+
 const NavigationItemContent = ({ batch, subBatchNodes, elementRef }) => {
   const displayed = useBatchNavigationStore(useCallback(state => state.selected[batch.id] || false, [batch.id]));
   const { isTemporaryId } = useTemporaryId();
   const isTemporaryBatch = isTemporaryId(batch.id);
   const deleteEnabled = !!batch.batch_id && !subBatchNodes.length;
+  const protocol = useGetBatchProtocol(batch.id);
 
   return (
     <>
@@ -70,6 +91,19 @@ const NavigationItemContent = ({ batch, subBatchNodes, elementRef }) => {
           <CircularProgress sx={{ width: '1.2em', height: '1.2em' }} />
         ) : (
           <>
+            {!!protocol?.zipfile && (
+              <Tooltip title="Download OT protocols">
+                <StyledFabPrimary
+                  size="small"
+                  component="a"
+                  href={protocol.zipfile}
+                  download
+                  onClick={e => e.stopPropagation()}
+                >
+                  <StyledRobotIcon />
+                </StyledFabPrimary>
+              </Tooltip>
+            )}
             {deleteEnabled && (
               <Tooltip title="Delete batch">
                 <StyledFab
