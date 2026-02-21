@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { TreeView } from '@mui/x-tree-view/TreeView';
 import { CircularProgress } from '@mui/material';
 import { ChevronRight, ExpandMore } from '@mui/icons-material';
@@ -8,6 +8,7 @@ import { NavigationItem } from './components/NavigationItem';
 import { setBatchesExpanded, useBatchNavigationStore } from '../../../common/stores/batchNavigationStore';
 import { DeleteSubBatchDialog } from '../DeleteSubBatchDialog';
 import { SuspenseWithBoundary } from '../../../common/components/SuspenseWithBoundary';
+import { getAllBatchNodeIds } from '../../../common/utils/getAllBatchNodeIds';
 
 const StyledTreeView = styled(TreeView)(({ theme }) => ({
   '& .MuiTreeItem-iconContainer .MuiSvgIcon-root': {
@@ -33,6 +34,56 @@ const BatchNavigationContent = () => {
   const batchTree = useBatchTree();
   const selected = useBatchNavigationStore(selectedBatchesIdsSelector);
   const expanded = useBatchNavigationStore.useExpanded();
+  const hasAutoExpanded = useRef(false);
+
+  // Auto-expand all nodes on first render only
+  useEffect(() => {
+    if (batchTree?.length && !hasAutoExpanded.current) {
+      hasAutoExpanded.current = true;
+      setBatchesExpanded(getAllBatchNodeIds(batchTree));
+    }
+  }, [batchTree]);
+
+  const allNodeIds = batchTree?.length ? getAllBatchNodeIds(batchTree) : [];
+  const topLevelIds = batchTree?.map(n => String(n.batch.id)) || [];
+
+  const handleNodeToggle = useCallback((event, nodeIds) => {
+    // Find which top-level node was toggled
+    const wasExpanded = expanded;
+    const added = nodeIds.filter(id => !wasExpanded.includes(id));
+    const removed = wasExpanded.filter(id => !nodeIds.includes(id));
+
+    // If a top-level node was expanded, expand all its descendants too
+    if (added.length > 0) {
+      const topLevelExpanded = added.filter(id => topLevelIds.includes(id));
+      if (topLevelExpanded.length > 0) {
+        // Find all descendant IDs for the expanded top-level nodes
+        const descendantIds = topLevelExpanded.flatMap(tlId => {
+          const node = batchTree.find(n => String(n.batch.id) === tlId);
+          return node ? getAllBatchNodeIds([node]) : [];
+        });
+        const merged = [...new Set([...nodeIds, ...descendantIds])];
+        setBatchesExpanded(merged);
+        return;
+      }
+    }
+
+    // If a top-level node was collapsed, collapse all its descendants too
+    if (removed.length > 0) {
+      const topLevelCollapsed = removed.filter(id => topLevelIds.includes(id));
+      if (topLevelCollapsed.length > 0) {
+        const descendantIds = topLevelCollapsed.flatMap(tlId => {
+          const node = batchTree.find(n => String(n.batch.id) === tlId);
+          return node ? getAllBatchNodeIds([node]) : [];
+        });
+        const filtered = nodeIds.filter(id => !descendantIds.includes(id));
+        setBatchesExpanded(filtered);
+        return;
+      }
+    }
+
+    setBatchesExpanded(nodeIds);
+  }, [expanded, topLevelIds, batchTree]);
 
   const renderTree = node => {
     if (!node || !node.batch) return null;
@@ -60,7 +111,7 @@ const BatchNavigationContent = () => {
       defaultExpandIcon={<ChevronRight />}
       selected={selected}
       expanded={expanded}
-      onNodeToggle={(event, nodeIds) => setBatchesExpanded(nodeIds)}
+      onNodeToggle={handleNodeToggle}
       disableSelection
       multiSelect
     >
