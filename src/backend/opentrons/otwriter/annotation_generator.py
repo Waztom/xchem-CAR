@@ -138,6 +138,62 @@ class AnnotationGenerator:
             num_newlines=2,
         )
 
+    def multichannel_step_header(
+        self,
+        step_number: int,
+        total_steps: int,
+        smiles: str,
+        solvent: Optional[str],
+        volume: float,
+    ) -> str:
+        """Return a banner comment for a multichannel-eligible add step.
+
+        Parameters
+        ----------
+        step_number : int
+            1-based step index
+        total_steps : int
+            Total number of add steps in the recipe
+        smiles : str
+            SMILES of the shared reagent
+        solvent : str or None
+            Solvent used
+        volume : float
+            Transfer volume in µL
+        """
+        solvent_info = f" in {solvent}" if solvent else ""
+        return self.comment(
+            _SEP
+            + f"\n\t# Add step {step_number} of {total_steps}: "
+            f"{smiles}{solvent_info} – {volume:.1f} µL (multichannel)"
+            + "\n\t# "
+            + _SEP,
+            num_newlines=2,
+        )
+
+    def single_channel_step_header(
+        self,
+        step_number: int,
+        total_steps: int,
+    ) -> str:
+        """Return a banner comment for a single-channel add step.
+
+        Parameters
+        ----------
+        step_number : int
+            1-based step index
+        total_steps : int
+            Total number of add steps in the recipe
+        """
+        return self.comment(
+            _SEP
+            + f"\n\t# Add step {step_number} of {total_steps}: "
+            "individual starting materials (single-channel)"
+            + "\n\t# "
+            + _SEP,
+            num_newlines=2,
+        )
+
     # ------------------------------------------------------------------
     # Per-action summary comments (session-level)
     # ------------------------------------------------------------------

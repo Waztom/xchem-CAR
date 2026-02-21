@@ -404,8 +404,17 @@ class CommandGenerator:
         aspirateheight: int = 0.1,
         transfertype: str = "standard",
         pipette_name_override: str = None,
+        aspirate_sub_column_index: int = 0,
+        dispense_sub_column_index: int = 0,
     ) -> List[str]:
         """Generate transfer fluid command for multi channel.
+
+        For 384-well plates the 8-channel pipette reaches every other row,
+        producing two sub-columns per physical column.  ``sub_column_index=0``
+        addresses rows A,C,E,G,I,K,M,O (via ``columns()[col][0]``), while
+        ``sub_column_index=1`` addresses rows B,D,F,H,J,L,N,P
+        (via ``columns()[col][1]``).  For 96-well plates the sub-column
+        index is always 0.
 
         Parameters
         ----------
@@ -426,6 +435,10 @@ class CommandGenerator:
         pipette_name_override : str, optional
             Explicit pipette name to use.  When None, falls back to the
             multi-channel pipette if available, else the default pipette.
+        aspirate_sub_column_index : int, optional
+            Sub-column index for the aspirate plate (0 or 1 for 384-well).
+        dispense_sub_column_index : int, optional
+            Sub-column index for the dispense plate (0 or 1 for 384-well).
 
         Returns
         -------
@@ -434,7 +447,10 @@ class CommandGenerator:
         """
         logger.info(f"Generating multi-channel fluid transfer: {transfertype}")
         logger.info(
-            f"Transfer: {transvolume:.1f} µL from {aspirateplatename} column {aspiratecolumnindex} to {dispenseplatename} column {dispensecolumnindex}"
+            f"Transfer: {transvolume:.1f} µL from {aspirateplatename} "
+            f"column {aspiratecolumnindex} (sub-col {aspirate_sub_column_index}) to "
+            f"{dispenseplatename} column {dispensecolumnindex} "
+            f"(sub-col {dispense_sub_column_index})"
         )
         logger.info(f"Aspirate height: {aspirateheight} mm")
 
@@ -466,7 +482,16 @@ class CommandGenerator:
                 dispenseplatename=dispenseplatename,
                 dispensecolumnindex=dispensecolumnindex,
             ),
-            f"{self.indent()}{pipette_name}.transfer({transvolume}, {aspirateplatename}.columns()[{aspiratecolumnindex}][0].bottom({aspirateheight}), {dispenseplatename}.columns()[{dispensecolumnindex}][0].top({dispenseplatename}.highest_z*0.05), air_gap = {air_gap_volume}, touch_tip=True, new_tip='never', blow_out=True, blowout_location='destination well')",
+            (
+                f"{self.indent()}{pipette_name}.transfer({transvolume}, "
+                f"{aspirateplatename}.columns()[{aspiratecolumnindex}]"
+                f"[{aspirate_sub_column_index}].bottom({aspirateheight}), "
+                f"{dispenseplatename}.columns()[{dispensecolumnindex}]"
+                f"[{dispense_sub_column_index}].top("
+                f"{dispenseplatename}.highest_z*0.05), "
+                f"air_gap = {air_gap_volume}, touch_tip=True, new_tip='never', "
+                f"blow_out=True, blowout_location='destination well')"
+            ),
         ]
 
     def mix_well(self, wellindex: int, nomixes: int, plate: str) -> List[str]:
