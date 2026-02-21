@@ -5,6 +5,9 @@ This module provides methods for handling reaction sessions.
 """
 
 import logging
+from collections import defaultdict
+from typing import Set, Tuple
+
 from django.db.models import QuerySet
 
 from backend.models import AddAction, MixAction, RecipeAddAction, RecipeMixAction
@@ -57,6 +60,17 @@ class ReactionSessionHandler(SessionHandler):
                 )
             )
 
+        # --- Multichannel pre-processing phase ---
+        # Process all MC column-to-column transfers before the per-reaction
+        # single-channel loop.  Returns the set of (reaction_id, action_number)
+        # pairs that were handled and should be skipped.
+        mc_handled = self.process_multichannel_transfers(actionsession_queryset)
+        if mc_handled:
+            logger.info(
+                f"{len(mc_handled)} add action(s) handled by multichannel – "
+                f"these will be skipped in the per-reaction loop"
+            )
+
         # Process each action session
         action_count = actionsession_queryset.count()
         logger.info(f"Processing {action_count} individual reaction action session(s)")
@@ -74,10 +88,187 @@ class ReactionSessionHandler(SessionHandler):
             )
 
             self.process_reaction_actions(
-                actionsession_obj, reaction_obj, session_number
+                actionsession_obj, reaction_obj, session_number,
+                mc_handled=mc_handled,
             )
 
         self.log_session_end("reaction")
+
+    # ------------------------------------------------------------------
+    # Multichannel (column-to-column) pre-processing
+    # ------------------------------------------------------------------
+
+    def process_multichannel_transfers(
+        self, actionsession_queryset: QuerySet
+    ) -> Set[Tuple[int, int]]:
+        """Process all multichannel column-to-column transfers.
+
+        This method is called **before** the per-reaction loop.  It finds all
+        starting-material wells that were tagged ``transfer_type='multichannel'``
+        during plate creation, groups them by source column, then emits
+        ``transfer_fluid_multi`` commands using the 8-channel pipette.
+
+        Parameters
+        ----------
+        actionsession_queryset : QuerySet
+            The action-session queryset being processed in this session.
+
+        Returns
+        -------
+        Set[Tuple[int, int]]
+            A set of ``(reaction_id, action_number)`` pairs that were fully
+            handled by multichannel transfers and should be **skipped** by
+            the per-reaction single-channel loop.
+        """
+        handled: Set[Tuple[int, int]] = set()
+
+        mc_wells = self.query_service.get_multichannel_source_wells()
+        if not mc_wells.exists():
+            logger.info("No multichannel source wells found – skipping MC phase")
+            return handled
+
+        mc_pipette_name = self.script_generator.mc_pipettename
+        if not mc_pipette_name:
+            logger.warning(
+                "Multichannel source wells exist but no MC pipette is configured"
+            )
+            return handled
+
+        # --- Annotation banner ---
+        self.add_command(self.annotation_generator.multichannel_header())
+
+        # Group MC source wells by material identity + source column.
+        # Key: (smiles, solvent, concentration, plate_id, src_column_index)
+        groups: dict = defaultdict(list)
+        for well in mc_wells:
+            plate = well.plate_id
+            src_col = well.index // plate.numberwellsincolumn
+            key = (well.smiles, well.solvent, well.concentration, plate.id, src_col)
+            groups[key].append(well)
+
+        group_count = len(groups)
+        logger.info(
+            f"Found {group_count} multichannel source group(s) across "
+            f"{mc_wells.count()} wells"
+        )
+
+        for (smiles, solvent, conc, plate_id, src_col), src_wells in groups.items():
+            src_plate = self.query_service.get_plate_by_id(plateid=plate_id)
+            logger.info(
+                f"MC group: {smiles[:30]}… | solvent={solvent} "
+                f"| plate={src_plate.name} col={src_col}"
+            )
+
+            # Find matching AddActions in this session via query service.
+            add_action_qs = self.query_service.get_multichannel_add_actions(
+                actionsession_queryset=actionsession_queryset,
+                smiles=smiles,
+                solvent=solvent,
+                concentration=conc,
+            )
+
+            if not add_action_qs.exists():
+                logger.warning(
+                    f"No AddActions found for MC material {smiles[:30]}… – skipping"
+                )
+                continue
+
+            # Group those AddActions by their destination column on the
+            # reaction plate.  Key: (dest_plate_id, dest_column_index)
+            dest_columns: dict = defaultdict(list)
+            for aa in add_action_qs:
+                rxn_id = aa.reaction_id.id
+                try:
+                    to_well = self.well_finder.find_reaction_well(
+                        reaction_id=rxn_id,
+                        role="reaction",
+                        role_index=1,
+                    )
+                except Exception:
+                    logger.warning(
+                        f"No reaction well for reaction {rxn_id} – "
+                        f"MC transfer skipped for this reaction"
+                    )
+                    continue
+
+                to_plate = to_well.plate_id
+                dest_col = to_well.index // to_plate.numberwellsincolumn
+                dest_columns[(to_plate.id, dest_col)].append((aa, to_well))
+
+            # For each destination column, emit an MC transfer.
+            for (dest_plate_id, dest_col), action_wells in dest_columns.items():
+                dest_plate = self.query_service.get_plate_by_id(plateid=dest_plate_id)
+                volume = action_wells[0][0].volume
+
+                logger.info(
+                    f"MC transfer: {src_plate.name} col {src_col} → "
+                    f"{dest_plate.name} col {dest_col} ({volume:.1f} µL, "
+                    f"{len(action_wells)} reaction(s))"
+                )
+
+                # Pick up MC tip
+                self.add_command(self.command_generator.pick_up_tip(suffix="MC"))
+
+                # Column-to-column transfer
+                self.add_command(
+                    self.command_generator.transfer_fluid_multi(
+                        aspirateplatename=src_plate.name,
+                        dispenseplatename=dest_plate.name,
+                        aspiratecolumnindex=src_col,
+                        dispensecolumnindex=dest_col,
+                        transvolume=volume,
+                        pipette_name_override=mc_pipette_name,
+                    )
+                )
+
+                # Record each individual reaction transfer in the ledger and
+                # mark (reaction_id, action_number) as handled.
+                for aa, to_well in action_wells:
+                    rxn_id = aa.reaction_id.id
+                    handled.add((rxn_id, aa.number))
+
+                    # Identify the source well that corresponds to this
+                    # channel (same row position as destination well).
+                    row_in_col = to_well.index % dest_plate.numberwellsincolumn
+                    src_well_index = src_col * src_plate.numberwellsincolumn + row_in_col
+                    src_well = self.query_service.get_well_by_plate_and_index(
+                        plate_id=src_plate, well_index=src_well_index,
+                    )
+
+                    self.script_generator.transfer_ledger.record(
+                        action_type="add",
+                        source_plate_name=src_plate.name,
+                        source_plate_role="startingmaterial",
+                        source_well_index=src_well_index,
+                        source_well_name=(
+                            getattr(src_well, "name", "") or ""
+                        )
+                        if src_well
+                        else "",
+                        dest_plate_name=dest_plate.name,
+                        dest_plate_role="reaction",
+                        dest_well_index=to_well.index,
+                        dest_well_name=getattr(to_well, "name", "") or "",
+                        volume=volume,
+                        smiles=smiles,
+                        solvent=solvent,
+                        reaction_id=rxn_id,
+                    )
+
+                    # Update well statuses
+                    self.volume_manager.update_well_reactant_status(to_well, True)
+                    if src_well:
+                        self.volume_manager.update_well_volume(
+                            wellobj=src_well, transfervolume=volume
+                        )
+
+                # Drop MC tip
+                self.add_command(self.command_generator.drop_tip(suffix="MC"))
+
+        logger.info(
+            f"Multichannel phase complete: {len(handled)} add action(s) handled"
+        )
+        return handled
 
     def process_dilution_step(self, session_number: int) -> None:
         """
@@ -502,7 +693,9 @@ class ReactionSessionHandler(SessionHandler):
                 else:
                     logger.info(f"No previous reactions found for material")
 
-    def process_reaction_actions(self, actionsession_obj, reaction_obj, session_number):
+    def process_reaction_actions(
+        self, actionsession_obj, reaction_obj, session_number, mc_handled=None,
+    ):
         """
         Process actions for a single reaction.
 
@@ -514,7 +707,13 @@ class ReactionSessionHandler(SessionHandler):
             The reaction object
         session_number : int
             The session number
+        mc_handled : set, optional
+            Set of ``(reaction_id, action_number)`` pairs already handled by
+            multichannel transfers.  These add actions will be skipped.
         """
+        if mc_handled is None:
+            mc_handled = set()
+
         reaction_id = reaction_obj.id
         reaction_class = reaction_obj.reactionclass
         recipe_type = reaction_obj.recipe
@@ -547,6 +746,15 @@ class ReactionSessionHandler(SessionHandler):
             for index, reaction_action in enumerate(reaction_actions):
                 if isinstance(reaction_action, RecipeAddAction):
                     action_number = reaction_action.action_number
+
+                    # Skip actions already handled by the MC phase
+                    if (reaction_id, action_number) in mc_handled:
+                        logger.info(
+                            f"Skipping action {index+1}/{action_count}: add "
+                            f"{action_number} (handled by multichannel)"
+                        )
+                        continue
+
                     logger.info(
                         f"Processing action {index+1}/{action_count}: add {action_number}"
                     )

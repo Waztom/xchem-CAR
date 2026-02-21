@@ -128,6 +128,16 @@ class AnnotationGenerator:
             num_newlines=2,
         )
 
+    def multichannel_header(self) -> str:
+        """Return a banner comment for the multichannel transfer section."""
+        return self.comment(
+            _SEP
+            + "\n\t# Multichannel transfers: column-to-column starting material additions"
+            + "\n\t# "
+            + _SEP,
+            num_newlines=2,
+        )
+
     # ------------------------------------------------------------------
     # Per-action summary comments (session-level)
     # ------------------------------------------------------------------

@@ -1262,6 +1262,7 @@ class TestReactionSessionExecute(TestCase):
             session.actionsession_ids = [1, 2]
             session.actionsessionqueryset = _mock_action_session_qs()
             session.customSMcsvpath = None
+            session.use_multichannel = False
             session.groupreactionqueryset = MagicMock()
             session.otsessionobj = MagicMock(id=1)
             session.roundedaddvolumes = []

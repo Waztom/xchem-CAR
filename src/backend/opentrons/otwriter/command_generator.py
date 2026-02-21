@@ -189,7 +189,7 @@ class CommandGenerator:
         ]
 
     def get_number_tips_available_setup(
-        self, num_tipracks: int, channel_type: str
+        self, num_tipracks: int, channel_type: str, suffix: str = ""
     ) -> List[str]:
         """Captures number of tips available in tipracks.
 
@@ -199,6 +199,8 @@ class CommandGenerator:
             Number of tip racks
         channel_type : str
             Type of channel ('single' or 'multi')
+        suffix : str, optional
+            Suffix for the tipstate variable name (e.g. "MC")
 
         Returns
         -------
@@ -212,75 +214,83 @@ class CommandGenerator:
         logger.info(f"Total of {numbertipsavailable} tips available")
 
         return [
-            f'{self.indent()}tipstate = {{"channeltype": "{channel_type}", "maxnumbertips": {numbertipsavailable}, "notipsavailable": {numbertipsavailable}}}'
+            f'{self.indent()}tipstate{suffix} = {{"channeltype": "{channel_type}", "maxnumbertips": {numbertipsavailable}, "notipsavailable": {numbertipsavailable}}}'
         ]
 
-    def get_pickup_tip_function(self, pipette_name: str) -> List[str]:
+    def get_pickup_tip_function(self, pipette_name: str, suffix: str = "") -> List[str]:
         """Function definition for picking up a tip.
 
         Parameters
         ----------
         pipette_name : str
             Name of the pipette
+        suffix : str, optional
+            Suffix appended to function name and tip state variable (e.g. "MC")
 
         Returns
         -------
         List[str]
             Pickup tip function definition
         """
-        logger.info(f"Generating pickUpTip function for {pipette_name} pipette")
+        func_name = f"pickUpTip{suffix}"
+        logger.info(f"Generating {func_name} function for {pipette_name} pipette")
 
         return [
-            f"\n\n{self.indent()}def pickUpTip():",
-            f'{self.indent(2)}if tipstate["notipsavailable"] == 0:',
+            f"\n\n{self.indent()}def {func_name}():",
+            f'{self.indent(2)}if tipstate{suffix}["notipsavailable"] == 0:',
             f'{self.indent(3)}protocol.pause("Please replace tips")',
             f"{self.indent(3)}{pipette_name}.reset_tipracks()",
-            f'{self.indent(3)}tipstate["notipsavailable"] = tipstate["maxnumbertips"]',
+            f'{self.indent(3)}tipstate{suffix}["notipsavailable"] = tipstate{suffix}["maxnumbertips"]',
             f"{self.indent(2)}if not {pipette_name}.has_tip:",
             f"{self.indent(3)}{pipette_name}.pick_up_tip()",
-            f'{self.indent(3)}if tipstate["channeltype"] == "multi":',
-            f'{self.indent(4)}tipstate["notipsavailable"] = tipstate["notipsavailable"] - 8',
-            f'{self.indent(3)}if tipstate["channeltype"] == "single":',
-            f'{self.indent(4)}tipstate["notipsavailable"] = tipstate["notipsavailable"] - 1',
+            f'{self.indent(3)}if tipstate{suffix}["channeltype"] == "multi":',
+            f'{self.indent(4)}tipstate{suffix}["notipsavailable"] = tipstate{suffix}["notipsavailable"] - 8',
+            f'{self.indent(3)}if tipstate{suffix}["channeltype"] == "single":',
+            f'{self.indent(4)}tipstate{suffix}["notipsavailable"] = tipstate{suffix}["notipsavailable"] - 1',
         ]
 
-    def get_drop_tip_function(self, pipette_name: str) -> List[str]:
+    def get_drop_tip_function(self, pipette_name: str, suffix: str = "") -> List[str]:
         """Function definition for dropping a tip.
 
         Parameters
         ----------
         pipette_name : str
             Name of the pipette
+        suffix : str, optional
+            Suffix appended to function name (e.g. "MC")
 
         Returns
         -------
         List[str]
             Drop tip function definition
         """
-        logger.info(f"Generating dropTip function for {pipette_name} pipette")
+        func_name = f"dropTip{suffix}"
+        logger.info(f"Generating {func_name} function for {pipette_name} pipette")
 
         return [
-            f"\n\n{self.indent()}def dropTip():",
+            f"\n\n{self.indent()}def {func_name}():",
             f"{self.indent(2)}if {pipette_name}.has_tip:",
             f"{self.indent(3)}{pipette_name}.drop_tip()",
         ]
 
-    def pick_up_tip(self) -> List[str]:
+    def pick_up_tip(self, suffix: str = "") -> List[str]:
         """Generate pick up tip command."""
-        logger.info("Generating pick up tip command")
+        func_name = f"pickUpTip{suffix}"
+        logger.info(f"Generating {func_name} command")
 
         return [
             self.annotator.pick_up_tip(),
-            f"{self.indent()}pickUpTip()",
+            f"{self.indent()}{func_name}()",
         ]
 
-    def drop_tip(self) -> List[str]:
+    def drop_tip(self, suffix: str = "") -> List[str]:
         """Generate drop tip command."""
-        logger.info("Generating drop tip command")
+        func_name = f"dropTip{suffix}"
+        logger.info(f"Generating {func_name} command")
 
         return [
             self.annotator.drop_tip(),
-            f"{self.indent()}dropTip()",
+            f"{self.indent()}{func_name}()",
         ]
 
     def pause_protocol(self, message: str) -> List[str]:
@@ -393,6 +403,7 @@ class CommandGenerator:
         transvolume: float,
         aspirateheight: int = 0.1,
         transfertype: str = "standard",
+        pipette_name_override: str = None,
     ) -> List[str]:
         """Generate transfer fluid command for multi channel.
 
@@ -412,6 +423,9 @@ class CommandGenerator:
             Height to aspirate from in mm, by default 0.1
         transfertype : str, optional
             Type of transfer, by default "standard"
+        pipette_name_override : str, optional
+            Explicit pipette name to use.  When None, falls back to the
+            multi-channel pipette if available, else the default pipette.
 
         Returns
         -------
@@ -424,7 +438,12 @@ class CommandGenerator:
         )
         logger.info(f"Aspirate height: {aspirateheight} mm")
 
-        pipette_name = self.script_generator.pipettename
+        if pipette_name_override:
+            pipette_name = pipette_name_override
+        elif self.script_generator.mc_pipettename:
+            pipette_name = self.script_generator.mc_pipettename
+        else:
+            pipette_name = self.script_generator.pipettename
         max_volume = f"{pipette_name}.max_volume"
         air_gap_volume = f"{max_volume}*0.05"
 

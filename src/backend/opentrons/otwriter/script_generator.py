@@ -121,9 +121,17 @@ class ScriptGenerator:
         self.platequeryset = self.query_service.get_plates()
         self.pipettename = self.pipetteobj.name
 
+        # Multi-channel pipette (may be None when not configured)
+        self.mc_pipetteobj = self.query_service.get_multichannel_pipette()
+        self.mc_pipettename = (
+            self.mc_pipetteobj.name if self.mc_pipetteobj else None
+        )
+
         logger.info(
             f"Using pipette: {self.pipettename} with {self.tiprackqueryset.count()} tip racks"
         )
+        if self.mc_pipettename:
+            logger.info(f"Multi-channel pipette: {self.mc_pipettename}")
         logger.info(f"Using {self.platequeryset.count()} plates for protocol")
 
         # Create file path for script
@@ -242,6 +250,18 @@ class ScriptGenerator:
             )
         )
 
+        # Add multi-channel pipette if present
+        if self.mc_pipetteobj:
+            logger.info(f"Setting up multi-channel pipette: {self.mc_pipettename}")
+            self.content.extend(
+                self.command_generator.get_pipette_setup(
+                    pipette_name=self.mc_pipetteobj.name,
+                    pipette_labware=self.mc_pipetteobj.labware,
+                    pipette_position=self.mc_pipetteobj.position,
+                    tiprack_names=[tiprack.name for tiprack in self.tiprackqueryset],
+                )
+            )
+
         # Set up tip tracking
         logger.info("Setting up tip tracking system")
         self.content.extend(
@@ -262,6 +282,29 @@ class ScriptGenerator:
         self.content.extend(
             self.command_generator.get_drop_tip_function(pipette_name=self.pipettename)
         )
+
+        # Add MC tip functions if multi-channel pipette present
+        if self.mc_pipetteobj:
+            logger.info("Adding multi-channel tip state and functions")
+            self.content.extend(
+                self.command_generator.get_number_tips_available_setup(
+                    num_tipracks=len(self.tiprackqueryset),
+                    channel_type="multi",
+                    suffix="MC",
+                )
+            )
+            self.content.extend(
+                self.command_generator.get_pickup_tip_function(
+                    pipette_name=self.mc_pipettename,
+                    suffix="MC",
+                )
+            )
+            self.content.extend(
+                self.command_generator.get_drop_tip_function(
+                    pipette_name=self.mc_pipettename,
+                    suffix="MC",
+                )
+            )
 
         logger.info("Script setup completed")
 
