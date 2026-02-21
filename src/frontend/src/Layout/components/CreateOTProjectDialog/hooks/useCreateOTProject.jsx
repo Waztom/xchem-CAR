@@ -11,6 +11,7 @@ import {
   getOtProjectsQueryKey,
   getOtProjectTaskStatusQueryKey
 } from '../../../../common/api/otProjectsQueryKeys';
+import { getBatchProtocolQueryKey } from '../../../../common/api/otBatchProtocolQueryKeys';
 import { useGlobalSnackbar } from '../../../../common/hooks/useGlobalSnackbar';
 
 export const useCreateOTProject = () => {
@@ -42,6 +43,8 @@ export const useCreateOTProject = () => {
           closeSnackbar(creatingMessageId);
 
           queryClient.invalidateQueries(otProjectsQueryKey);
+          // Invalidate all batch protocol queries so the robot icon appears
+          queryClient.invalidateQueries('/otbatchprotocols/');
 
           enqueueSnackbarSuccess('OT protocol has been generated successfully', {
             action: key => <CloseSnackbarButton messageId={key} />

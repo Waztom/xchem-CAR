@@ -546,10 +546,13 @@ class OTProjectViewSet(viewsets.ModelViewSet):
                 if file_key in request.FILES:
                     custom_files[str(batch_id)] = request.FILES[file_key]
 
+        use_multichannel = request.data.get("use_multichannel", "false") == "true"
+
         task_id = initiate_ot_project(
             batch_ids=batch_ids,
             protocol_name=protocol_name,
             custom_files=custom_files,
+            use_multichannel=use_multichannel,
         )
 
         return JsonResponse(data={"task_id": task_id})
