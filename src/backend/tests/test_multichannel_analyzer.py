@@ -63,6 +63,32 @@ def _make_partial_column(col_index, count, smiles="CCO", volume=50.0, wells_per_
     ]
 
 
+def _make_uniform_sub_column(
+    col_index,
+    sub_col_index,
+    smiles="CCO",
+    volume=50.0,
+    wells_per_column=16,
+    pipette_channels=8,
+):
+    """Create WellInfo entries for one sub-column of a 384-well plate.
+
+    sub_col_index 0 → even row indices (0, 2, 4, …)
+    sub_col_index 1 → odd  row indices (1, 3, 5, …)
+    """
+    sub_cols = max(1, wells_per_column // pipette_channels)
+    group_size = min(wells_per_column, pipette_channels)
+    col_start = col_index * wells_per_column
+    return [
+        WellInfo(
+            index=col_start + sub_col_index + i * sub_cols,
+            smiles=smiles,
+            volume=volume,
+        )
+        for i in range(group_size)
+    ]
+
+
 # ===================================================================
 # Identity key tests
 # ===================================================================
@@ -116,6 +142,37 @@ class TestColumnHelpers(TestCase):
         self.assertEqual(a384.get_column_index_for_well(15), 0)
         self.assertEqual(a384.get_column_index_for_well(16), 1)
         self.assertEqual(a384.get_column_index_for_well(383), 23)
+
+    def test_384_sub_column_indices(self):
+        """384-well sub-columns: even/odd row interleaving."""
+        a384 = MultichannelAnalyzer(wells_per_column=16, num_columns=24)
+        # Sub-column 0 of column 0 → even rows: 0,2,4,6,8,10,12,14
+        self.assertEqual(
+            a384.get_sub_column_well_indices(0, 0),
+            [0, 2, 4, 6, 8, 10, 12, 14],
+        )
+        # Sub-column 1 of column 0 → odd rows: 1,3,5,7,9,11,13,15
+        self.assertEqual(
+            a384.get_sub_column_well_indices(0, 1),
+            [1, 3, 5, 7, 9, 11, 13, 15],
+        )
+        # Sub-column 0 of column 1 → 16,18,20,22,24,26,28,30
+        self.assertEqual(
+            a384.get_sub_column_well_indices(1, 0),
+            [16, 18, 20, 22, 24, 26, 28, 30],
+        )
+
+    def test_96_well_sub_column_same_as_full_column(self):
+        """96-well: sub-column 0 == full column (sub_columns_per_column=1)."""
+        a96 = MultichannelAnalyzer(wells_per_column=8, num_columns=12)
+        self.assertEqual(
+            a96.get_sub_column_well_indices(0, 0),
+            list(range(0, 8)),
+        )
+        self.assertEqual(
+            a96.get_sub_column_well_indices(2, 0),
+            list(range(16, 24)),
+        )
 
     # --- get_well_indices_for_column ---
     def test_column_0_indices(self):
@@ -303,20 +360,81 @@ class TestAnalyzePlate96Well(TestCase):
 # analyze_plate — 384- and 24-well plates
 # ===================================================================
 class TestAnalyzePlate384Well(TestCase):
-    """analyze_plate on a 384-well plate (16 rows × 24 columns)."""
+    """analyze_plate on a 384-well plate (16 rows × 24 columns).
+
+    The 8-channel pipette reaches every other row, so each physical
+    column contains two sub-columns of 8 wells.
+    """
 
     def setUp(self):
         self.analyzer = MultichannelAnalyzer(wells_per_column=16, num_columns=24)
 
-    def test_full_column_384(self):
+    def test_full_uniform_column_produces_two_mc_groups(self):
+        """All 16 wells identical → 2 MC groups (one per sub-column)."""
         wells = _make_uniform_column(0, smiles="CCO", volume=50.0, wells_per_column=16)
         result = self.analyzer.analyze_plate(wells)
-        self.assertEqual(len(result.multichannel_groups), 1)
-        self.assertEqual(len(result.multichannel_groups[0].well_indices), 16)
+        self.assertEqual(len(result.multichannel_groups), 2)
+        self.assertEqual(len(result.multichannel_groups[0].well_indices), 8)
+        self.assertEqual(len(result.multichannel_groups[1].well_indices), 8)
+        self.assertEqual(result.multichannel_well_count, 16)
+        self.assertAlmostEqual(result.efficiency, 1.0)
 
-    def test_partial_column_384(self):
+    def test_sub_column_indices_are_interleaved(self):
+        """MC groups from a 384-well column use interleaved indices."""
+        wells = _make_uniform_column(0, smiles="CCO", volume=50.0, wells_per_column=16)
+        result = self.analyzer.analyze_plate(wells)
+        g0 = result.multichannel_groups[0]
+        g1 = result.multichannel_groups[1]
+        self.assertEqual(g0.well_indices, [0, 2, 4, 6, 8, 10, 12, 14])
+        self.assertEqual(g1.well_indices, [1, 3, 5, 7, 9, 11, 13, 15])
+        self.assertEqual(g0.sub_column_index, 0)
+        self.assertEqual(g1.sub_column_index, 1)
+
+    def test_only_even_sub_column_filled(self):
+        """8 wells at even rows → 1 MC group; odd rows empty → nothing."""
+        wells = _make_uniform_sub_column(0, sub_col_index=0, smiles="CCO", volume=50.0)
+        result = self.analyzer.analyze_plate(wells)
+        self.assertEqual(len(result.multichannel_groups), 1)
+        self.assertEqual(result.multichannel_groups[0].sub_column_index, 0)
+        self.assertEqual(len(result.multichannel_groups[0].well_indices), 8)
+
+    def test_only_odd_sub_column_filled(self):
+        """8 wells at odd rows → 1 MC group."""
+        wells = _make_uniform_sub_column(0, sub_col_index=1, smiles="CCO", volume=50.0)
+        result = self.analyzer.analyze_plate(wells)
+        self.assertEqual(len(result.multichannel_groups), 1)
+        self.assertEqual(result.multichannel_groups[0].sub_column_index, 1)
+
+    def test_even_uniform_odd_mixed_reagents(self):
+        """Even sub-column uniform → MC; odd sub-column mixed → cherry-picks."""
+        even_wells = _make_uniform_sub_column(0, sub_col_index=0, smiles="CCO", volume=50.0)
+        odd_wells = _make_uniform_sub_column(0, sub_col_index=1, smiles="CCO", volume=50.0)
+        # Break odd sub-column uniformity
+        odd_wells[3] = WellInfo(index=odd_wells[3].index, smiles="DIFFERENT", volume=50.0)
+        result = self.analyzer.analyze_plate(even_wells + odd_wells)
+        self.assertEqual(len(result.multichannel_groups), 1)  # even only
+        self.assertEqual(result.multichannel_groups[0].sub_column_index, 0)
+        self.assertEqual(result.cherry_pick_well_count, 8)  # odd sub-column
+
+    def test_partial_sub_column(self):
+        """Fewer than 8 wells in a sub-column → incomplete, cherry-picks."""
+        # Only 5 wells at even positions in column 0
+        col_start = 0
+        wells = [
+            WellInfo(index=col_start + i * 2, smiles="CCO", volume=50.0)
+            for i in range(5)
+        ]
+        result = self.analyzer.analyze_plate(wells)
+        self.assertEqual(len(result.multichannel_groups), 0)
+        self.assertEqual(result.cherry_pick_well_count, 5)
+
+    def test_partial_column_12_wells(self):
+        """12 of 16 wells → potentially one sub-col full, one partial."""
+        # Wells 0-11 of column 0
         wells = _make_partial_column(0, count=12, wells_per_column=16)
         result = self.analyzer.analyze_plate(wells)
+        # Even sub-col: indices 0,2,4,6,8,10 = 6 wells (incomplete)
+        # Odd sub-col: indices 1,3,5,7,9,11 = 6 wells (incomplete)
         self.assertEqual(len(result.multichannel_groups), 0)
         self.assertEqual(result.cherry_pick_well_count, 12)
 
@@ -643,7 +761,10 @@ class TestAnalyzeCustomPlateCsv(TestCase):
         self.assertEqual(result.column_analyses[0].reason, "mixed_reagents")
 
     def test_csv_override_plate_dimensions(self):
-        """Override to 384-well dimensions."""
+        """Override to 384-well dimensions.
+
+        All 16 wells in column 0 → 2 MC groups (one per sub-column of 8).
+        """
         rows = [
             {"well-index": str(i), "SMILES": "CCO", "amount-uL": "50.0"}
             for i in range(16)
@@ -651,8 +772,9 @@ class TestAnalyzeCustomPlateCsv(TestCase):
         result = self.analyzer.analyze_custom_plate_csv(
             rows, wells_per_column=16, num_columns=24
         )
-        self.assertEqual(len(result.multichannel_groups), 1)
-        self.assertEqual(len(result.multichannel_groups[0].well_indices), 16)
+        self.assertEqual(len(result.multichannel_groups), 2)
+        self.assertEqual(len(result.multichannel_groups[0].well_indices), 8)
+        self.assertEqual(len(result.multichannel_groups[1].well_indices), 8)
 
     def test_csv_restores_original_dimensions(self):
         """After calling with overrides, original dimensions must be restored."""
@@ -663,6 +785,9 @@ class TestAnalyzeCustomPlateCsv(TestCase):
         )
         self.assertEqual(self.analyzer.wells_per_column, 8)
         self.assertEqual(self.analyzer.num_columns, 12)
+        # Derived sub-column properties must also be restored
+        self.assertEqual(self.analyzer.wells_per_group, 8)
+        self.assertEqual(self.analyzer.sub_columns_per_column, 1)
 
     def test_csv_identical_to_wellinfo_analysis(self):
         """CSV analysis must produce the same result as direct WellInfo analysis."""

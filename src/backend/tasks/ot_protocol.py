@@ -57,6 +57,7 @@ def _process_reaction_step_sessions(
     otbatchprotocolobj,
     custom_sm_csv_path,
     batchtag,
+    use_multichannel=False,
 ):
     """Shared logic for processing a single reaction step.
 
@@ -75,6 +76,9 @@ def _process_reaction_step_sessions(
         Path to a custom starting-material CSV, if any.
     batchtag : str or None
         Batch tag for session naming.
+    use_multichannel : bool, optional
+        When True, starter plates are laid out for multichannel
+        pipette column transfers where possible (default False).
     """
     actionsessionqueryset = get_action_session_query_set(
         reaction_ids=reaction_ids
@@ -104,11 +108,12 @@ def _process_reaction_step_sessions(
                 actionsessionqueryset=robot_qs,
                 customSMcsvpath=custom_sm_csv_path,
                 batchtag=batchtag,
+                use_multichannel=use_multichannel,
             )
 
 
 @shared_task
-def create_ot_script(batchids: list, protocol_name: str, custom_SM_files: dict = None):
+def create_ot_script(batchids: list, protocol_name: str, custom_SM_files: dict = None, use_multichannel: bool = False):
     """Create OT scripts and starting plates for a list of batch IDs.
 
     Parameters
@@ -212,6 +217,7 @@ def create_ot_script(batchids: list, protocol_name: str, custom_SM_files: dict =
                     otbatchprotocolobj=otbatchprotocolobj,
                     custom_sm_csv_path=custom_sm_csv_path,
                     batchtag=batchtag,
+                    use_multichannel=use_multichannel,
                 )
 
             zip_protocol = ZipOTBatchProtocol(
@@ -238,6 +244,7 @@ def create_multiple_ot_sessions(
     customSMcsvpath: str = None,
     max_reactions_per_session: int = None,
     batchtag: str = None,
+    use_multichannel: bool = False,
 ):
     """Splits a large reaction set into multiple OT sessions to prevent deck overflow.
 
@@ -296,6 +303,7 @@ def create_multiple_ot_sessions(
                 otbatchprotocolobj=otbatchprotocolobj,
                 actionsessionqueryset=group_action_sessions,
                 customSMcsvpath=customSMcsvpath,
+                use_multichannel=use_multichannel,
             )
 
             orchestrator.execute()
@@ -384,6 +392,7 @@ def create_multiple_ot_sessions(
                     customSMcsvpath=customSMcsvpath,
                     max_reactions_per_session=smaller_max,
                     batchtag=batchtag,
+                    use_multichannel=use_multichannel,
                 )
                 created_sessions.extend(sub_sessions)
             else:

@@ -43,16 +43,23 @@ class WellInfo:
 
 @dataclass
 class MultichannelGroup:
-    """A group of wells forming a full column eligible for multi-channel transfer.
+    """A group of wells eligible for multi-channel transfer.
+
+    For 96-well plates this is a full column (8 wells).  For 384-well
+    plates the 8-channel pipette accesses every other row, so each
+    physical column contains two sub-columns of 8 wells each.
 
     Attributes
     ----------
     column_index : int
-        0-based column index on the plate.
+        0-based physical column index on the plate.
+    sub_column_index : int
+        Sub-column within the physical column (0 for 96/24-well;
+        0 or 1 for 384-well).
     well_indices : list of int
-        The well indices that make up this column.
+        The well indices that make up this group.
     smiles : str
-        The shared SMILES for all wells in the column.
+        The shared SMILES for all wells in the group.
     volume : float
         The shared transfer volume.
     concentration : float or None
@@ -62,6 +69,7 @@ class MultichannelGroup:
     """
 
     column_index: int
+    sub_column_index: int = 0
     well_indices: List[int] = field(default_factory=list)
     smiles: str = ""
     volume: float = 0.0
@@ -100,14 +108,21 @@ class CherryPickWell:
 
 @dataclass
 class ColumnAnalysis:
-    """Analysis result for a single column.
+    """Analysis result for a sub-column (or full column on 96/24-well plates).
+
+    On 384-well plates each physical column produces two
+    ``ColumnAnalysis`` entries (one per sub-column the 8-channel
+    pipette can reach).
 
     Attributes
     ----------
     column_index : int
-        0-based column index.
+        0-based physical column index.
+    sub_column_index : int
+        Sub-column within the physical column (0 for 96/24-well;
+        0 or 1 for 384-well).
     wells : list of WellInfo
-        Wells in this column.
+        Wells in this sub-column.
     is_multichannel_eligible : bool
         True if all wells share the same identity key and volume.
     reason : str
@@ -119,6 +134,7 @@ class ColumnAnalysis:
     """
 
     column_index: int
+    sub_column_index: int = 0
     wells: List[WellInfo] = field(default_factory=list)
     is_multichannel_eligible: bool = False
     reason: str = ""
@@ -179,9 +195,11 @@ class MaterialGroup:
     reaction_count : int
         Number of reactions that use this material at this volume.
     columns_needed : int
-        Number of full columns needed (ceil(reaction_count / wells_per_column)).
+        Number of full MC groups needed (ceil(reaction_count /
+        wells_per_group)).  For 384-well plates each physical column
+        holds two groups.
     leftover_wells : int
-        Reactions that don't fill a complete column.
+        Reactions that don't fill a complete MC group.
     """
 
     identity_key: str
@@ -197,22 +215,27 @@ class MaterialGroup:
 class MultichannelAnalyzer:
     """Analyzes plates and materials for multi-channel pipette compatibility.
 
-    A multi-channel pipette operates on a full column (all rows) simultaneously.
-    For a transfer to be multichannel-eligible:
-    1. Every well in the column must contain the same reagent (SMILES + solvent +
-       concentration).
-    2. Every well in the column must transfer the same volume.
-    3. The column must be fully occupied (no empty wells).
+    An 8-channel pipette has tips spaced at 9 mm (96-well pitch).  On a
+    384-well plate (4.5 mm pitch, 16 rows) the pipette reaches every
+    other row, producing two *sub-columns* of 8 wells per physical
+    column.  For a transfer to be multichannel-eligible:
+
+    1. Every well in the sub-column must contain the same reagent
+       (SMILES + solvent + concentration).
+    2. Every well in the sub-column must transfer the same volume.
+    3. The sub-column must be fully occupied (no empty wells).
 
     Parameters
     ----------
     wells_per_column : int
-        Number of wells in each column (8 for 96-well, 16 for 384-well, 4 for
-        24-well). Default 8.
+        Physical rows per column (8 for 96-well, 16 for 384-well, 4 for
+        24-well).  Default 8.
     num_columns : int
-        Total number of columns on the plate. Default 12.
+        Total physical columns on the plate.  Default 12.
     volume_tolerance : float
         Relative tolerance for comparing volumes (default 0.001, i.e. 0.1%).
+    pipette_channels : int
+        Number of channels on the multi-channel pipette.  Default 8.
     """
 
     def __init__(
@@ -220,10 +243,22 @@ class MultichannelAnalyzer:
         wells_per_column: int = 8,
         num_columns: int = 12,
         volume_tolerance: float = 0.001,
+        pipette_channels: int = 8,
     ):
         self.wells_per_column = wells_per_column
         self.num_columns = num_columns
         self.volume_tolerance = volume_tolerance
+        self.pipette_channels = pipette_channels
+
+        #: Wells the pipette can access in one pass within a column.
+        #: Equals ``min(wells_per_column, pipette_channels)``.
+        self.wells_per_group: int = min(wells_per_column, pipette_channels)
+
+        #: Number of independent sub-columns per physical column.
+        #: 1 for 96/24-well, 2 for 384-well with an 8-channel pipette.
+        self.sub_columns_per_column: int = max(
+            1, wells_per_column // pipette_channels
+        )
 
     # ------------------------------------------------------------------
     # Identity key helper
@@ -284,6 +319,39 @@ class MultichannelAnalyzer:
         start = column_index * self.wells_per_column
         return list(range(start, start + self.wells_per_column))
 
+    def get_sub_column_well_indices(
+        self, column_index: int, sub_column_index: int = 0
+    ) -> List[int]:
+        """Return the well indices for one sub-column within a physical column.
+
+        For plates where ``wells_per_column <= pipette_channels`` (e.g. 96-well)
+        this returns the same result as :meth:`get_well_indices_for_column`.
+
+        For 384-well plates (``wells_per_column=16, pipette_channels=8``) each
+        column is split into two interleaved sub-columns:
+
+        * sub-column 0 → even row indices (A, C, E, G, I, K, M, O)
+        * sub-column 1 → odd row indices  (B, D, F, H, J, L, N, P)
+
+        Parameters
+        ----------
+        column_index : int
+            0-based physical column.
+        sub_column_index : int
+            0-based sub-column within the physical column.
+
+        Returns
+        -------
+        indices : list of int
+        """
+        col_start = column_index * self.wells_per_column
+        if self.sub_columns_per_column <= 1:
+            return list(range(col_start, col_start + self.wells_per_column))
+        return [
+            col_start + sub_column_index + i * self.sub_columns_per_column
+            for i in range(self.wells_per_group)
+        ]
+
     # ------------------------------------------------------------------
     # 1. Analyze an existing plate (custom starter plate CSV or DB wells)
     # ------------------------------------------------------------------
@@ -291,8 +359,9 @@ class MultichannelAnalyzer:
     def analyze_plate(self, wells: List[WellInfo]) -> PlateAnalysisResult:
         """Analyze an existing plate layout for multichannel compatibility.
 
-        Groups wells by column, then checks each column for uniformity of
-        reagent identity and transfer volume.
+        Groups wells by column (and sub-column on 384-well plates), then
+        checks each group for uniformity of reagent identity and transfer
+        volume.
 
         Parameters
         ----------
@@ -312,37 +381,50 @@ class MultichannelAnalyzer:
         cherry_pick_wells = []
 
         for col_idx in range(self.num_columns):
-            col_well_indices = self.get_well_indices_for_column(col_idx)
-            col_wells = [
-                well_map[idx] for idx in col_well_indices if idx in well_map
-            ]
+            # Track which wells in this column are claimed by an MC group
+            # so the remainder become cherry-picks.
+            mc_claimed_indices: set = set()
 
-            analysis = self._analyze_column(col_idx, col_well_indices, col_wells)
-            column_analyses.append(analysis)
-
-            if analysis.is_multichannel_eligible:
-                group = MultichannelGroup(
-                    column_index=col_idx,
-                    well_indices=[w.index for w in col_wells],
-                    smiles=col_wells[0].smiles,
-                    volume=col_wells[0].volume,
-                    concentration=col_wells[0].concentration,
-                    solvent=col_wells[0].solvent,
+            for sub_col_idx in range(self.sub_columns_per_column):
+                sub_col_well_indices = self.get_sub_column_well_indices(
+                    col_idx, sub_col_idx
                 )
-                multichannel_groups.append(group)
-            else:
-                # Every occupied well in this column is a cherry-pick
-                for w in col_wells:
-                    cherry_pick_wells.append(
-                        CherryPickWell(
-                            well_index=w.index,
-                            smiles=w.smiles or "",
-                            volume=w.volume,
-                            concentration=w.concentration,
-                            solvent=w.solvent,
-                            reason=analysis.reason,
-                        )
+                sub_col_wells = [
+                    well_map[idx]
+                    for idx in sub_col_well_indices
+                    if idx in well_map
+                ]
+
+                analysis = self._analyze_column(
+                    col_idx, sub_col_well_indices, sub_col_wells,
+                    sub_column_index=sub_col_idx,
+                )
+                column_analyses.append(analysis)
+
+                if analysis.is_multichannel_eligible:
+                    group = MultichannelGroup(
+                        column_index=col_idx,
+                        sub_column_index=sub_col_idx,
+                        well_indices=[w.index for w in sub_col_wells],
+                        smiles=sub_col_wells[0].smiles,
+                        volume=sub_col_wells[0].volume,
+                        concentration=sub_col_wells[0].concentration,
+                        solvent=sub_col_wells[0].solvent,
                     )
+                    multichannel_groups.append(group)
+                    mc_claimed_indices.update(w.index for w in sub_col_wells)
+                else:
+                    for w in sub_col_wells:
+                        cherry_pick_wells.append(
+                            CherryPickWell(
+                                well_index=w.index,
+                                smiles=w.smiles or "",
+                                volume=w.volume,
+                                concentration=w.concentration,
+                                solvent=w.solvent,
+                                reason=analysis.reason,
+                            )
+                        )
 
         mc_count = sum(len(g.well_indices) for g in multichannel_groups)
         cp_count = len(cherry_pick_wells)
@@ -363,30 +445,37 @@ class MultichannelAnalyzer:
         col_idx: int,
         expected_indices: List[int],
         occupied_wells: List[WellInfo],
+        sub_column_index: int = 0,
     ) -> ColumnAnalysis:
-        """Analyze a single column for multichannel eligibility.
+        """Analyze a single sub-column for multichannel eligibility.
 
         Parameters
         ----------
         col_idx : int
-            Column index.
+            Physical column index.
         expected_indices : list of int
-            All well indices that should be filled for a full column.
+            All well indices that should be filled for a full group.
         occupied_wells : list of WellInfo
-            Wells actually present in this column.
+            Wells actually present in this sub-column.
+        sub_column_index : int
+            Sub-column within the physical column.
 
         Returns
         -------
         analysis : ColumnAnalysis
         """
-        analysis = ColumnAnalysis(column_index=col_idx, wells=occupied_wells)
+        analysis = ColumnAnalysis(
+            column_index=col_idx,
+            sub_column_index=sub_column_index,
+            wells=occupied_wells,
+        )
 
-        # Column must be fully occupied
+        # Sub-column must be fully occupied
         if len(occupied_wells) == 0:
             analysis.reason = "empty_column"
             return analysis
 
-        if len(occupied_wells) < self.wells_per_column:
+        if len(occupied_wells) < self.wells_per_group:
             analysis.reason = "incomplete_column"
             return analysis
 
@@ -446,17 +535,24 @@ class MultichannelAnalyzer:
             Each dict must have keys: 'smiles', 'volume', 'reaction_count'.
             Optional keys: 'solvent', 'concentration'.
         wells_per_column : int or None
-            Override instance default if needed.
+            Override instance default if needed.  Ignored when
+            ``wells_per_column > pipette_channels``; in that case the
+            effective group size (``wells_per_group``) is used instead.
 
         Returns
         -------
         multichannel_materials : list of MaterialGroup
-            Materials that can fill at least one full column, sorted by
+            Materials that can fill at least one full MC group, sorted by
             priority (descending).
         single_channel_materials : list of MaterialGroup
-            Materials that cannot fill a full column.
+            Materials that cannot fill a full MC group.
         """
-        wpc = wells_per_column or self.wells_per_column
+        # The group size is how many wells the pipette can transfer in
+        # one pass — equals min(wells_per_column, pipette_channels).
+        if wells_per_column is not None:
+            wpg = min(wells_per_column, self.pipette_channels)
+        else:
+            wpg = self.wells_per_group
 
         # Group by identity key + volume
         groups: Dict[str, MaterialGroup] = {}
@@ -482,10 +578,11 @@ class MultichannelAnalyzer:
 
             groups[group_key].reaction_count += mat["reaction_count"]
 
-        # Calculate columns needed and leftovers
+        # Calculate groups needed and leftovers using the effective
+        # pipette group size (8 for both 96- and 384-well plates).
         for g in groups.values():
-            g.columns_needed = g.reaction_count // wpc
-            g.leftover_wells = g.reaction_count % wpc
+            g.columns_needed = g.reaction_count // wpg
+            g.leftover_wells = g.reaction_count % wpg
 
         # Split into multichannel-eligible (≥1 full column) vs single-channel
         multichannel = []
@@ -553,24 +650,29 @@ class MultichannelAnalyzer:
         """
         nc = num_columns or self.num_columns
         wpc = wells_per_column or self.wells_per_column
+        wpg = min(wpc, self.pipette_channels)
+        spc = max(1, wpc // self.pipette_channels)  # sub-columns per column
 
-        next_column = 0  # Next available column for multichannel
-        next_sequential_index = None  # Will be set after multichannel columns
+        # Track placement by (column, sub_column) slots.
+        next_column = 0
+        next_sub_column = 0  # within current column
 
         multichannel_groups = []
         cherry_pick_wells = []
 
-        # --- Phase A: Assign full columns for multichannel materials ---
+        total_mc_slots = nc * spc  # total sub-column slots available
+        used_mc_slots = 0
+
+        # --- Phase A: Assign sub-column slots for multichannel materials ---
         leftover_single_channel = []
 
         for mat in multichannel_materials:
             for _ in range(mat.columns_needed):
-                if next_column >= nc:
+                if used_mc_slots >= total_mc_slots:
                     logger.warning(
-                        "Ran out of columns for multichannel placement; "
-                        "remaining reactions will use single-channel"
+                        "Ran out of sub-column slots for multichannel "
+                        "placement; remaining reactions will use single-channel"
                     )
-                    # Remaining full columns become leftovers
                     leftover_single_channel.append(
                         MaterialGroup(
                             identity_key=mat.identity_key,
@@ -578,15 +680,18 @@ class MultichannelAnalyzer:
                             volume=mat.volume,
                             concentration=mat.concentration,
                             solvent=mat.solvent,
-                            reaction_count=wpc,
+                            reaction_count=wpg,
                         )
                     )
                     continue
 
-                well_indices = self.get_well_indices_for_column(next_column)
+                well_indices = self.get_sub_column_well_indices(
+                    next_column, next_sub_column
+                )
                 multichannel_groups.append(
                     MultichannelGroup(
                         column_index=next_column,
+                        sub_column_index=next_sub_column,
                         well_indices=well_indices,
                         smiles=mat.smiles,
                         volume=mat.volume,
@@ -594,9 +699,13 @@ class MultichannelAnalyzer:
                         solvent=mat.solvent,
                     )
                 )
-                next_column += 1
+                used_mc_slots += 1
+                next_sub_column += 1
+                if next_sub_column >= spc:
+                    next_sub_column = 0
+                    next_column += 1
 
-            # Leftover reactions from this material that don't fill a column
+            # Leftover reactions from this material that don't fill a group
             if mat.leftover_wells > 0:
                 leftover_single_channel.append(
                     MaterialGroup(
@@ -610,8 +719,12 @@ class MultichannelAnalyzer:
                 )
 
         # --- Phase B: Fill remaining wells sequentially for single-channel ---
-        # Start sequential filling after the last multichannel column
-        next_sequential_index = next_column * wpc
+        # Start sequential filling after the last fully-used MC column.
+        # If we consumed part of a column (sub_column > 0), the remaining
+        # sub-column wells in that column are NOT used for SC — the column
+        # is reserved.  SC starts at the next full column.
+        first_sc_column = next_column + (1 if next_sub_column > 0 else 0)
+        next_sequential_index = first_sc_column * wpc
 
         all_single = leftover_single_channel + list(single_channel_materials)
 
@@ -639,7 +752,8 @@ class MultichannelAnalyzer:
                 next_sequential_index += 1
 
         logger.info(
-            f"Plate layout planned: {len(multichannel_groups)} multichannel columns, "
+            f"Plate layout planned: {len(multichannel_groups)} multichannel groups "
+            f"({used_mc_slots} sub-column slots), "
             f"{len(cherry_pick_wells)} cherry-pick wells"
         )
 
@@ -679,8 +793,13 @@ class MultichannelAnalyzer:
         # Temporarily override instance values for this analysis
         original_wpc = self.wells_per_column
         original_nc = self.num_columns
+        original_wpg = self.wells_per_group
+        original_spc = self.sub_columns_per_column
+
         self.wells_per_column = wpc
         self.num_columns = nc
+        self.wells_per_group = min(wpc, self.pipette_channels)
+        self.sub_columns_per_column = max(1, wpc // self.pipette_channels)
 
         try:
             well_infos = []
@@ -703,3 +822,5 @@ class MultichannelAnalyzer:
         finally:
             self.wells_per_column = original_wpc
             self.num_columns = original_nc
+            self.wells_per_group = original_wpg
+            self.sub_columns_per_column = original_spc

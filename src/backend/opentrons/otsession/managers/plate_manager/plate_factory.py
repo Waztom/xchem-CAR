@@ -1,4 +1,5 @@
 import logging
+import math
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Descriptors
@@ -7,6 +8,7 @@ from .....models import Plate
 from .....conversions import sanitize_for_python_var
 from .....recipe_utils import unparse_plate_type
 from ....labwareavailable import labware_plates
+from ..multichannel_analyzer import MultichannelAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -411,6 +413,10 @@ class PlateFactory:
         Creates a starting material plate for reaction materials, respecting the maximum
         fill percentage defined in labware configuration.
 
+        When ``self.session.use_multichannel`` is True, delegates to
+        :meth:`_create_multichannel_starting_plate` which lays out
+        reagents in full-column groups for 8-channel pipette transfers.
+
         Returns
         -------
         plate_obj: Plate
@@ -425,6 +431,412 @@ class PlateFactory:
         if materials_df.empty:
             logger.info("No materials needed for starting plate")
             return None
+
+        # Branch: multichannel-aware layout or standard sequential layout
+        if getattr(self.session, "use_multichannel", False):
+            return self._create_multichannel_starting_plate(materials_df)
+
+        return self._create_sequential_starting_plate(materials_df)
+
+    # ------------------------------------------------------------------
+    # Multichannel-aware starter plate layout
+    # ------------------------------------------------------------------
+
+    def _create_multichannel_starting_plate(self, materials_df):
+        """Create a starting material plate with multichannel-aware column layout.
+
+        Multichannel-eligible reagents (used in ≥ ``wells_per_column`` reactions
+        with the same volume) are placed in full, uniform columns so that an
+        8-channel pipette can aspirate from the entire column at once.  Each
+        source well in a multichannel column holds enough volume for *N*
+        transfers, where *N = ceil(reaction_count / wells_per_column)*.
+
+        Remaining reagents (too few reactions, or leftover fractions) revert
+        to the standard sequential approach: one well per reagent with the
+        summed total volume.
+
+        Parameters
+        ----------
+        materials_df : pd.DataFrame
+            Output of ``MaterialManager.get_add_actions_material_dataframe()``.
+
+        Returns
+        -------
+        plate_obj : Plate or None
+        """
+        # --- 1. Build per-transfer materials list from raw add actions ---
+        addactionsdf = self.session.addactionsdf
+        if addactionsdf is None or addactionsdf.empty:
+            logger.warning("No add actions dataframe available for multichannel analysis")
+            return self._create_sequential_starting_plate(materials_df)
+
+        # Ensure uniquesolution column exists
+        if "uniquesolution" not in addactionsdf.columns:
+            addactionsdf["uniquesolution"] = addactionsdf.apply(
+                self.session.material_manager.combine_strings, axis=1
+            )
+
+        # Group raw add actions by (uniquesolution, volume) to get
+        # per-transfer volume and reaction counts
+        raw_groups = (
+            addactionsdf.groupby(["uniquesolution", "volume"])
+            .agg(
+                smiles=("smiles", "first"),
+                solvent=("solvent", "first"),
+                concentration=("concentration", "first"),
+                reaction_count=("reaction_id_id", "nunique"),
+            )
+            .reset_index()
+        )
+
+        # Only include materials that still need wells (present in materials_df)
+        materials_unique_solutions = set(materials_df["uniquesolution"].tolist())
+
+        materials_for_analysis = []
+        for _, row in raw_groups.iterrows():
+            if row["uniquesolution"] not in materials_unique_solutions:
+                continue
+            materials_for_analysis.append(
+                {
+                    "smiles": row["smiles"],
+                    "volume": row["volume"],
+                    "reaction_count": int(row["reaction_count"]),
+                    "solvent": row["solvent"] if pd.notna(row["solvent"]) else None,
+                    "concentration": (
+                        float(row["concentration"])
+                        if pd.notna(row["concentration"])
+                        else None
+                    ),
+                }
+            )
+
+        if not materials_for_analysis:
+            logger.info("No materials available for multichannel analysis, "
+                        "falling back to sequential layout")
+            return self._create_sequential_starting_plate(materials_df)
+
+        # --- 2. Determine plate labware ---
+        volumes = materials_df["volume"].tolist()
+        labware_type = self.session.labware_selector.get_plate_type(
+            role="startingmaterial", volumes=volumes, temperature=25
+        )
+
+        plate_obj = self.create_plate_model(
+            role="startingmaterial",
+            role_index=1,
+            platename="reaction-starting-materials-mc",
+            labwaretype=labware_type,
+        )
+        if not plate_obj:
+            logger.warning("Could not create starting material plate")
+            return None
+
+        wells_per_column = plate_obj.numberwellsincolumn
+        num_columns = plate_obj.numbercolumns
+        effective_max_volume = self.session.well_manager.get_max_well_volume(plate_obj)
+        raw_max_volume = plate_obj.maxwellvolume
+        dead_volume = self.session.labware_selector.get_dead_volume(raw_max_volume)
+
+        # --- 3. Run MultichannelAnalyzer ---
+        analyzer = MultichannelAnalyzer(
+            wells_per_column=wells_per_column,
+            num_columns=num_columns,
+        )
+        wells_per_group = analyzer.wells_per_group
+        sub_columns_per_column = analyzer.sub_columns_per_column
+
+        mc_materials, sc_materials = analyzer.prioritize_materials(
+            materials_for_analysis
+        )
+
+        logger.info(
+            f"Multichannel analysis: {len(mc_materials)} MC groups, "
+            f"{len(sc_materials)} SC groups "
+            f"(wells_per_group={wells_per_group}, "
+            f"sub_columns_per_column={sub_columns_per_column})"
+        )
+
+        order_dicts_list = []
+        next_column = 0       # Next available physical column
+        next_sub_column = 0   # Next available sub-column within that column
+
+        total_mc_slots = num_columns * sub_columns_per_column
+
+        # --- 4. Phase A: Place multichannel materials as sub-column groups ---
+        sc_leftover = []  # MC leftovers that fall back to sequential
+        mc_slots_used = 0
+
+        for mat in mc_materials:
+            # Volume per well in the source sub-column.
+            # Each channel serves ceil(reaction_count / wells_per_group)
+            # transfers from its well.
+            transfers_per_channel = math.ceil(
+                mat.reaction_count / wells_per_group
+            )
+            per_well_volume = (
+                mat.volume * transfers_per_channel * 1.15 + dead_volume
+            )
+
+            # If volume exceeds well capacity, we need multiple source groups
+            # (or fall back to sequential for the excess).
+            if per_well_volume > effective_max_volume:
+                # Max transfers one well can support
+                max_transfers = max(
+                    1,
+                    int((effective_max_volume - dead_volume) / (mat.volume * 1.15)),
+                )
+                groups_from_volume = math.ceil(
+                    mat.reaction_count / (wells_per_group * max_transfers)
+                )
+                per_well_volume_capped = (
+                    mat.volume * max_transfers * 1.15 + dead_volume
+                )
+                logger.info(
+                    f"MC material {mat.smiles}: volume per well {per_well_volume:.1f}µL "
+                    f"exceeds max {effective_max_volume:.1f}µL; "
+                    f"using {groups_from_volume} groups with {max_transfers} transfers/channel"
+                )
+            else:
+                groups_from_volume = 1
+                per_well_volume_capped = per_well_volume
+
+            actual_groups = max(groups_from_volume, 1)
+
+            for _ in range(actual_groups):
+                if mc_slots_used >= total_mc_slots:
+                    logger.warning(
+                        f"Plate full at column {next_column}; "
+                        f"remaining MC reactions for {mat.smiles} → sequential"
+                    )
+                    # Remaining goes to single-channel
+                    sc_leftover.append(mat)
+                    break
+
+                sub_col_well_indices = analyzer.get_sub_column_well_indices(
+                    next_column, next_sub_column
+                )
+
+                for well_idx in sub_col_well_indices:
+                    well_obj = self.session.well_manager.create_well_model(
+                        plate_obj=plate_obj,
+                        role="startingmaterial",
+                        role_index=1,
+                        wellindex=well_idx,
+                        volume=round(per_well_volume_capped, 2),
+                        smiles=mat.smiles,
+                        concentration=mat.concentration,
+                        solvent=mat.solvent,
+                        transfer_type="multichannel",
+                    )
+                    if well_obj:
+                        order_dicts_list.append(
+                            {
+                                "SMILES": mat.smiles,
+                                "plate-name": plate_obj.name,
+                                "labware": plate_obj.labware,
+                                "well-index": well_obj.index,
+                                "well-name": well_obj.name,
+                                "concentration": mat.concentration,
+                                "solvent": mat.solvent,
+                                "molecularweight": None,
+                                "amount-uL": round(per_well_volume_capped, 2),
+                            }
+                        )
+
+                mc_slots_used += 1
+                next_sub_column += 1
+                if next_sub_column >= sub_columns_per_column:
+                    # Finished all sub-columns for this physical column.
+                    # Update plate indices past this physical column.
+                    next_well_after_column = (next_column + 1) * wells_per_column
+                    self.session.well_manager.update_plate_well_index(
+                        plate_obj=plate_obj,
+                        wellindexupdate=next_well_after_column,
+                    )
+                    self.session.column_manager.update_plate_column_index_available(
+                        plate_obj=plate_obj,
+                        columnindexupdate=next_column + 1,
+                    )
+                    next_sub_column = 0
+                    next_column += 1
+
+            # Leftovers (reactions that don't fill a full column) go to SC
+            if mat.leftover_wells > 0:
+                sc_leftover.append(
+                    type(mat)(
+                        identity_key=mat.identity_key,
+                        smiles=mat.smiles,
+                        volume=mat.volume,
+                        concentration=mat.concentration,
+                        solvent=mat.solvent,
+                        reaction_count=mat.leftover_wells,
+                        columns_needed=0,
+                        leftover_wells=0,
+                    )
+                )
+
+        # --- 5. Phase B: Place single-channel materials sequentially ---
+        # Merge SC leftover + original SC materials.
+        # For sequential placement, use one well per unique reagent with
+        # the TOTAL volume (same as the existing approach).
+        # Retrieve the *adjusted* total per unique solution from materials_df.
+        sc_unique_solutions = set()
+
+        # Add MC-leftover unique solutions (their total volume is a fraction)
+        for mat in sc_leftover:
+            sc_unique_solutions.add(
+                analyzer.make_identity_key(mat.smiles, mat.solvent, mat.concentration)
+            )
+        # Add genuinely single-channel unique solutions
+        for mat in sc_materials:
+            sc_unique_solutions.add(
+                analyzer.make_identity_key(mat.smiles, mat.solvent, mat.concentration)
+            )
+
+        # Process SC materials from materials_df (which has correct adjusted total volumes)
+        for _, row in materials_df.iterrows():
+            row_key = analyzer.make_identity_key(
+                row["smiles"],
+                row["solvent"] if pd.notna(row.get("solvent")) else None,
+                float(row["concentration"]) if pd.notna(row.get("concentration")) else None,
+            )
+            if row_key not in sc_unique_solutions:
+                continue
+
+            extra_error_volume = row["volume"] * 0.15
+            total_volume_needed = row["volume"] + extra_error_volume + dead_volume
+
+            well_idx = self.session.well_manager.get_plate_well_index_available(
+                plate_obj
+            )
+            if well_idx is False:
+                plate_obj = self.create_plate_model(
+                    role="startingmaterial",
+                    role_index=1,
+                    platename="reaction-starting-materials-mc",
+                    labwaretype=labware_type,
+                )
+                if not plate_obj:
+                    logger.warning("Could not create additional starting material plate")
+                    break
+                well_idx = self.session.well_manager.get_plate_well_index_available(
+                    plate_obj
+                )
+                effective_max_volume = self.session.well_manager.get_max_well_volume(
+                    plate_obj
+                )
+
+            # Handle volume overflow — split into multiple wells
+            if total_volume_needed > effective_max_volume:
+                remaining_volume = total_volume_needed
+                while remaining_volume > 0:
+                    volume_this_well = min(remaining_volume, effective_max_volume)
+                    well_obj = self.session.well_manager.create_well_model(
+                        plate_obj=plate_obj,
+                        role="startingmaterial",
+                        role_index=1,
+                        wellindex=well_idx,
+                        volume=round(volume_this_well, 2),
+                        smiles=row["smiles"],
+                        concentration=row["concentration"],
+                        solvent=row["solvent"],
+                        transfer_type="single",
+                    )
+                    if well_obj:
+                        order_dicts_list.append(
+                            {
+                                "SMILES": row["smiles"],
+                                "plate-name": plate_obj.name,
+                                "labware": plate_obj.labware,
+                                "well-index": well_obj.index,
+                                "well-name": well_obj.name,
+                                "concentration": row["concentration"],
+                                "solvent": row["solvent"],
+                                "molecularweight": row.get("molecularweight"),
+                                "amount-uL": round(volume_this_well, 2),
+                            }
+                        )
+                    remaining_volume -= volume_this_well
+                    self.session.well_manager.update_plate_well_index(
+                        plate_obj=plate_obj, wellindexupdate=well_idx + 1
+                    )
+                    if remaining_volume > 0:
+                        well_idx = (
+                            self.session.well_manager.get_plate_well_index_available(
+                                plate_obj
+                            )
+                        )
+                        if well_idx is False:
+                            plate_obj = self.create_plate_model(
+                                role="startingmaterial",
+                                role_index=1,
+                                platename="reaction-starting-materials-mc",
+                                labwaretype=labware_type,
+                            )
+                            if not plate_obj:
+                                break
+                            well_idx = (
+                                self.session.well_manager.get_plate_well_index_available(
+                                    plate_obj
+                                )
+                            )
+            else:
+                well_obj = self.session.well_manager.create_well_model(
+                    plate_obj=plate_obj,
+                    role="startingmaterial",
+                    role_index=1,
+                    wellindex=well_idx,
+                    volume=round(total_volume_needed, 2),
+                    smiles=row["smiles"],
+                    concentration=row["concentration"],
+                    solvent=row["solvent"],
+                    transfer_type="single",
+                )
+                if well_obj:
+                    order_dicts_list.append(
+                        {
+                            "SMILES": row["smiles"],
+                            "plate-name": plate_obj.name,
+                            "labware": plate_obj.labware,
+                            "well-index": well_obj.index,
+                            "well-name": well_obj.name,
+                            "concentration": row["concentration"],
+                            "solvent": row["solvent"],
+                            "molecularweight": row.get("molecularweight"),
+                            "amount-uL": round(total_volume_needed, 2),
+                        }
+                    )
+                self.session.well_manager.update_plate_well_index(
+                    plate_obj=plate_obj, wellindexupdate=well_idx + 1
+                )
+
+        # --- 6. Create compound order ---
+        self._create_compound_order(order_dicts_list)
+
+        mc_well_count = mc_slots_used * wells_per_group
+        sc_well_count = len(order_dicts_list) - mc_well_count
+        logger.info(
+            f"Created multichannel starting plate: {mc_slots_used} MC groups "
+            f"({mc_well_count} wells), {sc_well_count} SC wells"
+        )
+        return plate_obj
+
+    # ------------------------------------------------------------------
+    # Standard sequential starter plate layout (original logic)
+    # ------------------------------------------------------------------
+
+    def _create_sequential_starting_plate(self, materials_df):
+        """Standard sequential starting plate layout (one well per reagent).
+
+        Parameters
+        ----------
+        materials_df : pd.DataFrame
+            Output of ``MaterialManager.get_add_actions_material_dataframe()``.
+
+        Returns
+        -------
+        plate_obj : Plate or None
+        """
 
         # Get total volumes for plate sizing
         volumes = materials_df["volume"].tolist()
@@ -614,43 +1026,61 @@ class PlateFactory:
             )
 
         # Create compound order from well assignments
-        if order_dicts_list:
-            order_df = pd.DataFrame(order_dicts_list)
-
-            # Calculate additional fields
-            if (
-                "molecularweight" not in order_df.columns
-                or order_df["molecularweight"].isna().any()
-            ):
-                order_df["molecularweight"] = order_df["SMILES"].apply(
-                    lambda smiles: Descriptors.MolWt(Chem.MolFromSmiles(smiles))
-                )
-
-            # Calculate mass
-            order_df["mass-mg"] = order_df.apply(
-                self.session.material_manager.calc_mass, axis=1
-            )
-
-            # Add inchikey and compound name if available
-            if hasattr(self.session, "data_manager") and hasattr(
-                self.session.data_manager, "get_inchi_key"
-            ):
-                order_df["inchikey"] = order_df["SMILES"].apply(
-                    self.session.data_manager.get_inchi_key
-                )
-                order_df["compound-name"] = order_df["inchikey"].apply(
-                    self.session.data_manager.get_chemical_name
-                )
-
-            # Create the compound order
-            self.session.data_manager.create_compound_order_model(
-                order_df=order_df, is_custom_starter_plate=False
-            )
+        self._create_compound_order(order_dicts_list)
 
         logger.info(
             f"Created starting material plate with {len(order_dicts_list)} material wells"
         )
         return plate_obj
+
+    # ------------------------------------------------------------------
+    # Shared compound-order helper
+    # ------------------------------------------------------------------
+
+    def _create_compound_order(self, order_dicts_list):
+        """Build and persist a CompoundOrder from a list of order dicts.
+
+        Parameters
+        ----------
+        order_dicts_list : list[dict]
+            Each dict has at minimum: ``SMILES``, ``plate-name``,
+            ``labware``, ``well-index``, ``well-name``, ``concentration``,
+            ``solvent``, ``molecularweight``, ``amount-uL``.
+        """
+        if not order_dicts_list:
+            return
+
+        order_df = pd.DataFrame(order_dicts_list)
+
+        # Calculate additional fields
+        if (
+            "molecularweight" not in order_df.columns
+            or order_df["molecularweight"].isna().any()
+        ):
+            order_df["molecularweight"] = order_df["SMILES"].apply(
+                lambda smiles: Descriptors.MolWt(Chem.MolFromSmiles(smiles))
+            )
+
+        # Calculate mass
+        order_df["mass-mg"] = order_df.apply(
+            self.session.material_manager.calc_mass, axis=1
+        )
+
+        # Add inchikey and compound name if available
+        if hasattr(self.session, "data_manager") and hasattr(
+            self.session.data_manager, "get_inchi_key"
+        ):
+            order_df["inchikey"] = order_df["SMILES"].apply(
+                self.session.data_manager.get_inchi_key
+            )
+            order_df["compound-name"] = order_df["inchikey"].apply(
+                self.session.data_manager.get_chemical_name
+            )
+
+        # Create the compound order
+        self.session.data_manager.create_compound_order_model(
+            order_df=order_df, is_custom_starter_plate=False
+        )
 
     def create_plates_by_temperature(
         self,
