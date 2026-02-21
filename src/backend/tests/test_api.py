@@ -193,7 +193,7 @@ class TestProjectCRUD(APITestBase):
     def test_list_projects(self):
         resp = self.client.get("/api/projects/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertGreaterEqual(resp.json()["count"], 1)
+        self.assertGreaterEqual(len(resp.json()), 1)
 
     def test_retrieve_project(self):
         resp = self.client.get(f"/api/projects/{self.project.pk}/")
@@ -244,7 +244,7 @@ class TestBatchCRUD(APITestBase):
     def test_filter_by_project(self):
         resp = self.client.get(f"/api/batches/?project_id={self.project.pk}")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        for item in resp.json()["results"]:
+        for item in resp.json():
             self.assertEqual(item["project_id"], self.project.pk)
 
     def test_retrieve_with_fetchall(self):
@@ -268,7 +268,7 @@ class TestTargetCRUD(APITestBase):
     def test_filter_by_batch(self):
         resp = self.client.get(f"/api/targets/?batch_id={self.batch.pk}")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        for item in resp.json()["results"]:
+        for item in resp.json():
             self.assertEqual(item["batch_id"], self.batch.pk)
 
     def test_retrieve_with_fetchall(self):
@@ -427,7 +427,7 @@ class TestOTBatchProtocolCRUD(APITestBase):
             "/api/otbatchprotocols/?celery_taskid=abc-123"
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.json()["count"], 1)
+        self.assertEqual(len(resp.json()), 1)
 
 
 class TestOTSessionCRUD(APITestBase):

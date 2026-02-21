@@ -503,9 +503,16 @@ class StirActionViewSet(viewsets.ModelViewSet):
 
 # OT Session viewsets
 class OTProjectViewSet(viewsets.ModelViewSet):
-    queryset = OTProject.objects.all()
     serializer_class = OTProjectSerializer
     filterset_fields = ["project_id"]
+
+    def get_queryset(self):
+        """Only return OTProjects that still have at least one
+        OTBatchProtocol.  This excludes historical orphans whose batches
+        (and therefore protocols) have been deleted."""
+        return OTProject.objects.filter(
+            otbatchprotocol__isnull=False
+        ).distinct()
 
     @action(methods=["post"], detail=False, url_path="createotproject")
     def create_ot_project(self, request, pk=None):

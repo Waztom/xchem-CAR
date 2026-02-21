@@ -8,7 +8,6 @@ export const useGetProtocolsForTask = otProjectId => {
 
   const { data: batches } = useGetBatches({ project_id: currentProject.id });
   const { data: otBatchProtocols } = useGetOtBatchProtocols({
-    project_id: currentProject.id,
     otproject_id: otProjectId
   });
 

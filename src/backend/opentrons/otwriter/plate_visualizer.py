@@ -141,9 +141,26 @@ class PlateVisualizer:
         ``transfer_ledger`` and session metadata are used.
     """
 
+    # Role display order – solvent first, then starting materials, then
+    # reaction / analysis plates.
+    _ROLE_PRIORITY = {
+        "solvent": 0,
+        "startingmaterial": 1,
+        "reaction": 2,
+        "workup": 3,
+        "spefilter": 4,
+        "analyse": 5,
+        "lcms": 6,
+        "xchem": 7,
+        "nmr": 8,
+    }
+
     def __init__(self, script_generator):
         self.sg = script_generator
-        self.plates = list(script_generator.platequeryset)
+        self.plates = sorted(
+            script_generator.platequeryset,
+            key=lambda p: self._ROLE_PRIORITY.get(getattr(p, "role", "") or "", 99),
+        )
         self.ledger = script_generator.transfer_ledger
         self.session_type = script_generator.otsessiontype
         self.protocol_name = script_generator.protocolname
@@ -187,16 +204,26 @@ class PlateVisualizer:
     def generate_html(self) -> str:
         """Return a complete self-contained HTML document."""
         plate_sections = "\n".join(
-            self._render_plate(plate) for plate in self.plates
+            self._render_plate(plate, idx)
+            for idx, plate in enumerate(self.plates)
         )
         transfer_table = self._render_transfer_table()
         legend = self._render_legend()
+
+        # Build <option> list for the plate selector
+        plate_options = "\n".join(
+            f'<option value="{i}">{html_mod.escape(p.name)} '
+            f'({p.role or "unknown"})</option>'
+            for i, p in enumerate(self.plates)
+        )
 
         return _HTML_TEMPLATE.format(
             title=html_mod.escape(self.protocol_name),
             session_type=html_mod.escape(self.session_type),
             legend=legend,
             plates=plate_sections,
+            plate_options=plate_options,
+            plate_count=len(self.plates),
             transfer_table=transfer_table,
             record_count=len(self.ledger),
         )
@@ -232,7 +259,7 @@ class PlateVisualizer:
     # Plate rendering
     # ------------------------------------------------------------------
 
-    def _render_plate(self, plate) -> str:
+    def _render_plate(self, plate, plate_idx: int = 0) -> str:
         """Build the HTML for a single plate grid."""
         wells = self._plate_wells.get(plate.id, [])
         rows = plate.numberwellsincolumn or 8
@@ -310,8 +337,9 @@ class PlateVisualizer:
         if hasattr(plate, "role_index") and plate.role_index and plate.role_index > 1:
             role_display += f" #{plate.role_index}"
 
+        hidden_style = ' style="display:none;"' if plate_idx > 0 else ''
         return (
-            f'<div class="plate-section">'
+            f'<div class="plate-section" data-plate-index="{plate_idx}"{hidden_style}>'
             f'<h2>{html_mod.escape(plate.name)} '
             f'<span class="plate-role">({role_display})</span></h2>'
             f'<div class="plate-info">Labware: {html_mod.escape(plate.labware)} '
@@ -511,8 +539,26 @@ _HTML_TEMPLATE = """\
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
          background: var(--bg); color: var(--text); padding: 20px; }}
-  h1 {{ margin-bottom: 4px; }}
-  .subtitle {{ color: #666; margin-bottom: 20px; }}
+
+  /* Sticky header band – compact */
+  .sticky-header {{ position: sticky; top: 0; z-index: 50; background: var(--bg);
+                    padding: 4px 0 2px; }}
+  h1 {{ margin-bottom: 0; font-size: 1.15rem; }}
+  .subtitle {{ color: #666; margin-bottom: 0; font-size: 0.8rem; }}
+
+  /* Plate navigator – inside legend, sticks with it */
+  .plate-nav {{ display: flex; align-items: center; gap: 10px; margin-top: 6px;
+                padding-top: 6px; border-top: 1px solid var(--border); }}
+  .plate-nav select {{ font-size: 0.9rem; padding: 4px 8px; border: 1px solid var(--border);
+                       border-radius: 6px; background: var(--card-bg); cursor: pointer;
+                       min-width: 180px; }}
+  .plate-nav button {{ background: var(--card-bg); border: 1px solid var(--border);
+                       border-radius: 6px; padding: 4px 12px; cursor: pointer;
+                       font-size: 1rem; line-height: 1; transition: background 0.15s; }}
+  .plate-nav button:hover:not(:disabled) {{ background: #e8e8e8; }}
+  .plate-nav button:disabled {{ opacity: 0.35; cursor: default; }}
+  .plate-nav .plate-counter {{ font-size: 0.82rem; color: #888; }}
+
   .plate-section {{ background: var(--card-bg); border: 1px solid var(--border);
                     border-radius: 8px; padding: 16px; margin-bottom: 24px; }}
   .plate-section h2 {{ margin-bottom: 4px; font-size: 1.1rem; }}
@@ -547,35 +593,47 @@ _HTML_TEMPLATE = """\
   #detail-panel .close-btn:hover {{ color: #333; }}
   #detail-panel ul {{ font-size: 0.82rem; padding-left: 18px; margin-top: 4px; }}
 
-  /* Legend */
-  .legend {{ background: var(--card-bg); border: 1px solid var(--border);
-             border-radius: 8px; padding: 14px; margin-bottom: 20px; }}
-  .legend h3 {{ margin-bottom: 10px; }}
-  .legend-group {{ margin-bottom: 10px; }}
-  .legend-group h4 {{ font-size: 0.85rem; margin-bottom: 4px; }}
-  .legend-swatch {{ display: inline-block; width: 16px; height: 16px;
-                    border-radius: 50%; vertical-align: middle; margin-right: 6px; }}
-  .gradient-bar {{ display: flex; align-items: center; gap: 8px; font-size: 0.78rem; }}
-  .gradient {{ display: inline-block; width: 120px; height: 14px; border-radius: 7px; }}
+  /* Legend – compact, sticky below header */
+  .legend {{ position: sticky; top: 34px; z-index: 40;
+             background: var(--card-bg); border: 1px solid var(--border);
+             border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; }}
+  .legend h3 {{ margin-bottom: 4px; font-size: 0.9rem; }}
+  .legend-group {{ margin-bottom: 4px; }}
+  .legend-group h4 {{ font-size: 0.8rem; margin-bottom: 2px; }}
+  .legend-swatch {{ display: inline-block; width: 13px; height: 13px;
+                    border-radius: 50%; vertical-align: middle; margin-right: 4px; }}
+  .gradient-bar {{ display: flex; align-items: center; gap: 6px; font-size: 0.74rem; }}
+  .gradient {{ display: inline-block; width: 90px; height: 12px; border-radius: 6px; }}
 
   /* Transfer table */
   .transfer-section {{ background: var(--card-bg); border: 1px solid var(--border);
                        border-radius: 8px; padding: 16px; margin-top: 24px; }}
   .transfer-table {{ width: 100%; border-collapse: collapse; font-size: 0.82rem; }}
   .transfer-table th {{ background: #f0f0f0; text-align: left; padding: 6px 8px;
-                        border-bottom: 2px solid var(--border); }}
+                        border-bottom: 2px solid var(--border);
+                        position: sticky; top: 0; z-index: 5; }}
   .transfer-table td {{ padding: 6px 8px; border-bottom: 1px solid #eee; vertical-align: top; }}
   .transfer-table tr:hover {{ background: #fafafa; }}
   .table-mol {{ height: 40px; }}
 </style>
 </head>
 <body>
+<div class="sticky-header">
 <h1>{title}</h1>
 <p class="subtitle">Session type: <b>{session_type}</b> | Transfers: <b>{record_count}</b></p>
+</div>
 
 <div class="legend">
 <h3>Legend</h3>
 {legend}
+<div class="plate-nav">
+  <button id="prev-plate" onclick="navigatePlate(-1)" disabled>&larr;</button>
+  <select id="plate-select" onchange="showPlate(parseInt(this.value))">
+    {plate_options}
+  </select>
+  <button id="next-plate" onclick="navigatePlate(1)">&rarr;</button>
+  <span class="plate-counter" id="plate-counter">1 / {plate_count}</span>
+</div>
 </div>
 
 {plates}
@@ -636,6 +694,33 @@ function showWell(el) {{
   body.innerHTML = html;
   panel.style.display = 'block';
 }}
+
+/* ---------- plate navigator ---------- */
+var currentPlate = 0;
+var plateCount = {plate_count};
+
+function showPlate(idx) {{
+  var sections = document.querySelectorAll('.plate-section');
+  sections.forEach(function(s) {{ s.style.display = 'none'; }});
+  var target = document.querySelector('.plate-section[data-plate-index="' + idx + '"]');
+  if (target) target.style.display = '';
+  currentPlate = idx;
+  document.getElementById('plate-select').value = idx;
+  document.getElementById('plate-counter').textContent = (idx + 1) + ' / ' + plateCount;
+  document.getElementById('prev-plate').disabled = (idx === 0);
+  document.getElementById('next-plate').disabled = (idx === plateCount - 1);
+}}
+
+function navigatePlate(delta) {{
+  var next = currentPlate + delta;
+  if (next >= 0 && next < plateCount) showPlate(next);
+}}
+
+document.addEventListener('keydown', function(e) {{
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft')  navigatePlate(-1);
+  if (e.key === 'ArrowRight') navigatePlate(1);
+}});
 </script>
 </body>
 </html>
