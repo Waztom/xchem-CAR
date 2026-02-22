@@ -879,6 +879,7 @@ class TestOTProjectCreateAction(APITestBase):
             batch_ids=[self.batch.pk],
             protocol_name="test-protocol",
             custom_files=None,
+            use_multichannel=False,
         )
 
     @patch("backend.api.initiate_ot_project", return_value="ot-task-002")
@@ -904,6 +905,7 @@ class TestOTProjectCreateAction(APITestBase):
         call_kwargs = mock_initiate.call_args[1]
         self.assertIsNotNone(call_kwargs["custom_files"])
         self.assertIn(str(self.batch.pk), call_kwargs["custom_files"])
+        self.assertFalse(call_kwargs["use_multichannel"])
 
 
 class TestOTProjectGetTaskStatus(APITestBase):
