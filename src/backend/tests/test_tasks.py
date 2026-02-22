@@ -2156,6 +2156,7 @@ class TestProcessReactionStepSessions(TestCase):
             otbatchprotocolobj=protocol_obj,
             custom_sm_csv_path=custom_sm_csv_path,
             batchtag="batch-1",
+            use_multichannel=False,
         )
         return mock_create_sessions, robot_qs, protocol_obj
 
@@ -2167,6 +2168,7 @@ class TestProcessReactionStepSessions(TestCase):
             actionsessionqueryset=robot_qs,
             customSMcsvpath=None,
             batchtag="batch-1",
+            use_multichannel=False,
         )
 
     def test_passes_custom_sm_csv_path(self):

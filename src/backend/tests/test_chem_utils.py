@@ -26,7 +26,7 @@ from backend.exceptions import (
     SMARTSReactionError,
 )
 
-from .fixtures.testutils import (
+from .fixtures.test_utils import (
     snar_combo_equal,
     snar_combo_unequal,
     svg_str,
