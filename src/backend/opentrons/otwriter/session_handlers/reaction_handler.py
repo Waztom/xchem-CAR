@@ -36,21 +36,24 @@ class ReactionSessionHandler(SessionHandler):
         Process the reaction session(s).
 
         When a multichannel pipette is configured and multichannel source
-        wells exist, processing switches to **step-wise** mode.  Instead of
-        completing all add actions per-reaction before moving to the next
-        reaction, it iterates through the recipe steps *in order* and, for
-        each step, decides whether to use multichannel (MC) or
-        single-channel (SC) transfers:
+        wells exist, processing switches to **step-wise** mode.  Reactions
+        are first grouped by recipe (different recipes may define add
+        actions in different orders).  Within each recipe group, recipe
+        steps are iterated in order.  For each add step the method checks
+        whether full destination sub-columns can be served by a matching
+        MC source sub-column:
 
-        * MC is used for add steps where **all reactions share the same
-          reagent** (SMILES + solvent + concentration) at the same volume,
-          AND the destination sub-column is fully occupied (8 wells for an
-          8-channel pipette).
-        * SC is used for all other cases (unique reagents per reaction,
-          partial sub-columns, or no MC source wells).
+        * **MC-eligible** — the destination sub-column has exactly 8
+          wells, all volumes are the same, and a MC source sub-column
+          exists where each source-well position holds the material
+          the corresponding destination well needs.  Both homogeneous
+          (same reagent) and heterogeneous (different reagents per
+          well) MC transfers are supported.
+        * **SC fallback** — the sub-column is partial, volumes differ,
+          or no matching MC source sub-column is found.
 
-        This preserves add-action ordering while maximising multichannel
-        efficiency.
+        This preserves per-recipe add-action ordering while maximising
+        multichannel efficiency.
 
         Parameters
         ----------
@@ -152,227 +155,201 @@ class ReactionSessionHandler(SessionHandler):
     ) -> None:
         """Process add actions step-by-step across all reactions.
 
-        Instead of completing every action for reaction 1, then reaction 2,
-        etc., this method processes one recipe **step** at a time across all
-        reactions.  For each step it decides:
-
-        * **MC-eligible** — all reactions share the same reagent for this
-          step and MC source wells exist → full sub-columns use the
-          8-channel pipette, partial sub-columns fall back to SC.
-        * **SC-only** — the reagent varies per reaction → every reaction
-          is transferred individually.
-
-        This preserves the add-action ordering (step 1 before step 2 before
-        step 3) while maximising multichannel efficiency.
+        Reactions are first grouped by recipe (different recipes may
+        define add actions in different orders).  Within each recipe
+        group, recipe steps are iterated in order.  For each add step
+        the method checks whether full destination sub-columns can be
+        served by a matching MC source sub-column — both homogeneous
+        (all same reagent) and heterogeneous (different reagents per
+        well) transfers are supported.
         """
-        mc_source_map = self._build_mc_source_map(mc_wells_qs)
+        mc_source_groups = self._build_mc_source_map(mc_wells_qs)
 
-        # Get the canonical recipe action list from the first reaction.
-        # All reactions in the session are expected to share the same recipe.
-        first_as = actionsession_queryset.first()
-        first_rxn = get_reaction(reaction_id=first_as.reaction_id.id)
-        reaction_actions = get_session_recipe_actions(
-            reaction_class=first_rxn.reactionclass,
-            name=first_rxn.recipe,
-            session_type="reaction",
-            session_number=session_number,
-            molecular_context=(
-                "intramolecular" if first_rxn.intramolecular else "intermolecular"
-            ),
-        )
+        # Group reactions by recipe to handle different step orderings
+        recipe_groups = self._group_by_recipe(actionsession_queryset)
 
-        total_actions = len(reaction_actions)
-        logger.info(
-            f"Step-wise processing: {total_actions} recipe steps, "
-            f"{actionsession_queryset.count()} reactions"
-        )
+        for recipe_key, reaction_sessions in recipe_groups.items():
+            reaction_class, recipe_name, mol_ctx = recipe_key
 
-        for step_index, reaction_action in enumerate(reaction_actions):
-            if isinstance(reaction_action, RecipeAddAction):
-                action_number = reaction_action.action_number
+            reaction_actions = get_session_recipe_actions(
+                reaction_class=reaction_class,
+                name=recipe_name,
+                session_type="reaction",
+                session_number=session_number,
+                molecular_context=mol_ctx,
+            )
 
-                # Fetch all AddActions for this step number across reactions
-                all_add_actions = list(
-                    AddAction.objects.filter(
-                        actionsession_id__in=actionsession_queryset,
-                        number=action_number,
-                    )
-                    .select_related("reaction_id", "actionsession_id")
-                    .order_by("reaction_id__id")
-                )
+            total_steps = len(reaction_actions)
+            logger.info(
+                f"Step-wise processing recipe '{recipe_name}' "
+                f"({reaction_class}, {mol_ctx}): "
+                f"{total_steps} steps, {len(reaction_sessions)} reactions"
+            )
 
-                if not all_add_actions:
-                    logger.warning(
-                        f"No AddActions for step {action_number} – skipping"
-                    )
-                    continue
-
-                mc_key = self._check_step_homogeneous(all_add_actions)
-
-                if mc_key and mc_key in mc_source_map:
-                    self._process_step_with_mc(
-                        all_add_actions,
-                        mc_key,
-                        mc_source_map,
+            for step_index, reaction_action in enumerate(reaction_actions):
+                if isinstance(reaction_action, RecipeAddAction):
+                    self._process_add_step(
                         reaction_action,
+                        reaction_sessions,
+                        mc_source_groups,
                         step_index,
-                        total_actions,
-                        session_number,
-                    )
-                else:
-                    self._process_step_single_channel(
-                        all_add_actions,
-                        reaction_action,
-                        step_index,
+                        total_steps,
                         reaction_actions,
                         session_number,
                     )
-
-            elif isinstance(reaction_action, RecipeMixAction):
-                action_number = reaction_action.action_number
-                for actionsession_obj in actionsession_queryset:
-                    reaction_obj = get_reaction(
-                        reaction_id=actionsession_obj.reaction_id.id
+                elif isinstance(reaction_action, RecipeMixAction):
+                    for as_obj in reaction_sessions:
+                        rxn = get_reaction(
+                            reaction_id=as_obj.reaction_id.id
+                        )
+                        self.process_mix_action(
+                            reaction_action.action_number,
+                            as_obj,
+                            rxn,
+                            rxn.id,
+                        )
+                else:
+                    logger.warning(
+                        f"Unknown action type at step {step_index}: "
+                        f"{type(reaction_action).__name__}"
                     )
-                    self.process_mix_action(
-                        action_number,
-                        actionsession_obj,
-                        reaction_obj,
-                        reaction_obj.id,
-                    )
-            else:
-                logger.warning(
-                    f"Unknown action type at step {step_index}: "
-                    f"{type(reaction_action).__name__}"
-                )
 
     # ------------------------------------------------------------------
-    # Step-wise helper: build MC source well lookup
+    # Step-wise helper: group reactions by recipe
     # ------------------------------------------------------------------
 
-    def _build_mc_source_map(
-        self, mc_wells_qs: QuerySet
-    ) -> Dict[Tuple, List[dict]]:
-        """Build a lookup of multichannel source well groups.
+    def _group_by_recipe(
+        self, actionsession_queryset: QuerySet
+    ) -> Dict[Tuple, List]:
+        """Group reaction action sessions by their recipe.
 
-        Groups MC-tagged source wells by their material identity
-        ``(smiles, solvent, concentration)`` and source sub-column position.
+        Different recipes may define add actions in different orders,
+        so the step-wise processing must iterate each recipe group's
+        steps independently.
 
         Returns
         -------
         dict
-            ``{(smiles, solvent, concentration): [
-                {'plate': Plate, 'col': int, 'sub_col': int, 'wells': [Well, …]},
-                …
-            ]}``
+            ``{(reaction_class, recipe_name, molecular_context):
+            [ActionSession, …]}``
         """
-        # Group wells by (material_key, plate_id, col, sub_col)
-        temp: Dict[tuple, list] = defaultdict(list)
+        groups: Dict[Tuple, List] = defaultdict(list)
+        for as_obj in actionsession_queryset:
+            rxn = as_obj.reaction_id
+            mol_ctx = (
+                "intramolecular" if rxn.intramolecular else "intermolecular"
+            )
+            key = (rxn.reactionclass, rxn.recipe, mol_ctx)
+            groups[key].append(as_obj)
+
+        logger.info(
+            f"Grouped {actionsession_queryset.count()} reaction sessions "
+            f"into {len(groups)} recipe group(s)"
+        )
+        return dict(groups)
+
+    # ------------------------------------------------------------------
+    # Step-wise helper: build MC source sub-column lookup
+    # ------------------------------------------------------------------
+
+    def _build_mc_source_map(
+        self, mc_wells_qs: QuerySet
+    ) -> List[dict]:
+        """Build a list of MC source sub-column groups by physical position.
+
+        Each group represents one sub-column of MC-tagged source wells,
+        with a position map so that tip *N* can be matched to its well.
+        This supports both homogeneous sub-columns (same reagent in
+        every position) and heterogeneous sub-columns (different
+        reagents at each position).
+
+        Returns
+        -------
+        list of dict
+            Each dict:
+            ``{'plate': Plate, 'col': int, 'sub_col': int,
+            'wells_by_pos': {pos_in_sub_col: Well, …}}``
+        """
+        temp: Dict[tuple, Dict[int, object]] = defaultdict(dict)
         for well in mc_wells_qs:
             plate = well.plate_id
             wpc = plate.numberwellsincolumn
             sub_cols = max(1, wpc // _MC_CHANNELS)
 
             col = well.index // wpc
-            pos = well.index % wpc
-            sub_col = pos % sub_cols if sub_cols > 1 else 0
+            pos_in_col = well.index % wpc
 
-            mat_key = (well.smiles, well.solvent, well.concentration)
-            group_key = (mat_key, plate.id, col, sub_col)
-            temp[group_key].append(well)
+            if sub_cols > 1:
+                sub_col = pos_in_col % sub_cols
+                pos_in_sub_col = pos_in_col // sub_cols
+            else:
+                sub_col = 0
+                pos_in_sub_col = pos_in_col
 
-        mc_map: Dict[Tuple, List[dict]] = defaultdict(list)
-        for (mat_key, _plate_id, col, sub_col), wells in temp.items():
-            mc_map[mat_key].append(
-                {"plate": wells[0].plate_id, "col": col, "sub_col": sub_col, "wells": wells}
-            )
+            group_key = (plate.id, col, sub_col)
+            temp[group_key][pos_in_sub_col] = well
+
+        mc_groups: List[dict] = []
+        for (_plate_id, col, sub_col), wells_by_pos in temp.items():
+            plate = next(iter(wells_by_pos.values())).plate_id
+            mc_groups.append({
+                "plate": plate,
+                "col": col,
+                "sub_col": sub_col,
+                "wells_by_pos": wells_by_pos,
+            })
 
         logger.info(
-            f"MC source map built: {len(mc_map)} material(s), "
-            f"{sum(len(v) for v in mc_map.values())} sub-column group(s)"
+            f"MC source map built: {len(mc_groups)} sub-column group(s)"
         )
-        return dict(mc_map)
+        return mc_groups
 
     # ------------------------------------------------------------------
-    # Step-wise helper: check if a step has homogeneous material
+    # Step-wise helper: process one add step across a recipe group
     # ------------------------------------------------------------------
 
-    @staticmethod
-    def _check_step_homogeneous(
-        all_add_actions: list,
-    ) -> Optional[Tuple[str, Optional[str], Optional[float]]]:
-        """Return the material key if every AddAction shares the same reagent.
-
-        Parameters
-        ----------
-        all_add_actions : list[AddAction]
-            All AddActions for one recipe step, across all reactions.
-
-        Returns
-        -------
-        tuple or None
-            ``(smiles, solvent, concentration)`` when all actions share
-            the same material; ``None`` otherwise.
-        """
-        first = all_add_actions[0]
-        ref = (first.smiles, first.solvent, first.concentration)
-        for aa in all_add_actions[1:]:
-            if (aa.smiles, aa.solvent, aa.concentration) != ref:
-                return None
-        return ref
-
-    # ------------------------------------------------------------------
-    # Step-wise helper: MC-eligible step (full sub-cols MC, partials SC)
-    # ------------------------------------------------------------------
-
-    def _process_step_with_mc(
+    def _process_add_step(
         self,
-        all_add_actions: list,
-        mc_key: Tuple,
-        mc_source_map: Dict,
         reaction_action: RecipeAddAction,
+        reaction_sessions: List,
+        mc_source_groups: List[dict],
         step_index: int,
-        total_actions: int,
+        total_steps: int,
+        reaction_actions: list,
         session_number: int,
     ) -> None:
-        """Process an MC-eligible add step.
+        """Process a single add step across all reactions in a recipe group.
 
-        Full destination sub-columns (exactly ``_MC_CHANNELS`` reactions)
-        are transferred with the multichannel pipette.  Partial
-        sub-columns fall back to single-channel.
+        Groups destination wells by sub-column.  For each full sub-column
+        (``_MC_CHANNELS`` wells) with uniform volume, attempts to find a
+        matching MC source sub-column where each source position holds the
+        material the corresponding dest well needs.  Full sub-columns
+        with a match use MC; all others fall back to SC.
 
-        Parameters
-        ----------
-        all_add_actions : list[AddAction]
-            All AddActions for this step.
-        mc_key : tuple
-            ``(smiles, solvent, concentration)`` identifying the shared material.
-        mc_source_map : dict
-            Lookup built by :meth:`_build_mc_source_map`.
-        reaction_action : RecipeAddAction
-            The recipe-level action template for this step.
-        step_index : int
-            0-based index of this step within the recipe.
-        total_actions : int
-            Total recipe steps.
-        session_number : int
-            Current session number.
+        Both homogeneous (shared reagent) and heterogeneous (different
+        reagents per well) MC transfers are supported.
         """
+        action_number = reaction_action.action_number
         mc_pipette_name = self.script_generator.mc_pipettename
-        smiles, solvent, concentration = mc_key
-        volume = all_add_actions[0].volume
 
-        mc_sources = mc_source_map[mc_key]
-
-        # --- Step banner ---
-        self.add_command(
-            self.annotation_generator.multichannel_step_header(
-                step_index + 1, total_actions, smiles, solvent, volume
+        # Fetch AddActions for this step across the recipe group
+        all_add_actions = list(
+            AddAction.objects.filter(
+                actionsession_id__in=reaction_sessions,
+                number=action_number,
             )
+            .select_related("reaction_id", "actionsession_id")
+            .order_by("reaction_id__id")
         )
 
-        # Group destination wells by (plate_id, physical_column, sub_column)
-        dest_groups: Dict[Tuple, List[Tuple]] = defaultdict(list)
+        if not all_add_actions:
+            logger.warning(
+                f"No AddActions for step {action_number} – skipping"
+            )
+            return
+
+        # Group dest wells by (plate, column, sub-column)
+        dest_sub_cols: Dict[Tuple, List[Tuple]] = defaultdict(list)
         sc_fallback: List = []
 
         for aa in all_add_actions:
@@ -385,7 +362,7 @@ class ReactionSessionHandler(SessionHandler):
                 )
             except Exception:
                 logger.warning(
-                    f"No reaction well for reaction {rxn_id} – SC fallback"
+                    f"No reaction well for {rxn_id} – SC fallback"
                 )
                 sc_fallback.append(aa)
                 continue
@@ -395,76 +372,122 @@ class ReactionSessionHandler(SessionHandler):
             sub_cols = max(1, wpc // _MC_CHANNELS)
 
             dest_col = to_well.index // wpc
-            pos = to_well.index % wpc
-            dest_sub_col = pos % sub_cols if sub_cols > 1 else 0
+            pos_in_col = to_well.index % wpc
 
-            dest_groups[(to_plate.id, dest_col, dest_sub_col)].append(
-                (aa, to_well)
-            )
+            if sub_cols > 1:
+                dest_sub_col = pos_in_col % sub_cols
+                pos_in_sub_col = pos_in_col // sub_cols
+            else:
+                dest_sub_col = 0
+                pos_in_sub_col = pos_in_col
 
-        # Process each destination sub-column group
-        for (dest_plate_id, dest_col, dest_sub_col), group in sorted(
-            dest_groups.items()
+            dest_sub_cols[
+                (to_plate.id, dest_col, dest_sub_col)
+            ].append((aa, to_well, pos_in_sub_col))
+
+        # --- Try MC for each full destination sub-column ---
+        mc_banner_emitted = False
+
+        for (plate_id, col, sub_col), group in sorted(
+            dest_sub_cols.items()
         ):
-            dest_plate = self.query_service.get_plate_by_id(plateid=dest_plate_id)
-
+            # Partial sub-column → SC
             if len(group) < _MC_CHANNELS:
-                # Partial sub-column → SC fallback
+                dest_plate = self.query_service.get_plate_by_id(
+                    plateid=plate_id
+                )
                 logger.info(
-                    f"Partial sub-column: {dest_plate.name} col {dest_col} "
-                    f"sub-col {dest_sub_col} ({len(group)}/{_MC_CHANNELS}) → SC"
+                    f"Partial sub-column: {dest_plate.name} col {col} "
+                    f"sub-col {sub_col} "
+                    f"({len(group)}/{_MC_CHANNELS}) → SC"
                 )
-                sc_fallback.extend([aa for aa, _w in group])
+                sc_fallback.extend([aa for aa, _, _ in group])
                 continue
 
-            # Find a matching MC source sub-column
-            src_group = self._find_mc_source_for_sub_col(
-                mc_sources, dest_sub_col
+            # Volume uniformity check (MC uses one volume for all tips)
+            volumes = {aa.volume for aa, _, _ in group}
+            if len(volumes) > 1:
+                logger.info(
+                    f"Non-uniform volumes {volumes} in dest sub-col "
+                    f"col {col} sub-col {sub_col} → SC"
+                )
+                sc_fallback.extend([aa for aa, _, _ in group])
+                continue
+
+            volume = group[0][0].volume
+
+            # Build position → material needs
+            dest_needs: Dict[int, Tuple] = {
+                pos: (aa.smiles, aa.solvent, aa.concentration)
+                for aa, _, pos in group
+            }
+
+            # Find a MC source sub-column matching by position
+            src_group = self._find_matching_mc_source(
+                mc_source_groups, dest_needs
             )
+
             if src_group is None:
-                logger.warning(
-                    f"No MC source sub-column {dest_sub_col} for {smiles[:30]}… – SC"
-                )
-                sc_fallback.extend([aa for aa, _w in group])
+                sc_fallback.extend([aa for aa, _, _ in group])
                 continue
 
+            # --- Emit MC step banner (once per step) ---
+            if not mc_banner_emitted:
+                unique_materials = set(dest_needs.values())
+                if len(unique_materials) == 1:
+                    smiles_0, solvent_0, _ = next(iter(unique_materials))
+                    self.add_command(
+                        self.annotation_generator.multichannel_step_header(
+                            step_index + 1, total_steps,
+                            smiles_0, solvent_0, volume,
+                        )
+                    )
+                else:
+                    self.add_command(
+                        self.annotation_generator.multichannel_step_header(
+                            step_index + 1, total_steps,
+                            f"{len(unique_materials)} different materials",
+                            None, volume,
+                        )
+                    )
+                mc_banner_emitted = True
+
+            # --- MC transfer ---
+            dest_plate = self.query_service.get_plate_by_id(
+                plateid=plate_id
+            )
             src_plate = src_group["plate"]
             src_col = src_group["col"]
             src_sub_col = src_group["sub_col"]
 
             logger.info(
                 f"MC transfer step {step_index + 1}: "
-                f"{src_plate.name} col {src_col} sub-col {src_sub_col} → "
-                f"{dest_plate.name} col {dest_col} sub-col {dest_sub_col} "
-                f"({volume:.1f} µL, {len(group)} reactions)"
+                f"{src_plate.name} col {src_col} "
+                f"sub-col {src_sub_col} → "
+                f"{dest_plate.name} col {col} sub-col {sub_col} "
+                f"({volume:.1f} µL, {len(group)} wells)"
             )
 
-            # Pick up MC tip
-            self.add_command(self.command_generator.pick_up_tip(suffix="MC"))
-
-            # Column-to-column transfer with correct sub-column indices
+            self.add_command(
+                self.command_generator.pick_up_tip(suffix="MC")
+            )
             self.add_command(
                 self.command_generator.transfer_fluid_multi(
                     aspirateplatename=src_plate.name,
                     dispenseplatename=dest_plate.name,
                     aspiratecolumnindex=src_col,
-                    dispensecolumnindex=dest_col,
+                    dispensecolumnindex=col,
                     transvolume=volume,
                     pipette_name_override=mc_pipette_name,
                     aspirate_sub_column_index=src_sub_col,
-                    dispense_sub_column_index=dest_sub_col,
+                    dispense_sub_column_index=sub_col,
                 )
             )
 
             # Record each transfer in the ledger
-            for aa, to_well in group:
-                rxn_id = aa.reaction_id.id
-                src_well_index = self._mc_source_well_for_dest(
-                    src_plate, src_col, to_well, dest_plate
-                )
-                src_well = self.query_service.get_well_by_plate_and_index(
-                    plate_id=src_plate, well_index=src_well_index,
-                )
+            for aa, to_well, pos in group:
+                src_well = src_group["wells_by_pos"].get(pos)
+                src_well_index = src_well.index if src_well else -1
 
                 self.script_generator.transfer_ledger.record(
                     action_type="add",
@@ -472,16 +495,20 @@ class ReactionSessionHandler(SessionHandler):
                     source_plate_role="startingmaterial",
                     source_well_index=src_well_index,
                     source_well_name=(
-                        (getattr(src_well, "name", "") or "") if src_well else ""
+                        (getattr(src_well, "name", "") or "")
+                        if src_well
+                        else ""
                     ),
                     dest_plate_name=dest_plate.name,
                     dest_plate_role="reaction",
                     dest_well_index=to_well.index,
-                    dest_well_name=getattr(to_well, "name", "") or "",
+                    dest_well_name=(
+                        getattr(to_well, "name", "") or ""
+                    ),
                     volume=volume,
-                    smiles=smiles,
-                    solvent=solvent,
-                    reaction_id=rxn_id,
+                    smiles=aa.smiles,
+                    solvent=aa.solvent,
+                    reaction_id=aa.reaction_id.id,
                     reaction_class=getattr(
                         aa.reaction_id, "reactionclass", None
                     ),
@@ -489,16 +516,19 @@ class ReactionSessionHandler(SessionHandler):
                     transfer_mode="multichannel",
                 )
 
-                self.volume_manager.update_well_reactant_status(to_well, True)
+                self.volume_manager.update_well_reactant_status(
+                    to_well, True
+                )
                 if src_well:
                     self.volume_manager.update_well_volume(
                         wellobj=src_well, transfervolume=volume
                     )
 
-            # Drop MC tip
-            self.add_command(self.command_generator.drop_tip(suffix="MC"))
+            self.add_command(
+                self.command_generator.drop_tip(suffix="MC")
+            )
 
-        # ---- SC fallback for partial sub-columns ----
+        # --- SC fallback ---
         if sc_fallback:
             logger.info(
                 f"Processing {len(sc_fallback)} SC fallback transfers "
@@ -508,10 +538,7 @@ class ReactionSessionHandler(SessionHandler):
                 sc_fallback,
                 reaction_action,
                 step_index,
-                # Fetch canonical reaction_actions for tip logic
-                self._get_canonical_reaction_actions(
-                    sc_fallback[0], session_number
-                ),
+                reaction_actions,
                 session_number,
             )
 
@@ -542,7 +569,6 @@ class ReactionSessionHandler(SessionHandler):
         session_number : int
             Current session number.
         """
-        # Emit a SC step banner when called directly (not as MC fallback)
         total_actions = len(reaction_actions)
 
         for aa in add_actions:
@@ -567,49 +593,51 @@ class ReactionSessionHandler(SessionHandler):
             )
 
     # ------------------------------------------------------------------
-    # Step-wise helper: find a MC source group matching a sub-column
+    # Step-wise helper: find MC source sub-column by position matching
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _find_mc_source_for_sub_col(
-        mc_sources: List[dict], target_sub_col: int
+    def _find_matching_mc_source(
+        mc_source_groups: List[dict],
+        dest_needs: Dict[int, Tuple],
     ) -> Optional[dict]:
-        """Return the first MC source group whose sub-column matches."""
-        for sg in mc_sources:
-            if sg["sub_col"] == target_sub_col:
+        """Find a MC source sub-column where each position has the
+        material needed by the corresponding destination well.
+
+        Supports both homogeneous (all same reagent) and heterogeneous
+        (different reagent per position) sub-columns.
+
+        Parameters
+        ----------
+        mc_source_groups : list of dict
+            MC source sub-columns from :meth:`_build_mc_source_map`.
+        dest_needs : dict
+            ``{pos_in_sub_col: (smiles, solvent, concentration), …}``
+            — what each destination position needs.
+
+        Returns
+        -------
+        dict or None
+            The matching source group, or ``None`` if no match.
+        """
+        for sg in mc_source_groups:
+            wells_by_pos = sg["wells_by_pos"]
+            match = True
+            for pos, (smiles, solvent, conc) in dest_needs.items():
+                src_well = wells_by_pos.get(pos)
+                if src_well is None:
+                    match = False
+                    break
+                if (
+                    src_well.smiles,
+                    src_well.solvent,
+                    src_well.concentration,
+                ) != (smiles, solvent, conc):
+                    match = False
+                    break
+            if match:
                 return sg
         return None
-
-    # ------------------------------------------------------------------
-    # Step-wise helper: map dest well → source well for MC ledger
-    # ------------------------------------------------------------------
-
-    @staticmethod
-    def _mc_source_well_for_dest(
-        src_plate, src_col: int, dest_well, dest_plate
-    ) -> int:
-        """Compute the source well index that is paired with a dest well.
-
-        In a multichannel transfer the tip at physical position *N*
-        aspirates from source row *N* and dispenses to destination row
-        *N*.  For same-type plates this is a direct position mapping;
-        for cross-type (e.g. 96 → 384) the row pitch ratio is applied.
-        """
-        src_wpc = src_plate.numberwellsincolumn
-        dest_wpc = dest_plate.numberwellsincolumn
-        dest_pos = dest_well.index % dest_wpc
-
-        if src_wpc == dest_wpc:
-            src_pos = dest_pos
-        elif dest_wpc > src_wpc:
-            # e.g. 96-well source → 384-well dest
-            ratio = dest_wpc // src_wpc
-            src_pos = dest_pos // ratio
-        else:
-            ratio = src_wpc // dest_wpc
-            src_pos = dest_pos * ratio
-
-        return src_col * src_wpc + src_pos
 
     # ------------------------------------------------------------------
     # Step-wise helper: canonical reaction actions for a given AddAction

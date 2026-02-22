@@ -2451,29 +2451,15 @@ class TestReactionHandlerMultichannelTransfers(TestCase):
         self.sg = _make_mc_script_generator_stub(reactionstep=1)
         self.handler = ReactionSessionHandler(self.sg)
 
-    def test_check_step_homogeneous_all_same(self):
-        """All AddActions with same material → returns the key."""
-        aa1 = MagicMock(smiles="CCO", solvent="DMSO", concentration=0.5)
-        aa2 = MagicMock(smiles="CCO", solvent="DMSO", concentration=0.5)
-        result = self.handler._check_step_homogeneous([aa1, aa2])
-        self.assertEqual(result, ("CCO", "DMSO", 0.5))
-
-    def test_check_step_homogeneous_different(self):
-        """Different SMILES across actions → returns None."""
-        aa1 = MagicMock(smiles="CCO", solvent="DMSO", concentration=0.5)
-        aa2 = MagicMock(smiles="OCC", solvent="DMSO", concentration=0.5)
-        result = self.handler._check_step_homogeneous([aa1, aa2])
-        self.assertIsNone(result)
-
-    def test_build_mc_source_map(self):
-        """MC source wells are grouped by material key & sub-column."""
+    def test_build_mc_source_map_groups_by_position(self):
+        """MC source wells are grouped by physical sub-column position."""
         src_plate = _make_plate_stub(id=10, name="sm_plate")
         src_plate.numberwellsincolumn = 8
 
         mc_wells = []
         for i in range(8):
             w = _make_well_stub(
-                index=i, smiles="CCO", solvent="DMSO", concentration=0.5,
+                index=i, smiles=f"mol_{i}", solvent="DMSO", concentration=0.5,
                 plate_id=10, plate_name="sm_plate",
             )
             w.plate_id = src_plate
@@ -2482,57 +2468,124 @@ class TestReactionHandlerMultichannelTransfers(TestCase):
         mc_qs = MagicMock()
         mc_qs.__iter__ = lambda s: iter(mc_wells)
 
-        mc_map = self.handler._build_mc_source_map(mc_qs)
-        key = ("CCO", "DMSO", 0.5)
-        self.assertIn(key, mc_map)
-        self.assertEqual(len(mc_map[key]), 1)
-        self.assertEqual(mc_map[key][0]["col"], 0)
-        self.assertEqual(mc_map[key][0]["sub_col"], 0)
+        mc_groups = self.handler._build_mc_source_map(mc_qs)
+        self.assertEqual(len(mc_groups), 1)
+        group = mc_groups[0]
+        self.assertEqual(group["col"], 0)
+        self.assertEqual(group["sub_col"], 0)
+        self.assertEqual(len(group["wells_by_pos"]), 8)
+        # Position 0 has the first well, position 7 has the last
+        self.assertEqual(group["wells_by_pos"][0].smiles, "mol_0")
+        self.assertEqual(group["wells_by_pos"][7].smiles, "mol_7")
 
-    def test_find_mc_source_for_sub_col(self):
-        """Matching sub-column returns the source group."""
-        mc_sources = [
-            {"plate": MagicMock(), "col": 0, "sub_col": 0, "wells": []},
-            {"plate": MagicMock(), "col": 0, "sub_col": 1, "wells": []},
-        ]
-        result = self.handler._find_mc_source_for_sub_col(mc_sources, 1)
-        self.assertEqual(result["sub_col"], 1)
+    def test_build_mc_source_map_384_well(self):
+        """384-well source produces two sub-column groups per column."""
+        src_plate = _make_plate_stub(id=10, name="sm_plate")
+        src_plate.numberwellsincolumn = 16
 
-    def test_find_mc_source_for_sub_col_none(self):
-        """No match returns None."""
-        mc_sources = [
-            {"plate": MagicMock(), "col": 0, "sub_col": 0, "wells": []},
+        mc_wells = []
+        for i in range(16):
+            w = _make_well_stub(
+                index=i, smiles=f"mol_{i}", solvent=None, concentration=None,
+                plate_id=10, plate_name="sm_plate",
+            )
+            w.plate_id = src_plate
+            mc_wells.append(w)
+
+        mc_qs = MagicMock()
+        mc_qs.__iter__ = lambda s: iter(mc_wells)
+
+        mc_groups = self.handler._build_mc_source_map(mc_qs)
+        self.assertEqual(len(mc_groups), 2)
+        sub_cols = {g["sub_col"] for g in mc_groups}
+        self.assertEqual(sub_cols, {0, 1})
+
+    def test_find_matching_mc_source_homogeneous(self):
+        """Matching homogeneous source sub-column is found."""
+        # Source sub-column: all same material
+        wells_by_pos = {}
+        for i in range(8):
+            wells_by_pos[i] = MagicMock(
+                smiles="CCO", solvent="DMSO", concentration=0.5
+            )
+        mc_groups = [
+            {"plate": MagicMock(), "col": 0, "sub_col": 0,
+             "wells_by_pos": wells_by_pos},
         ]
-        result = self.handler._find_mc_source_for_sub_col(mc_sources, 1)
+        # Dest needs: all same material
+        dest_needs = {i: ("CCO", "DMSO", 0.5) for i in range(8)}
+        result = self.handler._find_matching_mc_source(mc_groups, dest_needs)
+        self.assertIsNotNone(result)
+
+    def test_find_matching_mc_source_heterogeneous(self):
+        """Matching heterogeneous source sub-column is found."""
+        wells_by_pos = {}
+        for i in range(8):
+            wells_by_pos[i] = MagicMock(
+                smiles=f"mol_{i}", solvent="DMSO", concentration=0.5
+            )
+        mc_groups = [
+            {"plate": MagicMock(), "col": 0, "sub_col": 0,
+             "wells_by_pos": wells_by_pos},
+        ]
+        dest_needs = {i: (f"mol_{i}", "DMSO", 0.5) for i in range(8)}
+        result = self.handler._find_matching_mc_source(mc_groups, dest_needs)
+        self.assertIsNotNone(result)
+
+    def test_find_matching_mc_source_mismatch(self):
+        """Non-matching source returns None."""
+        wells_by_pos = {}
+        for i in range(8):
+            wells_by_pos[i] = MagicMock(
+                smiles="CCO", solvent="DMSO", concentration=0.5
+            )
+        mc_groups = [
+            {"plate": MagicMock(), "col": 0, "sub_col": 0,
+             "wells_by_pos": wells_by_pos},
+        ]
+        # Dest needs different material at position 3
+        dest_needs = {i: ("CCO", "DMSO", 0.5) for i in range(8)}
+        dest_needs[3] = ("OCC", "DMSO", 0.5)
+        result = self.handler._find_matching_mc_source(mc_groups, dest_needs)
         self.assertIsNone(result)
 
-    def test_mc_source_well_for_dest_same_type(self):
-        """Same-type plates map position directly."""
-        src_plate = _make_plate_stub()
-        src_plate.numberwellsincolumn = 8
-        dest_plate = _make_plate_stub()
-        dest_plate.numberwellsincolumn = 8
+    def test_find_matching_mc_source_missing_position(self):
+        """Source missing a required position returns None."""
+        wells_by_pos = {i: MagicMock(
+            smiles="CCO", solvent="DMSO", concentration=0.5
+        ) for i in range(7)}  # only 7 positions
+        mc_groups = [
+            {"plate": MagicMock(), "col": 0, "sub_col": 0,
+             "wells_by_pos": wells_by_pos},
+        ]
+        dest_needs = {i: ("CCO", "DMSO", 0.5) for i in range(8)}
+        result = self.handler._find_matching_mc_source(mc_groups, dest_needs)
+        self.assertIsNone(result)
 
-        dest_well = MagicMock()
-        dest_well.index = 3  # position 3 in column 0
-        result = self.handler._mc_source_well_for_dest(
-            src_plate, 0, dest_well, dest_plate
-        )
-        self.assertEqual(result, 3)
+    def test_group_by_recipe(self):
+        """Reactions with different recipes are grouped separately."""
+        as1 = MagicMock()
+        rxn1 = MagicMock()
+        rxn1.reactionclass = "amidation"
+        rxn1.recipe = "standard"
+        rxn1.intramolecular = False
+        as1.reaction_id = rxn1
 
-    def test_mc_source_well_for_dest_384_to_384(self):
-        """384-well plates preserve the full row position."""
-        src_plate = _make_plate_stub()
-        src_plate.numberwellsincolumn = 16
-        dest_plate = _make_plate_stub()
-        dest_plate.numberwellsincolumn = 16
+        as2 = MagicMock()
+        rxn2 = MagicMock()
+        rxn2.reactionclass = "amidation"
+        rxn2.recipe = "alternative"
+        rxn2.intramolecular = False
+        as2.reaction_id = rxn2
 
-        dest_well = MagicMock()
-        dest_well.index = 18  # col 1, pos 2 → source col 0, pos 2
-        result = self.handler._mc_source_well_for_dest(
-            src_plate, 0, dest_well, dest_plate
-        )
-        self.assertEqual(result, 2)
+        qs = MagicMock()
+        qs.__iter__ = lambda s: iter([as1, as2])
+        qs.count.return_value = 2
+
+        groups = self.handler._group_by_recipe(qs)
+        self.assertEqual(len(groups), 2)
+        self.assertIn(("amidation", "standard", "intermolecular"), groups)
+        self.assertIn(("amidation", "alternative", "intermolecular"), groups)
 
 
 class TestReactionHandlerProcessSessionMCIntegration(TestCase):

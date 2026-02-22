@@ -4,7 +4,7 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 
-from .....models import Plate
+from .....models import Plate, Well
 from .....conversions import sanitize_for_python_var
 from .....recipe_utils import unparse_plate_type
 from ....labwareavailable import labware_plates
@@ -675,6 +675,38 @@ class PlateFactory:
                     )
                 )
 
+        # --- 4.5. Phase A.5: Heterogeneous MC sub-columns ---
+        # For destination sub-columns where each reaction needs a
+        # DIFFERENT material (e.g. 8 unique amines), create a MC source
+        # sub-column with a different reagent at each position, matching
+        # the destination well layout.  This lets the 8-channel pipette
+        # transfer 8 different materials in one go.
+        phase_a5_volume_served = {}  # identity_key → total volume served by MC
+        phase_a5_solutions = set()
+        try:
+            phase_a5_volume_served, phase_a5_solutions = (
+                self._create_heterogeneous_mc_sub_columns(
+                    plate_obj=plate_obj,
+                    addactionsdf=addactionsdf,
+                    analyzer=analyzer,
+                    mc_materials=mc_materials,
+                    wells_per_column=wells_per_column,
+                    wells_per_group=wells_per_group,
+                    sub_columns_per_column=sub_columns_per_column,
+                    effective_max_volume=effective_max_volume,
+                    dead_volume=dead_volume,
+                    order_dicts_list=order_dicts_list,
+                    next_column=next_column,
+                    next_sub_column=next_sub_column,
+                    mc_slots_used=mc_slots_used,
+                    total_mc_slots=total_mc_slots,
+                )
+            )
+        except Exception as e:
+            logger.warning(
+                f"Phase A.5 heterogeneous MC failed, continuing: {e}"
+            )
+
         # --- 5. Phase B: Place single-channel materials sequentially ---
         # Merge SC leftover + original SC materials.
         # For sequential placement, use one well per unique reagent with
@@ -703,8 +735,19 @@ class PlateFactory:
             if row_key not in sc_unique_solutions:
                 continue
 
-            extra_error_volume = row["volume"] * 0.15
-            total_volume_needed = row["volume"] + extra_error_volume + dead_volume
+            # Subtract volume already served by Phase A.5 heterogeneous MC
+            raw_volume = row["volume"]
+            mc_served = phase_a5_volume_served.get(row_key, 0)
+            adjusted_volume = raw_volume - mc_served
+            if adjusted_volume <= 0:
+                logger.info(
+                    f"Material {row_key} fully served by heterogeneous MC "
+                    f"— skipping SC well"
+                )
+                continue
+
+            extra_error_volume = adjusted_volume * 0.15
+            total_volume_needed = adjusted_volume + extra_error_volume + dead_volume
 
             well_idx = self.session.well_manager.get_plate_well_index_available(
                 plate_obj
@@ -820,6 +863,243 @@ class PlateFactory:
             f"({mc_well_count} wells), {sc_well_count} SC wells"
         )
         return plate_obj
+
+    # ------------------------------------------------------------------
+    # Heterogeneous MC sub-column creation (Phase A.5)
+    # ------------------------------------------------------------------
+
+    def _create_heterogeneous_mc_sub_columns(
+        self,
+        plate_obj,
+        addactionsdf,
+        analyzer,
+        mc_materials,
+        wells_per_column,
+        wells_per_group,
+        sub_columns_per_column,
+        effective_max_volume,
+        dead_volume,
+        order_dicts_list,
+        next_column,
+        next_sub_column,
+        mc_slots_used,
+        total_mc_slots,
+    ):
+        """Create heterogeneous MC sub-columns for groups of different
+        reagents that share a destination sub-column.
+
+        For each destination sub-column of exactly ``wells_per_group``
+        reactions, if the materials at a given add-action step are NOT
+        all the same (i.e. not covered by a Phase A homogeneous MC
+        sub-column), and all transfer volumes match, a MC source
+        sub-column is created with a different reagent at each position
+        — matching the position of the corresponding destination well.
+
+        This enables the 8-channel pipette to transfer 8 different
+        materials (e.g. unique amines) in a single operation.
+
+        Returns
+        -------
+        tuple
+            ``(volume_served, solutions_set)`` —
+            ``volume_served`` is a dict mapping identity_key → total
+            volume served by heterogeneous MC, and ``solutions_set``
+            collects the identity keys of materials placed.
+        """
+        volume_served = {}  # identity_key → total volume served
+        solutions_set = set()
+
+        # Build reaction → dest well position mapping from reaction plate
+        rxn_wells = Well.objects.filter(
+            otsession_id=self.session.otsession_id,
+            role="reaction",
+            reaction_id__isnull=False,
+        ).select_related("plate_id")
+
+        if not rxn_wells.exists():
+            logger.info("No reaction wells found for Phase A.5")
+            return volume_served, solutions_set
+
+        rxn_to_dest = {}  # reaction_id → (plate_id, col, sub_col, pos)
+        for w in rxn_wells:
+            wpc = w.plate_id.numberwellsincolumn
+            sc_per_col = max(1, wpc // wells_per_group)
+            col = w.index // wpc
+            pos_in_col = w.index % wpc
+            if sc_per_col > 1:
+                sc = pos_in_col % sc_per_col
+                pisc = pos_in_col // sc_per_col
+            else:
+                sc = 0
+                pisc = pos_in_col
+            rxn_to_dest[w.reaction_id_id] = (w.plate_id_id, col, sc, pisc)
+
+        # Identity keys already covered by Phase A homogeneous MC
+        phase_a_keys = {
+            analyzer.make_identity_key(
+                m.smiles, m.solvent, m.concentration
+            )
+            for m in mc_materials
+        }
+
+        # Group add actions by (action_number, dest_plate, col, sub_col)
+        from collections import defaultdict
+        dest_step_groups = defaultdict(dict)
+
+        for _, row in addactionsdf.iterrows():
+            rxn_id = row["reaction_id_id"]
+            if rxn_id not in rxn_to_dest:
+                continue
+            _pid, col, sc, pisc = rxn_to_dest[rxn_id]
+            action_num = row["number"]
+            sol = row["solvent"] if pd.notna(row.get("solvent")) else None
+            conc = (
+                float(row["concentration"])
+                if pd.notna(row.get("concentration"))
+                else None
+            )
+            group_key = (action_num, _pid, col, sc)
+            dest_step_groups[group_key][pisc] = {
+                "smiles": row["smiles"],
+                "volume": row["volume"],
+                "solvent": sol,
+                "concentration": conc,
+            }
+
+        # Identify heterogeneous MC candidates
+        candidates = []
+        for (action_num, _pid, _col, _sc), pos_map in sorted(
+            dest_step_groups.items()
+        ):
+            if len(pos_map) < wells_per_group:
+                continue  # partial sub-column
+
+            # Volume uniformity check
+            vols = {d["volume"] for d in pos_map.values()}
+            if len(vols) > 1:
+                continue
+
+            # Skip if all materials are identical (Phase A handles those)
+            materials = {
+                (d["smiles"], d["solvent"], d["concentration"])
+                for d in pos_map.values()
+            }
+            if len(materials) == 1:
+                mat_key = analyzer.make_identity_key(
+                    *next(iter(materials))
+                )
+                if mat_key in phase_a_keys:
+                    continue
+
+            # Skip if ALL materials are already covered by Phase A
+            all_in_a = all(
+                analyzer.make_identity_key(
+                    d["smiles"], d["solvent"], d["concentration"]
+                )
+                in phase_a_keys
+                for d in pos_map.values()
+            )
+            if all_in_a:
+                continue
+
+            vol = next(iter(vols))
+            candidates.append(
+                {"pos_map": pos_map, "volume": vol}
+            )
+
+        if not candidates:
+            logger.info("No heterogeneous MC candidates found")
+            return volume_served, solutions_set
+
+        logger.info(
+            f"Phase A.5: {len(candidates)} heterogeneous MC candidate(s)"
+        )
+
+        for cand in candidates:
+            if mc_slots_used >= total_mc_slots:
+                logger.warning("Plate full — stopping heterogeneous MC")
+                break
+
+            pos_map = cand["pos_map"]
+            vol = cand["volume"]
+            per_well_volume = vol * 1.15 + dead_volume
+
+            if per_well_volume > effective_max_volume:
+                logger.info(
+                    "Heterogeneous MC well volume "
+                    f"{per_well_volume:.1f} µL exceeds max "
+                    f"{effective_max_volume:.1f} µL — skipping"
+                )
+                continue
+
+            sub_col_well_indices = analyzer.get_sub_column_well_indices(
+                next_column, next_sub_column
+            )
+
+            for pos in range(wells_per_group):
+                if pos not in pos_map:
+                    continue
+
+                mat_data = pos_map[pos]
+                well_idx = sub_col_well_indices[pos]
+
+                well_obj = self.session.well_manager.create_well_model(
+                    plate_obj=plate_obj,
+                    role="startingmaterial",
+                    role_index=1,
+                    wellindex=well_idx,
+                    volume=round(per_well_volume, 2),
+                    smiles=mat_data["smiles"],
+                    concentration=mat_data["concentration"],
+                    solvent=mat_data["solvent"],
+                    transfer_type="multichannel",
+                )
+                if well_obj:
+                    order_dicts_list.append(
+                        {
+                            "SMILES": mat_data["smiles"],
+                            "plate-name": plate_obj.name,
+                            "labware": plate_obj.labware,
+                            "well-index": well_obj.index,
+                            "well-name": well_obj.name,
+                            "concentration": mat_data["concentration"],
+                            "solvent": mat_data["solvent"],
+                            "molecularweight": None,
+                            "amount-uL": round(per_well_volume, 2),
+                        }
+                    )
+
+                    # Track served volume
+                    ik = analyzer.make_identity_key(
+                        mat_data["smiles"],
+                        mat_data["solvent"],
+                        mat_data["concentration"],
+                    )
+                    volume_served[ik] = volume_served.get(ik, 0) + vol
+                    solutions_set.add(ik)
+
+            mc_slots_used += 1
+            next_sub_column += 1
+            if next_sub_column >= sub_columns_per_column:
+                next_well_after_column = (
+                    (next_column + 1) * wells_per_column
+                )
+                self.session.well_manager.update_plate_well_index(
+                    plate_obj=plate_obj,
+                    wellindexupdate=next_well_after_column,
+                )
+                self.session.column_manager.update_plate_column_index_available(
+                    plate_obj=plate_obj,
+                    columnindexupdate=next_column + 1,
+                )
+                next_sub_column = 0
+                next_column += 1
+
+        logger.info(
+            f"Phase A.5 complete: {len(solutions_set)} material(s) placed "
+            f"in heterogeneous MC sub-columns"
+        )
+        return volume_served, solutions_set
 
     # ------------------------------------------------------------------
     # Standard sequential starter plate layout (original logic)
