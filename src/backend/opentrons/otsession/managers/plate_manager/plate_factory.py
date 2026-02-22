@@ -563,13 +563,14 @@ class PlateFactory:
         total_mc_slots = num_columns * sub_columns_per_column
 
         # --- 4. Phase A: Place multichannel materials as sub-column groups ---
+        # MC wells hold volume for MC transfers ONLY.  SC transfers are
+        # served by separate SC wells created in Phase B.  The OT writer
+        # well-finder uses transfer_type to route MC transfers to MC
+        # wells and SC transfers to SC wells.
         sc_leftover = []  # MC leftovers that fall back to sequential
         mc_slots_used = 0
 
         for mat in mc_materials:
-            # Volume per well in the source sub-column.
-            # Each channel serves ceil(reaction_count / wells_per_group)
-            # transfers from its well.
             transfers_per_channel = math.ceil(
                 mat.reaction_count / wells_per_group
             )
@@ -591,6 +592,7 @@ class PlateFactory:
                 per_well_volume_capped = (
                     mat.volume * max_transfers * 1.15 + dead_volume
                 )
+                effective_transfers = max_transfers
                 logger.info(
                     f"MC material {mat.smiles}: volume per well {per_well_volume:.1f}µL "
                     f"exceeds max {effective_max_volume:.1f}µL; "
@@ -599,8 +601,10 @@ class PlateFactory:
             else:
                 groups_from_volume = 1
                 per_well_volume_capped = per_well_volume
+                effective_transfers = transfers_per_channel
 
             actual_groups = max(groups_from_volume, 1)
+            groups_placed = 0
 
             for _ in range(actual_groups):
                 if mc_slots_used >= total_mc_slots:
@@ -643,6 +647,7 @@ class PlateFactory:
                             }
                         )
 
+                groups_placed += 1
                 mc_slots_used += 1
                 next_sub_column += 1
                 if next_sub_column >= sub_columns_per_column:
@@ -660,8 +665,19 @@ class PlateFactory:
                     next_sub_column = 0
                     next_column += 1
 
-            # Leftovers (reactions that don't fill a full column) go to SC
-            if mat.leftover_wells > 0:
+            # Log placement result.
+            if groups_placed > 0:
+                logger.info(
+                    f"Phase A MC: {mat.smiles} — {groups_placed} group(s), "
+                    f"{mat.volume}µL × {mat.reaction_count} reactions"
+                )
+
+            # Only create SC leftover for reactions genuinely not covered
+            # by the placed MC groups (e.g. plate overflow).
+            mc_capacity = groups_placed * wells_per_group * effective_transfers
+            mc_served_reactions = min(mat.reaction_count, mc_capacity)
+            uncovered = mat.reaction_count - mc_served_reactions
+            if uncovered > 0:
                 sc_leftover.append(
                     type(mat)(
                         identity_key=mat.identity_key,
@@ -669,7 +685,7 @@ class PlateFactory:
                         volume=mat.volume,
                         concentration=mat.concentration,
                         solvent=mat.solvent,
-                        reaction_count=mat.leftover_wells,
+                        reaction_count=uncovered,
                         columns_needed=0,
                         leftover_wells=0,
                     )
@@ -708,46 +724,63 @@ class PlateFactory:
             )
 
         # --- 5. Phase B: Place single-channel materials sequentially ---
-        # Merge SC leftover + original SC materials.
-        # For sequential placement, use one well per unique reagent with
-        # the TOTAL volume (same as the existing approach).
-        # Retrieve the *adjusted* total per unique solution from materials_df.
-        sc_unique_solutions = set()
+        # SC wells hold volume for SC transfers ONLY.  The well-finder
+        # uses transfer_type='single' so SC transfers draw from these
+        # wells and NOT from the MC wells created in Phase A / A.5.
+        #
+        # Aggregate SC volume per identity key from all SC material
+        # groups (including MC overflow in sc_leftover).
 
-        # Add MC-leftover unique solutions (their total volume is a fraction)
-        for mat in sc_leftover:
-            sc_unique_solutions.add(
-                analyzer.make_identity_key(mat.smiles, mat.solvent, mat.concentration)
-            )
-        # Add genuinely single-channel unique solutions
-        for mat in sc_materials:
-            sc_unique_solutions.add(
-                analyzer.make_identity_key(mat.smiles, mat.solvent, mat.concentration)
-            )
+        sc_volume_by_ik: dict = {}   # identity_key → total raw volume
+        sc_info_by_ik: dict = {}     # identity_key → material info
 
-        # Process SC materials from materials_df (which has correct adjusted total volumes)
-        for _, row in materials_df.iterrows():
-            row_key = analyzer.make_identity_key(
-                row["smiles"],
-                row["solvent"] if pd.notna(row.get("solvent")) else None,
-                float(row["concentration"]) if pd.notna(row.get("concentration")) else None,
+        for mat in list(sc_leftover) + list(sc_materials):
+            ik = analyzer.make_identity_key(
+                mat.smiles, mat.solvent, mat.concentration
             )
-            if row_key not in sc_unique_solutions:
-                continue
+            sc_volume_by_ik[ik] = (
+                sc_volume_by_ik.get(ik, 0)
+                + mat.volume * mat.reaction_count
+            )
+            if ik not in sc_info_by_ik:
+                sc_info_by_ik[ik] = {
+                    "smiles": mat.smiles,
+                    "concentration": mat.concentration,
+                    "solvent": mat.solvent,
+                }
 
-            # Subtract volume already served by Phase A.5 heterogeneous MC
-            raw_volume = row["volume"]
-            mc_served = phase_a5_volume_served.get(row_key, 0)
-            adjusted_volume = raw_volume - mc_served
-            if adjusted_volume <= 0:
+        # Subtract volume already served by Phase A.5 heterogeneous MC
+        # (Phase A.5 creates MC wells for materials that appear in
+        # heterogeneous sub-columns; those transfers are MC, not SC).
+        for ik in list(sc_volume_by_ik):
+            mc_a5_served = phase_a5_volume_served.get(ik, 0)
+            if mc_a5_served > 0:
+                sc_volume_by_ik[ik] = max(
+                    0, sc_volume_by_ik[ik] - mc_a5_served
+                )
+
+        for ik, raw_volume in sc_volume_by_ik.items():
+            if raw_volume <= 0:
                 logger.info(
-                    f"Material {row_key} fully served by heterogeneous MC "
-                    f"— skipping SC well"
+                    f"SC material {ik}: no remaining SC volume — skipping"
                 )
                 continue
 
-            extra_error_volume = adjusted_volume * 0.15
-            total_volume_needed = adjusted_volume + extra_error_volume + dead_volume
+            # Also skip if the material was already placed as a
+            # heterogeneous MC well in Phase A.5.
+            if ik in phase_a5_solutions:
+                remaining_after_a5 = raw_volume
+                if remaining_after_a5 <= 0:
+                    continue
+
+            info = sc_info_by_ik[ik]
+            total_volume_needed = raw_volume * 1.15 + dead_volume
+
+            logger.info(
+                f"Phase B SC: {info['smiles'][:30]} — "
+                f"raw={raw_volume:.2f}µL, "
+                f"total={total_volume_needed:.2f}µL"
+            )
 
             well_idx = self.session.well_manager.get_plate_well_index_available(
                 plate_obj
@@ -760,42 +793,48 @@ class PlateFactory:
                     labwaretype=labware_type,
                 )
                 if not plate_obj:
-                    logger.warning("Could not create additional starting material plate")
+                    logger.warning(
+                        "Could not create additional starting material plate"
+                    )
                     break
-                well_idx = self.session.well_manager.get_plate_well_index_available(
-                    plate_obj
+                well_idx = (
+                    self.session.well_manager.get_plate_well_index_available(
+                        plate_obj
+                    )
                 )
-                effective_max_volume = self.session.well_manager.get_max_well_volume(
-                    plate_obj
+                effective_max_volume = (
+                    self.session.well_manager.get_max_well_volume(plate_obj)
                 )
 
             # Handle volume overflow — split into multiple wells
             if total_volume_needed > effective_max_volume:
                 remaining_volume = total_volume_needed
                 while remaining_volume > 0:
-                    volume_this_well = min(remaining_volume, effective_max_volume)
+                    volume_this_well = min(
+                        remaining_volume, effective_max_volume
+                    )
                     well_obj = self.session.well_manager.create_well_model(
                         plate_obj=plate_obj,
                         role="startingmaterial",
                         role_index=1,
                         wellindex=well_idx,
                         volume=round(volume_this_well, 2),
-                        smiles=row["smiles"],
-                        concentration=row["concentration"],
-                        solvent=row["solvent"],
+                        smiles=info["smiles"],
+                        concentration=info["concentration"],
+                        solvent=info["solvent"],
                         transfer_type="single",
                     )
                     if well_obj:
                         order_dicts_list.append(
                             {
-                                "SMILES": row["smiles"],
+                                "SMILES": info["smiles"],
                                 "plate-name": plate_obj.name,
                                 "labware": plate_obj.labware,
                                 "well-index": well_obj.index,
                                 "well-name": well_obj.name,
-                                "concentration": row["concentration"],
-                                "solvent": row["solvent"],
-                                "molecularweight": row.get("molecularweight"),
+                                "concentration": info["concentration"],
+                                "solvent": info["solvent"],
+                                "molecularweight": None,
                                 "amount-uL": round(volume_this_well, 2),
                             }
                         )
@@ -830,22 +869,22 @@ class PlateFactory:
                     role_index=1,
                     wellindex=well_idx,
                     volume=round(total_volume_needed, 2),
-                    smiles=row["smiles"],
-                    concentration=row["concentration"],
-                    solvent=row["solvent"],
+                    smiles=info["smiles"],
+                    concentration=info["concentration"],
+                    solvent=info["solvent"],
                     transfer_type="single",
                 )
                 if well_obj:
                     order_dicts_list.append(
                         {
-                            "SMILES": row["smiles"],
+                            "SMILES": info["smiles"],
                             "plate-name": plate_obj.name,
                             "labware": plate_obj.labware,
                             "well-index": well_obj.index,
                             "well-name": well_obj.name,
-                            "concentration": row["concentration"],
-                            "solvent": row["solvent"],
-                            "molecularweight": row.get("molecularweight"),
+                            "concentration": info["concentration"],
+                            "solvent": info["solvent"],
+                            "molecularweight": None,
                             "amount-uL": round(total_volume_needed, 2),
                         }
                     )

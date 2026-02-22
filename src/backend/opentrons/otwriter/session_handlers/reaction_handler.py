@@ -590,6 +590,7 @@ class ReactionSessionHandler(SessionHandler):
                 actionsession_obj,
                 reaction_obj,
                 rxn_id,
+                transfer_type="single",
             )
 
     # ------------------------------------------------------------------
@@ -1166,8 +1167,17 @@ class ReactionSessionHandler(SessionHandler):
         actionsession_obj,
         reaction_obj,
         reaction_id,
+        transfer_type=None,
     ):
-        """Process an add action for reaction session."""
+        """Process an add action for reaction session.
+
+        Parameters
+        ----------
+        transfer_type : str, optional
+            When provided, restricts well-finder to wells with this
+            ``transfer_type`` (e.g. ``'single'``).  ``None`` means no
+            filtering (default).
+        """
         try:
             logger.info(
                 f"Processing add action {action_number} for reaction {reaction_id}"
@@ -1219,6 +1229,7 @@ class ReactionSessionHandler(SessionHandler):
                 solvent=solvent,
                 concentration=concentration,
                 transfer_volume=transfer_volume,
+                transfer_type=transfer_type,
             )
 
             well_count = len(from_well_info)

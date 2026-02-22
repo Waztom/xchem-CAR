@@ -1,11 +1,11 @@
 """
-Session Visualizer for OpenTrons protocol scripts.
+Plate Visualizer for OpenTrons protocol scripts.
 
-Generates self-contained interactive HTML visualizations that show plate
-layouts, well contents, transfer logs, and efficiency metrics for an OT
-session.  The HTML files are packaged alongside the OT scripts so that
-chemists can click any well to see its contents, molecule structure (SVG),
-and the transfers that touch it.
+Generates self-contained interactive HTML platemaps that show what is in
+each well and how reagents move between plates during a session.  The
+HTML files are packaged alongside the OT scripts so that chemists can
+click any well to see its contents, molecule structure (SVG), and the
+transfers that touch it.
 
 Colour conventions
 ------------------
@@ -131,11 +131,8 @@ def _well_name_from_index(index: int, rows: int = 8) -> str:
 # Main class
 # ===================================================================
 
-class SessionVisualizer:
-    """Generates interactive HTML session visualizations for an OT session.
-
-    Includes plate maps, transfer logs, and efficiency metrics
-    (tip-change counts, estimated run time).
+class PlateVisualizer:
+    """Generates interactive HTML plate visualizations for an OT session.
 
     Parameters
     ----------
@@ -239,7 +236,7 @@ class SessionVisualizer:
         Parameters
         ----------
         directory : str, optional
-            Target directory.  Defaults to ``MEDIA_ROOT/session_visualizations/``.
+            Target directory.  Defaults to ``MEDIA_ROOT/plate_visualizations/``.
 
         Returns
         -------
@@ -247,17 +244,17 @@ class SessionVisualizer:
             Absolute path to the written file.
         """
         if directory is None:
-            directory = os.path.join(settings.MEDIA_ROOT, "session_visualizations")
+            directory = os.path.join(settings.MEDIA_ROOT, "plate_visualizations")
         os.makedirs(directory, exist_ok=True)
 
-        filename = f"{self.protocol_name}-session.html"
+        filename = f"{self.protocol_name}-plates.html"
         filepath = os.path.join(directory, filename)
 
         content = self.generate_html()
         with open(filepath, "w", encoding="utf-8") as fh:
             fh.write(content)
 
-        logger.info(f"Session visualization written to {filepath}")
+        logger.info(f"Plate visualization written to {filepath}")
         return filepath
 
     # ------------------------------------------------------------------
@@ -291,12 +288,6 @@ class SessionVisualizer:
             # Build tooltip data
             smiles = getattr(well, "smiles", None) if well else None
             volume = getattr(well, "volume", None) if well else None
-            # well.volume is decremented during script generation; reconstruct
-            # the initial (prepared) volume by adding back outgoing transfers.
-            if volume is not None and idx in outgoing:
-                volume = round(
-                    volume + sum(rec.volume for rec in outgoing[idx]), 2
-                )
             solvent = getattr(well, "solvent", None) if well else None
             conc = getattr(well, "concentration", None) if well else None
             db_name = getattr(well, "name", None) if well else None
@@ -557,12 +548,12 @@ class SessionVisualizer:
             '<div class="stat-card">'
             f'<div class="stat-value">{tip_ops}</div>'
             '<div class="stat-label">Tip Changes</div>'
-            f'<div class="stat-detail">{_fmt_time(tip_time)} @ 30 s ea.</div>'
+            f'<div class="stat-detail">{_fmt_time(tip_time)} @ 10 s ea.</div>'
             "</div>"
             '<div class="stat-card">'
             f'<div class="stat-value">{no_tip_ops}</div>'
             '<div class="stat-label">No-Tip-Change Ops</div>'
-            f'<div class="stat-detail">{_fmt_time(no_tip_time)} @ 10 s ea.</div>'
+            f'<div class="stat-detail">{_fmt_time(no_tip_time)} @ 2.5 s ea.</div>'
             "</div>"
             # Row 2, last card – total time
             '<div class="stat-card stat-card-accent">'
