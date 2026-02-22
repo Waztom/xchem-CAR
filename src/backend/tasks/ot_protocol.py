@@ -450,8 +450,8 @@ class ZipOTBatchProtocol:
                         ziparchive, session, model, file_field, dest_dir
                     )
 
-            # Add plate visualization HTML files (not model-backed)
-            self._add_plate_visualizations(ziparchive)
+            # Add session visualization HTML files (not model-backed)
+            self._add_session_visualizations(ziparchive)
 
         self._write_zip_to_media()
         self._delete_tmp_zip()
@@ -510,21 +510,21 @@ class ZipOTBatchProtocol:
             arcname = os.path.join(dest_dir, os.path.basename(filepath))
             ziparchive.write(filename=filepath, arcname=arcname)
 
-    def _add_plate_visualizations(self, ziparchive):
-        """Add any plate visualization HTML files to the zip archive.
+    def _add_session_visualizations(self, ziparchive):
+        """Add any session visualization HTML files to the zip archive.
 
-        Visualization files are written to ``MEDIA_ROOT/plate_visualizations/``
-        by ``PlateVisualizer`` during script generation.  We glob for all
+        Visualization files are written to ``MEDIA_ROOT/session_visualizations/``
+        by ``SessionVisualizer`` during script generation.  We glob for all
         ``.html`` files in that directory and add them under a
-        ``platevisualizations/`` subdirectory in the zip.
+        ``sessionvisualizations/`` subdirectory in the zip.
         """
-        viz_dir = os.path.join(self.mediaroot, "plate_visualizations")
+        viz_dir = os.path.join(self.mediaroot, "session_visualizations")
         if not os.path.isdir(viz_dir):
             return
         for fname in os.listdir(viz_dir):
             if fname.endswith(".html"):
                 filepath = os.path.join(viz_dir, fname)
-                arcname = os.path.join("platevisualizations", fname)
+                arcname = os.path.join("sessionvisualizations", fname)
                 ziparchive.write(filename=filepath, arcname=arcname)
 
     def _write_zip_to_media(self):

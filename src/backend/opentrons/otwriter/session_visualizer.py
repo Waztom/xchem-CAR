@@ -1,11 +1,11 @@
 """
-Plate Visualizer for OpenTrons protocol scripts.
+Session Visualizer for OpenTrons protocol scripts.
 
-Generates self-contained interactive HTML platemaps that show what is in
-each well and how reagents move between plates during a session.  The
-HTML files are packaged alongside the OT scripts so that chemists can
-click any well to see its contents, molecule structure (SVG), and the
-transfers that touch it.
+Generates self-contained interactive HTML visualizations that show plate
+layouts, well contents, transfer logs, and efficiency metrics for an OT
+session.  The HTML files are packaged alongside the OT scripts so that
+chemists can click any well to see its contents, molecule structure (SVG),
+and the transfers that touch it.
 
 Colour conventions
 ------------------
@@ -131,8 +131,11 @@ def _well_name_from_index(index: int, rows: int = 8) -> str:
 # Main class
 # ===================================================================
 
-class PlateVisualizer:
-    """Generates interactive HTML plate visualizations for an OT session.
+class SessionVisualizer:
+    """Generates interactive HTML session visualizations for an OT session.
+
+    Includes plate maps, transfer logs, and efficiency metrics
+    (tip-change counts, estimated run time).
 
     Parameters
     ----------
@@ -209,6 +212,7 @@ class PlateVisualizer:
         )
         transfer_table = self._render_transfer_table()
         legend = self._render_legend()
+        stats_section = self._render_stats()
 
         # Build <option> list for the plate selector
         plate_options = "\n".join(
@@ -226,6 +230,7 @@ class PlateVisualizer:
             plate_count=len(self.plates),
             transfer_table=transfer_table,
             record_count=len(self.ledger),
+            stats_section=stats_section,
         )
 
     def write_html(self, directory: Optional[str] = None) -> str:
@@ -234,7 +239,7 @@ class PlateVisualizer:
         Parameters
         ----------
         directory : str, optional
-            Target directory.  Defaults to ``MEDIA_ROOT/plate_visualizations/``.
+            Target directory.  Defaults to ``MEDIA_ROOT/session_visualizations/``.
 
         Returns
         -------
@@ -242,17 +247,17 @@ class PlateVisualizer:
             Absolute path to the written file.
         """
         if directory is None:
-            directory = os.path.join(settings.MEDIA_ROOT, "plate_visualizations")
+            directory = os.path.join(settings.MEDIA_ROOT, "session_visualizations")
         os.makedirs(directory, exist_ok=True)
 
-        filename = f"{self.protocol_name}-plates.html"
+        filename = f"{self.protocol_name}-session.html"
         filepath = os.path.join(directory, filename)
 
         content = self.generate_html()
         with open(filepath, "w", encoding="utf-8") as fh:
             fh.write(content)
 
-        logger.info(f"Plate visualization written to {filepath}")
+        logger.info(f"Session visualization written to {filepath}")
         return filepath
 
     # ------------------------------------------------------------------
@@ -503,6 +508,65 @@ class PlateVisualizer:
         )
 
     # ------------------------------------------------------------------
+    # Efficiency statistics
+    # ------------------------------------------------------------------
+
+    def _render_stats(self) -> str:
+        """Build the HTML for the efficiency-metrics panel."""
+        stats = self.ledger.compute_pipette_stats()
+
+        total_transfers = stats["total_transfers"]
+        tip_ops = stats["tip_change_ops"]
+        no_tip_ops = stats["no_tip_change_ops"]
+        mc_ops = stats["mc_operations"]
+        sc_ops = stats["sc_operations"]
+        tip_time = stats["tip_change_time_s"]
+        no_tip_time = stats["no_tip_change_time_s"]
+        total_time = stats["estimated_time_s"]
+
+        # Format time as min:sec or just seconds
+        def _fmt_time(seconds: float) -> str:
+            if seconds >= 60:
+                mins = int(seconds // 60)
+                secs = seconds % 60
+                return f"{mins}m {secs:.0f}s"
+            return f"{seconds:.0f}s"
+
+        return (
+            '<div class="stats-grid">'
+            # Row 1 – transfer counts
+            '<div class="stat-card">'
+            f'<div class="stat-value">{total_transfers}</div>'
+            '<div class="stat-label">Total Transfers</div>'
+            "</div>"
+            '<div class="stat-card">'
+            f'<div class="stat-value">{mc_ops}</div>'
+            '<div class="stat-label">MC Operations</div>'
+            "</div>"
+            '<div class="stat-card">'
+            f'<div class="stat-value">{sc_ops}</div>'
+            '<div class="stat-label">SC Operations</div>'
+            "</div>"
+            # Row 2 – tip-change breakdown
+            '<div class="stat-card">'
+            f'<div class="stat-value">{tip_ops}</div>'
+            '<div class="stat-label">Tip Changes</div>'
+            f'<div class="stat-detail">{_fmt_time(tip_time)} @ 30 s ea.</div>'
+            "</div>"
+            '<div class="stat-card">'
+            f'<div class="stat-value">{no_tip_ops}</div>'
+            '<div class="stat-label">No-Tip-Change Ops</div>'
+            f'<div class="stat-detail">{_fmt_time(no_tip_time)} @ 10 s ea.</div>'
+            "</div>"
+            # Row 2, last card – total time
+            '<div class="stat-card stat-card-accent">'
+            f'<div class="stat-value">{_fmt_time(total_time)}</div>'
+            '<div class="stat-label">Est. Run Time</div>'
+            "</div>"
+            "</div>"
+        )
+
+    # ------------------------------------------------------------------
     # Legend
     # ------------------------------------------------------------------
 
@@ -565,7 +629,7 @@ _HTML_TEMPLATE = """\
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title} – Plate Visualization</title>
+<title>{title} – Session Visualization</title>
 <style>
   :root {{
     --bg: #fafafa;
@@ -665,12 +729,30 @@ _HTML_TEMPLATE = """\
   .transfer-table td {{ padding: 6px 8px; border-bottom: 1px solid #eee; vertical-align: top; }}
   .transfer-table tr:hover {{ background: #fafafa; }}
   .table-mol {{ height: 40px; }}
+
+  /* Stats panel */
+  .stats-section {{ background: var(--card-bg); border: 1px solid var(--border);
+                    border-radius: 8px; padding: 16px; margin-bottom: 16px; }}
+  .stats-section h3 {{ margin-bottom: 10px; font-size: 1rem; }}
+  .stats-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }}
+  .stat-card {{ background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px;
+                padding: 12px; text-align: center; }}
+  .stat-card-accent {{ background: #e8f5e9; border-color: #a5d6a7; }}
+  .stat-value {{ font-size: 1.5rem; font-weight: 700; color: var(--text); }}
+  .stat-card-accent .stat-value {{ color: #2e7d32; }}
+  .stat-label {{ font-size: 0.78rem; color: #666; margin-top: 2px; }}
+  .stat-detail {{ font-size: 0.72rem; color: #999; margin-top: 2px; }}
 </style>
 </head>
 <body>
 <div class="sticky-header">
 <h1>{title}</h1>
-<p class="subtitle">Session type: <b>{session_type}</b> | Transfers: <b>{record_count}</b></p>
+<p class="subtitle">Session type: <b>{session_type}</b></p>
+</div>
+
+<div class="stats-section">
+<h3>Efficiency Metrics</h3>
+{stats_section}
 </div>
 
 <div class="legend">

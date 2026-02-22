@@ -23,7 +23,7 @@ from .session_handlers.analysis_handler import AnalysisSessionHandler
 from .utils.well_finder import WellFinder
 from .annotation_generator import AnnotationGenerator
 from .transfer_record import TransferLedger
-from .plate_visualizer import PlateVisualizer
+from .session_visualizer import SessionVisualizer
 
 logger = logging.getLogger(__name__)
 
@@ -177,14 +177,14 @@ class ScriptGenerator:
             script_obj = self.file_manager.create_ot_script_model()
             logger.info(f"Created OTScript record with ID: {script_obj.id}")
 
-            # Generate plate visualization HTML
-            logger.info("Generating plate visualization")
+            # Generate session visualization HTML
+            logger.info("Generating session visualization")
             try:
-                visualizer = PlateVisualizer(self)
+                visualizer = SessionVisualizer(self)
                 self.visualization_path = visualizer.write_html()
-                logger.info(f"Plate visualization saved to: {self.visualization_path}")
+                logger.info(f"Session visualization saved to: {self.visualization_path}")
             except Exception as viz_err:
-                logger.warning(f"Plate visualization generation failed (non-fatal): {viz_err}")
+                logger.warning(f"Session visualization generation failed (non-fatal): {viz_err}")
                 self.visualization_path = None
 
             logger.info(f"Script generation completed successfully: {self.filepath}")

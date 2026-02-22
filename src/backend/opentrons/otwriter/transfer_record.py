@@ -4,13 +4,14 @@ Transfer Record for OpenTrons protocol scripts.
 Lightweight dataclass that captures every liquid-handling event during
 script generation.  The ``ScriptGenerator`` maintains a list of these
 records (the *transfer ledger*) which downstream consumers — such as the
-``PlateVisualizer`` — read to build visualizations, audit trails, or
+``SessionVisualizer`` — read to build visualizations, audit trails, or
 validation reports.
 """
 
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass, field
 from typing import List, Optional
 
@@ -107,7 +108,7 @@ class TransferLedger:
         return rec
 
     # ------------------------------------------------------------------
-    # Query helpers (used by PlateVisualizer)
+    # Query helpers (used by SessionVisualizer)
     # ------------------------------------------------------------------
 
     def get_records_for_plate(self, plate_name: str) -> List[TransferRecord]:
@@ -143,6 +144,144 @@ class TransferLedger:
                 usage[key].add(r.reaction_id)
         # Convert sets → counts
         return {k: len(v) for k, v in usage.items()}
+
+    # ------------------------------------------------------------------
+    # Efficiency statistics
+    # ------------------------------------------------------------------
+
+    def compute_pipette_stats(self) -> dict:
+        """Compute pipette operation statistics from the ledger.
+
+        Groups consecutive transfer records into *tip cycles* — sequences
+        of transfers that share a single tip pick-up / drop cycle on the
+        robot — then classifies each cycle as either a *tip-change*
+        operation or a *no-tip-change* operation.
+
+        Tip-cycle grouping rules (mirror the handler logic):
+
+        * **Multichannel (MC)** – each physical MC operation picks up
+          a tip, does one ``transfer_fluid_multi`` call that moves
+          liquid through all 8 channels simultaneously, then drops the
+          tip.  In the ledger this appears as a contiguous block of
+          8 MC records (one per channel / well) that share the same
+          ``source_plate_name``, ``dest_plate_name`` and ``volume``.
+          Multiple back-to-back MC operations with the same plate/volume
+          are merged into one group; the number of physical MC
+          operations is ``ceil(len(group) / 8)``.
+        * **Dilution** – consecutive ``action_type="dilution"`` records
+          with the same ``reaction_class`` share a tip.  Each record is a
+          separate physical aspirate/dispense within that tip cycle.
+        * **All other SC transfers** (add, extract, analysis) – each
+          record is its own 1-record tip cycle (one tip per transfer).
+
+        Time estimates
+        ~~~~~~~~~~~~~~
+        * Tip-change operation  : **30 s** (pick-up → aspirate → dispense
+          → drop)
+        * No-tip-change operation: **10 s** (aspirate → dispense, tip
+          already held)
+
+        Returns
+        -------
+        dict
+            Keys: ``total_transfers``, ``tip_change_ops``,
+            ``no_tip_change_ops``, ``mc_operations``, ``sc_operations``,
+            ``tip_change_time_s``, ``no_tip_change_time_s``,
+            ``estimated_time_s``.
+        """
+        TIP_CHANGE_TIME_S = 30.0
+        NO_TIP_CHANGE_TIME_S = 10.0
+
+        empty = {
+            "total_transfers": 0,
+            "tip_change_ops": 0,
+            "no_tip_change_ops": 0,
+            "mc_operations": 0,
+            "sc_operations": 0,
+            "tip_change_time_s": 0.0,
+            "no_tip_change_time_s": 0.0,
+            "estimated_time_s": 0.0,
+        }
+        if not self.records:
+            return empty
+
+        # ---- build tip-cycle groups ----
+        tip_groups: List[List[TransferRecord]] = []
+        current_group: List[TransferRecord] = [self.records[0]]
+
+        for rec in self.records[1:]:
+            prev = current_group[-1]
+            same_group = False
+
+            # Consecutive MC records for the same src/dest plate & volume
+            if (
+                rec.transfer_mode == "multichannel"
+                and prev.transfer_mode == "multichannel"
+                and rec.source_plate_name == prev.source_plate_name
+                and rec.dest_plate_name == prev.dest_plate_name
+                and abs(rec.volume - prev.volume) < 0.01
+            ):
+                same_group = True
+
+            # Consecutive dilution records within the same reaction-class
+            # group (one tip per class group in the handler)
+            elif (
+                rec.action_type == "dilution"
+                and prev.action_type == "dilution"
+                and (rec.reaction_class or "") == (prev.reaction_class or "")
+            ):
+                same_group = True
+
+            if same_group:
+                current_group.append(rec)
+            else:
+                tip_groups.append(current_group)
+                current_group = [rec]
+
+        tip_groups.append(current_group)
+
+        # ---- tally operations ----
+        tip_change_ops = 0
+        no_tip_change_ops = 0
+        mc_operations = 0
+        sc_operations = 0
+
+        # Number of channels on the multichannel pipette.  Each physical
+        # MC operation records exactly this many ledger entries.
+        _MC_CHANNELS = 8
+
+        for group in tip_groups:
+            is_mc = group[0].transfer_mode == "multichannel"
+
+            if is_mc:
+                # An MC "group" may contain multiple physical MC
+                # operations that were merged because they share the
+                # same src plate, dest plate, and volume.  Each
+                # physical operation uses one pick-up / transfer / drop
+                # cycle and records exactly _MC_CHANNELS ledger entries
+                # (one per pipette channel).
+                ops_in_group = math.ceil(len(group) / _MC_CHANNELS)
+                tip_change_ops += ops_in_group
+                mc_operations += ops_in_group
+            else:
+                # SC group: 1 tip change + (N-1) no-tip-change operations
+                tip_change_ops += 1
+                no_tip_change_ops += len(group) - 1
+                sc_operations += len(group)
+
+        tip_change_time = tip_change_ops * TIP_CHANGE_TIME_S
+        no_tip_change_time = no_tip_change_ops * NO_TIP_CHANGE_TIME_S
+
+        return {
+            "total_transfers": len(self.records),
+            "tip_change_ops": tip_change_ops,
+            "no_tip_change_ops": no_tip_change_ops,
+            "mc_operations": mc_operations,
+            "sc_operations": sc_operations,
+            "tip_change_time_s": tip_change_time,
+            "no_tip_change_time_s": no_tip_change_time,
+            "estimated_time_s": tip_change_time + no_tip_change_time,
+        }
 
     def __len__(self) -> int:
         return len(self.records)
