@@ -911,7 +911,7 @@ class PlateFactory:
 
         # Build reaction → dest well position mapping from reaction plate
         rxn_wells = Well.objects.filter(
-            otsession_id=self.session.otsession_id,
+            otsession_id=self.session.otsessionobj,
             role="reaction",
             reaction_id__isnull=False,
         ).select_related("plate_id")
@@ -1375,6 +1375,13 @@ class PlateFactory:
         This function processes each temperature group, determines the appropriate labware type
         based on volumes and temperature, and creates plates for each group.
 
+        When ``self.session.use_multichannel`` is True, reactions are
+        placed in **sub-column order** so that each sub-column fills
+        completely before the next one starts.  This maximises the
+        number of 8-well groups eligible for multichannel transfer.
+        Recipe-group boundaries are aligned to sub-column starts so
+        that different recipes never share a sub-column.
+
         Parameters
         ----------
         grouped_reaction_temperature_querysets: dict
@@ -1396,6 +1403,8 @@ class PlateFactory:
             f"Creating {platetype_str} plates for {len(grouped_reaction_temperature_querysets)} temperature groups"
         )
         created_plates = []
+
+        use_mc = getattr(self.session, "use_multichannel", False)
 
         for (
             temp,
@@ -1443,89 +1452,305 @@ class PlateFactory:
                         reaction_class_groups[reaction_class] = []
                     reaction_class_groups[reaction_class].append(reaction)
 
-                # Create columns for each reaction class within the temperature plate
-                for reaction_class, class_reactions in reaction_class_groups.items():
-                    column_index = (
-                        self.session.column_manager.get_plate_current_column_index(
-                            plate_obj=plate_obj
-                        )
+                if use_mc:
+                    self._fill_plate_mc_optimized(
+                        plate_obj=plate_obj,
+                        reaction_class_groups=reaction_class_groups,
+                        role=role,
+                        role_index=role_index,
+                        labware_platetype=labware_platetype,
+                        plate_name=plate_name,
+                        created_plates=created_plates,
                     )
-                    if column_index is not False:
-                        column_obj = self.session.column_manager.create_column_model(
-                            plate_obj=plate_obj,
-                            columnindex=column_index,
-                            role=role,
-                            role_index=role_index,
-                            reactionclass=reaction_class,
-                        )
-
-                        # Update column index
-                        self.session.column_manager.update_plate_column_index_available(
-                            plate_obj=plate_obj, columnindexupdate=column_index + 1
-                        )
-
-                        # Add wells for each reaction in this class
-                        for reaction in class_reactions:
-                            # Get product SMILES for this reaction
-                            product_smiles = (
-                                self.session.material_manager.get_product_smiles(
-                                    [reaction.id]
-                                )[0]
-                            )
-
-                            logger.debug(
-                                f"Creating well for reaction {reaction.id} (class: {reaction_class}, "
-                                f"temp: {reaction_temperature}°C) with product SMILES: {product_smiles}"
-                            )
-
-                            # Check if well index is available
-                            well_index = (
-                                self.session.well_manager.get_plate_well_index_available(
-                                    plate_obj=plate_obj
-                                )
-                            )
-                            
-                            if well_index is False:
-                                # Create a new plate for the same temperature
-                                new_plate_name = f"{plate_name}-continued"
-                                plate_obj = self.create_plate_model(
-                                    role=role,
-                                    role_index=role_index,
-                                    platename=new_plate_name,
-                                    labwaretype=labware_platetype,
-                                )
-                                
-                                if not plate_obj:
-                                    logger.error("Failed to create additional plate")
-                                    break
-                                    
-                                created_plates.append(plate_obj)
-                                
-                                well_index = self.session.well_manager.get_plate_well_index_available(
-                                    plate_obj=plate_obj
-                                )
-                                if well_index is False:
-                                    logger.error("New plate has no available wells")
-                                    break
-
-                            # Create well directly (you may want to add column management here)
-                            well_obj = self.session.well_manager.create_well_model(
-                                plate_obj=plate_obj,
-                                role=role,
-                                role_index=role_index,
-                                wellindex=well_index,
-                                reactionobj=reaction,
-                                smiles=product_smiles,
-                                reactantfornextstep=True,
-                            )
-
-                            # Update well index
-                            self.session.well_manager.update_plate_well_index(
-                                plate_obj=plate_obj, wellindexupdate=well_index + 1
-                            )
+                else:
+                    self._fill_plate_sequential(
+                        plate_obj=plate_obj,
+                        reaction_class_groups=reaction_class_groups,
+                        role=role,
+                        role_index=role_index,
+                        labware_platetype=labware_platetype,
+                        plate_name=plate_name,
+                        created_plates=created_plates,
+                    )
 
         logger.info(f"Created {len(created_plates)} {platetype_str} plates by temperature")
         # return created_plates
+
+    # ------------------------------------------------------------------
+    # Reaction plate fill: sequential (original logic)
+    # ------------------------------------------------------------------
+
+    def _fill_plate_sequential(
+        self,
+        plate_obj,
+        reaction_class_groups,
+        role,
+        role_index,
+        labware_platetype,
+        plate_name,
+        created_plates,
+    ):
+        """Fill reaction plate wells sequentially (original non-MC logic).
+
+        One column model per reaction class; wells are assigned in the
+        order returned by ``get_plate_well_index_available`` (0, 1, 2 …).
+        """
+        for reaction_class, class_reactions in reaction_class_groups.items():
+            column_index = (
+                self.session.column_manager.get_plate_current_column_index(
+                    plate_obj=plate_obj
+                )
+            )
+            if column_index is not False:
+                self.session.column_manager.create_column_model(
+                    plate_obj=plate_obj,
+                    columnindex=column_index,
+                    role=role,
+                    role_index=role_index,
+                    reactionclass=reaction_class,
+                )
+                self.session.column_manager.update_plate_column_index_available(
+                    plate_obj=plate_obj, columnindexupdate=column_index + 1
+                )
+
+                for reaction in class_reactions:
+                    product_smiles = (
+                        self.session.material_manager.get_product_smiles(
+                            [reaction.id]
+                        )[0]
+                    )
+
+                    logger.debug(
+                        f"Creating well for reaction {reaction.id} "
+                        f"(class: {reaction_class}) "
+                        f"with product SMILES: {product_smiles}"
+                    )
+
+                    well_index = (
+                        self.session.well_manager.get_plate_well_index_available(
+                            plate_obj=plate_obj
+                        )
+                    )
+
+                    if well_index is False:
+                        new_plate_name = f"{plate_name}-continued"
+                        plate_obj = self.create_plate_model(
+                            role=role,
+                            role_index=role_index,
+                            platename=new_plate_name,
+                            labwaretype=labware_platetype,
+                        )
+                        if not plate_obj:
+                            logger.error("Failed to create additional plate")
+                            break
+                        created_plates.append(plate_obj)
+                        well_index = (
+                            self.session.well_manager.get_plate_well_index_available(
+                                plate_obj=plate_obj
+                            )
+                        )
+                        if well_index is False:
+                            logger.error("New plate has no available wells")
+                            break
+
+                    self.session.well_manager.create_well_model(
+                        plate_obj=plate_obj,
+                        role=role,
+                        role_index=role_index,
+                        wellindex=well_index,
+                        reactionobj=reaction,
+                        smiles=product_smiles,
+                        reactantfornextstep=True,
+                    )
+                    self.session.well_manager.update_plate_well_index(
+                        plate_obj=plate_obj, wellindexupdate=well_index + 1
+                    )
+
+    # ------------------------------------------------------------------
+    # Reaction plate fill: MC-optimized sub-column ordering
+    # ------------------------------------------------------------------
+
+    _MC_PIPETTE_CHANNELS = 8
+
+    def _fill_plate_mc_optimized(
+        self,
+        plate_obj,
+        reaction_class_groups,
+        role,
+        role_index,
+        labware_platetype,
+        plate_name,
+        created_plates,
+    ):
+        """Fill reaction plate in sub-column order for multichannel transfer.
+
+        Instead of sequential indices (0, 1, 2, 3 …), wells are assigned
+        so that one sub-column fills completely before the next begins:
+
+        * 96-well  (8 rows):  0, 1, 2, …, 7  (same as sequential)
+        * 384-well (16 rows): 0, 2, 4, 6, 8, 10, 12, 14  then
+          1, 3, 5, 7, 9, 11, 13, 15  (interleaved sub-columns)
+
+        Reactions are further sub-grouped by
+        ``(reactionclass, recipe, intramolecular)`` so that different
+        recipe groups never share a sub-column.  Group boundaries are
+        aligned to sub-column starts.  Larger groups are placed first
+        to maximise the number of full sub-columns.
+        """
+        wpc = plate_obj.numberwellsincolumn
+        num_cols = plate_obj.numbercolumns
+        sub_cols_per_col = max(1, wpc // self._MC_PIPETTE_CHANNELS)
+        wells_per_group = min(wpc, self._MC_PIPETTE_CHANNELS)
+
+        # --- Build (class, recipe, intramolecular) recipe groups ---
+        from collections import defaultdict as _defaultdict
+
+        recipe_groups = _defaultdict(list)
+        for reaction_class, class_reactions in reaction_class_groups.items():
+            for reaction in class_reactions:
+                key = (
+                    reaction_class,
+                    getattr(reaction, "recipe", None),
+                    getattr(reaction, "intramolecular", False),
+                )
+                recipe_groups[key].append(reaction)
+
+        # Sort by group size descending — larger groups yield more full
+        # sub-columns and therefore more MC transfers.
+        sorted_groups = sorted(
+            recipe_groups.items(), key=lambda x: len(x[1]), reverse=True
+        )
+
+        logger.info(
+            f"MC plate fill: {len(sorted_groups)} recipe group(s), "
+            f"wpc={wpc}, sub_cols_per_col={sub_cols_per_col}, "
+            f"wells_per_group={wells_per_group}"
+        )
+
+        # --- Sub-column allocator state ---
+        cur_col = 0
+        cur_sub_col = 0
+        cur_pos = 0  # position within the current sub-column (0..wells_per_group-1)
+
+        def _advance():
+            """Advance allocator by one position."""
+            nonlocal cur_col, cur_sub_col, cur_pos
+            cur_pos += 1
+            if cur_pos >= wells_per_group:
+                cur_pos = 0
+                cur_sub_col += 1
+                if cur_sub_col >= sub_cols_per_col:
+                    cur_sub_col = 0
+                    cur_col += 1
+
+        def _align_to_sub_col_boundary():
+            """Skip to the start of the next unused sub-column."""
+            nonlocal cur_col, cur_sub_col, cur_pos
+            if cur_pos > 0:
+                cur_pos = 0
+                cur_sub_col += 1
+                if cur_sub_col >= sub_cols_per_col:
+                    cur_sub_col = 0
+                    cur_col += 1
+
+        def _well_index_for_current_pos():
+            """Compute well index from (col, sub_col, pos)."""
+            col_start = cur_col * wpc
+            return col_start + cur_sub_col + cur_pos * sub_cols_per_col
+
+        # --- Place reactions ---
+        for (rxn_class, recipe, intra), reactions in sorted_groups:
+            # Align to sub-column boundary at group start so different
+            # recipe groups never share a sub-column.
+            _align_to_sub_col_boundary()
+
+            # Create a Column model for this group
+            col_model_index = (
+                self.session.column_manager.get_plate_current_column_index(
+                    plate_obj=plate_obj
+                )
+            )
+            if col_model_index is not False:
+                self.session.column_manager.create_column_model(
+                    plate_obj=plate_obj,
+                    columnindex=col_model_index,
+                    role=role,
+                    role_index=role_index,
+                    reactionclass=rxn_class,
+                )
+                self.session.column_manager.update_plate_column_index_available(
+                    plate_obj=plate_obj, columnindexupdate=col_model_index + 1
+                )
+
+            for reaction in reactions:
+                # Check plate capacity
+                if cur_col >= num_cols:
+                    # Plate full — create overflow plate
+                    new_plate_name = f"{plate_name}-continued"
+                    plate_obj = self.create_plate_model(
+                        role=role,
+                        role_index=role_index,
+                        platename=new_plate_name,
+                        labwaretype=labware_platetype,
+                    )
+                    if not plate_obj:
+                        logger.error("Failed to create overflow plate")
+                        break
+                    created_plates.append(plate_obj)
+                    wpc = plate_obj.numberwellsincolumn
+                    num_cols = plate_obj.numbercolumns
+                    sub_cols_per_col = max(1, wpc // self._MC_PIPETTE_CHANNELS)
+                    wells_per_group = min(wpc, self._MC_PIPETTE_CHANNELS)
+                    cur_col = 0
+                    cur_sub_col = 0
+                    cur_pos = 0
+
+                well_idx = _well_index_for_current_pos()
+
+                product_smiles = (
+                    self.session.material_manager.get_product_smiles(
+                        [reaction.id]
+                    )[0]
+                )
+
+                logger.debug(
+                    f"MC fill: reaction {reaction.id} → well {well_idx} "
+                    f"(col={cur_col}, sub_col={cur_sub_col}, pos={cur_pos})"
+                )
+
+                self.session.well_manager.create_well_model(
+                    plate_obj=plate_obj,
+                    role=role,
+                    role_index=role_index,
+                    wellindex=well_idx,
+                    reactionobj=reaction,
+                    smiles=product_smiles,
+                    reactantfornextstep=True,
+                )
+
+                _advance()
+
+        # --- Update plate tracking ---
+        # Set well index past the last fully/partially used column so
+        # subsequent code (e.g. starting plate) doesn't collide.
+        used_cols = cur_col + (1 if cur_pos > 0 or cur_sub_col > 0 else 0)
+        next_well = min(used_cols * wpc, num_cols * wpc)
+        self.session.well_manager.update_plate_well_index(
+            plate_obj=plate_obj, wellindexupdate=next_well
+        )
+        self.session.column_manager.update_plate_column_index_available(
+            plate_obj=plate_obj, columnindexupdate=min(used_cols, num_cols)
+        )
+
+        full_sub_cols = sum(
+            1
+            for _, reactions in sorted_groups
+            for i in range(len(reactions) // wells_per_group)
+        )
+        logger.info(
+            f"MC plate fill complete: {sum(len(r) for _, r in sorted_groups)} "
+            f"reactions, {full_sub_cols} full sub-column(s)"
+        )
 
     def update_plate_deck_ot_session_ids(self, plate_queryset):
         """
