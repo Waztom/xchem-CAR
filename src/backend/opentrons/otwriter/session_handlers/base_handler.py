@@ -29,6 +29,7 @@ class SessionHandler:
         """
         self.script_generator = script_generator
         self.command_generator = script_generator.command_generator
+        self.annotation_generator = script_generator.annotation_generator
         self.query_service = script_generator.query_service
         self.volume_manager = script_generator.volume_manager
         self.well_finder = script_generator.well_finder
@@ -165,3 +166,4 @@ class SessionHandler:
             Type of session that was processed
         """
         logger.info(f"Completed processing of {session_type} session")
+

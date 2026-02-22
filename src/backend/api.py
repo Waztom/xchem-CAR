@@ -114,7 +114,7 @@ from .services.protocol_service import (
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
+    queryset = Project.objects.all().order_by("-init_date")
 
     def get_serializer_class(self):
         fetchall = self.request.GET.get("fetchall", None)
@@ -503,9 +503,16 @@ class StirActionViewSet(viewsets.ModelViewSet):
 
 # OT Session viewsets
 class OTProjectViewSet(viewsets.ModelViewSet):
-    queryset = OTProject.objects.all()
     serializer_class = OTProjectSerializer
     filterset_fields = ["project_id"]
+
+    def get_queryset(self):
+        """Only return OTProjects that still have at least one
+        OTBatchProtocol.  This excludes historical orphans whose batches
+        (and therefore protocols) have been deleted."""
+        return OTProject.objects.filter(
+            otbatchprotocol__isnull=False
+        ).distinct()
 
     @action(methods=["post"], detail=False, url_path="createotproject")
     def create_ot_project(self, request, pk=None):
@@ -539,10 +546,13 @@ class OTProjectViewSet(viewsets.ModelViewSet):
                 if file_key in request.FILES:
                     custom_files[str(batch_id)] = request.FILES[file_key]
 
+        use_multichannel = request.data.get("use_multichannel", "false") == "true"
+
         task_id = initiate_ot_project(
             batch_ids=batch_ids,
             protocol_name=protocol_name,
             custom_files=custom_files,
+            use_multichannel=use_multichannel,
         )
 
         return JsonResponse(data={"task_id": task_id})

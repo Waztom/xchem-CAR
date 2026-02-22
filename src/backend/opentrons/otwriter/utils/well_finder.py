@@ -195,6 +195,7 @@ class WellFinder:
         solvent: str,
         concentration: float,
         transfer_volume: float,
+        transfer_type: str = None,
     ) -> List[List]:
         """
         Find starting plate wells for executing an add action.
@@ -213,6 +214,10 @@ class WellFinder:
             The concentration of the starting material
         transfer_volume : float
             The volume of starting material needed for the transfer
+        transfer_type : str, optional
+            When provided, restrict the search to wells with this
+            ``transfer_type`` (e.g. ``'single'`` or ``'multichannel'``).
+            ``None`` means no filtering (default).
 
         Returns
         -------
@@ -244,23 +249,33 @@ class WellFinder:
                 logger.info(
                     "Searching for starting material wells without solvent/concentration constraints"
                 )
-                well_objects = Well.objects.filter(
+                filter_kwargs = dict(
                     otsession_id=self.script_generator.otsession_id,
                     smiles=smiles,
                     available=True,
                     role="startingmaterial",
+                )
+                if transfer_type:
+                    filter_kwargs["transfer_type"] = transfer_type
+                well_objects = Well.objects.filter(
+                    **filter_kwargs
                 ).order_by("id")
             else:
                 logger.info(
                     f"Searching for starting material wells with solvent={solvent}, concentration={concentration}"
                 )
-                well_objects = Well.objects.filter(
+                filter_kwargs = dict(
                     otsession_id=self.script_generator.otsession_id,
                     smiles=smiles,
                     solvent=solvent,
                     concentration=concentration,
                     available=True,
                     role="startingmaterial",
+                )
+                if transfer_type:
+                    filter_kwargs["transfer_type"] = transfer_type
+                well_objects = Well.objects.filter(
+                    **filter_kwargs
                 ).order_by("id")
 
             if not well_objects.exists():

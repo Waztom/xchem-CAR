@@ -5,7 +5,7 @@ Manages pipette and tip rack selection, creation, and configuration.
 import logging
 from statistics import median
 
-from ....models import Pipette, TipRack
+from ....models import Pipette, TipRack, Well
 
 logger = logging.getLogger(__name__)
 
@@ -306,6 +306,67 @@ class PipetteManager:
 
         except Exception as e:
             logger.error(f"Error creating pipette model: {str(e)}")
+            return None
+
+    def create_multichannel_pipette_model(self, rounded_volumes: list):
+        """Create a multi-channel pipette if multichannel source wells exist.
+
+        Checks for starting-material wells with
+        ``transfer_type='multichannel'``.  If any are present, selects the
+        optimal multi-channel pipette for the session volumes and persists
+        a second ``Pipette`` row.
+
+        Parameters
+        ----------
+        rounded_volumes : list
+            The rounded transfer volumes used for pipette selection.
+
+        Returns
+        -------
+        Pipette or None
+            The created multi-channel pipette, or ``None`` if no MC wells
+            exist or creation fails.
+        """
+        mc_well_count = Well.objects.filter(
+            otsession_id=self.session.otsessionobj,
+            role="startingmaterial",
+            transfer_type=Well.TransferType.MULTICHANNEL,
+        ).count()
+
+        if mc_well_count == 0:
+            logger.info("No multichannel source wells — skipping MC pipette")
+            return None
+
+        logger.info(
+            f"Found {mc_well_count} multichannel source well(s) — "
+            "creating multi-channel pipette"
+        )
+
+        try:
+            mc_pipette_type = self.get_pipette_type(
+                rounded_volumes=rounded_volumes,
+                channel_type="multi",
+            )
+
+            mc_pipette = Pipette()
+            mc_pipette.otsession_id = self.session.otsessionobj
+            mc_pipette.position = mc_pipette_type["position"]
+            mc_pipette.maxvolume = mc_pipette_type["maxvolume"]
+            mc_pipette.type = mc_pipette_type["type"]
+            mc_pipette.name = (
+                f"{mc_pipette_type['position']}_{mc_pipette_type['labware']}"
+            )
+            mc_pipette.labware = mc_pipette_type["labware"]
+            mc_pipette.save()
+
+            logger.info(
+                f"Created multi-channel pipette: {mc_pipette.name} "
+                f"(ID: {mc_pipette.id})"
+            )
+            return mc_pipette
+
+        except Exception as e:
+            logger.error(f"Error creating multi-channel pipette: {str(e)}")
             return None
 
     def create_tiprack_model(self, name: str):

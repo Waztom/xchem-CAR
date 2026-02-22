@@ -41,6 +41,9 @@ _QS_MOD = f"{_WRITER_MOD}.utils.query_service"
 # ---------------------------------------------------------------------------
 def _make_script_generator_stub(**overrides):
     """Return a MagicMock with the interface expected by helper components."""
+    from backend.opentrons.otwriter.annotation_generator import AnnotationGenerator
+    from backend.opentrons.otwriter.transfer_record import TransferLedger
+
     sg = MagicMock()
     sg.otsession_id = overrides.get("otsession_id", 1)
     sg.actionsession_ids = overrides.get("actionsession_ids", [1, 2])
@@ -52,12 +55,15 @@ def _make_script_generator_stub(**overrides):
         "protocolname", "reaction-bABC123-r1-s1"
     )
     sg.pipettename = overrides.get("pipettename", "p300_single")
+    sg.mc_pipettename = overrides.get("mc_pipettename", None)
     sg.content = []
     sg.otsessionobj = MagicMock()
     sg.otsessionobj.id = sg.otsession_id
 
     # Sub-components
     sg.command_generator = MagicMock()
+    sg.annotation_generator = AnnotationGenerator(sg)
+    sg.transfer_ledger = TransferLedger()
     sg.query_service = MagicMock()
     sg.volume_manager = MagicMock()
     sg.well_finder = MagicMock()
@@ -1696,9 +1702,9 @@ class TestReactionHandlerProcessSession(TestCase):
 
         qs = _make_action_session_qs(session_number=1)
 
-        with patch.object(self.handler, "process_reaction_actions") as mock_pra:
+        with patch.object(self.handler, "_process_session_per_reaction") as mock_pr:
             self.handler.process_session(qs)
-            mock_pra.assert_called_once()
+            mock_pr.assert_called_once()
 
     @patch(f"{_RH_MOD}.get_reaction_query_set")
     @patch(f"{_RH_MOD}.get_reaction")
@@ -1716,7 +1722,7 @@ class TestReactionHandlerProcessSession(TestCase):
         mock_get_rxn.return_value = rxn
 
         with patch.object(handler, "process_dilution_step") as mock_dil, \
-             patch.object(handler, "process_reaction_actions"):
+             patch.object(handler, "_process_session_per_reaction"):
             handler.process_session(qs)
             mock_dil.assert_called_once()
 
@@ -2315,3 +2321,387 @@ class TestQueryServiceFindSolventPlateWellObj(TestCase):
         qs_obj = QueryService(sg)
         result = qs_obj.find_solvent_plate_well_obj("DMSO", 100.0)
         self.assertEqual(len(result), 0)
+
+
+# ===================================================================
+# Multichannel support tests
+# ===================================================================
+
+
+def _make_mc_script_generator_stub(**overrides):
+    """Script-generator stub with a multichannel pipette configured."""
+    sg = _make_script_generator_stub(**overrides)
+    sg.mc_pipettename = overrides.get("mc_pipettename", "left_p300_multi")
+    sg.mc_pipetteobj = overrides.get("mc_pipetteobj", MagicMock())
+    return sg
+
+
+class TestCommandGeneratorTipTrackingMCSuffix(TestCase):
+    """Tests for tip-tracking functions with MC suffix."""
+
+    def setUp(self):
+        from backend.opentrons.otwriter.command_generator import CommandGenerator
+        self.cg = CommandGenerator(_make_mc_script_generator_stub())
+
+    def test_tips_available_mc_suffix(self):
+        result = self.cg.get_number_tips_available_setup(1, "multi", suffix="MC")
+        joined = "\n".join(result)
+        self.assertIn("tipstateMC", joined)
+        self.assertNotIn("tipstate =", joined)
+
+    def test_pickup_tip_function_mc_suffix(self):
+        result = self.cg.get_pickup_tip_function("left_p300_multi", suffix="MC")
+        joined = "\n".join(result)
+        self.assertIn("def pickUpTipMC()", joined)
+        self.assertIn("left_p300_multi", joined)
+        self.assertIn("tipstateMC", joined)
+
+    def test_drop_tip_function_mc_suffix(self):
+        result = self.cg.get_drop_tip_function("left_p300_multi", suffix="MC")
+        joined = "\n".join(result)
+        self.assertIn("def dropTipMC()", joined)
+        self.assertIn("left_p300_multi.has_tip", joined)
+
+    def test_pick_up_tip_call_mc(self):
+        result = self.cg.pick_up_tip(suffix="MC")
+        joined = "\n".join(result)
+        self.assertIn("pickUpTipMC()", joined)
+
+    def test_drop_tip_call_mc(self):
+        result = self.cg.drop_tip(suffix="MC")
+        joined = "\n".join(result)
+        self.assertIn("dropTipMC()", joined)
+
+    def test_default_suffix_is_empty(self):
+        """Default suffix produces the original function names."""
+        result_pickup = self.cg.pick_up_tip()
+        result_drop = self.cg.drop_tip()
+        self.assertIn("pickUpTip()", "\n".join(result_pickup))
+        self.assertIn("dropTip()", "\n".join(result_drop))
+
+
+class TestCommandGeneratorTransferMultiMCPipette(TestCase):
+    """Tests for transfer_fluid_multi using the MC pipette name."""
+
+    def setUp(self):
+        from backend.opentrons.otwriter.command_generator import CommandGenerator
+        self.sg = _make_mc_script_generator_stub()
+        self.cg = CommandGenerator(self.sg)
+
+    def test_defaults_to_mc_pipette(self):
+        """When no override is given, mc_pipettename is used."""
+        result = self.cg.transfer_fluid_multi(
+            aspirateplatename="sm_plate",
+            dispenseplatename="rxn_plate",
+            aspiratecolumnindex=0,
+            dispensecolumnindex=2,
+            transvolume=50.0,
+        )
+        joined = "\n".join(result)
+        self.assertIn("left_p300_multi", joined)
+        self.assertNotIn("p300_single", joined)
+
+    def test_explicit_override(self):
+        """pipette_name_override takes precedence."""
+        result = self.cg.transfer_fluid_multi(
+            aspirateplatename="sm_plate",
+            dispenseplatename="rxn_plate",
+            aspiratecolumnindex=0,
+            dispensecolumnindex=1,
+            transvolume=25.0,
+            pipette_name_override="custom_pipette",
+        )
+        joined = "\n".join(result)
+        self.assertIn("custom_pipette", joined)
+        self.assertNotIn("left_p300_multi", joined)
+
+    def test_fallback_to_sc_when_no_mc(self):
+        """When mc_pipettename is None, falls back to single-channel name."""
+        self.sg.mc_pipettename = None
+        result = self.cg.transfer_fluid_multi(
+            aspirateplatename="sm",
+            dispenseplatename="rxn",
+            aspiratecolumnindex=0,
+            dispensecolumnindex=0,
+            transvolume=10.0,
+        )
+        joined = "\n".join(result)
+        self.assertIn("p300_single", joined)
+
+
+class TestAnnotationGeneratorMultichannelHeader(TestCase):
+    """Tests for AnnotationGenerator.multichannel_header()."""
+
+    def test_multichannel_header_contains_label(self):
+        from backend.opentrons.otwriter.annotation_generator import AnnotationGenerator
+        sg = _make_script_generator_stub()
+        ag = AnnotationGenerator(sg)
+        result = ag.multichannel_header()
+        self.assertIn("Multichannel transfers", result)
+        self.assertIn("column-to-column", result)
+
+
+class TestReactionHandlerMultichannelTransfers(TestCase):
+    """Tests for the step-wise multichannel processing helpers."""
+
+    def setUp(self):
+        from backend.opentrons.otwriter.session_handlers.reaction_handler import (
+            ReactionSessionHandler,
+        )
+        self.sg = _make_mc_script_generator_stub(reactionstep=1)
+        self.handler = ReactionSessionHandler(self.sg)
+
+    def test_build_mc_source_map_groups_by_position(self):
+        """MC source wells are grouped by physical sub-column position."""
+        src_plate = _make_plate_stub(id=10, name="sm_plate")
+        src_plate.numberwellsincolumn = 8
+
+        mc_wells = []
+        for i in range(8):
+            w = _make_well_stub(
+                index=i, smiles=f"mol_{i}", solvent="DMSO", concentration=0.5,
+                plate_id=10, plate_name="sm_plate",
+            )
+            w.plate_id = src_plate
+            mc_wells.append(w)
+
+        mc_qs = MagicMock()
+        mc_qs.__iter__ = lambda s: iter(mc_wells)
+
+        mc_groups = self.handler._build_mc_source_map(mc_qs)
+        self.assertEqual(len(mc_groups), 1)
+        group = mc_groups[0]
+        self.assertEqual(group["col"], 0)
+        self.assertEqual(group["sub_col"], 0)
+        self.assertEqual(len(group["wells_by_pos"]), 8)
+        # Position 0 has the first well, position 7 has the last
+        self.assertEqual(group["wells_by_pos"][0].smiles, "mol_0")
+        self.assertEqual(group["wells_by_pos"][7].smiles, "mol_7")
+
+    def test_build_mc_source_map_384_well(self):
+        """384-well source produces two sub-column groups per column."""
+        src_plate = _make_plate_stub(id=10, name="sm_plate")
+        src_plate.numberwellsincolumn = 16
+
+        mc_wells = []
+        for i in range(16):
+            w = _make_well_stub(
+                index=i, smiles=f"mol_{i}", solvent=None, concentration=None,
+                plate_id=10, plate_name="sm_plate",
+            )
+            w.plate_id = src_plate
+            mc_wells.append(w)
+
+        mc_qs = MagicMock()
+        mc_qs.__iter__ = lambda s: iter(mc_wells)
+
+        mc_groups = self.handler._build_mc_source_map(mc_qs)
+        self.assertEqual(len(mc_groups), 2)
+        sub_cols = {g["sub_col"] for g in mc_groups}
+        self.assertEqual(sub_cols, {0, 1})
+
+    def test_find_matching_mc_source_homogeneous(self):
+        """Matching homogeneous source sub-column is found."""
+        # Source sub-column: all same material
+        wells_by_pos = {}
+        for i in range(8):
+            wells_by_pos[i] = MagicMock(
+                smiles="CCO", solvent="DMSO", concentration=0.5
+            )
+        mc_groups = [
+            {"plate": MagicMock(), "col": 0, "sub_col": 0,
+             "wells_by_pos": wells_by_pos},
+        ]
+        # Dest needs: all same material
+        dest_needs = {i: ("CCO", "DMSO", 0.5) for i in range(8)}
+        result = self.handler._find_matching_mc_source(mc_groups, dest_needs)
+        self.assertIsNotNone(result)
+
+    def test_find_matching_mc_source_heterogeneous(self):
+        """Matching heterogeneous source sub-column is found."""
+        wells_by_pos = {}
+        for i in range(8):
+            wells_by_pos[i] = MagicMock(
+                smiles=f"mol_{i}", solvent="DMSO", concentration=0.5
+            )
+        mc_groups = [
+            {"plate": MagicMock(), "col": 0, "sub_col": 0,
+             "wells_by_pos": wells_by_pos},
+        ]
+        dest_needs = {i: (f"mol_{i}", "DMSO", 0.5) for i in range(8)}
+        result = self.handler._find_matching_mc_source(mc_groups, dest_needs)
+        self.assertIsNotNone(result)
+
+    def test_find_matching_mc_source_mismatch(self):
+        """Non-matching source returns None."""
+        wells_by_pos = {}
+        for i in range(8):
+            wells_by_pos[i] = MagicMock(
+                smiles="CCO", solvent="DMSO", concentration=0.5
+            )
+        mc_groups = [
+            {"plate": MagicMock(), "col": 0, "sub_col": 0,
+             "wells_by_pos": wells_by_pos},
+        ]
+        # Dest needs different material at position 3
+        dest_needs = {i: ("CCO", "DMSO", 0.5) for i in range(8)}
+        dest_needs[3] = ("OCC", "DMSO", 0.5)
+        result = self.handler._find_matching_mc_source(mc_groups, dest_needs)
+        self.assertIsNone(result)
+
+    def test_find_matching_mc_source_missing_position(self):
+        """Source missing a required position returns None."""
+        wells_by_pos = {i: MagicMock(
+            smiles="CCO", solvent="DMSO", concentration=0.5
+        ) for i in range(7)}  # only 7 positions
+        mc_groups = [
+            {"plate": MagicMock(), "col": 0, "sub_col": 0,
+             "wells_by_pos": wells_by_pos},
+        ]
+        dest_needs = {i: ("CCO", "DMSO", 0.5) for i in range(8)}
+        result = self.handler._find_matching_mc_source(mc_groups, dest_needs)
+        self.assertIsNone(result)
+
+    def test_group_by_recipe(self):
+        """Reactions with different recipes are grouped separately."""
+        as1 = MagicMock()
+        rxn1 = MagicMock()
+        rxn1.reactionclass = "amidation"
+        rxn1.recipe = "standard"
+        rxn1.intramolecular = False
+        as1.reaction_id = rxn1
+
+        as2 = MagicMock()
+        rxn2 = MagicMock()
+        rxn2.reactionclass = "amidation"
+        rxn2.recipe = "alternative"
+        rxn2.intramolecular = False
+        as2.reaction_id = rxn2
+
+        qs = MagicMock()
+        qs.__iter__ = lambda s: iter([as1, as2])
+        qs.count.return_value = 2
+
+        groups = self.handler._group_by_recipe(qs)
+        self.assertEqual(len(groups), 2)
+        self.assertIn(("amidation", "standard", "intermolecular"), groups)
+        self.assertIn(("amidation", "alternative", "intermolecular"), groups)
+
+
+class TestReactionHandlerProcessSessionMCIntegration(TestCase):
+    """Tests for process_session dispatching to step-wise or per-reaction mode."""
+
+    def setUp(self):
+        from backend.opentrons.otwriter.session_handlers.reaction_handler import (
+            ReactionSessionHandler,
+        )
+        self.sg = _make_mc_script_generator_stub(reactionstep=1)
+        self.handler = ReactionSessionHandler(self.sg)
+
+    @patch(f"{_RH_MOD}.get_reaction")
+    def test_process_session_dispatches_step_wise_when_mc(self, mock_get_rxn):
+        """When MC pipette + MC source wells exist, step-wise processing is used."""
+        rxn_obj = MagicMock()
+        rxn_obj.id = 1
+        mock_get_rxn.return_value = rxn_obj
+
+        mc_qs = MagicMock()
+        mc_qs.exists.return_value = True
+        mc_qs.count.return_value = 8
+        self.sg.query_service.get_multichannel_source_wells.return_value = mc_qs
+
+        qs = _make_action_session_qs(session_number=1)
+
+        with patch.object(self.handler, "_process_session_step_wise") as mock_sw, \
+             patch.object(self.handler, "_process_session_per_reaction") as mock_pr:
+            self.handler.process_session(qs)
+            mock_sw.assert_called_once()
+            mock_pr.assert_not_called()
+
+    @patch(f"{_RH_MOD}.get_reaction")
+    def test_process_session_dispatches_per_reaction_when_no_mc(self, mock_get_rxn):
+        """When no MC pipette, per-reaction processing is used."""
+        self.sg.mc_pipettename = None
+        rxn_obj = MagicMock()
+        rxn_obj.id = 1
+        mock_get_rxn.return_value = rxn_obj
+
+        qs = _make_action_session_qs(session_number=1)
+
+        with patch.object(self.handler, "_process_session_step_wise") as mock_sw, \
+             patch.object(self.handler, "_process_session_per_reaction") as mock_pr:
+            self.handler.process_session(qs)
+            mock_pr.assert_called_once()
+            mock_sw.assert_not_called()
+
+    @patch(f"{_RH_MOD}.get_reaction")
+    def test_process_session_dispatches_per_reaction_when_no_mc_wells(self, mock_get_rxn):
+        """When MC pipette exists but no MC wells, per-reaction processing is used."""
+        rxn_obj = MagicMock()
+        rxn_obj.id = 1
+        mock_get_rxn.return_value = rxn_obj
+
+        mc_qs = MagicMock()
+        mc_qs.exists.return_value = False
+        self.sg.query_service.get_multichannel_source_wells.return_value = mc_qs
+
+        qs = _make_action_session_qs(session_number=1)
+
+        with patch.object(self.handler, "_process_session_step_wise") as mock_sw, \
+             patch.object(self.handler, "_process_session_per_reaction") as mock_pr:
+            self.handler.process_session(qs)
+            mock_pr.assert_called_once()
+            mock_sw.assert_not_called()
+
+
+class TestReactionHandlerSkipMCHandledActions(TestCase):
+    """Tests that process_reaction_actions processes all add actions (no skip logic)."""
+
+    def setUp(self):
+        from backend.opentrons.otwriter.session_handlers.reaction_handler import (
+            ReactionSessionHandler,
+        )
+        self.sg = _make_mc_script_generator_stub()
+        self.handler = ReactionSessionHandler(self.sg)
+
+    @patch(f"{_RH_MOD}.get_session_recipe_actions")
+    def test_all_add_actions_processed(self, mock_recipe_actions):
+        """process_reaction_actions processes every add action (SC mode)."""
+        from backend.models import RecipeAddAction
+
+        add_action_1 = MagicMock(spec=RecipeAddAction)
+        add_action_1.action_number = 1
+        add_action_2 = MagicMock(spec=RecipeAddAction)
+        add_action_2.action_number = 2
+        mock_recipe_actions.return_value = [add_action_1, add_action_2]
+
+        rxn_obj = MagicMock()
+        rxn_obj.id = 42
+        rxn_obj.reactionclass = "amidation"
+        rxn_obj.recipe = "standard"
+        rxn_obj.intramolecular = False
+
+        with patch.object(self.handler, "process_add_action") as mock_add:
+            self.handler.process_reaction_actions(MagicMock(), rxn_obj, 1)
+            self.assertEqual(mock_add.call_count, 2)
+
+    @patch(f"{_RH_MOD}.get_session_recipe_actions")
+    def test_no_mc_handled_processes_all(self, mock_recipe_actions):
+        from backend.models import RecipeAddAction
+
+        add_action_1 = MagicMock(spec=RecipeAddAction)
+        add_action_1.action_number = 1
+        add_action_2 = MagicMock(spec=RecipeAddAction)
+        add_action_2.action_number = 2
+        mock_recipe_actions.return_value = [add_action_1, add_action_2]
+
+        rxn_obj = MagicMock()
+        rxn_obj.id = 42
+        rxn_obj.reactionclass = "amidation"
+        rxn_obj.recipe = "standard"
+        rxn_obj.intramolecular = False
+
+        with patch.object(self.handler, "process_add_action") as mock_add:
+            self.handler.process_reaction_actions(MagicMock(), rxn_obj, 1)
+            self.assertEqual(mock_add.call_count, 2)
+

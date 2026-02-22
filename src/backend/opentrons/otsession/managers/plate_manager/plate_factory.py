@@ -1,12 +1,14 @@
 import logging
+import math
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 
-from .....models import Plate
+from .....models import Plate, Well
 from .....conversions import sanitize_for_python_var
 from .....recipe_utils import unparse_plate_type
 from ....labwareavailable import labware_plates
+from ..multichannel_analyzer import MultichannelAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -411,6 +413,10 @@ class PlateFactory:
         Creates a starting material plate for reaction materials, respecting the maximum
         fill percentage defined in labware configuration.
 
+        When ``self.session.use_multichannel`` is True, delegates to
+        :meth:`_create_multichannel_starting_plate` which lays out
+        reagents in full-column groups for 8-channel pipette transfers.
+
         Returns
         -------
         plate_obj: Plate
@@ -425,6 +431,732 @@ class PlateFactory:
         if materials_df.empty:
             logger.info("No materials needed for starting plate")
             return None
+
+        # Branch: multichannel-aware layout or standard sequential layout
+        if getattr(self.session, "use_multichannel", False):
+            return self._create_multichannel_starting_plate(materials_df)
+
+        return self._create_sequential_starting_plate(materials_df)
+
+    # ------------------------------------------------------------------
+    # Multichannel-aware starter plate layout
+    # ------------------------------------------------------------------
+
+    def _create_multichannel_starting_plate(self, materials_df):
+        """Create a starting material plate with multichannel-aware column layout.
+
+        Multichannel-eligible reagents (used in ≥ ``wells_per_column`` reactions
+        with the same volume) are placed in full, uniform columns so that an
+        8-channel pipette can aspirate from the entire column at once.  Each
+        source well in a multichannel column holds enough volume for *N*
+        transfers, where *N = ceil(reaction_count / wells_per_column)*.
+
+        Remaining reagents (too few reactions, or leftover fractions) revert
+        to the standard sequential approach: one well per reagent with the
+        summed total volume.
+
+        Parameters
+        ----------
+        materials_df : pd.DataFrame
+            Output of ``MaterialManager.get_add_actions_material_dataframe()``.
+
+        Returns
+        -------
+        plate_obj : Plate or None
+        """
+        # --- 1. Build per-transfer materials list from raw add actions ---
+        addactionsdf = self.session.addactionsdf
+        if addactionsdf is None or addactionsdf.empty:
+            logger.warning("No add actions dataframe available for multichannel analysis")
+            return self._create_sequential_starting_plate(materials_df)
+
+        # Ensure uniquesolution column exists
+        if "uniquesolution" not in addactionsdf.columns:
+            addactionsdf["uniquesolution"] = addactionsdf.apply(
+                self.session.material_manager.combine_strings, axis=1
+            )
+
+        # Group raw add actions by (uniquesolution, volume) to get
+        # per-transfer volume and reaction counts
+        raw_groups = (
+            addactionsdf.groupby(["uniquesolution", "volume"])
+            .agg(
+                smiles=("smiles", "first"),
+                solvent=("solvent", "first"),
+                concentration=("concentration", "first"),
+                reaction_count=("reaction_id_id", "nunique"),
+            )
+            .reset_index()
+        )
+
+        # Only include materials that still need wells (present in materials_df)
+        materials_unique_solutions = set(materials_df["uniquesolution"].tolist())
+
+        materials_for_analysis = []
+        for _, row in raw_groups.iterrows():
+            if row["uniquesolution"] not in materials_unique_solutions:
+                continue
+            materials_for_analysis.append(
+                {
+                    "smiles": row["smiles"],
+                    "volume": row["volume"],
+                    "reaction_count": int(row["reaction_count"]),
+                    "solvent": row["solvent"] if pd.notna(row["solvent"]) else None,
+                    "concentration": (
+                        float(row["concentration"])
+                        if pd.notna(row["concentration"])
+                        else None
+                    ),
+                }
+            )
+
+        if not materials_for_analysis:
+            logger.info("No materials available for multichannel analysis, "
+                        "falling back to sequential layout")
+            return self._create_sequential_starting_plate(materials_df)
+
+        # --- 2. Determine plate labware ---
+        volumes = materials_df["volume"].tolist()
+        labware_type = self.session.labware_selector.get_plate_type(
+            role="startingmaterial", volumes=volumes, temperature=25
+        )
+
+        plate_obj = self.create_plate_model(
+            role="startingmaterial",
+            role_index=1,
+            platename="reaction-starting-materials-mc",
+            labwaretype=labware_type,
+        )
+        if not plate_obj:
+            logger.warning("Could not create starting material plate")
+            return None
+
+        wells_per_column = plate_obj.numberwellsincolumn
+        num_columns = plate_obj.numbercolumns
+        effective_max_volume = self.session.well_manager.get_max_well_volume(plate_obj)
+        raw_max_volume = plate_obj.maxwellvolume
+        dead_volume = self.session.labware_selector.get_dead_volume(raw_max_volume)
+
+        # --- 3. Run MultichannelAnalyzer ---
+        analyzer = MultichannelAnalyzer(
+            wells_per_column=wells_per_column,
+            num_columns=num_columns,
+        )
+        wells_per_group = analyzer.wells_per_group
+        sub_columns_per_column = analyzer.sub_columns_per_column
+
+        mc_materials, sc_materials = analyzer.prioritize_materials(
+            materials_for_analysis
+        )
+
+        logger.info(
+            f"Multichannel analysis: {len(mc_materials)} MC groups, "
+            f"{len(sc_materials)} SC groups "
+            f"(wells_per_group={wells_per_group}, "
+            f"sub_columns_per_column={sub_columns_per_column})"
+        )
+
+        order_dicts_list = []
+        next_column = 0       # Next available physical column
+        next_sub_column = 0   # Next available sub-column within that column
+
+        total_mc_slots = num_columns * sub_columns_per_column
+
+        # --- 4. Phase A: Place multichannel materials as sub-column groups ---
+        # MC wells hold volume for MC transfers ONLY.  SC transfers are
+        # served by separate SC wells created in Phase B.  The OT writer
+        # well-finder uses transfer_type to route MC transfers to MC
+        # wells and SC transfers to SC wells.
+        sc_leftover = []  # MC leftovers that fall back to sequential
+        mc_slots_used = 0
+
+        for mat in mc_materials:
+            # Use floor division: MC wells hold volume for full
+            # sub-columns ONLY.  Leftover reactions (reaction_count %
+            # wells_per_group) will go to sc_leftover → Phase B.
+            transfers_per_channel = mat.reaction_count // wells_per_group
+            per_well_volume = (
+                mat.volume * transfers_per_channel * 1.15 + dead_volume
+            )
+
+            # If volume exceeds well capacity, we need multiple source groups
+            # (or fall back to sequential for the excess).
+            if per_well_volume > effective_max_volume:
+                # Max transfers one well can support
+                max_transfers = max(
+                    1,
+                    int((effective_max_volume - dead_volume) / (mat.volume * 1.15)),
+                )
+                groups_from_volume = math.ceil(
+                    transfers_per_channel / max_transfers
+                )
+                per_well_volume_capped = (
+                    mat.volume * max_transfers * 1.15 + dead_volume
+                )
+                effective_transfers = max_transfers
+                logger.info(
+                    f"MC material {mat.smiles}: volume per well {per_well_volume:.1f}µL "
+                    f"exceeds max {effective_max_volume:.1f}µL; "
+                    f"using {groups_from_volume} groups with {max_transfers} transfers/channel"
+                )
+            else:
+                groups_from_volume = 1
+                per_well_volume_capped = per_well_volume
+                effective_transfers = transfers_per_channel
+
+            actual_groups = max(groups_from_volume, 1)
+            groups_placed = 0
+
+            for _ in range(actual_groups):
+                if mc_slots_used >= total_mc_slots:
+                    logger.warning(
+                        f"Plate full at column {next_column}; "
+                        f"remaining MC reactions for {mat.smiles} → sequential"
+                    )
+                    # Remaining goes to single-channel
+                    sc_leftover.append(mat)
+                    break
+
+                sub_col_well_indices = analyzer.get_sub_column_well_indices(
+                    next_column, next_sub_column
+                )
+
+                for well_idx in sub_col_well_indices:
+                    well_obj = self.session.well_manager.create_well_model(
+                        plate_obj=plate_obj,
+                        role="startingmaterial",
+                        role_index=1,
+                        wellindex=well_idx,
+                        volume=round(per_well_volume_capped, 2),
+                        smiles=mat.smiles,
+                        concentration=mat.concentration,
+                        solvent=mat.solvent,
+                        transfer_type="multichannel",
+                    )
+                    if well_obj:
+                        order_dicts_list.append(
+                            {
+                                "SMILES": mat.smiles,
+                                "plate-name": plate_obj.name,
+                                "labware": plate_obj.labware,
+                                "well-index": well_obj.index,
+                                "well-name": well_obj.name,
+                                "concentration": mat.concentration,
+                                "solvent": mat.solvent,
+                                "molecularweight": None,
+                                "amount-uL": round(per_well_volume_capped, 2),
+                            }
+                        )
+
+                groups_placed += 1
+                mc_slots_used += 1
+                next_sub_column += 1
+                if next_sub_column >= sub_columns_per_column:
+                    # Finished all sub-columns for this physical column.
+                    # Update plate indices past this physical column.
+                    next_well_after_column = (next_column + 1) * wells_per_column
+                    self.session.well_manager.update_plate_well_index(
+                        plate_obj=plate_obj,
+                        wellindexupdate=next_well_after_column,
+                    )
+                    self.session.column_manager.update_plate_column_index_available(
+                        plate_obj=plate_obj,
+                        columnindexupdate=next_column + 1,
+                    )
+                    next_sub_column = 0
+                    next_column += 1
+
+            # Log placement result.
+            if groups_placed > 0:
+                logger.info(
+                    f"Phase A MC: {mat.smiles} — {groups_placed} group(s), "
+                    f"{mat.volume}µL × {mat.reaction_count} reactions"
+                )
+
+            # Only create SC leftover for reactions genuinely not covered
+            # by the placed MC groups (e.g. plate overflow).
+            mc_capacity = groups_placed * wells_per_group * effective_transfers
+            mc_served_reactions = min(mat.reaction_count, mc_capacity)
+            uncovered = mat.reaction_count - mc_served_reactions
+            if uncovered > 0:
+                sc_leftover.append(
+                    type(mat)(
+                        identity_key=mat.identity_key,
+                        smiles=mat.smiles,
+                        volume=mat.volume,
+                        concentration=mat.concentration,
+                        solvent=mat.solvent,
+                        reaction_count=uncovered,
+                        columns_needed=0,
+                        leftover_wells=0,
+                    )
+                )
+
+        # --- 4.5. Phase A.5: Heterogeneous MC sub-columns ---
+        # For destination sub-columns where each reaction needs a
+        # DIFFERENT material (e.g. 8 unique amines), create a MC source
+        # sub-column with a different reagent at each position, matching
+        # the destination well layout.  This lets the 8-channel pipette
+        # transfer 8 different materials in one go.
+        phase_a5_volume_served = {}  # identity_key → total volume served by MC
+        phase_a5_solutions = set()
+        try:
+            phase_a5_volume_served, phase_a5_solutions = (
+                self._create_heterogeneous_mc_sub_columns(
+                    plate_obj=plate_obj,
+                    addactionsdf=addactionsdf,
+                    analyzer=analyzer,
+                    mc_materials=mc_materials,
+                    wells_per_column=wells_per_column,
+                    wells_per_group=wells_per_group,
+                    sub_columns_per_column=sub_columns_per_column,
+                    effective_max_volume=effective_max_volume,
+                    dead_volume=dead_volume,
+                    order_dicts_list=order_dicts_list,
+                    next_column=next_column,
+                    next_sub_column=next_sub_column,
+                    mc_slots_used=mc_slots_used,
+                    total_mc_slots=total_mc_slots,
+                )
+            )
+        except Exception as e:
+            logger.warning(
+                f"Phase A.5 heterogeneous MC failed, continuing: {e}"
+            )
+
+        # --- 5. Phase B: Place single-channel materials sequentially ---
+        # SC wells hold volume for SC transfers ONLY.  The well-finder
+        # uses transfer_type='single' so SC transfers draw from these
+        # wells and NOT from the MC wells created in Phase A / A.5.
+        #
+        # Aggregate SC volume per identity key from all SC material
+        # groups (including MC overflow in sc_leftover).
+
+        sc_volume_by_ik: dict = {}   # identity_key → total raw volume
+        sc_info_by_ik: dict = {}     # identity_key → material info
+
+        for mat in list(sc_leftover) + list(sc_materials):
+            ik = analyzer.make_identity_key(
+                mat.smiles, mat.solvent, mat.concentration
+            )
+            sc_volume_by_ik[ik] = (
+                sc_volume_by_ik.get(ik, 0)
+                + mat.volume * mat.reaction_count
+            )
+            if ik not in sc_info_by_ik:
+                sc_info_by_ik[ik] = {
+                    "smiles": mat.smiles,
+                    "concentration": mat.concentration,
+                    "solvent": mat.solvent,
+                }
+
+        # Subtract volume already served by Phase A.5 heterogeneous MC
+        # (Phase A.5 creates MC wells for materials that appear in
+        # heterogeneous sub-columns; those transfers are MC, not SC).
+        for ik in list(sc_volume_by_ik):
+            mc_a5_served = phase_a5_volume_served.get(ik, 0)
+            if mc_a5_served > 0:
+                sc_volume_by_ik[ik] = max(
+                    0, sc_volume_by_ik[ik] - mc_a5_served
+                )
+
+        for ik, raw_volume in sc_volume_by_ik.items():
+            if raw_volume <= 0:
+                logger.info(
+                    f"SC material {ik}: no remaining SC volume — skipping"
+                )
+                continue
+
+            # Also skip if the material was already placed as a
+            # heterogeneous MC well in Phase A.5.
+            if ik in phase_a5_solutions:
+                remaining_after_a5 = raw_volume
+                if remaining_after_a5 <= 0:
+                    continue
+
+            info = sc_info_by_ik[ik]
+            total_volume_needed = raw_volume * 1.15 + dead_volume
+
+            logger.info(
+                f"Phase B SC: {info['smiles'][:30]} — "
+                f"raw={raw_volume:.2f}µL, "
+                f"total={total_volume_needed:.2f}µL"
+            )
+
+            well_idx = self.session.well_manager.get_plate_well_index_available(
+                plate_obj
+            )
+            if well_idx is False:
+                plate_obj = self.create_plate_model(
+                    role="startingmaterial",
+                    role_index=1,
+                    platename="reaction-starting-materials-mc",
+                    labwaretype=labware_type,
+                )
+                if not plate_obj:
+                    logger.warning(
+                        "Could not create additional starting material plate"
+                    )
+                    break
+                well_idx = (
+                    self.session.well_manager.get_plate_well_index_available(
+                        plate_obj
+                    )
+                )
+                effective_max_volume = (
+                    self.session.well_manager.get_max_well_volume(plate_obj)
+                )
+
+            # Handle volume overflow — split into multiple wells
+            if total_volume_needed > effective_max_volume:
+                remaining_volume = total_volume_needed
+                while remaining_volume > 0:
+                    volume_this_well = min(
+                        remaining_volume, effective_max_volume
+                    )
+                    well_obj = self.session.well_manager.create_well_model(
+                        plate_obj=plate_obj,
+                        role="startingmaterial",
+                        role_index=1,
+                        wellindex=well_idx,
+                        volume=round(volume_this_well, 2),
+                        smiles=info["smiles"],
+                        concentration=info["concentration"],
+                        solvent=info["solvent"],
+                        transfer_type="single",
+                    )
+                    if well_obj:
+                        order_dicts_list.append(
+                            {
+                                "SMILES": info["smiles"],
+                                "plate-name": plate_obj.name,
+                                "labware": plate_obj.labware,
+                                "well-index": well_obj.index,
+                                "well-name": well_obj.name,
+                                "concentration": info["concentration"],
+                                "solvent": info["solvent"],
+                                "molecularweight": None,
+                                "amount-uL": round(volume_this_well, 2),
+                            }
+                        )
+                    remaining_volume -= volume_this_well
+                    self.session.well_manager.update_plate_well_index(
+                        plate_obj=plate_obj, wellindexupdate=well_idx + 1
+                    )
+                    if remaining_volume > 0:
+                        well_idx = (
+                            self.session.well_manager.get_plate_well_index_available(
+                                plate_obj
+                            )
+                        )
+                        if well_idx is False:
+                            plate_obj = self.create_plate_model(
+                                role="startingmaterial",
+                                role_index=1,
+                                platename="reaction-starting-materials-mc",
+                                labwaretype=labware_type,
+                            )
+                            if not plate_obj:
+                                break
+                            well_idx = (
+                                self.session.well_manager.get_plate_well_index_available(
+                                    plate_obj
+                                )
+                            )
+            else:
+                well_obj = self.session.well_manager.create_well_model(
+                    plate_obj=plate_obj,
+                    role="startingmaterial",
+                    role_index=1,
+                    wellindex=well_idx,
+                    volume=round(total_volume_needed, 2),
+                    smiles=info["smiles"],
+                    concentration=info["concentration"],
+                    solvent=info["solvent"],
+                    transfer_type="single",
+                )
+                if well_obj:
+                    order_dicts_list.append(
+                        {
+                            "SMILES": info["smiles"],
+                            "plate-name": plate_obj.name,
+                            "labware": plate_obj.labware,
+                            "well-index": well_obj.index,
+                            "well-name": well_obj.name,
+                            "concentration": info["concentration"],
+                            "solvent": info["solvent"],
+                            "molecularweight": None,
+                            "amount-uL": round(total_volume_needed, 2),
+                        }
+                    )
+                self.session.well_manager.update_plate_well_index(
+                    plate_obj=plate_obj, wellindexupdate=well_idx + 1
+                )
+
+        # --- 6. Create compound order ---
+        self._create_compound_order(order_dicts_list)
+
+        mc_well_count = mc_slots_used * wells_per_group
+        sc_well_count = len(order_dicts_list) - mc_well_count
+        logger.info(
+            f"Created multichannel starting plate: {mc_slots_used} MC groups "
+            f"({mc_well_count} wells), {sc_well_count} SC wells"
+        )
+        return plate_obj
+
+    # ------------------------------------------------------------------
+    # Heterogeneous MC sub-column creation (Phase A.5)
+    # ------------------------------------------------------------------
+
+    def _create_heterogeneous_mc_sub_columns(
+        self,
+        plate_obj,
+        addactionsdf,
+        analyzer,
+        mc_materials,
+        wells_per_column,
+        wells_per_group,
+        sub_columns_per_column,
+        effective_max_volume,
+        dead_volume,
+        order_dicts_list,
+        next_column,
+        next_sub_column,
+        mc_slots_used,
+        total_mc_slots,
+    ):
+        """Create heterogeneous MC sub-columns for groups of different
+        reagents that share a destination sub-column.
+
+        For each destination sub-column of exactly ``wells_per_group``
+        reactions, if the materials at a given add-action step are NOT
+        all the same (i.e. not covered by a Phase A homogeneous MC
+        sub-column), and all transfer volumes match, a MC source
+        sub-column is created with a different reagent at each position
+        — matching the position of the corresponding destination well.
+
+        This enables the 8-channel pipette to transfer 8 different
+        materials (e.g. unique amines) in a single operation.
+
+        Returns
+        -------
+        tuple
+            ``(volume_served, solutions_set)`` —
+            ``volume_served`` is a dict mapping identity_key → total
+            volume served by heterogeneous MC, and ``solutions_set``
+            collects the identity keys of materials placed.
+        """
+        volume_served = {}  # identity_key → total volume served
+        solutions_set = set()
+
+        # Build reaction → dest well position mapping from reaction plate
+        rxn_wells = Well.objects.filter(
+            otsession_id=self.session.otsessionobj,
+            role="reaction",
+            reaction_id__isnull=False,
+        ).select_related("plate_id")
+
+        if not rxn_wells.exists():
+            logger.info("No reaction wells found for Phase A.5")
+            return volume_served, solutions_set
+
+        rxn_to_dest = {}  # reaction_id → (plate_id, col, sub_col, pos)
+        for w in rxn_wells:
+            wpc = w.plate_id.numberwellsincolumn
+            sc_per_col = max(1, wpc // wells_per_group)
+            col = w.index // wpc
+            pos_in_col = w.index % wpc
+            if sc_per_col > 1:
+                sc = pos_in_col % sc_per_col
+                pisc = pos_in_col // sc_per_col
+            else:
+                sc = 0
+                pisc = pos_in_col
+            rxn_to_dest[w.reaction_id_id] = (w.plate_id_id, col, sc, pisc)
+
+        # Identity keys already covered by Phase A homogeneous MC
+        phase_a_keys = {
+            analyzer.make_identity_key(
+                m.smiles, m.solvent, m.concentration
+            )
+            for m in mc_materials
+        }
+
+        # Group add actions by (action_number, dest_plate, col, sub_col)
+        from collections import defaultdict
+        dest_step_groups = defaultdict(dict)
+
+        for _, row in addactionsdf.iterrows():
+            rxn_id = row["reaction_id_id"]
+            if rxn_id not in rxn_to_dest:
+                continue
+            _pid, col, sc, pisc = rxn_to_dest[rxn_id]
+            action_num = row["number"]
+            sol = row["solvent"] if pd.notna(row.get("solvent")) else None
+            conc = (
+                float(row["concentration"])
+                if pd.notna(row.get("concentration"))
+                else None
+            )
+            group_key = (action_num, _pid, col, sc)
+            dest_step_groups[group_key][pisc] = {
+                "smiles": row["smiles"],
+                "volume": row["volume"],
+                "solvent": sol,
+                "concentration": conc,
+            }
+
+        # Identify heterogeneous MC candidates
+        candidates = []
+        for (action_num, _pid, _col, _sc), pos_map in sorted(
+            dest_step_groups.items()
+        ):
+            if len(pos_map) < wells_per_group:
+                continue  # partial sub-column
+
+            # Volume uniformity check
+            vols = {d["volume"] for d in pos_map.values()}
+            if len(vols) > 1:
+                continue
+
+            # Skip if all materials are identical (Phase A handles those)
+            materials = {
+                (d["smiles"], d["solvent"], d["concentration"])
+                for d in pos_map.values()
+            }
+            if len(materials) == 1:
+                mat_key = analyzer.make_identity_key(
+                    *next(iter(materials))
+                )
+                if mat_key in phase_a_keys:
+                    continue
+
+            # Skip if ALL materials are already covered by Phase A
+            all_in_a = all(
+                analyzer.make_identity_key(
+                    d["smiles"], d["solvent"], d["concentration"]
+                )
+                in phase_a_keys
+                for d in pos_map.values()
+            )
+            if all_in_a:
+                continue
+
+            vol = next(iter(vols))
+            candidates.append(
+                {"pos_map": pos_map, "volume": vol}
+            )
+
+        if not candidates:
+            logger.info("No heterogeneous MC candidates found")
+            return volume_served, solutions_set
+
+        logger.info(
+            f"Phase A.5: {len(candidates)} heterogeneous MC candidate(s)"
+        )
+
+        for cand in candidates:
+            if mc_slots_used >= total_mc_slots:
+                logger.warning("Plate full — stopping heterogeneous MC")
+                break
+
+            pos_map = cand["pos_map"]
+            vol = cand["volume"]
+            per_well_volume = vol * 1.15 + dead_volume
+
+            if per_well_volume > effective_max_volume:
+                logger.info(
+                    "Heterogeneous MC well volume "
+                    f"{per_well_volume:.1f} µL exceeds max "
+                    f"{effective_max_volume:.1f} µL — skipping"
+                )
+                continue
+
+            sub_col_well_indices = analyzer.get_sub_column_well_indices(
+                next_column, next_sub_column
+            )
+
+            for pos in range(wells_per_group):
+                if pos not in pos_map:
+                    continue
+
+                mat_data = pos_map[pos]
+                well_idx = sub_col_well_indices[pos]
+
+                well_obj = self.session.well_manager.create_well_model(
+                    plate_obj=plate_obj,
+                    role="startingmaterial",
+                    role_index=1,
+                    wellindex=well_idx,
+                    volume=round(per_well_volume, 2),
+                    smiles=mat_data["smiles"],
+                    concentration=mat_data["concentration"],
+                    solvent=mat_data["solvent"],
+                    transfer_type="multichannel",
+                )
+                if well_obj:
+                    order_dicts_list.append(
+                        {
+                            "SMILES": mat_data["smiles"],
+                            "plate-name": plate_obj.name,
+                            "labware": plate_obj.labware,
+                            "well-index": well_obj.index,
+                            "well-name": well_obj.name,
+                            "concentration": mat_data["concentration"],
+                            "solvent": mat_data["solvent"],
+                            "molecularweight": None,
+                            "amount-uL": round(per_well_volume, 2),
+                        }
+                    )
+
+                    # Track served volume
+                    ik = analyzer.make_identity_key(
+                        mat_data["smiles"],
+                        mat_data["solvent"],
+                        mat_data["concentration"],
+                    )
+                    volume_served[ik] = volume_served.get(ik, 0) + vol
+                    solutions_set.add(ik)
+
+            mc_slots_used += 1
+            next_sub_column += 1
+            if next_sub_column >= sub_columns_per_column:
+                next_well_after_column = (
+                    (next_column + 1) * wells_per_column
+                )
+                self.session.well_manager.update_plate_well_index(
+                    plate_obj=plate_obj,
+                    wellindexupdate=next_well_after_column,
+                )
+                self.session.column_manager.update_plate_column_index_available(
+                    plate_obj=plate_obj,
+                    columnindexupdate=next_column + 1,
+                )
+                next_sub_column = 0
+                next_column += 1
+
+        logger.info(
+            f"Phase A.5 complete: {len(solutions_set)} material(s) placed "
+            f"in heterogeneous MC sub-columns"
+        )
+        return volume_served, solutions_set
+
+    # ------------------------------------------------------------------
+    # Standard sequential starter plate layout (original logic)
+    # ------------------------------------------------------------------
+
+    def _create_sequential_starting_plate(self, materials_df):
+        """Standard sequential starting plate layout (one well per reagent).
+
+        Parameters
+        ----------
+        materials_df : pd.DataFrame
+            Output of ``MaterialManager.get_add_actions_material_dataframe()``.
+
+        Returns
+        -------
+        plate_obj : Plate or None
+        """
 
         # Get total volumes for plate sizing
         volumes = materials_df["volume"].tolist()
@@ -614,43 +1346,61 @@ class PlateFactory:
             )
 
         # Create compound order from well assignments
-        if order_dicts_list:
-            order_df = pd.DataFrame(order_dicts_list)
-
-            # Calculate additional fields
-            if (
-                "molecularweight" not in order_df.columns
-                or order_df["molecularweight"].isna().any()
-            ):
-                order_df["molecularweight"] = order_df["SMILES"].apply(
-                    lambda smiles: Descriptors.MolWt(Chem.MolFromSmiles(smiles))
-                )
-
-            # Calculate mass
-            order_df["mass-mg"] = order_df.apply(
-                self.session.material_manager.calc_mass, axis=1
-            )
-
-            # Add inchikey and compound name if available
-            if hasattr(self.session, "data_manager") and hasattr(
-                self.session.data_manager, "get_inchi_key"
-            ):
-                order_df["inchikey"] = order_df["SMILES"].apply(
-                    self.session.data_manager.get_inchi_key
-                )
-                order_df["compound-name"] = order_df["inchikey"].apply(
-                    self.session.data_manager.get_chemical_name
-                )
-
-            # Create the compound order
-            self.session.data_manager.create_compound_order_model(
-                order_df=order_df, is_custom_starter_plate=False
-            )
+        self._create_compound_order(order_dicts_list)
 
         logger.info(
             f"Created starting material plate with {len(order_dicts_list)} material wells"
         )
         return plate_obj
+
+    # ------------------------------------------------------------------
+    # Shared compound-order helper
+    # ------------------------------------------------------------------
+
+    def _create_compound_order(self, order_dicts_list):
+        """Build and persist a CompoundOrder from a list of order dicts.
+
+        Parameters
+        ----------
+        order_dicts_list : list[dict]
+            Each dict has at minimum: ``SMILES``, ``plate-name``,
+            ``labware``, ``well-index``, ``well-name``, ``concentration``,
+            ``solvent``, ``molecularweight``, ``amount-uL``.
+        """
+        if not order_dicts_list:
+            return
+
+        order_df = pd.DataFrame(order_dicts_list)
+
+        # Calculate additional fields
+        if (
+            "molecularweight" not in order_df.columns
+            or order_df["molecularweight"].isna().any()
+        ):
+            order_df["molecularweight"] = order_df["SMILES"].apply(
+                lambda smiles: Descriptors.MolWt(Chem.MolFromSmiles(smiles))
+            )
+
+        # Calculate mass
+        order_df["mass-mg"] = order_df.apply(
+            self.session.material_manager.calc_mass, axis=1
+        )
+
+        # Add inchikey and compound name if available
+        if hasattr(self.session, "data_manager") and hasattr(
+            self.session.data_manager, "get_inchi_key"
+        ):
+            order_df["inchikey"] = order_df["SMILES"].apply(
+                self.session.data_manager.get_inchi_key
+            )
+            order_df["compound-name"] = order_df["inchikey"].apply(
+                self.session.data_manager.get_chemical_name
+            )
+
+        # Create the compound order
+        self.session.data_manager.create_compound_order_model(
+            order_df=order_df, is_custom_starter_plate=False
+        )
 
     def create_plates_by_temperature(
         self,
@@ -664,6 +1414,13 @@ class PlateFactory:
 
         This function processes each temperature group, determines the appropriate labware type
         based on volumes and temperature, and creates plates for each group.
+
+        When ``self.session.use_multichannel`` is True, reactions are
+        placed in **sub-column order** so that each sub-column fills
+        completely before the next one starts.  This maximises the
+        number of 8-well groups eligible for multichannel transfer.
+        Recipe-group boundaries are aligned to sub-column starts so
+        that different recipes never share a sub-column.
 
         Parameters
         ----------
@@ -686,6 +1443,8 @@ class PlateFactory:
             f"Creating {platetype_str} plates for {len(grouped_reaction_temperature_querysets)} temperature groups"
         )
         created_plates = []
+
+        use_mc = getattr(self.session, "use_multichannel", False)
 
         for (
             temp,
@@ -733,89 +1492,305 @@ class PlateFactory:
                         reaction_class_groups[reaction_class] = []
                     reaction_class_groups[reaction_class].append(reaction)
 
-                # Create columns for each reaction class within the temperature plate
-                for reaction_class, class_reactions in reaction_class_groups.items():
-                    column_index = (
-                        self.session.column_manager.get_plate_current_column_index(
-                            plate_obj=plate_obj
-                        )
+                if use_mc:
+                    self._fill_plate_mc_optimized(
+                        plate_obj=plate_obj,
+                        reaction_class_groups=reaction_class_groups,
+                        role=role,
+                        role_index=role_index,
+                        labware_platetype=labware_platetype,
+                        plate_name=plate_name,
+                        created_plates=created_plates,
                     )
-                    if column_index is not False:
-                        column_obj = self.session.column_manager.create_column_model(
-                            plate_obj=plate_obj,
-                            columnindex=column_index,
-                            role=role,
-                            role_index=role_index,
-                            reactionclass=reaction_class,
-                        )
-
-                        # Update column index
-                        self.session.column_manager.update_plate_column_index_available(
-                            plate_obj=plate_obj, columnindexupdate=column_index + 1
-                        )
-
-                        # Add wells for each reaction in this class
-                        for reaction in class_reactions:
-                            # Get product SMILES for this reaction
-                            product_smiles = (
-                                self.session.material_manager.get_product_smiles(
-                                    [reaction.id]
-                                )[0]
-                            )
-
-                            logger.debug(
-                                f"Creating well for reaction {reaction.id} (class: {reaction_class}, "
-                                f"temp: {reaction_temperature}°C) with product SMILES: {product_smiles}"
-                            )
-
-                            # Check if well index is available
-                            well_index = (
-                                self.session.well_manager.get_plate_well_index_available(
-                                    plate_obj=plate_obj
-                                )
-                            )
-                            
-                            if well_index is False:
-                                # Create a new plate for the same temperature
-                                new_plate_name = f"{plate_name}-continued"
-                                plate_obj = self.create_plate_model(
-                                    role=role,
-                                    role_index=role_index,
-                                    platename=new_plate_name,
-                                    labwaretype=labware_platetype,
-                                )
-                                
-                                if not plate_obj:
-                                    logger.error("Failed to create additional plate")
-                                    break
-                                    
-                                created_plates.append(plate_obj)
-                                
-                                well_index = self.session.well_manager.get_plate_well_index_available(
-                                    plate_obj=plate_obj
-                                )
-                                if well_index is False:
-                                    logger.error("New plate has no available wells")
-                                    break
-
-                            # Create well directly (you may want to add column management here)
-                            well_obj = self.session.well_manager.create_well_model(
-                                plate_obj=plate_obj,
-                                role=role,
-                                role_index=role_index,
-                                wellindex=well_index,
-                                reactionobj=reaction,
-                                smiles=product_smiles,
-                                reactantfornextstep=True,
-                            )
-
-                            # Update well index
-                            self.session.well_manager.update_plate_well_index(
-                                plate_obj=plate_obj, wellindexupdate=well_index + 1
-                            )
+                else:
+                    self._fill_plate_sequential(
+                        plate_obj=plate_obj,
+                        reaction_class_groups=reaction_class_groups,
+                        role=role,
+                        role_index=role_index,
+                        labware_platetype=labware_platetype,
+                        plate_name=plate_name,
+                        created_plates=created_plates,
+                    )
 
         logger.info(f"Created {len(created_plates)} {platetype_str} plates by temperature")
         # return created_plates
+
+    # ------------------------------------------------------------------
+    # Reaction plate fill: sequential (original logic)
+    # ------------------------------------------------------------------
+
+    def _fill_plate_sequential(
+        self,
+        plate_obj,
+        reaction_class_groups,
+        role,
+        role_index,
+        labware_platetype,
+        plate_name,
+        created_plates,
+    ):
+        """Fill reaction plate wells sequentially (original non-MC logic).
+
+        One column model per reaction class; wells are assigned in the
+        order returned by ``get_plate_well_index_available`` (0, 1, 2 …).
+        """
+        for reaction_class, class_reactions in reaction_class_groups.items():
+            column_index = (
+                self.session.column_manager.get_plate_current_column_index(
+                    plate_obj=plate_obj
+                )
+            )
+            if column_index is not False:
+                self.session.column_manager.create_column_model(
+                    plate_obj=plate_obj,
+                    columnindex=column_index,
+                    role=role,
+                    role_index=role_index,
+                    reactionclass=reaction_class,
+                )
+                self.session.column_manager.update_plate_column_index_available(
+                    plate_obj=plate_obj, columnindexupdate=column_index + 1
+                )
+
+                for reaction in class_reactions:
+                    product_smiles = (
+                        self.session.material_manager.get_product_smiles(
+                            [reaction.id]
+                        )[0]
+                    )
+
+                    logger.debug(
+                        f"Creating well for reaction {reaction.id} "
+                        f"(class: {reaction_class}) "
+                        f"with product SMILES: {product_smiles}"
+                    )
+
+                    well_index = (
+                        self.session.well_manager.get_plate_well_index_available(
+                            plate_obj=plate_obj
+                        )
+                    )
+
+                    if well_index is False:
+                        new_plate_name = f"{plate_name}-continued"
+                        plate_obj = self.create_plate_model(
+                            role=role,
+                            role_index=role_index,
+                            platename=new_plate_name,
+                            labwaretype=labware_platetype,
+                        )
+                        if not plate_obj:
+                            logger.error("Failed to create additional plate")
+                            break
+                        created_plates.append(plate_obj)
+                        well_index = (
+                            self.session.well_manager.get_plate_well_index_available(
+                                plate_obj=plate_obj
+                            )
+                        )
+                        if well_index is False:
+                            logger.error("New plate has no available wells")
+                            break
+
+                    self.session.well_manager.create_well_model(
+                        plate_obj=plate_obj,
+                        role=role,
+                        role_index=role_index,
+                        wellindex=well_index,
+                        reactionobj=reaction,
+                        smiles=product_smiles,
+                        reactantfornextstep=True,
+                    )
+                    self.session.well_manager.update_plate_well_index(
+                        plate_obj=plate_obj, wellindexupdate=well_index + 1
+                    )
+
+    # ------------------------------------------------------------------
+    # Reaction plate fill: MC-optimized sub-column ordering
+    # ------------------------------------------------------------------
+
+    _MC_PIPETTE_CHANNELS = 8
+
+    def _fill_plate_mc_optimized(
+        self,
+        plate_obj,
+        reaction_class_groups,
+        role,
+        role_index,
+        labware_platetype,
+        plate_name,
+        created_plates,
+    ):
+        """Fill reaction plate in sub-column order for multichannel transfer.
+
+        Instead of sequential indices (0, 1, 2, 3 …), wells are assigned
+        so that one sub-column fills completely before the next begins:
+
+        * 96-well  (8 rows):  0, 1, 2, …, 7  (same as sequential)
+        * 384-well (16 rows): 0, 2, 4, 6, 8, 10, 12, 14  then
+          1, 3, 5, 7, 9, 11, 13, 15  (interleaved sub-columns)
+
+        Reactions are further sub-grouped by
+        ``(reactionclass, recipe, intramolecular)`` so that different
+        recipe groups never share a sub-column.  Group boundaries are
+        aligned to sub-column starts.  Larger groups are placed first
+        to maximise the number of full sub-columns.
+        """
+        wpc = plate_obj.numberwellsincolumn
+        num_cols = plate_obj.numbercolumns
+        sub_cols_per_col = max(1, wpc // self._MC_PIPETTE_CHANNELS)
+        wells_per_group = min(wpc, self._MC_PIPETTE_CHANNELS)
+
+        # --- Build (class, recipe, intramolecular) recipe groups ---
+        from collections import defaultdict as _defaultdict
+
+        recipe_groups = _defaultdict(list)
+        for reaction_class, class_reactions in reaction_class_groups.items():
+            for reaction in class_reactions:
+                key = (
+                    reaction_class,
+                    getattr(reaction, "recipe", None),
+                    getattr(reaction, "intramolecular", False),
+                )
+                recipe_groups[key].append(reaction)
+
+        # Sort by group size descending — larger groups yield more full
+        # sub-columns and therefore more MC transfers.
+        sorted_groups = sorted(
+            recipe_groups.items(), key=lambda x: len(x[1]), reverse=True
+        )
+
+        logger.info(
+            f"MC plate fill: {len(sorted_groups)} recipe group(s), "
+            f"wpc={wpc}, sub_cols_per_col={sub_cols_per_col}, "
+            f"wells_per_group={wells_per_group}"
+        )
+
+        # --- Sub-column allocator state ---
+        cur_col = 0
+        cur_sub_col = 0
+        cur_pos = 0  # position within the current sub-column (0..wells_per_group-1)
+
+        def _advance():
+            """Advance allocator by one position."""
+            nonlocal cur_col, cur_sub_col, cur_pos
+            cur_pos += 1
+            if cur_pos >= wells_per_group:
+                cur_pos = 0
+                cur_sub_col += 1
+                if cur_sub_col >= sub_cols_per_col:
+                    cur_sub_col = 0
+                    cur_col += 1
+
+        def _align_to_sub_col_boundary():
+            """Skip to the start of the next unused sub-column."""
+            nonlocal cur_col, cur_sub_col, cur_pos
+            if cur_pos > 0:
+                cur_pos = 0
+                cur_sub_col += 1
+                if cur_sub_col >= sub_cols_per_col:
+                    cur_sub_col = 0
+                    cur_col += 1
+
+        def _well_index_for_current_pos():
+            """Compute well index from (col, sub_col, pos)."""
+            col_start = cur_col * wpc
+            return col_start + cur_sub_col + cur_pos * sub_cols_per_col
+
+        # --- Place reactions ---
+        for (rxn_class, recipe, intra), reactions in sorted_groups:
+            # Align to sub-column boundary at group start so different
+            # recipe groups never share a sub-column.
+            _align_to_sub_col_boundary()
+
+            # Create a Column model for this group
+            col_model_index = (
+                self.session.column_manager.get_plate_current_column_index(
+                    plate_obj=plate_obj
+                )
+            )
+            if col_model_index is not False:
+                self.session.column_manager.create_column_model(
+                    plate_obj=plate_obj,
+                    columnindex=col_model_index,
+                    role=role,
+                    role_index=role_index,
+                    reactionclass=rxn_class,
+                )
+                self.session.column_manager.update_plate_column_index_available(
+                    plate_obj=plate_obj, columnindexupdate=col_model_index + 1
+                )
+
+            for reaction in reactions:
+                # Check plate capacity
+                if cur_col >= num_cols:
+                    # Plate full — create overflow plate
+                    new_plate_name = f"{plate_name}-continued"
+                    plate_obj = self.create_plate_model(
+                        role=role,
+                        role_index=role_index,
+                        platename=new_plate_name,
+                        labwaretype=labware_platetype,
+                    )
+                    if not plate_obj:
+                        logger.error("Failed to create overflow plate")
+                        break
+                    created_plates.append(plate_obj)
+                    wpc = plate_obj.numberwellsincolumn
+                    num_cols = plate_obj.numbercolumns
+                    sub_cols_per_col = max(1, wpc // self._MC_PIPETTE_CHANNELS)
+                    wells_per_group = min(wpc, self._MC_PIPETTE_CHANNELS)
+                    cur_col = 0
+                    cur_sub_col = 0
+                    cur_pos = 0
+
+                well_idx = _well_index_for_current_pos()
+
+                product_smiles = (
+                    self.session.material_manager.get_product_smiles(
+                        [reaction.id]
+                    )[0]
+                )
+
+                logger.debug(
+                    f"MC fill: reaction {reaction.id} → well {well_idx} "
+                    f"(col={cur_col}, sub_col={cur_sub_col}, pos={cur_pos})"
+                )
+
+                self.session.well_manager.create_well_model(
+                    plate_obj=plate_obj,
+                    role=role,
+                    role_index=role_index,
+                    wellindex=well_idx,
+                    reactionobj=reaction,
+                    smiles=product_smiles,
+                    reactantfornextstep=True,
+                )
+
+                _advance()
+
+        # --- Update plate tracking ---
+        # Set well index past the last fully/partially used column so
+        # subsequent code (e.g. starting plate) doesn't collide.
+        used_cols = cur_col + (1 if cur_pos > 0 or cur_sub_col > 0 else 0)
+        next_well = min(used_cols * wpc, num_cols * wpc)
+        self.session.well_manager.update_plate_well_index(
+            plate_obj=plate_obj, wellindexupdate=next_well
+        )
+        self.session.column_manager.update_plate_column_index_available(
+            plate_obj=plate_obj, columnindexupdate=min(used_cols, num_cols)
+        )
+
+        full_sub_cols = sum(
+            1
+            for _, reactions in sorted_groups
+            for i in range(len(reactions) // wells_per_group)
+        )
+        logger.info(
+            f"MC plate fill complete: {sum(len(r) for _, r in sorted_groups)} "
+            f"reactions, {full_sub_cols} full sub-column(s)"
+        )
 
     def update_plate_deck_ot_session_ids(self, plate_queryset):
         """

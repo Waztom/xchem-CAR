@@ -105,6 +105,7 @@ class WellManager:
         concentration: float = None,
         solvent: str = None,
         reactantfornextstep: bool = False,
+        transfer_type: str = "single",
     ) -> Well:
         """
         Creates a well object.
@@ -134,6 +135,9 @@ class WellManager:
         reactantfornextstep: bool = False
             The optional setting if the contents of the well are
             used in any proceeding reactions
+        transfer_type: str = "single"
+            Transfer type: "single" for single-channel pipette,
+            "multichannel" for multi-channel pipette column transfer
 
         Returns
         -------
@@ -162,6 +166,7 @@ class WellManager:
         well_obj.concentration = concentration
         well_obj.solvent = solvent
         well_obj.reactantfornextstep = reactantfornextstep
+        well_obj.transfer_type = transfer_type
         well_obj.save()
 
         return well_obj

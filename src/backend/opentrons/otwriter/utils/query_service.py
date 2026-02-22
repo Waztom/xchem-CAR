@@ -374,9 +374,110 @@ class QueryService:
             raise
         except Pipette.MultipleObjectsReturned:
             logger.warning(
-                f"Multiple pipettes found for OT session {self.otsession_id}, using first one"
+                f"Multiple pipettes found for OT session {self.otsession_id}, using first (single) one"
             )
-            return Pipette.objects.filter(otsession_id=self.otsession_id).first()
+            return Pipette.objects.filter(
+                otsession_id=self.otsession_id, type="single"
+            ).first() or Pipette.objects.filter(otsession_id=self.otsession_id).first()
+
+    def get_multichannel_pipette(self):
+        """Get the multi-channel pipette for an OT session, if one exists.
+
+        Returns
+        -------
+        Pipette or None
+            The multi-channel pipette, or None if only single-channel is set up.
+        """
+        try:
+            pipetteobj = Pipette.objects.get(
+                otsession_id=self.otsession_id, type="multi"
+            )
+            logger.info(
+                f"Found multi-channel pipette: {pipetteobj.name} on mount {pipetteobj.position}"
+            )
+            return pipetteobj
+        except Pipette.DoesNotExist:
+            logger.info("No multi-channel pipette found for this session")
+            return None
+        except Pipette.MultipleObjectsReturned:
+            return Pipette.objects.filter(
+                otsession_id=self.otsession_id, type="multi"
+            ).first()
+
+    def get_multichannel_source_wells(self):
+        """Get all multichannel-tagged starting material wells for this session.
+
+        Returns
+        -------
+        QuerySet[Well]
+            Wells with ``transfer_type='multichannel'`` ordered by index.
+        """
+        qs = Well.objects.filter(
+            otsession_id=self.otsession_id,
+            role="startingmaterial",
+            transfer_type="multichannel",
+            available=True,
+        ).order_by("index")
+        logger.info(f"Found {qs.count()} multichannel source well(s)")
+        return qs
+
+    def get_multichannel_add_actions(
+        self,
+        actionsession_queryset,
+        smiles: str,
+        solvent: str = None,
+        concentration: float = None,
+    ):
+        """Get AddActions matching a multichannel source material.
+
+        Parameters
+        ----------
+        actionsession_queryset : QuerySet
+            The action sessions to search within.
+        smiles : str
+            SMILES of the material.
+        solvent : str, optional
+            Solvent filter.
+        concentration : float, optional
+            Concentration filter.
+
+        Returns
+        -------
+        QuerySet[AddAction]
+            Matching add actions, ordered by id.
+        """
+        qs = AddAction.objects.filter(
+            actionsession_id__in=actionsession_queryset,
+            smiles=smiles,
+        )
+        if solvent:
+            qs = qs.filter(solvent=solvent)
+        if concentration is not None:
+            qs = qs.filter(concentration=concentration)
+        qs = qs.order_by("id")
+        logger.info(
+            f"Found {qs.count()} AddAction(s) for MC material "
+            f"{smiles[:30]}… (solvent={solvent}, conc={concentration})"
+        )
+        return qs
+
+    def get_well_by_plate_and_index(self, plate_id, well_index: int):
+        """Look up a single well by plate and positional index.
+
+        Parameters
+        ----------
+        plate_id : int or Plate
+            The plate (or its id) containing the well.
+        well_index : int
+            The well index on the plate.
+
+        Returns
+        -------
+        Well or None
+        """
+        return Well.objects.filter(
+            plate_id=plate_id, index=well_index,
+        ).first()
 
     def get_column_query_set(
         self, role: str, role_index: int, reactionclass: str

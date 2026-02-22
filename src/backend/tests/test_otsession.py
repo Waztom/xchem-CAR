@@ -1043,6 +1043,7 @@ class TestSessionOrchestratorCreateSession(TestCase):
             orch.otbatchprotocolobj = MagicMock()
             orch.actionsessionqueryset = _mock_action_session_qs(session_type)
             orch.customSMcsvpath = None
+            orch.use_multichannel = False
             return orch
 
     @patch(f"{_ORCH_MOD}.ReactionSession")
@@ -1261,6 +1262,7 @@ class TestReactionSessionExecute(TestCase):
             session.actionsession_ids = [1, 2]
             session.actionsessionqueryset = _mock_action_session_qs()
             session.customSMcsvpath = None
+            session.use_multichannel = False
             session.groupreactionqueryset = MagicMock()
             session.otsessionobj = MagicMock(id=1)
             session.roundedaddvolumes = []
@@ -1854,3 +1856,1062 @@ class TestPlateFactorySolventPlate(TestCase):
 
         session.well_manager.create_well_model.assert_called_once()
         session.material_manager.create_solvent_prep_model.assert_called_once()
+
+
+# ===================================================================
+# PlateFactory: create_reaction_starting_plate multichannel branching
+# ===================================================================
+class TestPlateFactoryReactionStartingPlateBranching(TestCase):
+    """PlateFactory.create_reaction_starting_plate dispatches correctly."""
+
+    def _make_pf(self, *, use_multichannel=False, materials_df=None):
+        """Build a PlateFactory with a session stub wired for the test."""
+        from backend.opentrons.otsession.managers.plate_manager.plate_factory import (
+            PlateFactory,
+        )
+
+        session = _make_session_stub()
+        session.use_multichannel = use_multichannel
+
+        if materials_df is None:
+            materials_df = pd.DataFrame({
+                "uniquesolution": ["CCO-DMSO-10.0"],
+                "smiles": ["CCO"],
+                "volume": [500],
+                "solvent": ["DMSO"],
+                "concentration": [10.0],
+                "molecularweight": [46.07],
+            })
+        session.material_manager = MagicMock()
+        session.material_manager.get_add_actions_material_dataframe.return_value = materials_df
+
+        pf = PlateFactory(session)
+        return pf
+
+    def test_empty_materials_returns_none(self):
+        pf = self._make_pf(materials_df=pd.DataFrame())
+        result = pf.create_reaction_starting_plate()
+        self.assertIsNone(result)
+
+    def test_use_multichannel_false_calls_sequential(self):
+        pf = self._make_pf(use_multichannel=False)
+        pf._create_sequential_starting_plate = MagicMock(return_value=MagicMock())
+        pf._create_multichannel_starting_plate = MagicMock()
+
+        pf.create_reaction_starting_plate()
+
+        pf._create_sequential_starting_plate.assert_called_once()
+        pf._create_multichannel_starting_plate.assert_not_called()
+
+    def test_use_multichannel_true_calls_multichannel(self):
+        pf = self._make_pf(use_multichannel=True)
+        pf._create_sequential_starting_plate = MagicMock()
+        pf._create_multichannel_starting_plate = MagicMock(return_value=MagicMock())
+
+        pf.create_reaction_starting_plate()
+
+        pf._create_multichannel_starting_plate.assert_called_once()
+        pf._create_sequential_starting_plate.assert_not_called()
+
+
+# ===================================================================
+# PlateFactory: _create_multichannel_starting_plate integration tests
+# ===================================================================
+def _make_multichannel_session(
+    *,
+    addactionsdf=None,
+    materials_df=None,
+    wells_per_column=8,
+    num_columns=12,
+    max_well_volume=2500,
+):
+    """Build a fully-wired session stub for _create_multichannel_starting_plate tests.
+
+    Returns (session, mock_plate) where mock_plate is the plate object that
+    ``create_plate_model`` will return.
+    """
+    session = _make_session_stub()
+    session.use_multichannel = True
+
+    mock_plate = _mock_plate(
+        labware="plateone_96_wellplate_2500ul",
+        numberwellsincolumn=wells_per_column,
+        numbercolumns=num_columns,
+        maxwellvolume=max_well_volume,
+        name="reaction-starting-materials-mc",
+    )
+
+    # labware selector
+    session.labware_selector = MagicMock()
+    session.labware_selector.get_plate_type.return_value = "plateone_96_wellplate_2500ul"
+    session.labware_selector.get_dead_volume.return_value = 50.0  # 50µL dead volume
+
+    # well manager
+    _well_counter = [0]
+
+    def _create_well(plate_obj, role, role_index, wellindex, volume,
+                     smiles, concentration=None, solvent=None, transfer_type="single"):
+        w = MagicMock()
+        w.index = wellindex
+        w.name = f"well-{wellindex}"
+        w.transfer_type = transfer_type
+        return w
+
+    session.well_manager = MagicMock()
+    session.well_manager.create_well_model.side_effect = _create_well
+    session.well_manager.get_max_well_volume.return_value = max_well_volume * 0.6  # 60% fill
+    session.well_manager.get_plate_well_index_available.side_effect = (
+        lambda plate_obj: _well_counter[0]
+    )
+
+    def _update_well_index(plate_obj, wellindexupdate):
+        _well_counter[0] = wellindexupdate
+
+    session.well_manager.update_plate_well_index.side_effect = _update_well_index
+
+    # column manager
+    session.column_manager = MagicMock()
+
+    # deck manager
+    session.deck_manager = MagicMock()
+    session.deck_manager.check_deck_slot_available.return_value = 3
+
+    # material manager
+    session.material_manager = MagicMock()
+    session.material_manager.combine_strings.side_effect = (
+        lambda row: f"{row['smiles']}-{row['solvent']}-{row['concentration']}"
+    )
+    session.material_manager.calc_mass.return_value = 1.0
+
+    # data manager (for _create_compound_order)
+    session.data_manager = MagicMock()
+
+    # addactionsdf
+    session.addactionsdf = addactionsdf
+
+    return session, mock_plate
+
+
+class TestCreateMultichannelStartingPlate(TestCase):
+    """PlateFactory._create_multichannel_starting_plate — full integration tests."""
+
+    def _run(self, *, addactionsdf, materials_df, wells_per_column=8,
+             num_columns=12, max_well_volume=2500):
+        """Helper: build session, create PlateFactory, call the method."""
+        from backend.opentrons.otsession.managers.plate_manager.plate_factory import (
+            PlateFactory,
+        )
+
+        session, mock_plate = _make_multichannel_session(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=wells_per_column,
+            num_columns=num_columns,
+            max_well_volume=max_well_volume,
+        )
+
+        pf = PlateFactory(session)
+        pf.create_plate_model = MagicMock(return_value=mock_plate)
+        pf._create_compound_order = MagicMock()
+        pf._create_sequential_starting_plate = MagicMock(return_value=mock_plate)
+
+        result = pf._create_multichannel_starting_plate(materials_df)
+        return result, pf, session, mock_plate
+
+    # --- Fixture builder helpers ---
+
+    @staticmethod
+    def _make_addactions_df(entries):
+        """Build an addactionsdf from a list of dicts.
+
+        Each dict: {smiles, volume, solvent, concentration, reaction_id}
+        """
+        rows = []
+        for e in entries:
+            rows.append({
+                "smiles": e["smiles"],
+                "volume": e["volume"],
+                "solvent": e.get("solvent", "DMSO"),
+                "concentration": e.get("concentration", 10.0),
+                "reaction_id_id": e["reaction_id"],
+                "molecularweight": e.get("molecularweight", 46.07),
+            })
+        df = pd.DataFrame(rows)
+        df["uniquesolution"] = df.apply(
+            lambda r: f"{r['smiles']}-{r['solvent']}-{r['concentration']}", axis=1
+        )
+        return df
+
+    @staticmethod
+    def _make_materials_df(entries):
+        """Build a materials_df from a list of dicts.
+
+        Each dict: {smiles, volume, solvent, concentration}
+        volume = total summed volume for that unique solution.
+        """
+        rows = []
+        for e in entries:
+            rows.append({
+                "uniquesolution": f"{e['smiles']}-{e.get('solvent', 'DMSO')}-{e.get('concentration', 10.0)}",
+                "smiles": e["smiles"],
+                "volume": e["volume"],
+                "solvent": e.get("solvent", "DMSO"),
+                "concentration": e.get("concentration", 10.0),
+                "molecularweight": e.get("molecularweight", 46.07),
+            })
+        return pd.DataFrame(rows)
+
+    # ------------------------------------------------------------------
+    # Test: fallback to sequential when addactionsdf is None
+    # ------------------------------------------------------------------
+    def test_fallback_when_no_addactionsdf(self):
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 500},
+        ])
+        result, pf, session, _ = self._run(
+            addactionsdf=None,
+            materials_df=materials_df,
+        )
+        pf._create_sequential_starting_plate.assert_called_once_with(materials_df)
+
+    # ------------------------------------------------------------------
+    # Test: fallback when addactionsdf is empty
+    # ------------------------------------------------------------------
+    def test_fallback_when_addactionsdf_empty(self):
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 500},
+        ])
+        result, pf, session, _ = self._run(
+            addactionsdf=pd.DataFrame(),
+            materials_df=materials_df,
+        )
+        pf._create_sequential_starting_plate.assert_called_once_with(materials_df)
+
+    # ------------------------------------------------------------------
+    # Test: all materials go to single channel (< wells_per_column reactions)
+    # ------------------------------------------------------------------
+    def test_all_single_channel_when_too_few_reactions(self):
+        """3 reactions for one reagent on an 8-well-per-column plate → all SC."""
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 50, "reaction_id": 1},
+            {"smiles": "CCO", "volume": 50, "reaction_id": 2},
+            {"smiles": "CCO", "volume": 50, "reaction_id": 3},
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 150},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+        )
+
+        # Should be called for the SC well(s), with transfer_type="single"
+        calls = session.well_manager.create_well_model.call_args_list
+        for c in calls:
+            self.assertEqual(c.kwargs.get("transfer_type", c[1].get("transfer_type", "single")), "single")
+
+    # ------------------------------------------------------------------
+    # Test: one reagent with exactly wells_per_column reactions → 1 MC column
+    # ------------------------------------------------------------------
+    def test_one_full_multichannel_column(self):
+        """8 reactions for one reagent → one full MC column, no SC wells."""
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 50, "reaction_id": i}
+            for i in range(1, 9)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 400},  # 50 * 8 = 400
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+        )
+
+        # Should have created 8 wells with transfer_type="multichannel"
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        self.assertEqual(len(mc_calls), 8)
+
+        # All wells should be in column 0 (indices 0–7)
+        well_indices = [_get_kwarg(c, "wellindex") for c in mc_calls]
+        self.assertEqual(sorted(well_indices), list(range(8)))
+
+        # Compound order should have been created
+        pf._create_compound_order.assert_called_once()
+
+    # ------------------------------------------------------------------
+    # Test: reagent with 10 reactions → 1 MC column (8) + 2 SC leftovers
+    # ------------------------------------------------------------------
+    def test_multichannel_with_leftover_to_single_channel(self):
+        """10 reactions: 1 MC column of 8, 2 leftovers go to SC."""
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 50, "reaction_id": i}
+            for i in range(1, 11)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 500},  # 50 * 10 = 500
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+        )
+
+        # 8 MC wells + at least 1 SC well
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        sc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "single"
+        ]
+        self.assertEqual(len(mc_calls), 8)
+        self.assertGreaterEqual(len(sc_calls), 1)
+
+    # ------------------------------------------------------------------
+    # Test: two different reagents, one MC-eligible, one SC
+    # ------------------------------------------------------------------
+    def test_mixed_mc_and_sc_reagents(self):
+        """Reagent A: 8 reactions (MC), Reagent B: 3 reactions (SC)."""
+        addactionsdf = self._make_addactions_df(
+            [{"smiles": "CCO", "volume": 50, "reaction_id": i} for i in range(1, 9)]
+            + [{"smiles": "CCCC", "volume": 100, "reaction_id": i} for i in range(1, 4)]
+        )
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 400},
+            {"smiles": "CCCC", "volume": 300},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        sc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "single"
+        ]
+
+        # 8 MC wells for CCO
+        self.assertEqual(len(mc_calls), 8)
+        mc_smiles = {_get_kwarg(c, "smiles") for c in mc_calls}
+        self.assertEqual(mc_smiles, {"CCO"})
+
+        # SC wells for CCCC
+        self.assertGreaterEqual(len(sc_calls), 1)
+        sc_smiles = {_get_kwarg(c, "smiles") for c in sc_calls}
+        self.assertIn("CCCC", sc_smiles)
+
+    # ------------------------------------------------------------------
+    # Test: 16 reactions → 2 MC columns
+    # ------------------------------------------------------------------
+    def test_16_reactions_single_reagent_consolidates_to_one_column(self):
+        """16 reactions for one reagent at low volume → 1 MC column with 2 transfers/channel.
+
+        The factory consolidates transfers into fewer source columns when
+        the per-well volume fits.  transfers_per_channel = ceil(16/8) = 2,
+        per_well = 50*2*1.15 + 50 = 165 µL, well under the 1500 µL max.
+        """
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 50, "reaction_id": i}
+            for i in range(1, 17)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 800},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        # All 8 wells in 1 column (volume allows 2 transfers per channel)
+        self.assertEqual(len(mc_calls), 8)
+        well_indices = sorted(_get_kwarg(c, "wellindex") for c in mc_calls)
+        self.assertEqual(well_indices, list(range(8)))
+
+        # Per-well volume: 50 * 2 * 1.15 + 50 = 165
+        expected_vol = round(50 * 2 * 1.15 + 50, 2)
+        for c in mc_calls:
+            self.assertAlmostEqual(_get_kwarg(c, "volume"), expected_vol, places=1)
+
+    # ------------------------------------------------------------------
+    # Test: two different reagents each with ≥8 reactions → 2 MC columns
+    # ------------------------------------------------------------------
+    def test_two_reagents_two_mc_columns(self):
+        """Two reagents each with 8 reactions → 2 MC columns (one per reagent)."""
+        addactionsdf = self._make_addactions_df(
+            [{"smiles": "CCO", "volume": 50, "reaction_id": i} for i in range(1, 9)]
+            + [{"smiles": "CCCC", "volume": 100, "reaction_id": i} for i in range(1, 9)]
+        )
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 400},
+            {"smiles": "CCCC", "volume": 800},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        # 8 wells per column × 2 columns = 16 wells total
+        self.assertEqual(len(mc_calls), 16)
+
+        # Wells should span columns 0 and 1 (indices 0–15)
+        well_indices = sorted(_get_kwarg(c, "wellindex") for c in mc_calls)
+        self.assertEqual(well_indices, list(range(16)))
+
+    # ------------------------------------------------------------------
+    # Test: MC wells have correct per-well volume calculation
+    # ------------------------------------------------------------------
+    def test_mc_well_volume_calculation(self):
+        """Verify per-well volume = (transfer_vol * transfers_per_channel * 1.15) + dead_vol."""
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 50, "reaction_id": i}
+            for i in range(1, 9)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 400},
+        ])
+
+        # dead_volume=50, max fill = 2500*0.6 = 1500
+        # transfers_per_channel = ceil(8/8) = 1
+        # per_well = 50 * 1 * 1.15 + 50 = 107.5
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        expected_vol = round(50 * 1 * 1.15 + 50, 2)  # 107.5
+        for c in mc_calls:
+            self.assertAlmostEqual(_get_kwarg(c, "volume"), expected_vol, places=1)
+
+    # ------------------------------------------------------------------
+    # Test: column and well indices are updated after MC placement
+    # ------------------------------------------------------------------
+    def test_column_index_updated_after_mc_placement(self):
+        """After placing 1 MC column, column index should advance to 1."""
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 50, "reaction_id": i}
+            for i in range(1, 9)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 400},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+        )
+
+        # Well index should have been updated past the first column
+        session.well_manager.update_plate_well_index.assert_called()
+        session.column_manager.update_plate_column_index_available.assert_called()
+
+    # ------------------------------------------------------------------
+    # Test: plate is returned (not None)
+    # ------------------------------------------------------------------
+    def test_returns_plate_object(self):
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 50, "reaction_id": i}
+            for i in range(1, 9)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 400},
+        ])
+
+        result, pf, session, mock_plate = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+        )
+
+        self.assertEqual(result, mock_plate)
+
+    # ------------------------------------------------------------------
+    # Test: 24-well plate (wells_per_column=4)
+    # ------------------------------------------------------------------
+    def test_24_well_plate_4_per_column(self):
+        """4 reactions on a 24-well plate (4 wells per column) → 1 MC column."""
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 50, "reaction_id": i}
+            for i in range(1, 5)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 200},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=4,
+            num_columns=6,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        self.assertEqual(len(mc_calls), 4)
+
+    # ------------------------------------------------------------------
+    # 384-well plate tests (wells_per_column=16, num_columns=24)
+    # ------------------------------------------------------------------
+    def test_384_well_one_mc_sub_column(self):
+        """16 reactions on a 384-well plate → 1 sub-column of 8 MC wells.
+
+        wells_per_group=8, transfers_per_channel=ceil(16/8)=2.
+        Sub-column 0 of column 0 uses interleaved indices [0,2,4,6,8,10,12,14].
+        """
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 20, "reaction_id": i}
+            for i in range(1, 17)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 320},  # 20 * 16
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=16,
+            num_columns=24,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        self.assertEqual(len(mc_calls), 8)
+        well_indices = sorted(_get_kwarg(c, "wellindex") for c in mc_calls)
+        self.assertEqual(well_indices, [0, 2, 4, 6, 8, 10, 12, 14])
+
+    def test_384_well_below_threshold_all_sc(self):
+        """7 reactions on a 384-well plate (needs 8 per sub-column) → all SC.
+
+        With sub-column logic, the MC threshold on a 384-well plate is 8
+        (not 16), matching the 8-channel pipette's reach.
+        """
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 20, "reaction_id": i}
+            for i in range(1, 8)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 140},  # 20 * 7
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=16,
+            num_columns=24,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        self.assertEqual(len(mc_calls), 0)
+
+    def test_384_well_mixed_mc_and_sc(self):
+        """384-well: reagent A has 16 rxns (MC), reagent B has 5 rxns (SC).
+
+        CCO (16 rxns) → 1 sub-column of 8 MC wells (2 transfers/channel).
+        CCCC (5 rxns) → below 8-well threshold → SC.
+        """
+        addactionsdf = self._make_addactions_df(
+            [{"smiles": "CCO", "volume": 20, "reaction_id": i} for i in range(1, 17)]
+            + [{"smiles": "CCCC", "volume": 30, "reaction_id": i} for i in range(1, 6)]
+        )
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 320},
+            {"smiles": "CCCC", "volume": 150},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=16,
+            num_columns=24,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        sc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "single"
+        ]
+        self.assertEqual(len(mc_calls), 8)
+        self.assertEqual({_get_kwarg(c, "smiles") for c in mc_calls}, {"CCO"})
+        self.assertGreaterEqual(len(sc_calls), 1)
+        self.assertIn("CCCC", {_get_kwarg(c, "smiles") for c in sc_calls})
+
+    def test_384_well_with_leftover(self):
+        """384-well: 20 reactions (8 MC via sub-column + 4 leftover to SC).
+
+        wells_per_group=8, columns_needed=20//8=2, leftover=4.
+        PlateFactory places 1 sub-column of 8 MC wells (with
+        transfers_per_channel=ceil(20/8)=3). Leftover 4 → SC.
+        """
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 20, "reaction_id": i}
+            for i in range(1, 21)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 400},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=16,
+            num_columns=24,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        sc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "single"
+        ]
+        # 8 wells in MC sub-column
+        self.assertEqual(len(mc_calls), 8)
+        # Leftover 4 reactions should generate SC well(s)
+        self.assertGreaterEqual(len(sc_calls), 1)
+
+    # ------------------------------------------------------------------
+    # 24-well plate additional edge cases (wells_per_column=4, num_columns=6)
+    # ------------------------------------------------------------------
+    def test_24_well_below_threshold_all_sc(self):
+        """3 reactions on a 24-well plate (needs 4 per column) → all SC."""
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 50, "reaction_id": i}
+            for i in range(1, 4)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 150},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=4,
+            num_columns=6,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        self.assertEqual(len(mc_calls), 0)
+
+    def test_24_well_mixed_mc_and_sc(self):
+        """24-well: reagent A has 4 rxns (MC), reagent B has 2 rxns (SC)."""
+        addactionsdf = self._make_addactions_df(
+            [{"smiles": "CCO", "volume": 50, "reaction_id": i} for i in range(1, 5)]
+            + [{"smiles": "CCCC", "volume": 100, "reaction_id": i} for i in range(1, 3)]
+        )
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 200},
+            {"smiles": "CCCC", "volume": 200},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=4,
+            num_columns=6,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        sc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "single"
+        ]
+        self.assertEqual(len(mc_calls), 4)
+        self.assertEqual({_get_kwarg(c, "smiles") for c in mc_calls}, {"CCO"})
+        self.assertGreaterEqual(len(sc_calls), 1)
+
+    def test_24_well_two_mc_reagents(self):
+        """24-well: two reagents each with 4 reactions → 2 MC columns."""
+        addactionsdf = self._make_addactions_df(
+            [{"smiles": "CCO", "volume": 50, "reaction_id": i} for i in range(1, 5)]
+            + [{"smiles": "CCCC", "volume": 50, "reaction_id": i} for i in range(1, 5)]
+        )
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 200},
+            {"smiles": "CCCC", "volume": 200},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=4,
+            num_columns=6,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        # 4 wells × 2 columns = 8
+        self.assertEqual(len(mc_calls), 8)
+        well_indices = sorted(_get_kwarg(c, "wellindex") for c in mc_calls)
+        self.assertEqual(well_indices, list(range(8)))
+
+    # ------------------------------------------------------------------
+    # Volume overflow edge cases
+    # ------------------------------------------------------------------
+    def test_mc_volume_overflow_splits_to_multiple_columns(self):
+        """When per-well volume exceeds max, the plate factory uses multiple MC columns.
+
+        Setup: 96-well, max_well_volume=500 (effective=300 at 60% fill),
+        dead_volume=50, 8 rxns at 200µL each.
+        per_well = 200*1*1.15 + 50 = 280, fits in 300 → 1 column.
+        But with 16 rxns: per_well = 200*2*1.15+50 = 510 >300,
+        so max_transfers=1, columns_from_volume=ceil(16/8)=2 → 2 MC columns.
+        """
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 200, "reaction_id": i}
+            for i in range(1, 17)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 3200},  # 200 * 16
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=8,
+            num_columns=12,
+            max_well_volume=500,  # effective = 300 at 60%
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        # Should have 2 MC columns → 16 wells
+        self.assertEqual(len(mc_calls), 16)
+        well_indices = sorted(_get_kwarg(c, "wellindex") for c in mc_calls)
+        self.assertEqual(well_indices, list(range(16)))
+
+    def test_sc_volume_overflow_splits_into_multiple_wells(self):
+        """SC material with volume exceeding max capacity splits into multiple wells.
+
+        Setup: 96-well, max_well_volume=400 (effective=240), dead_volume=50.
+        2 reactions at 200µL each → total=400, +15% error=460, +dead=510.
+        510 > 240, so should split across multiple SC wells.
+        """
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 200, "reaction_id": 1},
+            {"smiles": "CCO", "volume": 200, "reaction_id": 2},
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 400},
+        ])
+
+        # Track well index progression for SC overflow
+        well_idx_counter = [0]
+
+        def _get_avail(plate_obj):
+            val = well_idx_counter[0]
+            return val
+
+        def _update_idx(plate_obj, wellindexupdate):
+            well_idx_counter[0] = wellindexupdate
+
+        session, mock_plate = _make_multichannel_session(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            max_well_volume=400,  # effective = 240
+        )
+        session.well_manager.get_plate_well_index_available.side_effect = _get_avail
+        session.well_manager.update_plate_well_index.side_effect = _update_idx
+
+        from backend.opentrons.otsession.managers.plate_manager.plate_factory import (
+            PlateFactory,
+        )
+        pf = PlateFactory(session)
+        pf.create_plate_model = MagicMock(return_value=mock_plate)
+        pf._create_compound_order = MagicMock()
+        pf._create_sequential_starting_plate = MagicMock(return_value=mock_plate)
+
+        result = pf._create_multichannel_starting_plate(materials_df)
+
+        sc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "single"
+        ]
+        # Volume 510 > effective 240 → splits into ceil(510/240) = 3 wells
+        self.assertGreaterEqual(len(sc_calls), 2)
+
+    # ------------------------------------------------------------------
+    # Plate-full edge cases
+    # ------------------------------------------------------------------
+    def test_plate_full_mc_overflows_to_sc(self):
+        """When MC columns exhaust all plate columns, remaining MC material
+        falls back to SC.
+
+        Setup: 24-well (4 wells × 6 columns). 7 reagents each with 4 rxns.
+        Only 6 columns available → 6 MC columns, 7th reagent → SC fallback.
+        """
+        reagents = [f"C{'C' * i}O" for i in range(7)]  # 7 distinct SMILES
+        addactions = []
+        for smiles in reagents:
+            for rid in range(1, 5):
+                addactions.append({"smiles": smiles, "volume": 50, "reaction_id": rid})
+
+        addactionsdf = self._make_addactions_df(addactions)
+        materials_df = self._make_materials_df([
+            {"smiles": s, "volume": 200} for s in reagents
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=4,
+            num_columns=6,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        sc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "single"
+        ]
+        # At most 6 columns × 4 wells = 24 MC wells
+        self.assertLessEqual(len(mc_calls), 24)
+        # At least one reagent must have fallen back to SC
+        self.assertGreaterEqual(len(sc_calls), 1)
+
+    def test_96_well_many_reagents_fills_all_columns(self):
+        """96-well: 12 reagents each with 8 rxns → fills all 12 columns as MC.
+
+        No SC wells should be needed.
+        """
+        reagents = [f"C{'C' * i}O" for i in range(12)]
+        addactions = []
+        for smiles in reagents:
+            for rid in range(1, 9):
+                addactions.append({"smiles": smiles, "volume": 50, "reaction_id": rid})
+
+        addactionsdf = self._make_addactions_df(addactions)
+        materials_df = self._make_materials_df([
+            {"smiles": s, "volume": 400} for s in reagents
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=8,
+            num_columns=12,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        # 12 columns × 8 wells = 96 MC wells
+        self.assertEqual(len(mc_calls), 96)
+        well_indices = sorted(_get_kwarg(c, "wellindex") for c in mc_calls)
+        self.assertEqual(well_indices, list(range(96)))
+
+    def test_384_well_volume_overflow_with_many_reactions(self):
+        """384-well: reagent with 48 reactions at high volume per transfer.
+
+        wells_per_group=8, max_well_volume=200 (effective=120).
+        transfer_vol=50, 48 rxns → transfers_per_channel=ceil(48/8)=6,
+        per_well=50*6*1.15+50=395 > 120.
+        max_transfers=floor((120-50)/(50*1.15))=1,
+        groups_from_volume=ceil(48/(8*1))=6 MC sub-column slots.
+        """
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 50, "reaction_id": i}
+            for i in range(1, 49)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 2400},  # 50 * 48
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=16,
+            num_columns=24,
+            max_well_volume=200,  # effective = 120
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        # Should get 3 MC columns × 16 wells = 48 MC wells
+        self.assertEqual(len(mc_calls), 48)
+
+    # ------------------------------------------------------------------
+    # MC volume calculation edge cases per plate type
+    # ------------------------------------------------------------------
+    def test_24_well_mc_volume_calculation(self):
+        """24-well: verify per-well volume with wells_per_column=4.
+
+        8 reactions, volume=100: transfers_per_channel=ceil(8/4)=2,
+        per_well = 100*2*1.15 + 50 = 280.
+        """
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 100, "reaction_id": i}
+            for i in range(1, 9)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 800},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=4,
+            num_columns=6,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        # 4 wells per column (all in same column since per-well volume fits)
+        self.assertGreaterEqual(len(mc_calls), 4)
+        expected_vol = round(100 * 2 * 1.15 + 50, 2)  # 280.0
+        for c in mc_calls:
+            self.assertAlmostEqual(_get_kwarg(c, "volume"), expected_vol, places=1)
+
+    def test_384_well_mc_volume_calculation(self):
+        """384-well: verify per-well volume with wells_per_group=8.
+
+        16 reactions, volume=30: transfers_per_channel=ceil(16/8)=2,
+        per_well = 30*2*1.15 + 50 = 119.0.
+        """
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 30, "reaction_id": i}
+            for i in range(1, 17)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 480},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=16,
+            num_columns=24,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        self.assertEqual(len(mc_calls), 8)
+        expected_vol = round(30 * 2 * 1.15 + 50, 2)  # 119.0
+        for c in mc_calls:
+            self.assertAlmostEqual(_get_kwarg(c, "volume"), expected_vol, places=1)
+
+    # ------------------------------------------------------------------
+    # Boundary: exactly at column threshold
+    # ------------------------------------------------------------------
+    def test_24_well_exact_boundary_at_4_reactions(self):
+        """Exactly 4 reactions on a 24-well → 1 full MC column, zero leftovers."""
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 50, "reaction_id": i}
+            for i in range(1, 5)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 200},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=4,
+            num_columns=6,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        sc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "single"
+        ]
+        self.assertEqual(len(mc_calls), 4)
+        # No SC if the only reagent perfectly fills columns (leftover may
+        # still appear in materials_df for the total-volume path, but since
+        # the identity key won't be in sc_unique_solutions, no SC well.)
+        self.assertEqual(len(sc_calls), 0)
+
+    def test_384_well_exact_boundary_at_16_reactions(self):
+        """16 reactions on a 384-well → 1 sub-column of 8 MC wells, zero leftovers.
+
+        wells_per_group=8, columns_needed=2, leftover=0.
+        PlateFactory: 1 sub-column, transfers_per_channel=2.
+        """
+        addactionsdf = self._make_addactions_df([
+            {"smiles": "CCO", "volume": 20, "reaction_id": i}
+            for i in range(1, 17)
+        ])
+        materials_df = self._make_materials_df([
+            {"smiles": "CCO", "volume": 320},
+        ])
+
+        result, pf, session, _ = self._run(
+            addactionsdf=addactionsdf,
+            materials_df=materials_df,
+            wells_per_column=16,
+            num_columns=24,
+        )
+
+        mc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "multichannel"
+        ]
+        sc_calls = [
+            c for c in session.well_manager.create_well_model.call_args_list
+            if _get_kwarg(c, "transfer_type") == "single"
+        ]
+        self.assertEqual(len(mc_calls), 8)
+        self.assertEqual(len(sc_calls), 0)
+
+
+def _get_kwarg(call_obj, key):
+    """Extract a keyword argument from a mock call, checking both kwargs and positional."""
+    if key in call_obj.kwargs:
+        return call_obj.kwargs[key]
+    # Fall back to checking if it was passed positionally via call()
+    return call_obj.kwargs.get(key)

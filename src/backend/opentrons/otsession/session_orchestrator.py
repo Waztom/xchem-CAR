@@ -26,6 +26,7 @@ class SessionOrchestrator:
         otbatchprotocolobj: OTBatchProtocol,
         actionsessionqueryset: QuerySet[ActionSession],
         customSMcsvpath: str = None,
+        use_multichannel: bool = False,
     ):
         """
         Initialize the orchestrator.
@@ -40,11 +41,15 @@ class SessionOrchestrator:
             The action sessions to execute
         customSMcsvpath: str, optional
             Path to custom starting material CSV file
+        use_multichannel: bool, optional
+            When True, starter plates are laid out for multichannel
+            pipette column transfers where possible (default False).
         """
         self.reactionstep = reactionstep
         self.otbatchprotocolobj = otbatchprotocolobj
         self.actionsessionqueryset = actionsessionqueryset
         self.customSMcsvpath = customSMcsvpath
+        self.use_multichannel = use_multichannel
 
         # Determine the session type
         self.actionsessiontype = self._determine_session_type()
@@ -102,6 +107,7 @@ class SessionOrchestrator:
                 otbatchprotocolobj=self.otbatchprotocolobj,
                 actionsessionqueryset=self.actionsessionqueryset,
                 customSMcsvpath=self.customSMcsvpath,
+                use_multichannel=self.use_multichannel,
             )
         elif self.actionsessiontype == "workup":
             session = WorkupSession(
@@ -109,6 +115,7 @@ class SessionOrchestrator:
                 otbatchprotocolobj=self.otbatchprotocolobj,
                 actionsessionqueryset=self.actionsessionqueryset,
                 customSMcsvpath=self.customSMcsvpath,
+                use_multichannel=self.use_multichannel,
             )
         elif self.actionsessiontype in ["analyse", "analysis"]:
             session = AnalysisSession(
@@ -116,6 +123,7 @@ class SessionOrchestrator:
                 otbatchprotocolobj=self.otbatchprotocolobj,
                 actionsessionqueryset=self.actionsessionqueryset,
                 customSMcsvpath=self.customSMcsvpath,
+                use_multichannel=self.use_multichannel,
             )
         else:
             logger.error(f"Unknown session type: {self.actionsessiontype}")

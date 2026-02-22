@@ -32,6 +32,7 @@ class BaseSession(ABC):
         otbatchprotocolobj,
         actionsessionqueryset,
         customSMcsvpath=None,
+        use_multichannel=False,
     ):
         """
         Initialize the session.
@@ -46,11 +47,15 @@ class BaseSession(ABC):
             The action sessions to execute
         customSMcsvpath: str, optional
             Path to custom starting material CSV file
+        use_multichannel: bool, optional
+            When True, starter plates are laid out for multichannel
+            pipette column transfers where possible (default False).
         """
         self.reactionstep = reactionstep
         self.otbatchprotocolobj = otbatchprotocolobj
         self.actionsessionqueryset = actionsessionqueryset
         self.customSMcsvpath = customSMcsvpath
+        self.use_multichannel = use_multichannel
 
         # Initialize session properties
         self.batchobj = otbatchprotocolobj.batch_id

@@ -48,6 +48,7 @@ def initiate_ot_project(
     batch_ids: List[int],
     protocol_name: str,
     custom_files: Optional[Dict[str, "UploadedFile"]] = None,
+    use_multichannel: bool = False,
 ) -> str:
     """Dispatch the ``create_ot_script`` Celery task.
 
@@ -81,6 +82,7 @@ def initiate_ot_project(
         batchids=batch_ids,
         protocol_name=protocol_name,
         custom_SM_files=starting_material_paths,
+        use_multichannel=use_multichannel,
     )
     return task.id
 

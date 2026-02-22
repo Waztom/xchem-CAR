@@ -293,6 +293,10 @@ class Well(models.Model):
         vs. being empty (default=True)
     """
 
+    class TransferType(models.TextChoices):
+        SINGLE = "single", "Single channel"
+        MULTICHANNEL = "multichannel", "Multichannel"
+
     otsession_id = models.ForeignKey(
         OTSession,
         related_name="otwells",
@@ -313,6 +317,11 @@ class Well(models.Model):
     solvent = models.CharField(max_length=255, null=True)
     reactantfornextstep = models.BooleanField(default=False)
     available = models.BooleanField(default=True)
+    transfer_type = models.CharField(
+        choices=TransferType.choices,
+        max_length=15,
+        default=TransferType.SINGLE,
+    )
 
 
 class CompoundOrder(models.Model):

@@ -116,6 +116,13 @@ class ReactionSession(BaseSession):
         # Create reaction starting plate for new materials
         self.plate_factory.create_reaction_starting_plate()
 
+        # If multichannel wells exist, create a second (multi-channel) pipette
+        # so the OT writer can emit both single- and multi-channel commands.
+        if self.use_multichannel:
+            self.pipette_manager.create_multichannel_pipette_model(
+                rounded_volumes=self.roundedvolumes,
+            )
+
         # For steps after the first, create solvent plate for previous products
         if self.reactionstep > 1:
             logger.info(f"Creating solvent plate for step {self.reactionstep}")
@@ -137,3 +144,5 @@ class ReactionSession(BaseSession):
             f"Reaction session execution completed for step {self.reactionstep}"
         )
         return True
+
+

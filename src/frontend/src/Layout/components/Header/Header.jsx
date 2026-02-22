@@ -5,8 +5,6 @@ import { setNavigationDisplayed, setProjectViewDisplayed, useLayoutStore } from 
 import { setCurrentProject, useCurrentProjectStore } from '../../../common/stores/currentProjectStore';
 import { LayoutSwitch } from './components/LayoutSwitch/LayoutSwitch';
 import { CreateOTProjectButton } from './components/CreateOTProjectButton';
-import { OTProjectHistoryButton } from './components/OTProjectHistoryButton';
-import { ExportProjectButton } from './components/ExportProjectButton';
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   gap: theme.spacing(),
@@ -35,8 +33,6 @@ export const Header = () => {
         {!!currentProject && (
           <>
             <CreateOTProjectButton />
-            <OTProjectHistoryButton />
-            <ExportProjectButton />
             <LayoutSwitch 
               checked={navigationDisplayed} 
               onChange={setNavigationDisplayed} 
