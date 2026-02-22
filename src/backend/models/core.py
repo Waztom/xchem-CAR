@@ -33,6 +33,9 @@ class Project(models.Model):
     quotedcost = models.FloatField(null=True)
     quoteurl = models.CharField(max_length=255, null=True)
 
+    class Meta:
+        ordering = ["-init_date"]
+
 
 class Batch(models.Model):
     """Django model to define a Batch - a batch of compounds.

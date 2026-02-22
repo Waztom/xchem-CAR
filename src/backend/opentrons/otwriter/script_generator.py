@@ -21,6 +21,9 @@ from .session_handlers.reaction_handler import ReactionSessionHandler
 from .session_handlers.workup_handler import WorkupSessionHandler
 from .session_handlers.analysis_handler import AnalysisSessionHandler
 from .utils.well_finder import WellFinder
+from .annotation_generator import AnnotationGenerator
+from .transfer_record import TransferLedger
+from .session_visualizer import SessionVisualizer
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +82,8 @@ class ScriptGenerator:
         logger.info(f"Creating helper components for reaction step {self.reactionstep}")
         # Create helper components
         self.command_generator = CommandGenerator(self)
+        self.annotation_generator = AnnotationGenerator(self)
+        self.transfer_ledger = TransferLedger()
         self.file_manager = FileManager(self)
         self.query_service = QueryService(self)
         self.volume_manager = VolumeManager(self)
@@ -116,9 +121,17 @@ class ScriptGenerator:
         self.platequeryset = self.query_service.get_plates()
         self.pipettename = self.pipetteobj.name
 
+        # Multi-channel pipette (may be None when not configured)
+        self.mc_pipetteobj = self.query_service.get_multichannel_pipette()
+        self.mc_pipettename = (
+            self.mc_pipetteobj.name if self.mc_pipetteobj else None
+        )
+
         logger.info(
             f"Using pipette: {self.pipettename} with {self.tiprackqueryset.count()} tip racks"
         )
+        if self.mc_pipettename:
+            logger.info(f"Multi-channel pipette: {self.mc_pipettename}")
         logger.info(f"Using {self.platequeryset.count()} plates for protocol")
 
         # Create file path for script
@@ -163,6 +176,16 @@ class ScriptGenerator:
             logger.info("Creating OTScript database record")
             script_obj = self.file_manager.create_ot_script_model()
             logger.info(f"Created OTScript record with ID: {script_obj.id}")
+
+            # Generate session visualization HTML
+            logger.info("Generating session visualization")
+            try:
+                visualizer = SessionVisualizer(self)
+                self.visualization_path = visualizer.write_html()
+                logger.info(f"Session visualization saved to: {self.visualization_path}")
+            except Exception as viz_err:
+                logger.warning(f"Session visualization generation failed (non-fatal): {viz_err}")
+                self.visualization_path = None
 
             logger.info(f"Script generation completed successfully: {self.filepath}")
             return self.filepath
@@ -227,6 +250,18 @@ class ScriptGenerator:
             )
         )
 
+        # Add multi-channel pipette if present
+        if self.mc_pipetteobj:
+            logger.info(f"Setting up multi-channel pipette: {self.mc_pipettename}")
+            self.content.extend(
+                self.command_generator.get_pipette_setup(
+                    pipette_name=self.mc_pipetteobj.name,
+                    pipette_labware=self.mc_pipetteobj.labware,
+                    pipette_position=self.mc_pipetteobj.position,
+                    tiprack_names=[tiprack.name for tiprack in self.tiprackqueryset],
+                )
+            )
+
         # Set up tip tracking
         logger.info("Setting up tip tracking system")
         self.content.extend(
@@ -247,6 +282,29 @@ class ScriptGenerator:
         self.content.extend(
             self.command_generator.get_drop_tip_function(pipette_name=self.pipettename)
         )
+
+        # Add MC tip functions if multi-channel pipette present
+        if self.mc_pipetteobj:
+            logger.info("Adding multi-channel tip state and functions")
+            self.content.extend(
+                self.command_generator.get_number_tips_available_setup(
+                    num_tipracks=len(self.tiprackqueryset),
+                    channel_type="multi",
+                    suffix="MC",
+                )
+            )
+            self.content.extend(
+                self.command_generator.get_pickup_tip_function(
+                    pipette_name=self.mc_pipettename,
+                    suffix="MC",
+                )
+            )
+            self.content.extend(
+                self.command_generator.get_drop_tip_function(
+                    pipette_name=self.mc_pipettename,
+                    suffix="MC",
+                )
+            )
 
         logger.info("Script setup completed")
 

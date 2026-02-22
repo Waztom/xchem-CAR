@@ -10,7 +10,8 @@ export const useGetProjects = (params) => {
     async () => {
       try {
         const response = await axiosGet(queryKey);
-        return response;
+        // DRF pagination wraps results in {count, next, previous, results}
+        return response.results !== undefined ? response.results : response;
       } catch (error) {
         console.error('Error fetching projects:', error);
         throw error;

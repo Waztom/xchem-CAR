@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from 'react-query';
 import { deleteBatchKey, getBatchesQueryKey } from '../../../../common/api/batchesQueryKeys';
 import { useCurrentProjectStore } from '../../../../common/stores/currentProjectStore';
 import { axiosDelete } from '../../../../common/utils/axiosFunctions';
-import { getOtBatchProtocolsQueryKey } from '../../../../common/api/otBatchProtocolsQueryKeys';
 import { useGlobalSnackbar } from '../../../../common/hooks/useGlobalSnackbar';
 
 export const useDeleteBatch = () => {
@@ -45,8 +44,11 @@ export const useDeleteBatch = () => {
     // Always refetch after error or success:
     onSettled: () => {
       queryClient.invalidateQueries(batchesQueryKey);
-      // Since information about batches is in OTBatchProtocol as well, it needs to be invalidated
-      queryClient.invalidateQueries(getOtBatchProtocolsQueryKey({ project_id: currentProject.id }));
+      // Invalidate ALL cached OT protocol queries (prefix match on the endpoint
+      // string). This works because React Query v3 treats array elements as a
+      // prefix — every query whose key starts with '/otbatchprotocols/' is
+      // invalidated regardless of the params object in position [1].
+      queryClient.invalidateQueries('/otbatchprotocols/');
     }
   });
 };
