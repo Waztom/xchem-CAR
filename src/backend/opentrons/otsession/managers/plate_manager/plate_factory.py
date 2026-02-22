@@ -571,9 +571,10 @@ class PlateFactory:
         mc_slots_used = 0
 
         for mat in mc_materials:
-            transfers_per_channel = math.ceil(
-                mat.reaction_count / wells_per_group
-            )
+            # Use floor division: MC wells hold volume for full
+            # sub-columns ONLY.  Leftover reactions (reaction_count %
+            # wells_per_group) will go to sc_leftover → Phase B.
+            transfers_per_channel = mat.reaction_count // wells_per_group
             per_well_volume = (
                 mat.volume * transfers_per_channel * 1.15 + dead_volume
             )
@@ -587,7 +588,7 @@ class PlateFactory:
                     int((effective_max_volume - dead_volume) / (mat.volume * 1.15)),
                 )
                 groups_from_volume = math.ceil(
-                    mat.reaction_count / (wells_per_group * max_transfers)
+                    transfers_per_channel / max_transfers
                 )
                 per_well_volume_capped = (
                     mat.volume * max_transfers * 1.15 + dead_volume
