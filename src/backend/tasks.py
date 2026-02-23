@@ -526,10 +526,10 @@ def uploadCustomReaction(validate_output):
                                 reactant_smiles=reactant_smi,
                                 previous_reaction_product=True,
                             )
-                            createCatalogEntryModel(
-                                reactant_id=reactant_id,
-                                previous_reaction_product=True,
-                            )
+                            # createCatalogEntryModel(
+                            #     reactant_id=reactant_id,
+                            #     previous_reaction_product=True,
+                            # )
 
                         if not previousreactionqueryset:
                             reactant_id = createReactantModel(
@@ -538,19 +538,19 @@ def uploadCustomReaction(validate_output):
                                 previous_reaction_product=False,
                             )
                             #### Creating catalog entries takes very long!
-                            createCatalogEntryModel(
-                                reactant_id=reactant_id,
-                                previous_reaction_product=False,
-                                lab_inventory=True,
-                            )
-                            catalog_entries = getExactSearch(smiles=reactant_smi)
-                            if "results" in catalog_entries:
-                                for catalog_entry in catalog_entries["results"]:
-                                    createCatalogEntryModel(
-                                        catalog_entry=catalog_entry,
-                                        reactant_id=reactant_id,
-                                        previous_reaction_product=False,
-                                    )
+                            # createCatalogEntryModel(
+                            #     reactant_id=reactant_id,
+                            #     previous_reaction_product=False,
+                            #     lab_inventory=True,
+                            # )
+                            # catalog_entries = getExactSearch(smiles=reactant_smi)
+                            # if "results" in catalog_entries:
+                            #     for catalog_entry in catalog_entries["results"]:
+                            #         createCatalogEntryModel(
+                            #             catalog_entry=catalog_entry,
+                            #             reactant_id=reactant_id,
+                            #             previous_reaction_product=False,
+                            #         )
 
     delete_tmp_file(csv_fp)
 
