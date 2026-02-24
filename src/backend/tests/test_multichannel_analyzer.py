@@ -697,6 +697,132 @@ class TestPlanPlateLayout(TestCase):
             self.assertEqual(mc_groups[i].column_index, i)
 
 
+class TestPlanPlateLayout384Well(TestCase):
+    """plan_plate_layout on 384-well plates (16 rows, 2 sub-columns)."""
+
+    def setUp(self):
+        self.analyzer = MultichannelAnalyzer(
+            wells_per_column=16, num_columns=24
+        )
+
+    def test_even_mc_groups_384(self):
+        """Two MC groups fill both sub-columns of the first physical column."""
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=2, leftover_wells=0, reaction_count=16,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(mc_materials, [])
+        self.assertEqual(len(mc_groups), 2)
+        # Both groups in physical column 0, sub-columns 0 and 1
+        self.assertEqual(mc_groups[0].column_index, 0)
+        self.assertEqual(mc_groups[0].sub_column_index, 0)
+        self.assertEqual(mc_groups[1].column_index, 0)
+        self.assertEqual(mc_groups[1].sub_column_index, 1)
+        self.assertEqual(len(cp_wells), 0)
+
+    def test_odd_mc_groups_no_sc_overlap(self):
+        """Three MC groups: 1 physical column full + 1 partial.
+
+        SC wells must start AFTER the partial column, never in it.
+        This is the key regression test for the Phase B overlap bug.
+        """
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=3, leftover_wells=2, reaction_count=26,
+            ),
+        ]
+        sc_materials = [
+            MaterialGroup(
+                identity_key="B--", smiles="B", volume=100.0,
+                columns_needed=0, leftover_wells=0, reaction_count=4,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(
+            mc_materials, sc_materials
+        )
+        self.assertEqual(len(mc_groups), 3)
+        # Columns 0-sub0, 0-sub1, 1-sub0
+        self.assertEqual(mc_groups[2].column_index, 1)
+        self.assertEqual(mc_groups[2].sub_column_index, 0)
+
+        # SC wells must start at column 2 (index 32), NOT column 1
+        mc_well_indices = set()
+        for g in mc_groups:
+            mc_well_indices.update(g.well_indices)
+
+        for cp in cp_wells:
+            self.assertNotIn(
+                cp.well_index, mc_well_indices,
+                f"SC well {cp.well_index} overlaps with MC wells {sorted(mc_well_indices)}",
+            )
+        # First SC well should be at column 2 (index 32)
+        self.assertEqual(cp_wells[0].well_index, 32)
+
+    def test_single_mc_group_384(self):
+        """A single MC group occupies sub-column 0 of column 0.
+
+        SC must start at column 1 (index 16), not column 0.
+        """
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=1, leftover_wells=3, reaction_count=11,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(mc_materials, [])
+        self.assertEqual(len(mc_groups), 1)
+        self.assertEqual(mc_groups[0].column_index, 0)
+        # 3 leftover → first SC well at column 1 (index 16)
+        self.assertEqual(len(cp_wells), 3)
+        self.assertEqual(cp_wells[0].well_index, 16)
+
+    def test_no_mc_groups_384(self):
+        """Pure SC on 384-well — starts at well 0."""
+        sc_materials = [
+            MaterialGroup(
+                identity_key="X--", smiles="X", volume=50.0,
+                columns_needed=0, leftover_wells=0, reaction_count=5,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout([], sc_materials)
+        self.assertEqual(len(mc_groups), 0)
+        self.assertEqual(cp_wells[0].well_index, 0)
+
+    def test_mc_sc_well_indices_never_overlap(self):
+        """No MC well index should ever appear in the SC well list."""
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=5, leftover_wells=4, reaction_count=44,
+            ),
+            MaterialGroup(
+                identity_key="B--", smiles="B", volume=75.0,
+                columns_needed=1, leftover_wells=6, reaction_count=14,
+            ),
+        ]
+        sc_materials = [
+            MaterialGroup(
+                identity_key="C--", smiles="C", volume=25.0,
+                columns_needed=0, leftover_wells=0, reaction_count=10,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(
+            mc_materials, sc_materials
+        )
+        mc_indices = set()
+        for g in mc_groups:
+            mc_indices.update(g.well_indices)
+        sc_indices = {cp.well_index for cp in cp_wells}
+        overlap = mc_indices & sc_indices
+        self.assertEqual(
+            overlap, set(),
+            f"MC and SC well indices overlap: {overlap}",
+        )
+
+
 # ===================================================================
 # analyze_custom_plate_csv
 # ===================================================================

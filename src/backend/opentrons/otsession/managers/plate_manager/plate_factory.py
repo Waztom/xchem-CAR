@@ -724,6 +724,42 @@ class PlateFactory:
                 f"Phase A.5 heterogeneous MC failed, continuing: {e}"
             )
 
+        # --- 4.9. Advance well tracker past all MC columns ----------
+        # Phase A and A.5 only update the plate's well tracker when a
+        # full physical column's sub-columns are all filled.  If Phase A
+        # or A.5 left a partial column (e.g. odd MC groups on a
+        # 384-well plate), the tracker may still point inside that
+        # column.  Ensure the tracker is past every MC well so Phase B
+        # does not place SC wells at the same indices.
+        mc_wells_on_plate = Well.objects.filter(
+            plate_id=plate_obj,
+            transfer_type="multichannel",
+        ).order_by("-index")
+        if mc_wells_on_plate.exists():
+            last_mc_index = mc_wells_on_plate.first().index
+            last_mc_column = last_mc_index // wells_per_column
+            first_available_after_mc = (last_mc_column + 1) * wells_per_column
+            current_tracker = (
+                self.session.well_manager.get_plate_well_index_available(
+                    plate_obj
+                )
+            )
+            if isinstance(current_tracker, int) and (
+                current_tracker < first_available_after_mc
+            ):
+                logger.info(
+                    f"Advancing well tracker from {current_tracker} to "
+                    f"{first_available_after_mc} to avoid MC/SC overlap"
+                )
+                self.session.well_manager.update_plate_well_index(
+                    plate_obj=plate_obj,
+                    wellindexupdate=first_available_after_mc,
+                )
+                self.session.column_manager.update_plate_column_index_available(
+                    plate_obj=plate_obj,
+                    columnindexupdate=last_mc_column + 1,
+                )
+
         # --- 5. Phase B: Place single-channel materials sequentially ---
         # SC wells hold volume for SC transfers ONLY.  The well-finder
         # uses transfer_type='single' so SC transfers draw from these

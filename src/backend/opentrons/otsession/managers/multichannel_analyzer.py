@@ -719,11 +719,15 @@ class MultichannelAnalyzer:
                 )
 
         # --- Phase B: Fill remaining wells sequentially for single-channel ---
-        # Start sequential filling after the last fully-used MC column.
-        # If we consumed part of a column (sub_column > 0), the remaining
-        # sub-column wells in that column are NOT used for SC — the column
-        # is reserved.  SC starts at the next full column.
-        first_sc_column = next_column + (1 if next_sub_column > 0 else 0)
+        # Derive the first SC column from the actually-placed MC groups
+        # rather than relying on counter algebra.  This avoids subtle
+        # bugs when next_sub_column resets to 0 after completing all
+        # sub-columns of a physical column — the counter state can
+        # make it look like the column is unused when it is not.
+        if multichannel_groups:
+            first_sc_column = max(g.column_index for g in multichannel_groups) + 1
+        else:
+            first_sc_column = 0
         next_sequential_index = first_sc_column * wpc
 
         all_single = leftover_single_channel + list(single_channel_materials)
