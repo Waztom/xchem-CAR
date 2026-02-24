@@ -66,6 +66,8 @@ class MultichannelGroup:
         Shared concentration.
     solvent : str or None
         Shared solvent.
+    plate_number : int
+        0-based plate index (0 = first plate, 1 = overflow plate, etc.).
     """
 
     column_index: int
@@ -75,6 +77,7 @@ class MultichannelGroup:
     volume: float = 0.0
     concentration: Optional[float] = None
     solvent: Optional[str] = None
+    plate_number: int = 0
 
 
 @dataclass
@@ -96,6 +99,8 @@ class CherryPickWell:
     reason : str
         Why this well cannot be multichannel (e.g. 'incomplete_column',
         'mixed_volumes', 'mixed_reagents').
+    plate_number : int
+        0-based plate index (0 = first plate, 1 = overflow plate, etc.).
     """
 
     well_index: int
@@ -104,6 +109,7 @@ class CherryPickWell:
     concentration: Optional[float] = None
     solvent: Optional[str] = None
     reason: str = ""
+    plate_number: int = 0
 
 
 @dataclass
@@ -171,6 +177,7 @@ class PlateAnalysisResult:
     multichannel_well_count: int = 0
     cherry_pick_well_count: int = 0
     efficiency: float = 0.0
+    plates_needed: int = 1
 
 
 @dataclass
@@ -656,11 +663,12 @@ class MultichannelAnalyzer:
         # Track placement by (column, sub_column) slots.
         next_column = 0
         next_sub_column = 0  # within current column
+        current_plate = 0
 
         multichannel_groups = []
         cherry_pick_wells = []
 
-        total_mc_slots = nc * spc  # total sub-column slots available
+        total_mc_slots = nc * spc  # total sub-column slots per plate
         used_mc_slots = 0
 
         # --- Phase A: Assign sub-column slots for multichannel materials ---
@@ -669,21 +677,17 @@ class MultichannelAnalyzer:
         for mat in multichannel_materials:
             for _ in range(mat.columns_needed):
                 if used_mc_slots >= total_mc_slots:
-                    logger.warning(
-                        "Ran out of sub-column slots for multichannel "
-                        "placement; remaining reactions will use single-channel"
+                    # Current plate is full — start a new overflow plate
+                    # for the remaining MC groups.
+                    current_plate += 1
+                    next_column = 0
+                    next_sub_column = 0
+                    used_mc_slots = 0
+                    logger.info(
+                        f"MC plate {current_plate - 1} full; creating "
+                        f"overflow plate {current_plate} for remaining "
+                        f"multichannel groups"
                     )
-                    leftover_single_channel.append(
-                        MaterialGroup(
-                            identity_key=mat.identity_key,
-                            smiles=mat.smiles,
-                            volume=mat.volume,
-                            concentration=mat.concentration,
-                            solvent=mat.solvent,
-                            reaction_count=wpg,
-                        )
-                    )
-                    continue
 
                 well_indices = self.get_sub_column_well_indices(
                     next_column, next_sub_column
@@ -697,6 +701,7 @@ class MultichannelAnalyzer:
                         volume=mat.volume,
                         concentration=mat.concentration,
                         solvent=mat.solvent,
+                        plate_number=current_plate,
                     )
                 )
                 used_mc_slots += 1
@@ -720,12 +725,16 @@ class MultichannelAnalyzer:
 
         # --- Phase B: Fill remaining wells sequentially for single-channel ---
         # Derive the first SC column from the actually-placed MC groups
-        # rather than relying on counter algebra.  This avoids subtle
-        # bugs when next_sub_column resets to 0 after completing all
-        # sub-columns of a physical column — the counter state can
-        # make it look like the column is unused when it is not.
-        if multichannel_groups:
-            first_sc_column = max(g.column_index for g in multichannel_groups) + 1
+        # on the current (last) plate, rather than relying on counter
+        # algebra.  This avoids subtle bugs when next_sub_column resets
+        # to 0 after completing all sub-columns of a physical column.
+        groups_on_current_plate = [
+            g for g in multichannel_groups if g.plate_number == current_plate
+        ]
+        if groups_on_current_plate:
+            first_sc_column = (
+                max(g.column_index for g in groups_on_current_plate) + 1
+            )
         else:
             first_sc_column = 0
         next_sequential_index = first_sc_column * wpc
@@ -737,11 +746,14 @@ class MultichannelAnalyzer:
         for mat in all_single:
             for _ in range(mat.reaction_count):
                 if next_sequential_index >= total_plate_wells:
-                    logger.warning(
-                        "Plate is full; additional wells would require "
-                        "overflow plate (not handled in layout planning)"
+                    # Current plate is full — start a new overflow plate.
+                    current_plate += 1
+                    next_sequential_index = 0
+                    logger.info(
+                        f"SC plate {current_plate - 1} full; creating "
+                        f"overflow plate {current_plate} for remaining "
+                        f"single-channel wells"
                     )
-                    break
 
                 cherry_pick_wells.append(
                     CherryPickWell(
@@ -751,14 +763,17 @@ class MultichannelAnalyzer:
                         concentration=mat.concentration,
                         solvent=mat.solvent,
                         reason="single_channel",
+                        plate_number=current_plate,
                     )
                 )
                 next_sequential_index += 1
 
+        plates_needed = current_plate + 1
+
         logger.info(
-            f"Plate layout planned: {len(multichannel_groups)} multichannel groups "
-            f"({used_mc_slots} sub-column slots), "
-            f"{len(cherry_pick_wells)} cherry-pick wells"
+            f"Plate layout planned: {len(multichannel_groups)} multichannel groups, "
+            f"{len(cherry_pick_wells)} cherry-pick wells, "
+            f"{plates_needed} plate(s) needed"
         )
 
         return multichannel_groups, cherry_pick_wells

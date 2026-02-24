@@ -609,13 +609,40 @@ class PlateFactory:
 
             for _ in range(actual_groups):
                 if mc_slots_used >= total_mc_slots:
-                    logger.warning(
-                        f"Plate full at column {next_column}; "
-                        f"remaining MC reactions for {mat.smiles} → sequential"
+                    # Current plate is full — create a new starting
+                    # material plate for the remaining MC groups.
+                    logger.info(
+                        f"MC plate full at column {next_column}; "
+                        f"creating overflow plate for {mat.smiles}"
                     )
-                    # Remaining goes to single-channel
-                    sc_leftover.append(mat)
-                    break
+                    plate_obj = self.create_plate_model(
+                        role="startingmaterial",
+                        role_index=1,
+                        platename="reaction-starting-materials-mc",
+                        labwaretype=labware_type,
+                    )
+                    if not plate_obj:
+                        logger.warning(
+                            "Could not create additional MC plate; "
+                            "remaining MC reactions will use single-channel"
+                        )
+                        sc_leftover.append(mat)
+                        break
+
+                    # Reset counters for the new plate.
+                    wells_per_column = plate_obj.numberwellsincolumn
+                    num_columns = plate_obj.numbercolumns
+                    effective_max_volume = (
+                        self.session.well_manager.get_max_well_volume(plate_obj)
+                    )
+                    raw_max_volume = plate_obj.maxwellvolume
+                    dead_volume = (
+                        self.session.labware_selector.get_dead_volume(raw_max_volume)
+                    )
+                    next_column = 0
+                    next_sub_column = 0
+                    mc_slots_used = 0
+                    total_mc_slots = num_columns * sub_columns_per_column
 
                 sub_col_well_indices = analyzer.get_sub_column_well_indices(
                     next_column, next_sub_column
