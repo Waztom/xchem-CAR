@@ -24,6 +24,8 @@ src/media/*
 # Ignore Opentrons protocol files
 src/output/*
 
+src/backend/temp_files/*
+
 # Ignore .env files
 #.*env
 
