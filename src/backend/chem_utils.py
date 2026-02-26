@@ -785,40 +785,32 @@ def create_combi_chem_csv(csv_input_file: str, out_dir: str):
             )
 
             all_possible_combinations = combi_chem(reactant_1_SMILES, reactant_2_SMILES)
-            product_smiles = []
             for reactant_pair in all_possible_combinations:
                 product_mols = check_reactant_smarts(
                     reactant_SMILES=reactant_pair, reaction_SMARTS=reaction_SMARTS
                 )
-                product_smiles.append(Chem.MolToSmiles(product_mols[0]))
+                if product_mols is not None:
+                    product_smi = Chem.MolToSmiles(product_mols[0])
+                else:
+                    product_smi = None
 
-            all_possible_reactant_1_smiles = [x[0] for x in all_possible_combinations]
-            all_possible_reactant_2_smiles = [x[1] for x in all_possible_combinations]
+                output_list.append(
+                    {
+                        "reactant_1_SMILES": reactant_pair[0],
+                        "reactant_2_SMILES": reactant_pair[1],
+                        "product_SMILES": product_smi,
+                        "reaction_class": reaction_classes[0],
+                        "reaction_recipe": reaction_recipes[0],
+                    }
+                )
 
-            output_list.append(
-                [
-                    all_possible_reactant_1_smiles,
-                    all_possible_reactant_2_smiles,
-                    product_smiles,
-                    reaction_classes,
-                    reaction_recipes,
-                ]
-            )
-        out_df = pd.DataFrame(
-            output_list,
-            columns=[
-                "reactant_1_SMILES",
-                "reactant_2_SMILES",
-                "product_SMILES",
-                "reaction_class",
-                "reaction_recipe",
-            ],
-        )
+        out_df = pd.DataFrame(output_list)
         out_df.to_csv(
             out_dir
             + "{}-combi-chem.csv".format(
                 datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-            )
+            ),
+            index=False,
         )
 
     except Exception as e:
