@@ -26,8 +26,11 @@ from pathlib import Path
 try:
     from .apicalls import search_smiles_batch, extract_building_blocks, extract_reaction_codes, ReactionType, get_synthons_by_id
 except ImportError:
-    print("Error: Could not import apicalls module. Make sure apicalls.py is in the same directory.")
-    sys.exit(1)
+    try:
+        from apicalls import search_smiles_batch, extract_building_blocks, extract_reaction_codes, ReactionType, get_synthons_by_id
+    except ImportError:
+        print("Error: Could not import apicalls module. Make sure apicalls.py is in the same directory.")
+        sys.exit(1)
 
 
 def parse_rsn_code(rsn_code: str) -> Dict[str, Any]:
