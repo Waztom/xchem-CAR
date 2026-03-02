@@ -776,6 +776,7 @@ def create_combi_chem_csv(csv_input_file: str, out_dir: str):
         input_df = pd.read_csv(csv_input_file)
         grouped_df = input_df.groupby(["reaction_class", "reaction_recipe"])
         for group in grouped_df:
+            print(group)
             reaction_classes = group[1]["reaction_class"].tolist()
             reaction_recipes = group[1]["reaction_recipe"].tolist()
             reactant_1_SMILES = group[1]["reactant_1"].tolist()
