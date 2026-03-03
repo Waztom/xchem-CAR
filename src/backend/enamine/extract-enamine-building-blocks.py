@@ -829,6 +829,37 @@ PRODUCT_BOND_SMARTS = {
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# Protecting Group Definitions
+# ═══════════════════════════════════════════════════════════════════════════
+# Enamine REAL reactions with prefixes Boc-, B-, K-, BBoc-, R039-Me3Si-
+# involve a protecting group removal step.  These definitions let us
+# detect the PG in the original BB SMILES and report a SMARTS pattern
+# that enumeration workflows can use to exclude the PG moiety.
+#
+# pg_smarts  : SMARTS that matches the protecting group in the BB
+# label      : human-readable description of the protecting group
+
+PROTECTING_GROUP_INFO = {
+    'boc': {
+        'label': 'Boc (tert-butyloxycarbonyl)',
+        'pg_smarts': '[#7]C(=O)OC([CH3])([CH3])[CH3]',
+    },
+    'tbu_ester': {
+        'label': 'tert-butyl ester',
+        'pg_smarts': '[CX3](=O)OC([CH3])([CH3])[CH3]',
+    },
+    'saponification': {
+        'label': 'Alkyl ester (saponification)',
+        'pg_smarts': '[CX3](=O)O[CX4;H1,H2,H3]',
+    },
+    'tms': {
+        'label': 'TMS (trimethylsilyl)',
+        'pg_smarts': '[Si]([CH3])([CH3])[CH3]',
+    },
+}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # Mapping: Enamine Reaction Name → Reaction Class
 # ═══════════════════════════════════════════════════════════════════════════
 # Every reaction from enamine-real-tools-rxns.csv is mapped here.
@@ -1184,6 +1215,102 @@ def classify_suzuki_role(bb_smiles):
         if atom.GetAtomicNum() in (17, 35, 53):  # Cl, Br, I
             return 'aryl_halide'
     return 'unknown'
+
+
+# ── Protecting Group Detection ────────────────────────────────────────────
+
+def get_reaction_pg_types(rxn_name):
+    """
+    Determine protecting group type(s) from the Enamine reaction name.
+
+    Enamine uses naming prefixes to indicate a deprotection/cleavage step:
+      Boc-   → tert-butyloxycarbonyl (Boc) removal from amine
+      B-     → tert-butyl ester cleavage (acid deprotection)
+      K-     → saponification (alkyl ester hydrolysis on acid)
+      BBoc-  → both Boc + tert-butyl ester
+      Me3Si  → trimethylsilyl (TMS) removal
+      -Boc-  → Boc deprotection in multi-component reactions
+      -tBu-  → tert-butyl ester in multi-component reactions
+
+    Returns a list of PG type keys (from PROTECTING_GROUP_INFO).
+    Order is significant for BBoc- (check Boc before tBu so that the
+    amine BB matches Boc first, leaving tBu for the acid BB).
+    """
+    if not rxn_name:
+        return []
+
+    # BBoc- means both Boc (on amine) + tBu ester (on acid)
+    if rxn_name.startswith('BBoc-'):
+        return ['boc', 'tbu_ester']
+
+    # Boc- prefix = Boc deprotection of amine
+    if rxn_name.startswith('Boc-'):
+        return ['boc']
+
+    # B- prefix = tert-butyl ester cleavage
+    if rxn_name.startswith('B-'):
+        return ['tbu_ester']
+
+    # K- prefix = saponification (base hydrolysis of alkyl ester)
+    if rxn_name.startswith('K-'):
+        return ['saponification']
+
+    # R039-Me3Si- = TMS deprotection
+    if 'Me3Si' in rxn_name:
+        return ['tms']
+
+    # Multi-component reactions with Boc in the name
+    # e.g., Radd-022-AA-Ac-Boc-Ac, R194a-Lactim-Boc-Ac, etc.
+    if '-Boc-' in rxn_name:
+        return ['boc']
+
+    # Multi-component with tBu in the name
+    # e.g., Radd-138-Ac-tBu-Ac
+    if '-tBu-' in rxn_name:
+        return ['tbu_ester']
+
+    return []
+
+
+def detect_protecting_group(bb_smiles, pg_types):
+    """
+    Check if a building block contains any of the specified protecting groups.
+
+    For each PG type (in order), check whether the BB SMILES contains the
+    corresponding PG pattern via RDKit substructure matching.  Returns the
+    PG SMARTS string on the first match, or '' if none detected.
+
+    The order matters for BBoc- reactions: 'boc' is checked before 'tbu_ester'
+    so the amine BB (with N-Boc) captures 'boc' and the acid BB (with
+    C(=O)OC(C)(C)C but no N-attached version) captures 'tbu_ester'.
+    """
+    if not pg_types or not bb_smiles:
+        return ''
+
+    clean = str(bb_smiles).strip()
+    if not clean or clean == 'nan':
+        return ''
+
+    # Strip salts — keep largest fragment
+    if '.' in clean:
+        clean = max(clean.split('.'), key=len)
+
+    mol = Chem.MolFromSmiles(clean)
+    if mol is None:
+        return ''
+
+    for pg_type in pg_types:
+        pg_info = PROTECTING_GROUP_INFO.get(pg_type)
+        if pg_info is None:
+            continue
+        pg_smarts = pg_info['pg_smarts']
+        pat = Chem.MolFromSmarts(pg_smarts)
+        if pat is None:
+            continue
+        if mol.HasSubstructMatch(pat):
+            return pg_smarts
+
+    return ''
 
 
 def _classify_acyl_bb(synthon_smarts, bb_smiles):
@@ -1673,6 +1800,10 @@ def extract_building_blocks(input_csv):
             # Validate expected product bond is in the target
             product_bond_ok = validate_product_bond(rxn_class_name, product_smi)
 
+            # Detect protecting group (if this reaction involves PG removal)
+            pg_types = get_reaction_pg_types(rxn_name)
+            pg_smarts = detect_protecting_group(bb_smiles, pg_types)
+
             record = {
                 'target_smiles': target,
                 'found_smiles': found_smiles,
@@ -1694,6 +1825,7 @@ def extract_building_blocks(input_csv):
                 'smarts_validated': match_ok if match_ok is not None else '',
                 'synthon_in_target': synthon_in_target if synthon_in_target is not None else '',
                 'product_bond_in_target': product_bond_ok if product_bond_ok is not None else '',
+                'protecting_group_SMARTS': pg_smarts,
             }
             bb_records.append(record)
 
@@ -1725,6 +1857,7 @@ def deduplicate_building_blocks(records):
         'bb_role', 'rxn_centre_smarts', 'rxn_centre_label',
         'synthon_smarts', 'smarts_validated',
         'synthon_in_target', 'product_bond_in_target',
+        'protecting_group_SMARTS',
     ]].copy()
 
     bb_summary = bb_summary.sort_values(
@@ -1839,6 +1972,42 @@ def print_summary(full_df, bb_summary):
               f"(BB-SMARTS: {n_fail}, synthon-in-target: {s_fail}, "
               f"product-bond: {b_fail})")
     print(f"{'='*70}")
+
+    # ── Protecting Group Summary ──────────────────────────────────────────
+    print(f"\n--- Protecting Group Detection ---")
+    pg_col = 'protecting-group-SMARTS'
+    if pg_col in bb_summary.columns:
+        has_pg = bb_summary[pg_col].astype(str).apply(lambda x: x.strip() != '' and x != 'nan')
+        n_with_pg = has_pg.sum()
+        n_rxns_with_pg = bb_summary.loc[has_pg, 'reaction_name'].nunique() if n_with_pg > 0 else 0
+
+        print(f"  BBs with protecting group   : {n_with_pg} / {len(bb_summary)}")
+        print(f"  Reactions involving PG step  : {n_rxns_with_pg}")
+
+        if n_with_pg > 0:
+            # Group by PG SMARTS pattern
+            pg_counts = bb_summary.loc[has_pg, pg_col].value_counts()
+            print(f"\n  By protecting group type:")
+            for pg_smarts, count in pg_counts.items():
+                # Look up the label
+                pg_label = pg_smarts
+                for pg_info in PROTECTING_GROUP_INFO.values():
+                    if pg_info['pg_smarts'] == pg_smarts:
+                        pg_label = pg_info['label']
+                        break
+                print(f"    {pg_label:40s}: {count:4d} BBs")
+
+            print(f"\n  Sample BBs with protecting groups:")
+            sample_pg = bb_summary[has_pg].head(10)
+            for _, row in sample_pg.iterrows():
+                pg_label = row[pg_col]
+                for pg_info in PROTECTING_GROUP_INFO.values():
+                    if pg_info['pg_smarts'] == row[pg_col]:
+                        pg_label = pg_info['label']
+                        break
+                print(f"    {row['bb_code']:20s} | {pg_label:30s} | {row['reaction_name']}")
+    else:
+        print(f"  (column not found in output)")
 
     print(f"\n--- Sample Output (first 20) ---")
     cols = ['bb_code', 'bb_smiles_clean', 'reaction_name', 'bb_role',
