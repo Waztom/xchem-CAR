@@ -1173,6 +1173,38 @@ ENAMINE_REACTION_TO_CLASS = {
 # Utility Functions
 # ═══════════════════════════════════════════════════════════════════════════
 
+def desalt_smiles(smiles):
+    """
+    Remove salt/counter-ion fragments from a SMILES string, returning only
+    the largest organic fragment.
+
+    Uses RDKit heavy-atom count (not string length) to pick the largest
+    fragment.  This correctly handles cases like ``Cl.Cl.NC`` where every
+    fragment has the same *string* length but very different molecular
+    sizes.
+
+    Returns the canonical SMILES of the largest fragment, or the original
+    string unchanged if RDKit cannot parse any fragment.
+    """
+    if '.' not in str(smiles):
+        return str(smiles)
+
+    fragments = str(smiles).split('.')
+    best_smi = fragments[0]
+    best_natoms = -1
+
+    for frag in fragments:
+        mol = Chem.MolFromSmiles(frag)
+        if mol is None:
+            continue
+        natoms = mol.GetNumHeavyAtoms()
+        if natoms > best_natoms:
+            best_natoms = natoms
+            best_smi = frag
+
+    return best_smi
+
+
 def get_u_neighbour_info(synthon_smarts):
     """
     Parse a synthon SMARTS to find the atom directly bonded to [U].
@@ -1291,9 +1323,8 @@ def detect_protecting_group(bb_smiles, pg_types):
     if not clean or clean == 'nan':
         return ''
 
-    # Strip salts — keep largest fragment
-    if '.' in clean:
-        clean = max(clean.split('.'), key=len)
+    # Strip salts — keep largest fragment by heavy-atom count
+    clean = desalt_smiles(clean)
 
     mol = Chem.MolFromSmiles(clean)
     if mol is None:
@@ -1645,9 +1676,7 @@ def validate_smarts_match(bb_smiles, rxn_centre_smarts):
     """Check if reaction centre SMARTS matches the BB. Returns True/False/None."""
     if rxn_centre_smarts is None:
         return None
-    clean = bb_smiles
-    if '.' in clean:
-        clean = max(clean.split('.'), key=len)
+    clean = desalt_smiles(bb_smiles)
     mol = Chem.MolFromSmiles(clean)
     if mol is None:
         return None
@@ -1774,14 +1803,6 @@ def extract_building_blocks(input_csv):
                 synthon_smarts, bb_smiles, rxn_name
             )
 
-            # Canonical SMILES (strip salts)
-            clean_smiles = bb_smiles
-            if '.' in clean_smiles:
-                clean_smiles = max(clean_smiles.split('.'), key=len)
-            mol = Chem.MolFromSmiles(clean_smiles)
-            if mol:
-                clean_smiles = Chem.MolToSmiles(mol)
-
             match_ok = validate_smarts_match(bb_smiles, rxn_centre)
 
             rxn_class_name = ENAMINE_REACTION_TO_CLASS.get(rxn_name, 'unknown')
@@ -1816,8 +1837,7 @@ def extract_building_blocks(input_csv):
                 'method_no': method_no,
                 'reactant_number': i,
                 'bb_code': bb_code,
-                'bb_smiles_raw': bb_smiles,
-                'bb_smiles_clean': clean_smiles,
+                'bb_smiles': bb_smiles,
                 'synthon_smarts': synthon_smarts,
                 'bb_role': role,
                 'rxn_centre_smarts': rxn_centre if rxn_centre else '',
@@ -1852,7 +1872,7 @@ def deduplicate_building_blocks(records):
     ).copy()
 
     bb_summary = dedup[[
-        'bb_code', 'bb_smiles_clean', 'reaction_name',
+        'bb_code', 'bb_smiles', 'reaction_name',
         'reaction_description', 'reaction_class', 'reaction_class_description',
         'bb_role', 'rxn_centre_smarts', 'rxn_centre_label',
         'synthon_smarts', 'smarts_validated',
@@ -1913,7 +1933,7 @@ def print_summary(full_df, bb_summary):
         print(f"\n  Failed:")
         failures = bb_summary[validated == False]
         for _, row in failures.head(20).iterrows():
-            print(f"    {row['bb_code']} | {row['bb_smiles_clean'][:50]}")
+            print(f"    {row['bb_code']} | {row['bb_smiles'][:50]}")
             print(f"      Role: {row['bb_role']} | SMARTS: {row['rxn_centre_smarts']} | "
                   f"Rxn: {row['reaction_name']}")
 
@@ -2010,8 +2030,8 @@ def print_summary(full_df, bb_summary):
         print(f"  (column not found in output)")
 
     print(f"\n--- Sample Output (first 20) ---")
-    cols = ['bb_code', 'bb_smiles_clean', 'reaction_name', 'bb_role',
-            'rxn_centre_smarts', 'rxn_centre_label']
+    cols = ['bb_code', 'bb_smiles', 'reaction_name',
+            'bb_role', 'rxn_centre_smarts', 'rxn_centre_label']
     pd.set_option('display.max_colwidth', 50)
     print(bb_summary[cols].head(20).to_string(index=False))
 
