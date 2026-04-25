@@ -148,3 +148,94 @@ The integration includes built-in rate limiting:
 - Batch searches: 50 calls/minute  
 - Synthon queries: 100 calls/minute
 
+## Preparing Syndirella Manual Inputs
+
+The [prepare_syndirella_input.py](prepare_syndirella_input.py) script converts a
+Syndirella **automatic** input CSV into a Syndirella **manual** input CSV by
+calling the Enamine REAL Tools API for retrosynthesis. It produces three
+artefacts in one pass:
+
+1. **Enamine REAL Tools CSV** — raw retrosynthesis results from the API
+   (`target_smiles`, `status`, `reaction_name`, `reactants`, …).
+2. **Syndirella manual input CSV** — reaction names, reactants and products
+   merged with the hit/template/compound_set metadata from the auto input.
+3. **SMIRKS JSON** — keyed by Enamine reaction name, ready to be merged into
+   Syndirella's `RXN_SMIRKS_CONSTANTS.json`.
+
+Reaction names in the outputs are the Enamine REAL Tools reaction types
+(e.g. `AMIDE1`, `REDUCTION3`, `Boc-SUZUKI`). The SMIRKS templates are derived
+from Syndirella's `RXN_SMIRKS_CONSTANTS.json` parent reaction patterns and are
+defined in `REACTION_CLASS_SMIRKS` inside the script.
+
+### Required Auto Input Columns
+
+The Syndirella auto input CSV must contain:
+
+- `smiles` — target SMILES
+- `hit1`, `hit2`, `hit3` — Fragalysis hit codes (used as metadata)
+- `template` — template PDB code
+- `compound_set` — compound set identifier
+
+### Usage
+
+API mode (default) — only the Syndirella auto CSV is required:
+
+```bash
+python prepare_syndirella_input.py <syndirella_auto.csv> \
+    [-o manual.csv] [-j smirks.json] [-e enamine_output.csv]
+```
+
+Offline mode — skip the API call by reusing a pre-existing Enamine CSV:
+
+```bash
+python prepare_syndirella_input.py <syndirella_auto.csv> \
+    --enamine-csv <existing_enamine.csv> \
+    [-o manual.csv] [-j smirks.json]
+```
+
+### CLI Options
+
+| Option | Description |
+|--------|-------------|
+| `auto_csv` | Syndirella automatic input CSV (positional, required). |
+| `--enamine-csv FILE` | Skip the API call and use this pre-existing Enamine REAL Tools output CSV instead. |
+| `-e`, `--enamine-output FILE` | Path for the Enamine REAL Tools CSV output (default: `<auto_basename>_enamine_real_tools.csv`). |
+| `-o`, `--output FILE` | Output Syndirella manual CSV path (default: `<auto_basename>_syndirella_manual.csv`). |
+| `-j`, `--json FILE` | Output SMIRKS JSON path (default: `<auto_basename>_smirks.json`). |
+| `--batch-size N` | Batch size for API requests (default: `1000`). |
+| `--reactions-file FILE` | Reaction mapping CSV (default: `enamine-real-tools-rxns.csv` in the script directory). |
+| `--reaction-types CODES` | Reaction type codes to search (default: `0 1050` — very and moderately tractable). |
+| `--no-synthons` | Skip fetching synthon SMARTS from the API (faster; only needed downstream by `extract-enamine-building-blocks`). |
+
+### Default Output Names
+
+If output paths are not specified, they are derived from the auto input
+basename:
+
+- `<auto_basename>_enamine_real_tools.csv`
+- `<auto_basename>_syndirella_manual.csv`
+- `<auto_basename>_smirks.json`
+
+### Example
+
+Sample auto input files live under [input-files/](../../../input-files/), e.g.
+`openbind_d68ev3c_c1_scaffolds_syndirella_input.csv`. Running:
+
+```bash
+python prepare_syndirella_input.py \
+    input-files/openbind_d68ev3c_c1_scaffolds_syndirella_input.csv
+```
+
+produces the matching `_enamine_real_tools.csv`, `_syndirella_manual.csv`
+and `_smirks.json` files alongside it.
+
+### Integration with the Syndirella Workflow
+
+1. Generate or curate a Syndirella auto input CSV with target SMILES and
+   hit/template metadata.
+2. Run `prepare_syndirella_input.py` to retrosynthesise via Enamine REAL
+   Tools and produce the manual CSV plus SMIRKS JSON.
+3. Filter for tractable chemistries
+3. Merge the SMIRKS JSON into Syndirella's `RXN_SMIRKS_CONSTANTS.json`. Review and test this with Lauren! 
+4. Feed the manual CSV into Syndirella for downstream library design.
+
