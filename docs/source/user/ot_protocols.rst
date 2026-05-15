@@ -10,20 +10,19 @@ visualizations — all packaged in a single **.zip** file.
 Requesting a Protocol
 ---------------------
 
-1. Navigate to your project and open the batch you want to synthesise.
+1. Navigate to your project and use the sub-batching features (see:doc:`/user/navigating_projects`) to create the batches of containing the target compounds you want to synthesise.
 2. Click **Create OT Protocol**.
 3. Fill in the form:
 
-   - **Protocol name** — a human-readable label
-   - **Batch IDs** — select one or more batches
-   - **Use Multichannel** — enable 8-channel pipette optimisation
+   - **Batch Selector** — select one or more batches
+   - **Pipette mode** — choose between Single channel only or Single + Multi-channel modes.
      (see :doc:`/technical/multichannel`)
-   - **Custom Starting-Material CSV** *(optional)* — override the
-     compound ordering sheet with pre-plated starting materials
+   - **Upload Starting Materials for Selected Batches** *(optional)* — override the
+     compound ordering sheet with pre-plated starting materials. Template of this csv is available in this menu.
 
 4. Click **Submit** — a Celery task begins processing.
 5. Poll the status with **Get Task Status** until ``SUCCESS``.
-6. Download the ``.zip`` from the OT Batch Protocol detail page.
+6. Download the ``.zip`` from the button that appears in the batch GUI for the batch(es) that had OT protocols generated.
 
 .. note::
 
@@ -49,7 +48,7 @@ Compound Order CSV
 ^^^^^^^^^^^^^^^^^^
 
 Lists every starting material you need to purchase and plate.  Columns
-include SMILES, vendor, catalogue ID, mass/volume required, and the
+include SMILES, plate-name, concentration, solvent, molecularweight, minimum mass/volume required, and the
 destination well on the source plate.
 
 OT Script (Python)
