@@ -164,10 +164,17 @@ class RecipeTemplate:
 
             {"sessions": [{..."actions": [{...}]}], "estimated_yield": ..., ...}
         """
+
         reaction_class, recipe_name = self._parse_base()
-        return copy.deepcopy(
-            recipe_to_dict(reaction_class, recipe_name)
+        base_recipe = recipe_to_dict(reaction_class, recipe_name)
+        base_recipe["reaction_class"] = reaction_class
+        return copy.deepcopy(base_recipe
         )
+
+#        reaction_class, recipe_name = self._parse_base()
+#        return copy.deepcopy(
+#            recipe_to_dict(reaction_class, recipe_name)
+#        )
     
     def get_recipe(self):
         """Get the Recipe model instance for this template's base recipe."""
