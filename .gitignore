@@ -4,6 +4,9 @@ __pycache__/
 /.vscode/
 wget-log
 
+# Ignore tmp folders
+src/temp/*
+
 # Ignore documentation files
 src/docs/*
 src/input-files/*

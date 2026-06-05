@@ -3,9 +3,15 @@ Recipe Generator - generates recipe variants from templates and design matrices.
 """
 
 import copy
+from importlib.resources import path
 import logging
 from typing import Any, Union
+import json
+from pathlib import Path
+
 import pandas as pd
+
+from backend.models import recipes
 
 from .template import RecipeTemplate, ActionLocation, VariableDefinition
 from .exceptions import (
@@ -17,6 +23,29 @@ from .exceptions import (
 
 logger = logging.getLogger(__name__)
 
+def save_recipe_json(recipe_data: dict, output_dir: str) -> Path:
+    """
+    Save a generated recipe dictionary to a JSON file.
+    """
+
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    recipe_name = recipe_data.get("name", "recipe")
+
+    safe_name = (
+        str(recipe_name)
+        .replace("/", "_")
+        .replace("\\", "_")
+        .replace(" ", "_")
+    )
+
+    file_path = output_path / f"{safe_name}.json"
+
+    with file_path.open("w", encoding="utf-8") as f:
+        json.dump(recipe_data, f, indent=2)
+
+    return file_path
 
 class RecipeGenerator:
     """
@@ -91,25 +120,53 @@ class RecipeGenerator:
         
         return recipes
     
+#    def from_csv(
+#        self, 
+#        filepath: str,
+#        recipe_name_column: str = None,
+#        **pandas_kwargs
+#    ) -> list[dict]:
+#        """
+#        Generate recipes from a CSV design matrix file.
+#        
+#        Args:
+#            filepath: Path to CSV file
+#            recipe_name_column: Optional column to use as recipe names
+#            **pandas_kwargs: Additional arguments passed to pd.read_csv
+#            
+#        Returns:
+#            List of generated recipe dictionaries
+#        """
+#        design_df = pd.read_csv(filepath, **pandas_kwargs)
+#        return self.from_dataframe(design_df, recipe_name_column)
+    
     def from_csv(
-        self, 
+        self,
         filepath: str,
         recipe_name_column: str = None,
+        output_dir: str = None,
         **pandas_kwargs
     ) -> list[dict]:
         """
         Generate recipes from a CSV design matrix file.
-        
+
         Args:
             filepath: Path to CSV file
             recipe_name_column: Optional column to use as recipe names
+            output_dir: Optional folder to write each recipe as a JSON file
             **pandas_kwargs: Additional arguments passed to pd.read_csv
-            
+
         Returns:
             List of generated recipe dictionaries
         """
         design_df = pd.read_csv(filepath, **pandas_kwargs)
-        return self.from_dataframe(design_df, recipe_name_column)
+        recipes = self.from_dataframe(design_df, recipe_name_column)
+
+        if output_dir is not None:
+            for recipe_data in recipes:
+                save_recipe_json(recipe_data, output_dir)
+
+        return recipes
     
     def generate_single(self, recipe_name: str = None, **params) -> dict:
         """
@@ -139,6 +196,11 @@ class RecipeGenerator:
         """
         # Start with deep copy of base recipe
         recipe = self.template.get_base_recipe()
+
+        reaction_class = recipe.get("reaction_class")
+        if not reaction_class:
+            logger.warning("Base recipe has no reaction_class; using 'Unknown'")
+            reaction_class = "Unknown"
         
         # Separate ordering params from value params
         action_order_params = {}
@@ -186,11 +248,16 @@ class RecipeGenerator:
             elif var_name not in metadata_columns:
                 logger.warning(f"Unknown variable '{var_name}' in parameters, skipping")
         
+        # Convert internal DB-style structure to CAR upload format
+        recipe["action_sessions"] = recipe.pop("sessions")
+
         return {
+            "reaction_class": reaction_class,
             "name": recipe_name,
             "template": self.template.name,
             "base": self.template.base,
-            "recipe": recipe,
+#            "recipe": recipe,
+            **recipe,
         }
     
     def _apply_variable(self, recipe: dict, var_name: str, value: Any) -> None:
@@ -211,7 +278,7 @@ class RecipeGenerator:
             raise ActionNotFoundError(
                 var_def.action_id, action_loc.session, action_loc.actionnumber
             )
-        
+
         # Navigate to the path and set value
         self._set_nested_value(action, var_def.path, value, var_def.action_id)
     
