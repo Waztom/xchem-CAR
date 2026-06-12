@@ -48,7 +48,7 @@ labware_plates = {
         "reflux": False,
     },
     "labcyte_384_wellplate_100ul": {
-        "type": ["xchem", "startingmaterial"],
+        "type": ["xchem", "startingmaterial","reaction"],
         "no_wells_in_column": 16,
         "no_wells": 384,
         "no_columns": 24,
@@ -57,7 +57,17 @@ labware_plates = {
         "max_temp": 25,
         "reflux": False,
     },
-    "nano_nest_384_wellplate_74ul": {
+    "matrix_96_wellplate_1000ul": {
+        "type": ["startingmaterial"],
+        "no_wells_in_column": 8,
+        "no_wells": 96,
+        "no_columns": 12,
+        "volume_well": 1000,
+        "max_fill_percentage": 90,
+        "max_temp": 25,
+        "reflux": False,
+    },
+    "nanonest_384_wellplate_74.7ul": {
         "type": ["xchem", "reaction", "startingmaterial"],
         "no_wells_in_column": 16,
         "no_wells": 384,

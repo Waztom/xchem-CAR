@@ -28,26 +28,40 @@ class PipetteManager:
 
         # Define available pipettes and their properties
         self.pipettes_available = [
-            {
-                "labware": "p10_single",
-                "position": "right",
-                "type": "single",
-                "maxvolume": 10,
-                "minvolume": 1,
-            },
-            {
-                "labware": "p300_single",
-                "position": "right",
-                "type": "single",
-                "maxvolume": 300,
-                "minvolume": 30,
-            },
+            # {
+            #     "labware": "p10_single",
+            #     "position": "right",
+            #     "type": "single",
+            #     "maxvolume": 10,
+            #     "minvolume": 1,
+            # },
+            # {
+            #     "labware": "p300_single",
+            #     "position": "right",
+            #     "type": "single",
+            #     "maxvolume": 300,
+            #     "minvolume": 30,
+            # },
             {
                 "labware": "p1000_single_gen2",
                 "position": "right",
                 "type": "single",
                 "maxvolume": 1000,
                 "minvolume": 100,
+            },
+            {
+                "labware": "p300_single_gen2",
+                "position": "right",
+                "type": "single",
+                "maxvolume": 300,
+                "minvolume": 30,
+            },
+            {
+                "labware": "p20_single_gen2",
+                "position": "right",
+                "type": "single",
+                "maxvolume": 20,
+                "minvolume": 1,
             },
             {
                 "labware": "p300_multi_gen2",
