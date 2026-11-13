@@ -13,7 +13,6 @@ src/media/*
 .idea/
 /Test_DB_files/*
 *.csv
-!src/backend/enamine/enamine-real-tools-rxns.csv
 !src/backend/recipe_generator/examples/*
 !src/backend/tests/fixtures/*
 
