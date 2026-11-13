@@ -188,6 +188,69 @@ Step 2: Prepare a Design Matrix
 The design matrix is a CSV (or Excel) file where each row defines one
 experiment and each column maps to a template variable.
 
+For example:
+
+in the amidation_template.json, this code block defines the variables.
+``"variables": {
+        "acid_solvent": {
+            "action_id": "add_acid",
+            "path": "content.material.solvent"
+        },
+        "acid_concentration": {
+            "action_id": "add_acid",
+            "path": "content.material.concentration"
+        },
+        "coupling_agent_equiv": {
+            "action_id": "add_coupling_agent",
+            "path": "content.material.quantity.value"
+        },
+        "base_equiv": {
+            "action_id": "add_base",
+            "path": "content.material.quantity.value"
+        },
+        "amine_equiv": {
+            "action_id": "add_amine",
+            "path": "content.material.quantity.value"
+        },
+        "reaction_temperature": {
+            "action_id": "stir_reaction",
+            "path": "content.temperature.value"
+        },
+        "reaction_duration": {
+            "action_id": "stir_reaction",
+            "path": "content.duration.value"
+        }
+    },``
+
+In the design csv, these values can be asigned values, and each row is a unique and new recipe:
+.. list-table::
+   :header-rows: 1
+   * - acid_solvent
+     - DMF
+     - DMSO
+   * - acid_concentration
+     - 0.25
+     - 0.5
+   * - coupling_agent_equiv
+     - 1
+     - 2
+   * - base_equiv
+     - 3
+     - 5
+     - 10
+   * - amine_equiv
+     - 1
+     - 1.2
+   * - reaction_temperature
+     - 25
+     - 50
+   * - reaction_duration
+     - 12
+     - 48
+
+
+ Below is a list of columns not related to variables, but are still useful to know. Please note that ``recipe_name`` is a mandatory column.
+
 Special columns:
 
 .. list-table::

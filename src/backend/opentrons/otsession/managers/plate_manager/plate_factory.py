@@ -609,13 +609,40 @@ class PlateFactory:
 
             for _ in range(actual_groups):
                 if mc_slots_used >= total_mc_slots:
-                    logger.warning(
-                        f"Plate full at column {next_column}; "
-                        f"remaining MC reactions for {mat.smiles} → sequential"
+                    # Current plate is full — create a new starting
+                    # material plate for the remaining MC groups.
+                    logger.info(
+                        f"MC plate full at column {next_column}; "
+                        f"creating overflow plate for {mat.smiles}"
                     )
-                    # Remaining goes to single-channel
-                    sc_leftover.append(mat)
-                    break
+                    plate_obj = self.create_plate_model(
+                        role="startingmaterial",
+                        role_index=1,
+                        platename="reaction-starting-materials-mc",
+                        labwaretype=labware_type,
+                    )
+                    if not plate_obj:
+                        logger.warning(
+                            "Could not create additional MC plate; "
+                            "remaining MC reactions will use single-channel"
+                        )
+                        sc_leftover.append(mat)
+                        break
+
+                    # Reset counters for the new plate.
+                    wells_per_column = plate_obj.numberwellsincolumn
+                    num_columns = plate_obj.numbercolumns
+                    effective_max_volume = (
+                        self.session.well_manager.get_max_well_volume(plate_obj)
+                    )
+                    raw_max_volume = plate_obj.maxwellvolume
+                    dead_volume = (
+                        self.session.labware_selector.get_dead_volume(raw_max_volume)
+                    )
+                    next_column = 0
+                    next_sub_column = 0
+                    mc_slots_used = 0
+                    total_mc_slots = num_columns * sub_columns_per_column
 
                 sub_col_well_indices = analyzer.get_sub_column_well_indices(
                     next_column, next_sub_column
@@ -723,6 +750,42 @@ class PlateFactory:
             logger.warning(
                 f"Phase A.5 heterogeneous MC failed, continuing: {e}"
             )
+
+        # --- 4.9. Advance well tracker past all MC columns ----------
+        # Phase A and A.5 only update the plate's well tracker when a
+        # full physical column's sub-columns are all filled.  If Phase A
+        # or A.5 left a partial column (e.g. odd MC groups on a
+        # 384-well plate), the tracker may still point inside that
+        # column.  Ensure the tracker is past every MC well so Phase B
+        # does not place SC wells at the same indices.
+        mc_wells_on_plate = Well.objects.filter(
+            plate_id=plate_obj,
+            transfer_type="multichannel",
+        ).order_by("-index")
+        if mc_wells_on_plate.exists():
+            last_mc_index = mc_wells_on_plate.first().index
+            last_mc_column = last_mc_index // wells_per_column
+            first_available_after_mc = (last_mc_column + 1) * wells_per_column
+            current_tracker = (
+                self.session.well_manager.get_plate_well_index_available(
+                    plate_obj
+                )
+            )
+            if isinstance(current_tracker, int) and (
+                current_tracker < first_available_after_mc
+            ):
+                logger.info(
+                    f"Advancing well tracker from {current_tracker} to "
+                    f"{first_available_after_mc} to avoid MC/SC overlap"
+                )
+                self.session.well_manager.update_plate_well_index(
+                    plate_obj=plate_obj,
+                    wellindexupdate=first_available_after_mc,
+                )
+                self.session.column_manager.update_plate_column_index_available(
+                    plate_obj=plate_obj,
+                    columnindexupdate=last_mc_column + 1,
+                )
 
         # --- 5. Phase B: Place single-channel materials sequentially ---
         # SC wells hold volume for SC transfers ONLY.  The well-finder
