@@ -197,6 +197,20 @@ The Kubernetes Django and Celery deployments pull ``waztom/car:latest``;
 rebuild and publish the image from ``src/Dockerfile.prod`` and roll out the
 deployments to use its Debian Bookworm runtime and Node 24 frontend build.
 
+Vulnerability scans
+^^^^^^^^^^^^^^^^^^^
+
+On a master push, CI scans the built app image with Trivy before pushing
+that same image. A separate workflow scans the frontend lockfile and the
+published app, PostgreSQL, Redis and RabbitMQ image tags on pushes, pull
+requests and every Monday at 03:17 UTC; it can also be run manually from
+GitHub Actions. High or critical findings, including those without a fix,
+fail the relevant check. Results are shown in the Actions logs.
+
+The scheduled image scans check the current registry tags, not images
+already running in a cluster. Compare the running image digests with those
+tags and rescan deployed digests when they differ.
+
 Troubleshooting
 ^^^^^^^^^^^^^^^
 
