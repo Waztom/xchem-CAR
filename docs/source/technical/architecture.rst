@@ -32,7 +32,7 @@ High-Level Overview
                                               │
                                               ▼
                                      ┌────────────────────┐
-                                     │    PostgreSQL 10   │
+                                     │    PostgreSQL 17   │
                                      └────────────────────┘
 
 Technology Stack
@@ -61,7 +61,7 @@ Technology Stack
      - alpine
    * - Database
      - PostgreSQL
-     - 10
+     - 17
    * - Chemistry
      - RDKit
      - 2022+

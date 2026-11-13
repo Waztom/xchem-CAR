@@ -25,9 +25,9 @@ RUN apt-get update && \
     apt-get autoclean -y && \
     pip install -r requirements-dev.txt
 
-# Install NVM and Node.js 18
+# Install NVM and Node.js 24
 ENV NVM_DIR=/root/.nvm
-ENV NODE_VERSION=18.19.0
+ENV NODE_VERSION=24.22.3
 
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash && \
     . $NVM_DIR/nvm.sh && \
