@@ -7,7 +7,7 @@
 #   1. unit-tests    – fast, no DB, pure unittest.TestCase tests
 #   2. django-tests  – needs Postgres, runs django.test.TestCase tests
 #   3. lint          – flake8 style checks
-#   4. build-push    – Docker build + push to Docker Hub (only on push, not PRs)
+#   4. build-push    – build, scan, and push to Docker Hub (master push only)
 # ─────────────────────────────────────────────────────────────
 name: CI
 
@@ -103,7 +103,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:14-alpine
+        image: postgres:17-alpine
         env:
           POSTGRES_DB: car_test
           POSTGRES_USER: car_ci
@@ -185,12 +185,9 @@ jobs:
             --extend-ignore E114,E128,E261,E302,E303,E305,E306,E402,E501,E712,E722,W291,W292,W293,W391,W503,W605,E203,F401,F541,F811,F841
 
   # ----------------------------------------------------------
-  # 4. Build & push Docker image
+  # 4. Build, scan & push Docker image
   #    Only runs on push (not PRs) and only after tests pass.
-  #    Tags:
-  #      - latest         (master only)
-  #      - staging        (staging only)
-  #      - sha-<commit>   (always)
+  #    Tags: latest and sha-<commit>
   # ----------------------------------------------------------
   build-push:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -204,33 +201,37 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: src
+          file: src/Dockerfile.prod
+          load: true
+          tags: car:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: car:ci
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Determine image tags
-        id: tags
+      - name: Push scanned image
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          COMMIT_SHA: ${{ github.sha }}
         run: |
-          REPO="${{ secrets.DOCKER_HUB_USERNAME }}/car"
-          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
-          TAGS="${REPO}:sha-${SHA_SHORT}"
-
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            TAGS="${TAGS},${REPO}:latest"
-          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
-            TAGS="${TAGS},${REPO}:staging"
-          fi
-
-          echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
-
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: src
-          file: src/Dockerfile.prod
-          push: true
-          tags: ${{ steps.tags.outputs.tags }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          repo="${DOCKER_HUB_USERNAME}/car"
+          docker tag car:ci "${repo}:latest"
+          docker tag car:ci "${repo}:sha-${COMMIT_SHA:0:7}"
+          docker push "${repo}:latest"
+          docker push "${repo}:sha-${COMMIT_SHA:0:7}"
