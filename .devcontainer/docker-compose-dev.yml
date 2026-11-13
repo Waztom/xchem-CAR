@@ -16,7 +16,7 @@ services:
     network_mode: service:db
 
   db:
-    image: postgres:10-alpine
+    image: postgres:17-alpine
     restart: on-failure
     env_file:
       - ./.devcontainerenv
