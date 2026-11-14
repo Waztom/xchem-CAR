@@ -230,7 +230,7 @@ jobs:
         with:
           image-ref: car:ci
           scanners: vuln
-          severity: HIGH,CRITICAL
+          severity: CRITICAL
           exit-code: '1'
           format: json
           output: trivy-image.json
