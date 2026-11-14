@@ -4,10 +4,14 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/waztom/car?logo=docker)](https://hub.docker.com/r/waztom/car)
 [![Docker Image Size](https://img.shields.io/docker/image-size/waztom/car?sort=date&logo=docker)](https://hub.docker.com/r/waztom/car)
 
-[![Python 3.9](https://img.shields.io/badge/python-3.9-blue?logo=python&logoColor=white)](https://python.org)
-[![Django 3.1](https://img.shields.io/badge/django-3.1-green?logo=django&logoColor=white)](https://djangoproject.com)
+[![Python 3.15](https://img.shields.io/badge/python-3.15-blue?logo=python&logoColor=white)](https://python.org)
+[![Django 6.1](https://img.shields.io/badge/django-6.1-green?logo=django&logoColor=white)](https://djangoproject.com)
 [![React 18](https://img.shields.io/badge/react-18-61DAFB?logo=react&logoColor=white)](https://react.dev)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
+
+The containers use Python 3.15 with pip-managed dependencies in an isolated
+`/opt/venv`, including RDKit and psycopg2. Rebuild existing devcontainers to
+apply the change. See the [Python environment notes](docs/source/reference/contributing.rst).
 
 # <a name="LocalDeploymentXChemCAR"></a>**Local deployment of XChem-CAR**
 #

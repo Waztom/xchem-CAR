@@ -1,33 +1,38 @@
-FROM debian:bookworm-slim
+FROM python:3.15.2-slim-bookworm
 
-# Copy Python requirements and NPM packages
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+
 COPY ./src/requirements-dev.txt /container/requirements-dev.txt
 
 USER root
 
 WORKDIR /container
 
-# Install base dependencies and NVM
+# Install native dependencies needed to build psycopg2.
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install --no-install-recommends -y \
     curl \
     gnupg2 \
     procps \
-    python3-rdkit \
-    python3-pip \
-    python3-psycopg2 \
+    libpq-dev \
     git \
     git-crypt \
     nano \
     locales \
     build-essential && \
-    apt-get autoclean -y && \
-    pip install -r requirements-dev.txt
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN python -m venv "${VIRTUAL_ENV}" && \
+    python -m pip install --no-cache-dir -r requirements-dev.txt && \
+    printf '%s\n' 'export PATH="/opt/venv/bin:$PATH"' > /etc/profile.d/venv.sh
 
 # Install NVM and Node.js 24
 ENV NVM_DIR=/root/.nvm
 ENV NODE_VERSION=24.22.3
+ENV PATH="${NVM_DIR}/versions/node/v${NODE_VERSION}/bin:${PATH}"
 
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash && \
     . $NVM_DIR/nvm.sh && \
@@ -36,8 +41,7 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | b
     nvm use default
 
 # Set the locale to the UK
-RUN locale-gen en_GB.UTF-8 && \
-    update-locale LANG en_GB.UTF-8
+RUN localedef -i en_GB -f UTF-8 en_GB.UTF-8
 
 ENV LANG=en_GB.UTF-8
 ENV LANGUAGE=en_GB:en

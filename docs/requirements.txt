@@ -1,2 +1,2 @@
-sphinx>=5.3,<8
-sphinx_rtd_theme>=1.2,<3
+sphinx==9.2.0
+sphinx_rtd_theme==3.1.0
