@@ -572,7 +572,7 @@ class ValidateFile(object):
         try:
             self.batchtags = [tag.strip() for tag in self.df["batch-tag"]]
             for index, tag in zip(self.index_df_rows, self.batchtags):
-                if not type(tag) == str:
+                if type(tag) is not str:
                     self.add_warning(
                         field="check_string",
                         warning_string="Batch tag {} at index {} is not a valid string format".format(

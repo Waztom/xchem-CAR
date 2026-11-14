@@ -1995,8 +1995,36 @@ def _make_multichannel_session(
 class TestCreateMultichannelStartingPlate(TestCase):
     """PlateFactory._create_multichannel_starting_plate — full integration tests."""
 
+    def setUp(self):
+        patcher = patch(f"{_PLATE_FAC_MOD}.Well")
+        self.mock_well = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def _mock_well_queries(self, session):
+        def filter_wells(**kwargs):
+            queryset = MagicMock()
+            if kwargs.get("role") == "reaction":
+                queryset.exists.return_value = False
+                queryset.select_related.return_value = queryset
+            elif kwargs.get("transfer_type") == "multichannel":
+                indices = [
+                    c.kwargs["wellindex"]
+                    for c in session.well_manager.create_well_model.call_args_list
+                    if c.kwargs.get("transfer_type") == "multichannel"
+                    and c.kwargs["plate_obj"] is kwargs["plate_id"]
+                ]
+                queryset.exists.return_value = bool(indices)
+                if indices:
+                    queryset.first.return_value = MagicMock(index=max(indices))
+                queryset.order_by.return_value = queryset
+            else:
+                raise AssertionError(f"Unexpected Well query: {kwargs}")
+            return queryset
+
+        self.mock_well.objects.filter.side_effect = filter_wells
+
     def _run(self, *, addactionsdf, materials_df, wells_per_column=8,
-             num_columns=12, max_well_volume=2500):
+             num_columns=12, max_well_volume=2500, overflow_plate=None):
         """Helper: build session, create PlateFactory, call the method."""
         from backend.opentrons.otsession.managers.plate_manager.plate_factory import (
             PlateFactory,
@@ -2009,9 +2037,12 @@ class TestCreateMultichannelStartingPlate(TestCase):
             num_columns=num_columns,
             max_well_volume=max_well_volume,
         )
+        self._mock_well_queries(session)
 
         pf = PlateFactory(session)
         pf.create_plate_model = MagicMock(return_value=mock_plate)
+        if overflow_plate is not None:
+            pf.create_plate_model.side_effect = [mock_plate, overflow_plate]
         pf._create_compound_order = MagicMock()
         pf._create_sequential_starting_plate = MagicMock(return_value=mock_plate)
 
@@ -2467,6 +2498,7 @@ class TestCreateMultichannelStartingPlate(TestCase):
         self.assertEqual({_get_kwarg(c, "smiles") for c in mc_calls}, {"CCO"})
         self.assertGreaterEqual(len(sc_calls), 1)
         self.assertIn("CCCC", {_get_kwarg(c, "smiles") for c in sc_calls})
+        self.assertTrue(all(_get_kwarg(c, "wellindex") >= 16 for c in sc_calls))
 
     def test_384_well_with_leftover(self):
         """384-well: 20 reactions (8 MC via sub-column + 4 leftover to SC).
@@ -2653,6 +2685,7 @@ class TestCreateMultichannelStartingPlate(TestCase):
             materials_df=materials_df,
             max_well_volume=400,  # effective = 240
         )
+        self._mock_well_queries(session)
         session.well_manager.get_plate_well_index_available.side_effect = _get_avail
         session.well_manager.update_plate_well_index.side_effect = _update_idx
 
@@ -2676,12 +2709,11 @@ class TestCreateMultichannelStartingPlate(TestCase):
     # ------------------------------------------------------------------
     # Plate-full edge cases
     # ------------------------------------------------------------------
-    def test_plate_full_mc_overflows_to_sc(self):
-        """When MC columns exhaust all plate columns, remaining MC material
-        falls back to SC.
+    def test_plate_full_mc_uses_another_plate(self):
+        """When the MC plate is full, remaining MC material uses a new plate.
 
         Setup: 24-well (4 wells × 6 columns). 7 reagents each with 4 rxns.
-        Only 6 columns available → 6 MC columns, 7th reagent → SC fallback.
+        Six columns fit on the first plate; the seventh starts a new plate.
         """
         reagents = [f"C{'C' * i}O" for i in range(7)]  # 7 distinct SMILES
         addactions = []
@@ -2694,11 +2726,15 @@ class TestCreateMultichannelStartingPlate(TestCase):
             {"smiles": s, "volume": 200} for s in reagents
         ])
 
-        result, pf, session, _ = self._run(
+        overflow_plate = _mock_plate(
+            id=2, numberwellsincolumn=4, numbercolumns=6, maxwellvolume=2500
+        )
+        result, pf, session, first_plate = self._run(
             addactionsdf=addactionsdf,
             materials_df=materials_df,
             wells_per_column=4,
             num_columns=6,
+            overflow_plate=overflow_plate,
         )
 
         mc_calls = [
@@ -2709,10 +2745,17 @@ class TestCreateMultichannelStartingPlate(TestCase):
             c for c in session.well_manager.create_well_model.call_args_list
             if _get_kwarg(c, "transfer_type") == "single"
         ]
-        # At most 6 columns × 4 wells = 24 MC wells
-        self.assertLessEqual(len(mc_calls), 24)
-        # At least one reagent must have fallen back to SC
-        self.assertGreaterEqual(len(sc_calls), 1)
+        first_indices = sorted(
+            c.kwargs["wellindex"] for c in mc_calls if c.kwargs["plate_obj"] is first_plate
+        )
+        overflow_indices = sorted(
+            c.kwargs["wellindex"] for c in mc_calls if c.kwargs["plate_obj"] is overflow_plate
+        )
+        self.assertEqual(first_indices, list(range(24)))
+        self.assertEqual(overflow_indices, list(range(4)))
+        self.assertEqual(sc_calls, [])
+        self.assertIs(result, overflow_plate)
+        self.assertEqual(pf.create_plate_model.call_count, 2)
 
     def test_96_well_many_reagents_fills_all_columns(self):
         """96-well: 12 reagents each with 8 rxns → fills all 12 columns as MC.
