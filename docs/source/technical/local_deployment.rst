@@ -223,8 +223,10 @@ frontend build.
 Vulnerability scans
 ^^^^^^^^^^^^^^^^^^^
 
-On a master push, CI scans the built app image with Trivy before pushing
-that same image. A separate workflow scans the frontend lockfile and the
+On a staging or master push, CI builds and scans the candidate app image
+with Trivy after the unit and Django tests pass. Staging does not publish an
+image; on master, CI pushes the same image only after its scan passes.
+A separate workflow scans the frontend lockfile and the
 published app, PostgreSQL, Redis and RabbitMQ image tags on pushes, pull
 requests and every Monday at 03:17 UTC; it can also be run manually from
 GitHub Actions. High or critical findings, including those without a fix,
