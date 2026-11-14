@@ -13,7 +13,6 @@ src/media/*
 .idea/
 /Test_DB_files/*
 *.csv
-!src/backend/enamine/enamine-real-tools-rxns.csv
 !src/backend/recipe_generator/examples/*
 !src/backend/tests/fixtures/*
 
@@ -90,12 +89,16 @@ pytestdebug.log
 node_modules
 src/frontend/static/frontend/main.js
 
-# Sphinx documentation
-docs/build/
-docs/source/_build/
-docs/_autosummary/
-docs/_templates/
+# Sphinx build output
+_build/
+build/
+dist/
 *.doctree
-*.pickle
-docs/generated/
+*.log
+
+# Sphinx cache
+__pycache__/
+*.pyc
+
+# Ignore CAR technical report
 src/2026-02(feb)-19-CAR technical report.txt

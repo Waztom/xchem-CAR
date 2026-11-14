@@ -7,7 +7,7 @@
 #   1. unit-tests    – fast, no DB, pure unittest.TestCase tests
 #   2. django-tests  – needs Postgres, runs django.test.TestCase tests
 #   3. lint          – flake8 style checks
-#   4. build-push    – Docker build + push to Docker Hub (only on push, not PRs)
+#   4. build-push    – build and scan on staging/master pushes; publish on master
 # ─────────────────────────────────────────────────────────────
 name: CI
 
@@ -30,21 +30,24 @@ jobs:
   # ----------------------------------------------------------
   # 1. Unit tests (no database required)
   #    Covers: chem_utils, conversions, validate, otsession,
-  #            otwriter, tasks, pubchem_utils, enamine,
+  #            otwriter, tasks, pubchem_utils,
   #            db_utils, createmodels, signals, serializers
   # ----------------------------------------------------------
   unit-tests:
     runs-on: ubuntu-latest
     container:
-      image: debian:bullseye-slim
+      image: python:3.15.2-slim-trixie
 
     steps:
-      - name: Install system dependencies
+      - name: Install native build dependencies and create venv
         run: |
           apt-get update -qq
           apt-get install --no-install-recommends -y \
-            git python3-rdkit python3-pip python3-pandas python3-psycopg2
+            git build-essential libpq-dev
           apt-get clean
+          python -m venv /opt/venv
+          echo "/opt/venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=/opt/venv" >> "$GITHUB_ENV"
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,8 +55,8 @@ jobs:
       - name: Install Python dependencies
         working-directory: src
         run: |
-          pip3 install --no-cache-dir -r requirements.txt
-          pip3 install --no-cache-dir -r requirements-dev.txt
+          python -m pip install --no-cache-dir -r requirements-dev.txt
+          python -m pip check
 
       - name: Run unit tests
         working-directory: src
@@ -84,7 +87,6 @@ jobs:
                                   backend.tests.test_otwriter \
                                   backend.tests.test_tasks \
                                   backend.tests.test_pubchem_utils \
-                                  backend.tests.test_enamine \
                                   backend.tests.test_db_utils \
                                   backend.tests.test_createmodels \
                                   backend.tests.test_signals \
@@ -99,11 +101,11 @@ jobs:
   django-tests:
     runs-on: ubuntu-latest
     container:
-      image: debian:bullseye-slim
+      image: python:3.15.2-slim-trixie
 
     services:
       postgres:
-        image: postgres:14-alpine
+        image: postgres:17-alpine
         env:
           POSTGRES_DB: car_test
           POSTGRES_USER: car_ci
@@ -115,12 +117,15 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Install system dependencies
+      - name: Install native build dependencies and create venv
         run: |
           apt-get update -qq
           apt-get install --no-install-recommends -y \
-            git python3-rdkit python3-pip python3-pandas python3-psycopg2
+            git build-essential libpq-dev
           apt-get clean
+          python -m venv /opt/venv
+          echo "/opt/venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=/opt/venv" >> "$GITHUB_ENV"
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -128,8 +133,8 @@ jobs:
       - name: Install Python dependencies
         working-directory: src
         run: |
-          pip3 install --no-cache-dir -r requirements.txt
-          pip3 install --no-cache-dir -r requirements-dev.txt
+          python -m pip install --no-cache-dir -r requirements-dev.txt
+          python -m pip check
 
       - name: Run Django integration tests
         working-directory: src
@@ -170,10 +175,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.15"
 
       - name: Install flake8
-        run: pip install flake8==3.9.1
+        run: python -m pip install flake8==7.5.0
 
       - name: Run flake8
         working-directory: src
@@ -185,15 +190,12 @@ jobs:
             --extend-ignore E114,E128,E261,E302,E303,E305,E306,E402,E501,E712,E722,W291,W292,W293,W391,W503,W605,E203,F401,F541,F811,F841
 
   # ----------------------------------------------------------
-  # 4. Build & push Docker image
-  #    Only runs on push (not PRs) and only after tests pass.
-  #    Tags:
-  #      - latest         (master only)
-  #      - staging        (staging only)
-  #      - sha-<commit>   (always)
+  # 4. Build and scan the candidate image; publish on master
+  #    Runs on staging/master pushes after tests pass, not on PRs.
+  #    Master tags: latest and sha-<commit>
   # ----------------------------------------------------------
   build-push:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/staging')
     needs: [unit-tests, django-tests]
     runs-on: ubuntu-latest
 
@@ -204,33 +206,62 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: src
+          file: src/Dockerfile.prod
+          pull: true
+          no-cache-filters: production
+          load: true
+          tags: car:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test runtime dependencies
+        run: |
+          docker run --rm --entrypoint python car:ci -c \
+            "import celery, django, matplotlib, numpy, pandas, PIL, psycopg2, rdkit, ssl, sqlite3; import importlib.util; assert importlib.util.find_spec('pip') is None"
+          docker run --rm --entrypoint /usr/local/bin/python car:ci -c \
+            "import importlib.util; assert importlib.util.find_spec('pip') is None; assert importlib.util.find_spec('ensurepip') is None"
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: car:ci
+          scanners: vuln
+          severity: CRITICAL
+          exit-code: '1'
+          format: json
+          output: trivy-image.json
+
+      - name: Show image vulnerability report
+        if: ${{ !cancelled() && hashFiles('trivy-image.json') != '' }}
+        run: trivy convert --format table trivy-image.json
+
+      - name: Upload image vulnerability report
+        if: ${{ !cancelled() && hashFiles('trivy-image.json') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-candidate-image
+          path: trivy-image.json
+          if-no-files-found: error
+
       - name: Login to Docker Hub
+        if: github.ref == 'refs/heads/master'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Determine image tags
-        id: tags
+      - name: Push scanned image
+        if: github.ref == 'refs/heads/master'
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          COMMIT_SHA: ${{ github.sha }}
         run: |
-          REPO="${{ secrets.DOCKER_HUB_USERNAME }}/car"
-          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
-          TAGS="${REPO}:sha-${SHA_SHORT}"
-
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            TAGS="${TAGS},${REPO}:latest"
-          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
-            TAGS="${TAGS},${REPO}:staging"
-          fi
-
-          echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
-
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: src
-          file: src/Dockerfile.prod
-          push: true
-          tags: ${{ steps.tags.outputs.tags }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          repo="${DOCKER_HUB_USERNAME}/car"
+          docker tag car:ci "${repo}:latest"
+          docker tag car:ci "${repo}:sha-${COMMIT_SHA:0:7}"
+          docker push "${repo}:latest"
+          docker push "${repo}:sha-${COMMIT_SHA:0:7}"

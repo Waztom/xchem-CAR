@@ -65,6 +65,17 @@ Open in Devcontainer
 3. Select the repository root and click **Open**.
 4. Wait for the container to build (first time takes a few minutes).
 
+The image uses Python 3.15 and creates an isolated ``/opt/venv`` during its
+build. Python packages, including RDKit and psycopg2, are installed there with
+pip; no host Python installation or manual venv activation is needed.
+``python``, ``python3``, ``pip`` and ``celery`` use that environment by
+default. The venv is outside ``/container`` so the workspace mount does not
+hide it.
+
+After updating an existing checkout, run **Dev Containers: Rebuild Container**.
+If VS Code retains an older interpreter selection, choose
+``/opt/venv/bin/python`` with **Python: Select Interpreter**.
+
 Launch Services
 ---------------
 
@@ -153,7 +164,7 @@ This starts five services:
      - ``Dockerfile.prod``
      - Django + Vite production build; port 8000
    * - **db**
-     - ``postgres:10-alpine``
+     - ``postgres:17-alpine``
      - PostgreSQL database
    * - **redis**
      - ``redis:alpine``
@@ -166,6 +177,78 @@ This starts five services:
      - Celery message broker (AMQP)
 
 Persistent data is stored in a ``pgdata`` Docker volume.
+
+PostgreSQL 10 to 17
+^^^^^^^^^^^^^^^^^^^
+
+For step-by-step **development-container** instructions, see the README's
+`PostgreSQL 10 to 17 guide
+<https://github.com/Waztom/xchem-CAR/blob/master/README.md#postgresql-10-to-17>`_.
+Choose either a fresh PG17 database (leaving the old volume untouched) or a
+PG10 dump and PG17 restore to retain existing records. Follow that guide
+**before launching services or running Django migrations** if migrating data;
+the restore requires a target without CAR tables. These steps do not migrate
+production or Kubernetes databases.
+
+The devcontainer, standalone Compose and Kubernetes configurations use
+PostgreSQL 17. The devcontainer uses a separate ``pgdata17`` volume; its
+previous ``pgdata`` volume is not removed or automatically migrated.
+A PostgreSQL 10 data directory, Docker volume or Kubernetes
+persistent volume cannot be opened directly by PostgreSQL 17. Changing the
+image does not migrate the volume, and the database service will fail to
+start if it is pointed at the old data. Before applying the Kubernetes
+manifests, migrate the database or use a separate, empty persistent volume.
+Keep the old volume separately if its data may be needed. The devcontainer
+and standalone Compose projects can have different volumes.
+
+To retain an existing database, start its original volume with PostgreSQL
+10 and migrate it using a logical dump and restore, or use PostgreSQL's
+``pg_upgrade``. Existing plain SQL dumps can generally be loaded into a
+new PostgreSQL 17 database with ``psql``; custom or directory-format
+``pg_dump`` archives require ``pg_restore``. Restore into an appropriate
+empty database, using the PostgreSQL 17 client tools. Database roles,
+extensions and ownership may need to be created or adjusted separately.
+Review restore errors and test the application and its migrations afterwards;
+SQL, extensions or application behavior can change between major releases.
+Logical dumps are not the same as copies of the PostgreSQL data directory.
+
+See the PostgreSQL documentation for `major-version upgrades
+<https://www.postgresql.org/docs/17/upgrading.html>`_ and
+`restoring dumps <https://www.postgresql.org/docs/17/backup-dump.html>`_.
+The Kubernetes Django and Celery deployments pull ``waztom/car:latest``;
+rebuild and publish the image from ``src/Dockerfile.prod`` and roll out the
+deployments to use its Python 3.15/venv runtime on Debian 13 (Trixie) and Node 24
+frontend build.
+
+The production image deliberately excludes pip and ensurepip, including pip's
+vendored dependencies. To change Python dependencies, update
+``src/requirements.txt`` and rebuild the image rather than installing packages
+inside a running container. The development container uses the same Python
+3.15.2 / Debian 13 (Trixie) base as production, but retains pip and development
+tools. After updating, use VS Code's **Dev Containers: Rebuild Container**
+command to apply the new development image; PostgreSQL data in the existing
+named volume is retained.
+
+Vulnerability scans
+^^^^^^^^^^^^^^^^^^^
+
+On a staging or master push, CI builds and scans the candidate app image
+with Trivy after the unit and Django tests pass. Staging does not publish an
+image; on master, CI pushes the same image only after its scan passes.
+A separate workflow scans the frontend lockfile and the
+published app, PostgreSQL, Redis and RabbitMQ image tags on pushes, pull
+requests and every Monday at 03:17 UTC; it can also be run manually from
+GitHub Actions. Only critical vulnerability findings, including those without
+a fix, fail the relevant check. Results are shown in the Actions logs.
+The candidate scan also uploads a ``trivy-candidate-image`` JSON artifact,
+including on scan failure, to identify affected package paths and versions.
+CI pulls the current base image and rebuilds the production stage without
+cached layers so available Debian security updates are applied on each build.
+Runtime import smoke tests run before the candidate scan.
+
+The scheduled image scans check the current registry tags, not images
+already running in a cluster. Compare the running image digests with those
+tags and rescan deployed digests when they differ.
 
 Troubleshooting
 ^^^^^^^^^^^^^^^

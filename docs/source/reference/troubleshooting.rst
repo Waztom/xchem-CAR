@@ -102,9 +102,15 @@ Docker
 ------
 
 **Container build fails on M1 / ARM Mac**
-   The ``Dockerfile.prod`` targets ``linux/amd64``.  Use Docker
-   Desktop's Rosetta emulation or build with
-   ``--platform linux/amd64``.
+   The Python/RDKit images support native ARM64 and x86-64 builds.
+   Rebuild the image for the target architecture rather than copying a
+   virtual environment from another machine or architecture.
+
+**Python package missing or wrong interpreter selected**
+   Rebuild the devcontainer after changing requirements. ``which python3``
+   should report ``/opt/venv/bin/python3``. If necessary, use **Python:
+   Select Interpreter** in VS Code and select ``/opt/venv/bin/python``.
+   Do not install application packages into the base image's Python.
 
 **PostgreSQL data lost after rebuild**
    Ensure the ``pgdata`` Docker volume is not being removed.

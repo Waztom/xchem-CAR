@@ -7,6 +7,11 @@ import logging
 from typing import Any, Union
 import pandas as pd
 
+from django.db import transaction
+
+from backend.models import Recipe
+from backend.management.commands.load_recipe_json import _load_recipe
+
 from .template import RecipeTemplate, ActionLocation, VariableDefinition
 from .exceptions import (
     RecipeGeneratorError,
@@ -453,3 +458,182 @@ class RecipeGenerator:
         """
         columns = ["experiment_id"] + self.get_required_columns()
         return pd.DataFrame(columns=columns)
+
+    # ── DB population ──────────────────────────────────────────────
+
+    def populate_db(
+        self,
+        recipes: list[dict],
+        exclude: list[Union[str, int]] | None = None,
+        created_by: str = "",
+        description: str = "",
+        dry_run: bool = False,
+    ) -> dict:
+        """
+        Save generated recipes to the database as new Recipe model instances.
+
+        Each recipe is stored as a new version under the same ``reaction_class``
+        as the template's base, using the recipe's ``name`` field.  The base
+        recipe is recorded as ``parent`` for traceability.
+
+        Args:
+            recipes: List of recipe dicts as returned by ``from_dataframe``,
+                ``from_csv``, or ``generate_single``.
+            exclude: Optional list of recipe names (str) or 0-based indices
+                (int) to skip.  Mixing types is supported — strings are matched
+                against the recipe ``name`` key, integers select by position.
+            created_by: Value for the ``created_by`` field on each new Recipe.
+            description: Default description applied to each new Recipe.  If a
+                recipe dict already contains a ``description`` key it takes
+                precedence.
+            dry_run: If ``True``, validate and filter but do **not** write to
+                the DB.  Returns the list of recipes that *would* be saved.
+
+        Returns:
+            dict with keys:
+                - ``created``: list of ``{name, recipe_id, version}`` dicts for
+                  each recipe saved.
+                - ``excluded``: list of recipe names that were skipped.
+                - ``dry_run``: whether this was a dry run.
+
+        Raises:
+            RecipeGeneratorError: If a recipe dict has an unexpected structure.
+        """
+        # ── Build exclusion sets ───────────────────────────────────
+        excluded_names: set[str] = set()
+        excluded_indices: set[int] = set()
+        if exclude:
+            for item in exclude:
+                if isinstance(item, int):
+                    excluded_indices.add(item)
+                else:
+                    excluded_names.add(str(item))
+
+        # ── Filter recipes ─────────────────────────────────────────
+        included: list[dict] = []
+        skipped_names: list[str] = []
+
+        for idx, recipe_dict in enumerate(recipes):
+            name = recipe_dict.get("name", f"recipe_{idx}")
+            if idx in excluded_indices or name in excluded_names:
+                skipped_names.append(name)
+                logger.info("Excluding recipe '%s' (index %d) from DB population", name, idx)
+                continue
+            included.append(recipe_dict)
+
+        if dry_run:
+            return {
+                "created": [{"name": r["name"]} for r in included],
+                "excluded": skipped_names,
+                "dry_run": True,
+            }
+
+        # ── Resolve base recipe (parent) ───────────────────────────
+        base_recipe = self.template.get_recipe()
+        reaction_class = self.template.get_reaction_class()
+
+        # ── Persist inside a transaction ───────────────────────────
+        created: list[dict] = []
+        with transaction.atomic():
+            for recipe_dict in included:
+                load_data = self._to_load_format(
+                    recipe_dict,
+                    reaction_class=reaction_class,
+                    parent=base_recipe,
+                    created_by=created_by,
+                    default_description=description,
+                )
+                # Determine version
+                latest_version = (
+                    Recipe.objects.filter(
+                        reaction_class=reaction_class,
+                        name=recipe_dict["name"],
+                    )
+                    .order_by("-version")
+                    .values_list("version", flat=True)
+                    .first()
+                ) or 0
+                version = latest_version + 1
+
+                recipe_model, _, _ = _load_recipe(
+                    data=load_data,
+                    version=version,
+                    parent=base_recipe,
+                )
+                created.append({
+                    "name": recipe_model.name,
+                    "recipe_id": recipe_model.id,
+                    "version": recipe_model.version,
+                })
+
+        logger.info(
+            "Populated DB with %d recipes (excluded %d) for reaction class '%s'",
+            len(created), len(skipped_names), reaction_class,
+        )
+        return {
+            "created": created,
+            "excluded": skipped_names,
+            "dry_run": False,
+        }
+
+    # ── Private helpers for DB population ──────────────────────────
+
+    @staticmethod
+    def _to_load_format(
+        recipe_dict: dict,
+        reaction_class: str,
+        parent: Recipe,
+        created_by: str,
+        default_description: str,
+    ) -> dict:
+        """Convert a generator recipe dict to the format expected by
+        :func:`backend.management.commands.load_recipe_json._load_recipe`.
+
+        The generator produces::
+
+            {"name": ..., "recipe": {"sessions": [...], ...}}
+
+        ``_load_recipe`` expects::
+
+            {"reaction_class": ..., "name": ..., "action_sessions": [...], ...}
+
+        Key translations:
+        - ``sessions`` → ``action_sessions``
+        - ``equivalents`` → ``amount`` (add actions)
+        - Inherits ``intramolecular`` / ``references`` from parent recipe.
+        """
+        recipe_data = recipe_dict["recipe"]
+
+        # Convert sessions → action_sessions, translating action fields
+        action_sessions = []
+        for session in recipe_data.get("sessions", []):
+            actions = []
+            for action in session.get("actions", []):
+                converted = dict(action)
+                # Translate equivalents → amount for add actions
+                if converted.get("type") == "add" and "equivalents" in converted:
+                    converted["amount"] = converted.pop("equivalents")
+                actions.append(converted)
+
+            action_sessions.append({
+                "session_type": session["session_type"],
+                "driver": session.get("driver", "robot"),
+                "continuation": session.get("continuation", False),
+                "actions": actions,
+            })
+
+        return {
+            "reaction_class": reaction_class,
+            "name": recipe_dict["name"],
+            "description": recipe_dict.get("description", default_description),
+            "created_by": created_by,
+            "intramolecular": parent.intramolecular,
+            "estimated_yield": recipe_data.get(
+                "estimated_yield", parent.estimated_yield
+            ),
+            "reaction_smarts": recipe_data.get(
+                "reaction_smarts", parent.reaction_smarts
+            ),
+            "references": parent.references,
+            "action_sessions": action_sessions,
+        }

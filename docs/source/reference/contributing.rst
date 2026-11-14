@@ -20,6 +20,36 @@ devcontainer.  Once running, you will have:
 - Celery worker processing background tasks
 - PostgreSQL database
 
+Python Dependency Migration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The application requirements now target **Python 3.15** and **Django 6.1**;
+compatibility with older Python releases is no longer a requirement.
+``src/requirements-dev.txt`` includes the application dependencies plus
+development and documentation tools. Keep its application pins aligned with
+``src/requirements.txt``.
+
+REALwrap is temporarily excluded until a PyPI release is available. Pycule
+remains included: its updated release installs on Python 3.15, although live
+vendor API compatibility still requires verification.
+
+Development, production and CI containers use Python 3.15 and install Python
+packages with pip into an isolated ``/opt/venv``. RDKit, pandas and psycopg2
+are no longer installed through apt. The virtual environment does not expose
+system site-packages; ``PATH`` selects its ``python``, ``python3``, ``pip``
+and ``celery`` without requiring shell activation. In CI, the venv's bin
+directory is added through ``GITHUB_PATH`` for subsequent steps.
+
+Psycopg2 is built from source against Debian's ``libpq``. Development and CI
+images include the compiler and ``libpq-dev``; the production image copies
+the venv from a build stage with the same Python/base image and includes only
+the native ``libpq5`` runtime dependency. Never copy a host-created venv into
+these images or reuse it across Python versions or CPU architectures.
+
+Rebuild existing devcontainers after changing requirements. VS Code's default
+interpreter is ``/opt/venv/bin/python``; use **Python: Select Interpreter** if
+an existing workspace selection still points elsewhere.
+
 Branch Strategy
 ^^^^^^^^^^^^^^^
 
@@ -69,8 +99,8 @@ Code Conventions
 Backend (Python)
 ^^^^^^^^^^^^^^^^
 
-- **Python 3.9** — use type hints where practical
-- **Django 3.1** coding style
+- **Python 3.15** — use type hints where practical
+- **Django 6.1** coding style
 - **PEP 8** — enforced by linting
 - Use ``snake_case`` for functions and variables
 - Use ``CamelCase`` for classes

@@ -271,6 +271,22 @@ class RecipeGeneratorTestCase(DjangoTestCase):
 
 class DesignMatrixParserTestCase(TestCase):
     """Tests for DesignMatrixParser class."""
+
+    def test_missing_action_order_uses_default(self):
+        parser = DesignMatrixParser()
+        df = parser.parse_dict_list(
+            [
+                {"reaction_1_action_order": float("nan")},
+                {"reaction_1_action_order": "nan"},
+                {"reaction_1_action_order": "add_acid,add_base"},
+            ],
+            validate=False,
+        )
+
+        self.assertEqual(
+            df["reaction_1_action_order"].tolist(),
+            ["default", "default", "add_acid,add_base"],
+        )
     
     def test_parse_csv(self):
         """Test parsing a CSV file."""

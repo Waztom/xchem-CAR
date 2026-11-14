@@ -16,12 +16,12 @@ services:
     network_mode: service:db
 
   db:
-    image: postgres:10-alpine
+    image: postgres:17-alpine
     restart: on-failure
     env_file:
       - ./.devcontainerenv
     volumes:
-      - pgdata:/var/lib/postgresql/data/
+      - pgdata17:/var/lib/postgresql/data/
 
   redis:
     image: redis:alpine
@@ -48,4 +48,4 @@ services:
       - 15672:15672
 
 volumes:
-  pgdata:
+  pgdata17:

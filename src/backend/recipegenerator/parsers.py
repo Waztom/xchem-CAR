@@ -130,7 +130,7 @@ class DesignMatrixParser:
             
             # Ensure order columns are strings
             if any(col.lower().endswith(suffix) for suffix in self.ORDER_SUFFIXES):
-                df[col] = df[col].astype(str).replace("nan", "default")
+                df[col] = df[col].astype(str).fillna("default").replace("nan", "default")
         
         return df
     

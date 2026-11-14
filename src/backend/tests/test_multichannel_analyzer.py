@@ -644,8 +644,9 @@ class TestPlanPlateLayout(TestCase):
         for cp in cp_wells[3:]:
             self.assertEqual(cp.smiles, "B")
 
-    def test_column_overflow_handled(self):
-        """When MC materials require more columns than available."""
+    def test_column_overflow_creates_new_plate(self):
+        """When MC materials require more columns than available, overflow
+        groups are placed on a new plate (plate_number=1)."""
         mc_materials = [
             MaterialGroup(
                 identity_key="A--", smiles="A", volume=50.0,
@@ -653,11 +654,19 @@ class TestPlanPlateLayout(TestCase):
             ),
         ]
         mc_groups, cp_wells = self.analyzer.plan_plate_layout(mc_materials, [])
-        # Only 12 columns fit on a 96-well plate
-        self.assertEqual(len(mc_groups), 12)
+        # All 15 groups should be placed (12 on plate 0, 3 on plate 1)
+        self.assertEqual(len(mc_groups), 15)
+        # First 12 on plate 0
+        plate_0_groups = [g for g in mc_groups if g.plate_number == 0]
+        self.assertEqual(len(plate_0_groups), 12)
+        # Remaining 3 on plate 1
+        plate_1_groups = [g for g in mc_groups if g.plate_number == 1]
+        self.assertEqual(len(plate_1_groups), 3)
+        # Overflow groups restart column indices from 0
+        self.assertEqual(plate_1_groups[0].column_index, 0)
 
-    def test_plate_capacity_limits_cherry_picks(self):
-        """SC wells stop when plate is full."""
+    def test_plate_capacity_overflow_cherry_picks(self):
+        """SC wells overflow onto additional plates."""
         sc_materials = [
             MaterialGroup(
                 identity_key="A--", smiles="A", volume=50.0,
@@ -665,8 +674,17 @@ class TestPlanPlateLayout(TestCase):
             ),
         ]
         mc_groups, cp_wells = self.analyzer.plan_plate_layout([], sc_materials)
-        # 96-well plate → max 96 wells
-        self.assertEqual(len(cp_wells), 96)
+        # All 200 wells should be placed across multiple plates
+        self.assertEqual(len(cp_wells), 200)
+        plate_0_wells = [w for w in cp_wells if w.plate_number == 0]
+        plate_1_wells = [w for w in cp_wells if w.plate_number == 1]
+        plate_2_wells = [w for w in cp_wells if w.plate_number == 2]
+        # 96-well plate → 96 on plate 0, 96 on plate 1, 8 on plate 2
+        self.assertEqual(len(plate_0_wells), 96)
+        self.assertEqual(len(plate_1_wells), 96)
+        self.assertEqual(len(plate_2_wells), 8)
+        # Overflow wells restart indices from 0
+        self.assertEqual(plate_1_wells[0].well_index, 0)
 
     def test_empty_inputs(self):
         mc_groups, cp_wells = self.analyzer.plan_plate_layout([], [])
@@ -695,6 +713,233 @@ class TestPlanPlateLayout(TestCase):
         for i in range(3, 5):
             self.assertEqual(mc_groups[i].smiles, "B")
             self.assertEqual(mc_groups[i].column_index, i)
+
+
+class TestPlanPlateLayout384Well(TestCase):
+    """plan_plate_layout on 384-well plates (16 rows, 2 sub-columns)."""
+
+    def setUp(self):
+        self.analyzer = MultichannelAnalyzer(
+            wells_per_column=16, num_columns=24
+        )
+
+    def test_even_mc_groups_384(self):
+        """Two MC groups fill both sub-columns of the first physical column."""
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=2, leftover_wells=0, reaction_count=16,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(mc_materials, [])
+        self.assertEqual(len(mc_groups), 2)
+        # Both groups in physical column 0, sub-columns 0 and 1
+        self.assertEqual(mc_groups[0].column_index, 0)
+        self.assertEqual(mc_groups[0].sub_column_index, 0)
+        self.assertEqual(mc_groups[1].column_index, 0)
+        self.assertEqual(mc_groups[1].sub_column_index, 1)
+        self.assertEqual(len(cp_wells), 0)
+
+    def test_odd_mc_groups_no_sc_overlap(self):
+        """Three MC groups: 1 physical column full + 1 partial.
+
+        SC wells must start AFTER the partial column, never in it.
+        This is the key regression test for the Phase B overlap bug.
+        """
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=3, leftover_wells=2, reaction_count=26,
+            ),
+        ]
+        sc_materials = [
+            MaterialGroup(
+                identity_key="B--", smiles="B", volume=100.0,
+                columns_needed=0, leftover_wells=0, reaction_count=4,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(
+            mc_materials, sc_materials
+        )
+        self.assertEqual(len(mc_groups), 3)
+        # Columns 0-sub0, 0-sub1, 1-sub0
+        self.assertEqual(mc_groups[2].column_index, 1)
+        self.assertEqual(mc_groups[2].sub_column_index, 0)
+
+        # SC wells must start at column 2 (index 32), NOT column 1
+        mc_well_indices = set()
+        for g in mc_groups:
+            mc_well_indices.update(g.well_indices)
+
+        for cp in cp_wells:
+            self.assertNotIn(
+                cp.well_index, mc_well_indices,
+                f"SC well {cp.well_index} overlaps with MC wells {sorted(mc_well_indices)}",
+            )
+        # First SC well should be at column 2 (index 32)
+        self.assertEqual(cp_wells[0].well_index, 32)
+
+    def test_single_mc_group_384(self):
+        """A single MC group occupies sub-column 0 of column 0.
+
+        SC must start at column 1 (index 16), not column 0.
+        """
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=1, leftover_wells=3, reaction_count=11,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(mc_materials, [])
+        self.assertEqual(len(mc_groups), 1)
+        self.assertEqual(mc_groups[0].column_index, 0)
+        # 3 leftover → first SC well at column 1 (index 16)
+        self.assertEqual(len(cp_wells), 3)
+        self.assertEqual(cp_wells[0].well_index, 16)
+
+    def test_no_mc_groups_384(self):
+        """Pure SC on 384-well — starts at well 0."""
+        sc_materials = [
+            MaterialGroup(
+                identity_key="X--", smiles="X", volume=50.0,
+                columns_needed=0, leftover_wells=0, reaction_count=5,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout([], sc_materials)
+        self.assertEqual(len(mc_groups), 0)
+        self.assertEqual(cp_wells[0].well_index, 0)
+
+    def test_mc_sc_well_indices_never_overlap(self):
+        """No MC well index should ever appear in the SC well list."""
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=5, leftover_wells=4, reaction_count=44,
+            ),
+            MaterialGroup(
+                identity_key="B--", smiles="B", volume=75.0,
+                columns_needed=1, leftover_wells=6, reaction_count=14,
+            ),
+        ]
+        sc_materials = [
+            MaterialGroup(
+                identity_key="C--", smiles="C", volume=25.0,
+                columns_needed=0, leftover_wells=0, reaction_count=10,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(
+            mc_materials, sc_materials
+        )
+        # Check per-plate: no overlap within the same plate
+        from collections import defaultdict
+        mc_by_plate = defaultdict(set)
+        sc_by_plate = defaultdict(set)
+        for g in mc_groups:
+            mc_by_plate[g.plate_number].update(g.well_indices)
+        for cp in cp_wells:
+            sc_by_plate[cp.plate_number].add(cp.well_index)
+        for plate_num in set(mc_by_plate) & set(sc_by_plate):
+            overlap = mc_by_plate[plate_num] & sc_by_plate[plate_num]
+            self.assertEqual(
+                overlap, set(),
+                f"MC and SC well indices overlap on plate {plate_num}: {overlap}",
+            )
+
+
+class TestPlanPlateLayoutOverflow(TestCase):
+    """Tests for multi-plate overflow in plan_plate_layout."""
+
+    def setUp(self):
+        self.analyzer = MultichannelAnalyzer(wells_per_column=8, num_columns=12)
+
+    def test_mc_overflow_preserves_all_groups(self):
+        """All requested MC groups are placed even if they span 3 plates."""
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=30, leftover_wells=0, reaction_count=240,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(mc_materials, [])
+        self.assertEqual(len(mc_groups), 30)
+        # 12 on plate 0, 12 on plate 1, 6 on plate 2
+        plate_counts = {}
+        for g in mc_groups:
+            plate_counts[g.plate_number] = plate_counts.get(g.plate_number, 0) + 1
+        self.assertEqual(plate_counts[0], 12)
+        self.assertEqual(plate_counts[1], 12)
+        self.assertEqual(plate_counts[2], 6)
+
+    def test_sc_after_mc_overflow_goes_to_last_plate(self):
+        """SC wells fill remaining space on the last MC plate."""
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=14, leftover_wells=0, reaction_count=112,
+            ),
+        ]
+        sc_materials = [
+            MaterialGroup(
+                identity_key="B--", smiles="B", volume=100.0,
+                columns_needed=0, leftover_wells=0, reaction_count=5,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(
+            mc_materials, sc_materials
+        )
+        # 12 MC on plate 0, 2 MC on plate 1
+        self.assertEqual(len(mc_groups), 14)
+        # SC wells go onto plate 1 after MC column 1
+        self.assertEqual(len(cp_wells), 5)
+        # SC wells should be on plate 1 (columns 2+)
+        for cp in cp_wells:
+            self.assertEqual(cp.plate_number, 1)
+        self.assertEqual(cp_wells[0].well_index, 16)  # column 2 start
+
+    def test_mixed_mc_sc_overflow_both(self):
+        """MC fills plate 0, SC overflows onto plate 1 and 2."""
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=12, leftover_wells=0, reaction_count=96,
+            ),
+        ]
+        sc_materials = [
+            MaterialGroup(
+                identity_key="B--", smiles="B", volume=100.0,
+                columns_needed=0, leftover_wells=0, reaction_count=150,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(
+            mc_materials, sc_materials
+        )
+        self.assertEqual(len(mc_groups), 12)
+        self.assertEqual(len(cp_wells), 150)
+        # MC fills plate 0; SC must start on plate 1
+        plate_0_mc = [g for g in mc_groups if g.plate_number == 0]
+        self.assertEqual(len(plate_0_mc), 12)
+        plate_0_sc = [w for w in cp_wells if w.plate_number == 0]
+        self.assertEqual(len(plate_0_sc), 0)  # No room on plate 0
+        plate_1_sc = [w for w in cp_wells if w.plate_number == 1]
+        self.assertEqual(len(plate_1_sc), 96)
+        plate_2_sc = [w for w in cp_wells if w.plate_number == 2]
+        self.assertEqual(len(plate_2_sc), 54)
+
+    def test_plate_number_on_leftover_sc(self):
+        """Leftover from MC material goes to correct plate."""
+        mc_materials = [
+            MaterialGroup(
+                identity_key="A--", smiles="A", volume=50.0,
+                columns_needed=12, leftover_wells=3, reaction_count=99,
+            ),
+        ]
+        mc_groups, cp_wells = self.analyzer.plan_plate_layout(mc_materials, [])
+        self.assertEqual(len(mc_groups), 12)
+        self.assertEqual(len(cp_wells), 3)
+        # Leftover SC wells should be on plate 1 (plate 0 is full of MC)
+        for cp in cp_wells:
+            self.assertEqual(cp.plate_number, 1)
+            self.assertEqual(cp.smiles, "A")
 
 
 # ===================================================================
@@ -934,11 +1179,13 @@ class TestDataclasses(TestCase):
         self.assertEqual(g.well_indices, [])
         self.assertEqual(g.smiles, "")
         self.assertEqual(g.volume, 0.0)
+        self.assertEqual(g.plate_number, 0)
 
     def test_cherry_pick_well_defaults(self):
         cp = CherryPickWell(well_index=5)
         self.assertEqual(cp.smiles, "")
         self.assertEqual(cp.reason, "")
+        self.assertEqual(cp.plate_number, 0)
 
     def test_plate_analysis_result_defaults(self):
         r = PlateAnalysisResult()
