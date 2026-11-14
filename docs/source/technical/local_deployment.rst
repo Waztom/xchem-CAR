@@ -217,8 +217,17 @@ See the PostgreSQL documentation for `major-version upgrades
 `restoring dumps <https://www.postgresql.org/docs/17/backup-dump.html>`_.
 The Kubernetes Django and Celery deployments pull ``waztom/car:latest``;
 rebuild and publish the image from ``src/Dockerfile.prod`` and roll out the
-deployments to use its Python 3.15/venv runtime on Debian Bookworm and Node 24
+deployments to use its Python 3.15/venv runtime on Debian 13 (Trixie) and Node 24
 frontend build.
+
+The production image deliberately excludes pip and ensurepip, including pip's
+vendored dependencies. To change Python dependencies, update
+``src/requirements.txt`` and rebuild the image rather than installing packages
+inside a running container. The development container uses the same Python
+3.15.2 / Debian 13 (Trixie) base as production, but retains pip and development
+tools. After updating, use VS Code's **Dev Containers: Rebuild Container**
+command to apply the new development image; PostgreSQL data in the existing
+named volume is retained.
 
 Vulnerability scans
 ^^^^^^^^^^^^^^^^^^^
@@ -231,6 +240,11 @@ published app, PostgreSQL, Redis and RabbitMQ image tags on pushes, pull
 requests and every Monday at 03:17 UTC; it can also be run manually from
 GitHub Actions. High or critical findings, including those without a fix,
 fail the relevant check. Results are shown in the Actions logs.
+The candidate scan also uploads a ``trivy-candidate-image`` JSON artifact,
+including on scan failure, to identify affected package paths and versions.
+CI pulls the current base image and rebuilds the production stage without
+cached layers so available Debian security updates are applied on each build.
+Runtime import smoke tests run before the candidate scan.
 
 The scheduled image scans check the current registry tags, not images
 already running in a cluster. Compare the running image digests with those

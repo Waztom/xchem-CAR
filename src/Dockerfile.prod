@@ -19,7 +19,7 @@ RUN npm run build
 
 
 # ── Stage 2: Build Python dependencies ──────────────────────
-FROM python:3.15.2-slim-bookworm AS python-build
+FROM python:3.15.2-slim-trixie AS python-build
 
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
@@ -32,11 +32,13 @@ RUN apt-get update -qq && \
 
 COPY requirements.txt /tmp/requirements.txt
 RUN python -m venv "${VIRTUAL_ENV}" && \
-    python -m pip install --no-cache-dir -r /tmp/requirements.txt
+    python -m pip install --no-cache-dir -r /tmp/requirements.txt && \
+    python -m pip check && \
+    python -m pip uninstall --yes pip
 
 
 # ── Stage 3: Production image ───────────────────────────────
-FROM python:3.15.2-slim-bookworm AS production
+FROM python:3.15.2-slim-trixie AS production
 
 # Prevent Python from writing .pyc files and enable unbuffered stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -48,11 +50,16 @@ WORKDIR /app
 
 # psycopg2 links against Debian's PostgreSQL client library.
 RUN apt-get update -qq && \
+    apt-get upgrade --no-install-recommends -y && \
     apt-get install --no-install-recommends -y \
       libpq5 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     printf '%s\n' 'export PATH="/opt/venv/bin:$PATH"' > /etc/profile.d/venv.sh
+
+# Installers and their vendored dependencies are not needed at runtime.
+RUN /usr/local/bin/python -m pip uninstall --yes pip && \
+    rm -rf /usr/local/lib/python3.15/ensurepip
 
 # Python dependencies
 COPY requirements.txt ./
