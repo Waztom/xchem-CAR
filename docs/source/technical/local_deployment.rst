@@ -181,8 +181,19 @@ Persistent data is stored in a ``pgdata`` Docker volume.
 PostgreSQL 10 to 17
 ^^^^^^^^^^^^^^^^^^^
 
+For step-by-step **development-container** instructions, see the README's
+`PostgreSQL 10 to 17 guide
+<https://github.com/Waztom/xchem-CAR/blob/master/README.md#postgresql-10-to-17>`_.
+Choose either a fresh PG17 database (leaving the old volume untouched) or a
+PG10 dump and PG17 restore to retain existing records. Follow that guide
+**before launching services or running Django migrations** if migrating data;
+the restore requires a target without CAR tables. These steps do not migrate
+production or Kubernetes databases.
+
 The devcontainer, standalone Compose and Kubernetes configurations use
-PostgreSQL 17. A PostgreSQL 10 data directory, Docker volume or Kubernetes
+PostgreSQL 17. The devcontainer uses a separate ``pgdata17`` volume; its
+previous ``pgdata`` volume is not removed or automatically migrated.
+A PostgreSQL 10 data directory, Docker volume or Kubernetes
 persistent volume cannot be opened directly by PostgreSQL 17. Changing the
 image does not migrate the volume, and the database service will fail to
 start if it is pointed at the old data. Before applying the Kubernetes
