@@ -65,6 +65,17 @@ Open in Devcontainer
 3. Select the repository root and click **Open**.
 4. Wait for the container to build (first time takes a few minutes).
 
+The image uses Python 3.15 and creates an isolated ``/opt/venv`` during its
+build. Python packages, including RDKit and psycopg2, are installed there with
+pip; no host Python installation or manual venv activation is needed.
+``python``, ``python3``, ``pip`` and ``celery`` use that environment by
+default. The venv is outside ``/container`` so the workspace mount does not
+hide it.
+
+After updating an existing checkout, run **Dev Containers: Rebuild Container**.
+If VS Code retains an older interpreter selection, choose
+``/opt/venv/bin/python`` with **Python: Select Interpreter**.
+
 Launch Services
 ---------------
 
@@ -279,7 +290,8 @@ See the PostgreSQL documentation for `major-version upgrades
 `restoring dumps <https://www.postgresql.org/docs/17/backup-dump.html>`_.
 The Kubernetes Django and Celery deployments pull ``waztom/car:latest``;
 rebuild and publish the image from ``src/Dockerfile.prod`` and roll out the
-deployments to use its Debian Bookworm runtime and Node 24 frontend build.
+deployments to use its Python 3.15/venv runtime on Debian Bookworm and Node 24
+frontend build.
 
 Vulnerability scans
 ^^^^^^^^^^^^^^^^^^^

@@ -44,7 +44,7 @@ html_theme_options = {
 # -- Intersphinx mapping -----------------------------------------------------
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "django": ("https://docs.djangoproject.com/en/3.1/", "https://docs.djangoproject.com/en/3.1/_objects/"),
+    "django": ("https://docs.djangoproject.com/en/6.1/", "https://docs.djangoproject.com/en/6.1/_objects/"),
 }
 
 # -- Napoleon settings -------------------------------------------------------

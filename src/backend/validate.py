@@ -296,7 +296,7 @@ class ValidateFile(object):
             self.batchtags = []
             self.concentrations = []
             self.amounts = []
-            combi_grouped = self.df.groupby(["combi-group"])
+            combi_grouped = self.df.groupby("combi-group")
             for combi_group_name, combi_group in combi_grouped:
                 combi_group_info = {}
                 combi_group = combi_group.reset_index()

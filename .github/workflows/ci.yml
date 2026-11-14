@@ -36,15 +36,18 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     container:
-      image: debian:bookworm-slim
+      image: python:3.15.2-slim-bookworm
 
     steps:
-      - name: Install system dependencies
+      - name: Install native build dependencies and create venv
         run: |
           apt-get update -qq
           apt-get install --no-install-recommends -y \
-            git python3-rdkit python3-pip python3-pandas python3-psycopg2
+            git build-essential libpq-dev
           apt-get clean
+          python -m venv /opt/venv
+          echo "/opt/venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=/opt/venv" >> "$GITHUB_ENV"
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,8 +55,8 @@ jobs:
       - name: Install Python dependencies
         working-directory: src
         run: |
-          pip3 install --no-cache-dir -r requirements.txt
-          pip3 install --no-cache-dir -r requirements-dev.txt
+          python -m pip install --no-cache-dir -r requirements-dev.txt
+          python -m pip check
 
       - name: Run unit tests
         working-directory: src
@@ -99,7 +102,7 @@ jobs:
   django-tests:
     runs-on: ubuntu-latest
     container:
-      image: debian:bookworm-slim
+      image: python:3.15.2-slim-bookworm
 
     services:
       postgres:
@@ -115,12 +118,15 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Install system dependencies
+      - name: Install native build dependencies and create venv
         run: |
           apt-get update -qq
           apt-get install --no-install-recommends -y \
-            git python3-rdkit python3-pip python3-pandas python3-psycopg2
+            git build-essential libpq-dev
           apt-get clean
+          python -m venv /opt/venv
+          echo "/opt/venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=/opt/venv" >> "$GITHUB_ENV"
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -128,8 +134,8 @@ jobs:
       - name: Install Python dependencies
         working-directory: src
         run: |
-          pip3 install --no-cache-dir -r requirements.txt
-          pip3 install --no-cache-dir -r requirements-dev.txt
+          python -m pip install --no-cache-dir -r requirements-dev.txt
+          python -m pip check
 
       - name: Run Django integration tests
         working-directory: src
@@ -170,10 +176,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.15"
 
       - name: Install flake8
-        run: pip install flake8==3.9.1
+        run: python -m pip install flake8==7.5.0
 
       - name: Run flake8
         working-directory: src
