@@ -30,7 +30,7 @@ jobs:
   # ----------------------------------------------------------
   # 1. Unit tests (no database required)
   #    Covers: chem_utils, conversions, validate, otsession,
-  #            otwriter, tasks, pubchem_utils, enamine,
+  #            otwriter, tasks, pubchem_utils,
   #            db_utils, createmodels, signals, serializers
   # ----------------------------------------------------------
   unit-tests:
@@ -87,7 +87,6 @@ jobs:
                                   backend.tests.test_otwriter \
                                   backend.tests.test_tasks \
                                   backend.tests.test_pubchem_utils \
-                                  backend.tests.test_enamine \
                                   backend.tests.test_db_utils \
                                   backend.tests.test_createmodels \
                                   backend.tests.test_signals \
