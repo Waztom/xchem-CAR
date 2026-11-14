@@ -2,7 +2,8 @@
 # CAR – Production multi-stage Dockerfile
 #
 # Stage 1 (frontend-build): Build the Vite/React frontend
-# Stage 2 (production):     Python app with pre-built static assets
+# Stage 2 (python-build):   Install Python packages in an isolated venv
+# Stage 3 (production):     Python app with pre-built static assets
 # ─────────────────────────────────────────────────────────────
 
 # ── Stage 1: Build frontend ─────────────────────────────────
@@ -17,28 +18,45 @@ COPY frontend/ ./
 RUN npm run build
 
 
-# ── Stage 2: Production image ───────────────────────────────
-FROM debian:bookworm-slim AS production
+# ── Stage 2: Build Python dependencies ──────────────────────
+FROM python:3.15.2-slim-bookworm AS python-build
+
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      build-essential \
+      libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /tmp/requirements.txt
+RUN python -m venv "${VIRTUAL_ENV}" && \
+    python -m pip install --no-cache-dir -r /tmp/requirements.txt
+
+
+# ── Stage 3: Production image ───────────────────────────────
+FROM python:3.15.2-slim-bookworm AS production
 
 # Prevent Python from writing .pyc files and enable unbuffered stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    VIRTUAL_ENV=/opt/venv
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
 WORKDIR /app
 
-# System dependencies (rdkit only available as system package on Debian)
+# psycopg2 links against Debian's PostgreSQL client library.
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-      python3-rdkit \
-      python3-pip \
-      python3-pandas \
-      python3-psycopg2 && \
+      libpq5 && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    printf '%s\n' 'export PATH="/opt/venv/bin:$PATH"' > /etc/profile.d/venv.sh
 
 # Python dependencies
 COPY requirements.txt ./
-RUN pip3 install --no-cache-dir -r requirements.txt
+COPY --from=python-build /opt/venv /opt/venv
 
 # Create log directory
 RUN mkdir -p logs && touch logs/logfile.log

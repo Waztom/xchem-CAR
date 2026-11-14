@@ -929,6 +929,7 @@ class TestCombiCustomChemValidation(TestCase):
         csv = _make_combi_csv_1step()
         vf = ValidateFile(csv, "combi-custom-chem")
         self.assertTrue(vf.validated)
+        self.assertEqual(vf.df["target-names"].tolist(), ["1-0", "1-1"])
 
     def test_combi_csv_wrong_columns_raises(self):
         """Completely wrong columns cause a KeyError on 'no-steps' access."""

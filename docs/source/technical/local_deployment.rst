@@ -65,6 +65,17 @@ Open in Devcontainer
 3. Select the repository root and click **Open**.
 4. Wait for the container to build (first time takes a few minutes).
 
+The image uses Python 3.15 and creates an isolated ``/opt/venv`` during its
+build. Python packages, including RDKit and psycopg2, are installed there with
+pip; no host Python installation or manual venv activation is needed.
+``python``, ``python3``, ``pip`` and ``celery`` use that environment by
+default. The venv is outside ``/container`` so the workspace mount does not
+hide it.
+
+After updating an existing checkout, run **Dev Containers: Rebuild Container**.
+If VS Code retains an older interpreter selection, choose
+``/opt/venv/bin/python`` with **Python: Select Interpreter**.
+
 Launch Services
 ---------------
 
@@ -170,8 +181,19 @@ Persistent data is stored in a ``pgdata`` Docker volume.
 PostgreSQL 10 to 17
 ^^^^^^^^^^^^^^^^^^^
 
+For step-by-step **development-container** instructions, see the README's
+`PostgreSQL 10 to 17 guide
+<https://github.com/Waztom/xchem-CAR/blob/master/README.md#postgresql-10-to-17>`_.
+Choose either a fresh PG17 database (leaving the old volume untouched) or a
+PG10 dump and PG17 restore to retain existing records. Follow that guide
+**before launching services or running Django migrations** if migrating data;
+the restore requires a target without CAR tables. These steps do not migrate
+production or Kubernetes databases.
+
 The devcontainer, standalone Compose and Kubernetes configurations use
-PostgreSQL 17. A PostgreSQL 10 data directory, Docker volume or Kubernetes
+PostgreSQL 17. The devcontainer uses a separate ``pgdata17`` volume; its
+previous ``pgdata`` volume is not removed or automatically migrated.
+A PostgreSQL 10 data directory, Docker volume or Kubernetes
 persistent volume cannot be opened directly by PostgreSQL 17. Changing the
 image does not migrate the volume, and the database service will fail to
 start if it is pointed at the old data. Before applying the Kubernetes
@@ -195,7 +217,8 @@ See the PostgreSQL documentation for `major-version upgrades
 `restoring dumps <https://www.postgresql.org/docs/17/backup-dump.html>`_.
 The Kubernetes Django and Celery deployments pull ``waztom/car:latest``;
 rebuild and publish the image from ``src/Dockerfile.prod`` and roll out the
-deployments to use its Debian Bookworm runtime and Node 24 frontend build.
+deployments to use its Python 3.15/venv runtime on Debian Bookworm and Node 24
+frontend build.
 
 Vulnerability scans
 ^^^^^^^^^^^^^^^^^^^
