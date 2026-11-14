@@ -238,8 +238,8 @@ image; on master, CI pushes the same image only after its scan passes.
 A separate workflow scans the frontend lockfile and the
 published app, PostgreSQL, Redis and RabbitMQ image tags on pushes, pull
 requests and every Monday at 03:17 UTC; it can also be run manually from
-GitHub Actions. High or critical findings, including those without a fix,
-fail the relevant check. Results are shown in the Actions logs.
+GitHub Actions. Only critical vulnerability findings, including those without
+a fix, fail the relevant check. Results are shown in the Actions logs.
 The candidate scan also uploads a ``trivy-candidate-image`` JSON artifact,
 including on scan failure, to identify affected package paths and versions.
 CI pulls the current base image and rebuilds the production stage without
