@@ -36,7 +36,7 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     container:
-      image: python:3.15.2-slim-bookworm
+      image: python:3.15.2-slim-trixie
 
     steps:
       - name: Install native build dependencies and create venv
@@ -101,7 +101,7 @@ jobs:
   django-tests:
     runs-on: ubuntu-latest
     container:
-      image: python:3.15.2-slim-bookworm
+      image: python:3.15.2-slim-trixie
 
     services:
       postgres:
@@ -211,10 +211,19 @@ jobs:
         with:
           context: src
           file: src/Dockerfile.prod
+          pull: true
+          no-cache-filters: production
           load: true
           tags: car:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Smoke test runtime dependencies
+        run: |
+          docker run --rm --entrypoint python car:ci -c \
+            "import celery, django, matplotlib, numpy, pandas, PIL, psycopg2, rdkit, ssl, sqlite3; import importlib.util; assert importlib.util.find_spec('pip') is None"
+          docker run --rm --entrypoint /usr/local/bin/python car:ci -c \
+            "import importlib.util; assert importlib.util.find_spec('pip') is None; assert importlib.util.find_spec('ensurepip') is None"
 
       - name: Scan image for vulnerabilities
         uses: aquasecurity/trivy-action@v0.36.0
@@ -223,6 +232,20 @@ jobs:
           scanners: vuln
           severity: HIGH,CRITICAL
           exit-code: '1'
+          format: json
+          output: trivy-image.json
+
+      - name: Show image vulnerability report
+        if: ${{ !cancelled() && hashFiles('trivy-image.json') != '' }}
+        run: trivy convert --format table trivy-image.json
+
+      - name: Upload image vulnerability report
+        if: ${{ !cancelled() && hashFiles('trivy-image.json') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-candidate-image
+          path: trivy-image.json
+          if-no-files-found: error
 
       - name: Login to Docker Hub
         if: github.ref == 'refs/heads/master'
